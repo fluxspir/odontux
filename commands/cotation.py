@@ -10,7 +10,10 @@ from model import act, cotation, meta
 
 from sqlalchemy import or_
 from gettext import gettext as _
+from decimal import Decimal
 import sys
+
+#getcontext().prec = 3
 
 class CotationFrParser(BaseCommand):
     """ """
@@ -64,6 +67,14 @@ class CotationFrParser(BaseCommand):
         parser.add_option("--exceeding_kid_cmu", action="store",
                         type="string", dest="exceeding_kid_cmu",
                         help="Exceeding, for a kid CMU")
+
+        parser.add_option("--totalprice_adult_normal", action="store",
+                        type="string", dest="totalprice_adult_normal",
+                        help="Total price for an adult normal")
+                        
+        parser.add_option("--totalprice_adult_cmu", action="store",
+                        type="string", dest="totalprice_adult_cmu",
+                        help="Total price for an adult cmu")
 
         (options, args) = parser.parse_args(args)
         return options, args
@@ -337,7 +348,7 @@ class ListCotationFrCommand(BaseCommand):
                 query = query.filter(or_(act.ActType.name.ilike(keyword),
                                     act.ActType.alias.ilike(keyword)))
 
-        print(_(u"{}/{} | {}{} | {} | {} | {} || {} || {}"\
+        print(_(u"{} / {} | {}{} |   {}   |   {}   | {} || {} || {}"\
                     .format(_("Act id"), _("Key id"), _("keycode"), _("fr"),
                              _("SS"), _("TM"), _("Exceeding"), _("Total"),
                              _("Act name"))))
@@ -345,34 +356,28 @@ class ListCotationFrCommand(BaseCommand):
 
         for code in query:
             key = meta.session.query(cotation.NgapKeyFr)\
-                        .filter(cotation.NgapKeyFr.id == code.key_id).first()
+                        .filter(cotation.NgapKeyFr.id == code.key_id).one()
             description = meta.session.query(act.ActType)\
                     .filter(act.ActType.cotationfr_id == code.id)
             acte = meta.session.query(cotation.CotationFr).filter(
                                 cotation.CotationFr.id == code.id).one()
             totalprice = acte.get_price(code.adult_multiplicator,
                                         code.exceeding_adult_normal)
-            ssprice = float(totalprice) * .7
-            tmprice = float(totalprice) - ssprice
+            ngapprice = key.get_price(code.adult_multiplicator)
+            ssprice = ngapprice * Decimal("0.7")
+            tmprice = ngapprice - ssprice
             actekid = meta.session.query(cotation.CotationFr).filter(
                                 cotation.CotationFr.id == code.id).one()
             totalpricekid = actekid.get_price(code.kid_multiplicator,
                                               code.exceeding_kid_normal)
             
             for desc in description:
-                print(_(u"{}/{} | {}{} | {} | {} | {} || {} || {}"\
+                print(_(u" {}    /  {}      |    {}{}    | {} | \
+{}  |    {}   ||   {}    ||    {}"\
                         .format(desc.id, code.id, key.key, 
                         code.adult_multiplicator, ssprice, tmprice,
                         code.exceeding_adult_normal, totalprice, desc.alias)))
 
-
-#            for desc in description:
-#                print(_(u"{}.\t{}{}\t{}.\t{}\t{}\n{}\t{}\n{}\t{}"
-#                    .format(code.id, key.key, code.adult_multiplicator, 
-#                    desc.id, desc.alias, desc.name, _("Base"), _("Kid"),
-#                    totalprice, totalpricekid)
-#                    ))
-#
 
 class UpdateCotationFrCommand(BaseCommand, CotationFrParser):
     """ """
@@ -390,47 +395,61 @@ class UpdateCotationFrCommand(BaseCommand, CotationFrParser):
         newcotation = self.query.filter(cotation.CotationFr.id ==
                                         options.cotation_id).one()
 
+        # key (SC, SPR ...)
         if options.key_id:
             newcotation.key_id = options.key_id.decode("utf_8")
+        # cmu key (FDA, FDC ...)
         if options.key_cmu_id:
             newcotation.key_cmu_id = options.key_cmu_id.decode("utf_8")
+        # multiplicators of keys
         if options.adult_multiplicator:
-            newcotation.adult_multiplicator = options.adult_multiplicator\
-                                                     .decode("utf_8")
+            newcotation.adult_multiplicator = \
+            options.adult_multiplicator.decode("utf_8")
         if options.kid_multiplicator:
-            newcotation.kid_multiplicator = options.kid_multiplicator\
-                                                   .decode("utf_8")
+            newcotation.kid_multiplicator = \
+            options.kid_multiplicator.decode("utf_8")
         else:
             if options.adult_multiplicator:
-                newcotation.kid_multiplicator = options.adult_multiplicator\
-                                                       .decode("utf_8")
+                newcotation.kid_multiplicator =\
+                options.adult_multiplicator.decode("utf_8")
         if options.adult_cmu_num:
-            newcotation.adult_cmu_num = options.adult_cmu_num.decode("utf_8")
+            newcotation.adult_cmu_num = \
+            options.adult_cmu_num.decode("utf_8")
         if options.kid_cmu_num:    
             newcotation.kid_cmu_num = options.kid_cmu_num.decode("utf_8")
         else:
             if options.adult_cmu_num:
-                newcotation.kid_cmu_num = options.adult_cmu_num.decode("utf_8")
-        if options.exceeding_adult_normal:
-            newcotation.exceeding_adult_normal = options\
-                                        .exceeding_adult_normal.decode("utf_8")
-        if options.exceeding_kid_normal:
-            newcotation.exceeding_kid_normal = options.exceeding_kid_normal\
-                                                      .decode("utf_8")
-        else:
+                newcotation.kid_cmu_num =\
+                options.adult_cmu_num.decode("utf_8")
+        # Exeeding
+        if not options.totalprice_adult_normal:
             if options.exceeding_adult_normal:
-                newcotation.exceeding_kid_normal =\
+                newcotation.exceeding_adult_normal =\
                 options.exceeding_adult_normal.decode("utf_8")
-        if options.exceeding_adult_cmu:
-            newcotation.exceeding_adult_cmu = options.exceeding_adult_cmu\
-                                                     .decode("utf_8")
-        if options.exceeding_kid_cmu:
-            newcotation.exceeding_kid_cmu = options.exceeding_kid_cmu\
-                                                   .decode("utf_8")
-        else:
+            if options.exceeding_kid_normal:
+                newcotation.exceeding_kid_normal =\
+                options.exceeding_kid_normal.decode("utf_8")
+            else:
+                if options.exceeding_adult_normal:
+                    newcotation.exceeding_kid_normal =\
+                    options.exceeding_adult_normal.decode("utf_8")
             if options.exceeding_adult_cmu:
-                newcotation.exceeding_kid_cmu = options.exceeding_adult_cmu\
-                                                       .decode("utf_8")
-
+                newcotation.exceeding_adult_cmu =\
+                options.exceeding_adult_cmu.decode("utf_8")
+            if options.exceeding_kid_cmu:
+                newcotation.exceeding_kid_cmu =\
+                options.exceeding_kid_cmu.decode("utf_8")
+            else:
+                if options.exceeding_adult_cmu:
+                    newcotation.exceeding_kid_cmu =\
+                    options.exceeding_adult_cmu.decode("utf_8")
+        else:
+            multiplicator = newcotation.adult_multiplicator
+            ngapprice = meta.session.query(cotation.NgapKeyFr)\
+                        .filter(cotation.NgapKeyFr.id == newcotation.key_id)\
+                        .one().get_price(multiplicator)
+            exceeding_adult_normal = Decimal(options.totalprice_adult_normal)\
+                                     - ngapprice
+            newcotation.exceeding_adult_normal = exceeding_adult_normal
         meta.session.commit()
  
