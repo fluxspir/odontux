@@ -1,0 +1,42 @@
+How to :
+
+create a directory with odontux, cloning the git :
+	$ git clone https://github.com/fluxspir/odontux
+
+First, create a postgresql database ; for example :
+	$ sudo -u postgres createuser -P my_user              (you may respond "no" to all 3 questions)
+	$ sudo -u postgres createdb -O my_user odontuxdb
+
+Then write in ~/.odontuxrc :
+	[db]
+	url = postgresql+psycopg2://user:password@127.0.0.1/odontuxdb
+
+
+Link the bash_dots_odontux in ~ (not mandatory, adapt after if you are not)
+	$ cd ~
+	$ ln -s path/to/odontux/bashodontuxrc .bashodontuxrc
+	$ ln -s path/to/odontux/bashodontuxcolours .bashodontuxcolours
+	$ ln -s path/to/odontux/bashodontuxaliases .bashodontuxaliases
+
+Start odontux shell
+	$ bash --rcfile ~/.bashodontuxrc
+
+	$ createdb.py
+
+Odontux Commands : 
+First, add yourself ; you are the "user" ; they could be different kind of "user" in the office (dentist, hygienist, nurse, secretary...) ; the access to db will be later be separated for every kind of user.Then, add a medecine_doctor (not the dentist, which is "you"), the one of the first patient you want to add
+And then, add a dental_office (this probably will be you, or the dental office you work in)
+	
+	$ add_user.py -u coolname -r {dentist,hygienist...} -t Dr -l lastname -f firstname --registration=REG-NUMBER -s M/F -b 19700101 --time_stamp=20110415 (... see -h)
+	$ add_MD.py -l doc_lastname -f doc_firstname -c doc_city -a "doc address" -p "doc_phone number" -m "doc_mail"
+	$ add_dental_office.py -e "enterprise name" -l lastname -m middlename -f firstname -c city -a "address" -p "phone" -m mail
+	$ list_MD.py    →   get the "id" of the doc (probably "1", for the first doc you created)
+	$ add_patient.py -l patient_lastname -f patient_firstname -b patient_date_of_birth -d doc_id
+	$ switch_patient keyword : enter in a patient file
+	$ list_patient -h
+	$ all.command.py -h
+
+
+Any question ? Ask Franck on the irc  oftc.net   (i'm working... the response could arrive late)
+or send me a mail   franck {att} kernlog.net
+Thanks to Bertrand "tamentis" Janin, for all the help he's giving me :)

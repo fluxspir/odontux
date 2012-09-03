@@ -1,0 +1,9 @@
+
+
+Create table Stock
+
+Create table Instrument
+
+Create table InstrumentUsed
+
+in Appointment, do a ForeignKey to InstrumentUsed.id

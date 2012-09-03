@@ -1,0 +1,403 @@
+# Franck Labadille
+# 2012/08/25
+# v0.4
+# Licence BSD
+#
+
+from model import anamnesis, meta
+from base import BaseCommand
+
+from gettext import gettext as _
+from sqlalchemy import or_
+import os
+import sys
+
+
+class MedicalHistoryParser(BaseCommand):
+    """ """
+    def parse_args(self, args):
+        parser = self.get_parser()
+
+        parser.add_option("--patient", action="store", type="string",
+                          help="id of the patient, mandatory",
+                          dest="patient_id")
+
+        parser.add_option("-u", "--user", action="store", type="string",
+                          help="id dentist who did anamnesis",
+                          dest="dentist_id")
+
+        parser.add_option("-i", "--icd10", action="store", type="string",
+                          dest="icd10", help="ICD10 code")
+
+        parser.add_option("-d", "--disease", action="store", type="string",
+                          dest="disease", help="A disease name")
+
+        parser.add_option("--disorder", action="store", type="string",
+                          dest="disorder", help="Disorder description")
+
+        parser.add_option("--habitus", action="store", type="string",
+                          dest="habitus", help="Patient's habitus")
+
+        parser.add_option("-t", "--treatment", action="store", type="string",
+                          help="Treatment used for this disease.",
+                          dest="treatment")
+
+        parser.add_option("--date", "--timestamp", action="store",
+                          help="Date the disease/treatment begun",
+                          type="string", dest="time_stamp")
+
+        (options,args) = parser.parse_args(args)
+
+        return options, args
+
+class PastSurgeriesParser(BaseCommand):
+    """ """
+
+    def parse_args(self, args):
+        parser = self.get_parser()
+
+        parser.add_option("--patient", action="store", type="string",
+                          help="id of the patient, mandatory",
+                          dest="patient_id")
+
+        parser.add_option("-u", "--user", action="store", type="string",
+                          help="id of dentist who made anamnesis",
+                          dest="dentist_id")
+
+        parser.add_option("-s", "--surgery", action="store", type="string",
+                          dest="surgery", help="Surgery the patient had.")
+
+        parser.add_option("-p", "--problem", action="store",
+                          help="Problem which happened during the surgery.",
+                          type="string", dest="problem")
+
+        parser.add_option("-c", "--complication", action="store",
+                          help="Complication that occured after the surgery",
+                          type="string", dest="complication")
+
+        parser.add_option("-d", "--date", action="store", type="string",
+                          dest="time_stamp", help="Year the surgery happened")
+
+        (options,args) = parser.parse_args(args)
+        return options, args
+
+
+class AllergiesParser(BaseCommand):
+    """ """
+
+    def parse_args(self, args):
+
+        parser = self.get_parser()
+
+        parser.add_option("--patient", action="store", type="string",
+                          help="id of the patient, mandatory",
+                          dest="patient_id")
+
+        parser.add_option("-u", "--user", action="store", type="string",
+                          help="id of dentist who made anamnesis",
+                          dest="dentist_id")
+
+        parser.add_option("-d", "--drug", action="store", type="string",
+                          dest="drug", help="Allergies to drugs.")
+
+        parser.add_option("-m", "--metal", action="store", type="string",
+                          dest="metal", help="Allergies to metals.")
+
+        parser.add_option("-f", "--food", action="store", type="string",
+                          dest="food", help="Allergies to food.")
+
+        parser.add_option("-o", "--other", action="store", type="string",
+                          dest="other", help="Allergies to other stuffs")
+
+        parser.add_option("-r", "--reaction", action="store", type="string",
+                          help="Type of reaction this allergens creates",
+                          dest="reaction")
+
+        parser.add_option("-t", "--date", "--timestamp", action="store",
+                          type="string", dest="time_stamp",
+                          help="when the allergie begun")
+
+        (options,args) = parser.parse_args(args)
+        return options, args
+
+
+class AddMedicalHistoryCommand(BaseCommand, MedicalHistoryParser):
+    """ """
+
+    command_name = "add_medicalhistory"
+
+    def __init__(self):
+        self.values = {}
+
+    def run(self, args):
+        
+        (options, args) = self.parse_args(args)
+
+        if options.patient_id:
+            patient_id = options.patient_id
+        else:
+            patient_id = os.getenv("patient_id")
+
+        self.values["patient_id"] = patient_id
+        self.values["dentist_id"] = options.dentist_id
+        if options.icd10:
+            self.values["icd10"] = options.icd10.decode("utf_8").upper()
+        if options.disease:
+            self.values["disease"] = options.disease.decode("utf_8").title()
+        if options.disorder:
+            self.values["disorder"] = options.disorder.decode("utf_8")
+        if options.habitus:
+            self.values["habitus"] = options.habitus.decode("utf_8")
+        if options.treatment:
+            self.values["treatment"] = options.treatment.decode("utf_8")
+        if options.time_stamp:
+            self.values["time_stamp"] = options.time_stamp.decode("utf_8")
+
+        new_disease = anamnesis.MedicalHistory(**self.values)
+        meta.session.add(new_disease)
+
+        meta.session.commit()
+
+
+class AddPastSurgeriesCommand(BaseCommand, PastSurgeriesParser):
+
+    command_name = "add_surgeries"
+
+    def __init__(self):
+        self.values = {}
+
+    def run(self, args):
+        
+        (options, args) = self.parse_args(args)
+
+        if options.patient_id:
+            patient_id = options.patient_id
+        else:
+            patient_id = os.getenv("patient_id")
+
+        self.values["patient_id"] = patient_id
+        self.values["dentist_id"] = options.dentist_id
+        if options.surgery:
+            self.values["surgery_type"] = options.surgery.decode("utf_8")
+        if options.problem:
+            self.values["problem"] = options.problem.decode("utf_8")
+        if options.complication:
+            self.values["complication"] = options.complication.decode("utf_8")
+        if options.time_stamp:
+            self.values["time_stamp"] = options.time_stamp
+
+        new_surgery = anamnesis.PastSurgeries(**self.values)
+        meta.session.add(new_surgery)
+
+        meta.session.commit()
+
+
+class AddAllergiesCommand(BaseCommand, AllergiesParser):
+
+    command_name = "add_allergies"
+
+    def __init__(self):
+        self.values = {}
+
+    def run(self, args):
+        
+        (options, args) = self.parse_args(args)
+
+        if options.patient_id:
+            patient_id = options.patient_id
+        else:
+            patient_id = os.getenv("patient_id")
+
+        self.values["patient_id"] = patient_id
+        self.values["dentist_id"] = options.dentist_id
+        if options.drug:
+            self.values["drug"] = options.drug.decode("utf_8")
+        if options.metal:
+            self.values["metal"] = options.metal.decode("utf_8")
+        if options.food:
+            self.values["food"] = options.food.decode("utf_8")
+        if options.other:
+            self.values["other"] = options.other.decode("utf_8")
+        if options.reaction:
+            self.values["reaction"] = options.reaction.decode("utf_8")
+        if options.time_stamp:
+            self.values["time_stamp"] = options.time_stamp
+
+        new_allergy = anamnesis.Allergies(**self.values)
+        meta.session.add(new_allergy)
+
+        meta.session.commit()
+
+
+class ListMedicalHistoryCommand(BaseCommand):
+    """
+    if started without options and without keywords, returns every diseases 
+    (icd10) and treatment for patient in shell_variable.
+
+    if started without options but with keywords : returns every patients which
+    shows keywords in their icd10 and/or treatemnt.
+
+    if started with options -d --disease keyword : returns patients which shows
+    the disease
+
+    if started with option -t --treatment : returns patients using this 
+    treatment.
+    """
+    
+    command_name = "list_medicalhistory"
+
+    def __init__(self):
+        self.query = meta.session.query(anamnesis.MedicalHistory)
+
+    def parse_args(self, args):
+
+        parser = self.get_parser()
+
+        parser.add_option("--patient", action="store",\
+                        type="string", dest="patient_id",\
+                        help="the patient id.")
+
+        (options, args) = parser.parse_args(args)
+        return options, args
+
+    def run(self, args):
+        (options, args) = self.parse_args(args)
+
+        if options.patient_id:
+            patient_id = options.patient_id
+        else:
+            patient_id = os.getenv("patient_id")
+
+        query = self.query.filter(anamnesis.MedicalHistory.patient_id == 
+                                  patient_id)
+
+        for keyword in args:
+            keyword = '%{}%'.format(keyword)
+            query = query.filter(or_(
+                            anamnesis.MedicalHistory.icd10.ilike(keyword),
+                            anamnesis.MedicalHistory.disease.ilike(keyword),
+                            anamnesis.MedicalHistory.disorder.ilike(keyword),
+                            anamnesis.MedicalHistory.treatment.ilike(keyword),
+                            anamnesis.MedicalHistory.habitus.ilike(keyword)
+                            )
+                    ).all()
+
+        for q in query:
+            print(_(u"{} {} {} {} {}"
+            .format(q.icd10, q.disease, q.disorder,q.treatment, q.habitus)))
+
+
+class ListSurgeriesCommand(BaseCommand):
+    """ """
+
+    command_name = "list_surgeries"
+
+    def __init__(self):
+        self.query = meta.session.query(anamnesis.PastSurgeries)
+
+    def parse_args(self, args):
+        parser = self.get_parser()
+
+        parser.add_option("--patient", action="store",\
+                        type="string", dest="patient_id",\
+                        help="the patient id.")
+
+        (options, args) = parser.parse_args(args)
+        return options, args
+
+    def run(self, args):
+
+        (options, args) = self.parse_args(args)
+        if options.patient_id:
+            patient_id = options.patient_id
+        else:
+            patient_id = os.getenv("patient_id")
+
+        query = self.query.filter(anamnesis.PastSurgeries.patient_id == 
+                                  patient_id)
+
+        for keyword in args:
+            keyword = '%{}%'.format(keyword)
+            query = query.filter(or_(
+                        anamnesis.PastSurgeries.surgery_type.ilike(keyword),
+                        anamnesis.PastSurgeries.complication.ilike(keyword),
+                        anamnesis.PastSurgeries.problem.ilike(keyword)
+                        )
+                    ).all()
+
+        for q in query:
+            print(_(u"{} {} {}"
+                .format(q.surgery_type, q.complication, q.problem)
+                )
+             )
+
+
+class ListAllergiesCommand(BaseCommand):
+    """
+    if started without options and without keywords, returns every allergies
+    and treatment for patient in shell_variable.
+
+    if started with options -d --drug keyword : returns patients which shows
+    the 
+    """
+
+    command_name = "list_allergies"
+
+    def __init__(self):
+        self.query = meta.session.query(anamnesis.Allergies)
+
+    def parse_args(self, args):
+
+        parser = self.get_parser()
+        parser.add_option("--patient", action="store",\
+                        type="string", dest="patient_id",\
+                        help="the patient id.")
+        parser.add_option("-d", "--drug", action="store_true", dest="drug",\
+                        help="drugs the patient is allergic to")
+        parser.add_option("-m", "--metal", action="store_true", dest="metal",\
+                        help="metal the patient is allergic to")
+        parser.add_option("-f", "--food", action="store_true", dest="food",\
+                        help="food the patient is allergic to")
+        parser.add_option("-o", "--other", action="store_true", dest="other",\
+                        help="other allergens for the patient")
+
+        (options, args) = parser.parse_args(args)
+        return options, args
+
+    def run(self, args):
+
+        (options, args) = self.parse_args(args)
+        if options.patient_id:
+            patient_id = options.patient_id
+        else:
+            patient_id = os.getenv("patient_id")
+
+        query = self.query.filter(anamnesis.Allergies.patient_id == patient_id)
+
+            
+        for keyword in args:
+            keyword = '%{}%'.format(keyword)
+            if options.drug:
+                query = query.filter(anamnesis.Allergies.drug.ilike(keyword))
+            elif options.metal:
+                query = query.filter(anamnesis.Allergies.metal.ilike(keyword))
+            elif options.food:
+                query = query.filter(anamnesis.Allergies.food.ilike(keyword))
+            elif options.other:
+                query = query.filter(anamnenisl.Allergies.other.ilike(keyword))
+            else:
+                query = query.filter(or_(
+                                    anamnesis.Allergies.drug.ilike(keyword),
+                                    anamnesis.Allergies.metal.ilike(keyword),
+                                    anamnesis.Allergies.food.ilike(keyword),
+                                    anamnesis.Allergies.other.ilike(keyword),
+                                    anamnesis.Allergies.reaction.ilike(keyword)
+                                    )
+                        )
+
+        query = query.all()
+
+        for allergie in query:
+            print(u"{} : {}\n{} : {}\n{} : {}\n{} : {}"\
+                .format(_("drug"), allergie.drug, _("metal"), allergie.metal,\
+                _("food"), allergie.food, _("other"), allergie.other))

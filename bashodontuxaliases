@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# fichier spécifiquec des alias de mon bashrc
+#
+# Franck Labadille ; 02/02/2010
+#
+
+####################
+# variables
+####################
+HOSTNAME=$(cat /etc/hostname) ;
+
+#####################
+# aliases
+#####################
+
+# some more ls aliases
+alias ll='ls -lh'
+alias la='ls -A'
+alias l='ls -CF'
+
+alias df='df -h'
+alias du='du -h'
+alias lh='ls -lh'
+
+alias chrono='time cat'
+
+# internet
+alias ifconfig='/sbin/ifconfig'
+
+alias ssh="ssh -XA"
+alias sshreg="ssh -XA $freg"
+
+alias mail="mutt"

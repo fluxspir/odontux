@@ -1,0 +1,118 @@
+#!/bin/sh
+
+# go to odontux dir, and add it to PATH
+cd ~/odontux
+PATH=~/odontux:~/bin:"${PATH}"
+
+_odontux() 
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    scmd=$(odontuxsubcommandlist)
+    opts="--patient --appointment"
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    else
+        COMPREPLY=( $(compgen -W "${scmd}" -- ${cur}) )
+    fi
+
+}
+complete -F _odontux odontux
+
+#odontuxsubcommandlist > subcommandlist
+#complete -F _odontux_subcommand odontux
+
+export patient_id="out of files"
+export appointment_id="OUT"
+
+# set a fancy prompt (non-color, unless we know we "want" color)
+if [[ -f ~/.bashodontuxcolours ]] ; then
+    . ~/.bashodontuxcolours
+    PS1="${Red}\u${White}@${BICyan}${patient_id}${White}:${BIWhite}\w${Color_Off}$ "
+fi
+
+if [ -f ~/.bashodontuxaliases ]; then
+    . ~/.bashodontuxaliases
+fi
+
+if [ -f ~/.bashodontuxvar ]; then
+    . ~/.bashodontuxvar
+fi
+
+set_prompt () {
+    odontux test_patientappointment
+    if [ $? == 0 ] ; then
+        PS1="${Green}\u${White}@${BIYellow}${patient_id}${White}_${BICyan}`odontux get_patientprompt ${patient_id}`${White}-${Blue}${appointment_id}${White}:${Purple}\w${Color_Off}$ "
+    elif [ $? == 1 ] ; then
+        PS1="${Green}\u${White}@${BIYellow}${patient_id}${White}_${BICyan}`odontux get_patientprompt ${patient_id}`${White}-${UYellow}OUT${White}:${Purple}\w${Color_Off}$ "
+    else
+        PS1="LAID"
+    fi
+}
+
+switch_patient () {
+    patient_id=$1
+    export patient_id
+    appointment_id=$(odontux get_appointment)
+    export appointment_id
+    set_prompt
+}
+
+switch_appointment () {
+    appointment_id=$1
+    export appointment_id
+    set_prompt
+}
+
+HOSTNAME=$(cat /etc/hostname) ;
+jour=$(date +%y%m%d) ;
+now=$(date +%y%m%d_%H%M%S) ;
+
+
+
+# If not running interactively, don't do anything
+[ -z "$PS1" ] && return
+
+# don't put duplicate lines in the history. See bash(1) for more options
+export HISTCONTROL=ignoreboth
+export HISTCONTROL=erasedups
+export EDITOR=vim
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+shopt -s extglob cdspell
+shopt -u dotglob
+
+#set    
+set -o noclobber
+#set -o xtrace
+set -o physical
+#set -o cdable_vars
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(lesspipe)"
+
+# set variable identifying the chroot you work in (used in the prompt below)
+if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
+    debian_chroot=$(cat /etc/debian_chroot)
+fi
+
+# enable color support of ls and also add handy aliases
+if [ "$TERM" != "dumb" ]; then
+    eval "`dircolors -b`"
+    alias ls='ls --color=auto'
+    #alias dir='ls --color=auto --format=vertical'
+    #alias vdir='ls --color=auto --format=long'
+fi
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+fi
