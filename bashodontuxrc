@@ -68,6 +68,20 @@ switch_appointment () {
     set_prompt
 }
 
+next_appointment () {
+    next_appointment=$(($appointment_id + 1))
+    patient_id=$(odontux get_appointmentpatient $next_appointment)
+    switch_patient $patient_id
+    switch_appointment $next_appointment
+}
+
+prev_appointment () {
+    next_appointment=$(($appointment_id - 1))
+    patient_id=$(odontux get_appointmentpatient $next_appointment)
+    switch_patient $patient_id
+    switch_appointment $next_appointment
+}
+
 HOSTNAME=$(cat /etc/hostname) ;
 jour=$(date +%y%m%d) ;
 now=$(date +%y%m%d_%H%M%S) ;

@@ -8,5 +8,5 @@ from createdb import CreateOdontuxDatabaseTool
 from act import GetActPriceTool, GetActTypeIdTool, GetActCotationFrIdTool
 from cotation import GetNgapPriceTool
 from patient import GetPatientPromptTool, TestPatientAppointmentTool
-from schedule import GetAppointmentTool
+from schedule import GetAppointmentTool, GetAppointmentPatientTool
 from teeth import GetToothTool, GetToothUnderSurveillanceTool

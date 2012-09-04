@@ -8,12 +8,17 @@
 from model import meta, schedule
 from base import BaseCommand
 
+import sqlalchemy
 import os
 import sys
 
 
 class GetAppointmentTool(BaseCommand):
-    """ """
+    """
+    Prints the last appointment id for the patient
+    Needed for the switch_patient function in bashodontuxrc, to set the 
+    appointment_id env variable to last appointment.
+    """
 
     tool_name = "get_appointment"
 
@@ -33,3 +38,24 @@ class GetAppointmentTool(BaseCommand):
         except IndexError:
             appointment_id = "OUT"
         print(appointment_id)
+
+
+class GetAppointmentPatientTool(BaseCommand):
+    """
+    Prints patient_id who assist on appointment in args
+    Needed for the "next_appointment" function in bashodontuxrc
+    """
+
+    tool_name = "get_appointmentpatient"
+    
+    def __init__(self):
+        self.query = meta.session.query(schedule.Appointment)
+
+    def run(self, appointment_id):
+        try:
+            appointment = self.query.filter(schedule.Appointment.id ==
+                                            int(appointment_id[0])).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            sys.exit(_("Bad appointment id given in argument"))
+
+        print(appointment.patient_id)
