@@ -81,11 +81,14 @@ class AddAppointmentCommand(BaseCommand, AppointmentParser):
         if options.reason:
             self.appointment_values["reason"] = options.reason.decode("utf_8")
         if options.diagnostic:
-            self.appointment_values["diagnostic"] = options.diagnostic.decode("utf_8")
+            self.appointment_values["diagnostic"] =\
+            options.diagnostic.decode("utf_8")
         if options.treatment:
-            self.appointment_values["treatment"] = options.treatment.decode("utf_8")
+            self.appointment_values["treatment"] =\
+            options.treatment.decode("utf_8")
         if options.prognostic:
-            self.appointment_values["prognostic"] = options.prognostic.decode("utf_8")
+            self.appointment_values["prognostic"] =\
+            options.prognostic.decode("utf_8")
         if options.advise:
             self.appointment_values["advise"] = options.advise.decode("utf_8")
         if options.next_appointment:
@@ -132,9 +135,6 @@ class AddAppointmentMemoCommand(BaseCommand):
         parser.add_option("-m", "--memo", action="store",
                         type="string", dest="memo",
                         help="Memo/note about patient.")
-#        parser.add_option("-d", "--date", "--timestamp", action="store",
-#                        type="string", dest="time_stamp",
-#                        help="date/hour of appointment")
 
         (options,args) = parser.parse_args(args)
         return options, args
@@ -155,8 +155,6 @@ class AddAppointmentMemoCommand(BaseCommand):
             self.values["appointment_id"] = os.getenv("appointment_id")
         if options.memo:
             self.values["memo"] = options.memo.decode("utf_8")
-#        if options.time_stamp:
-#            self.values["time_stamp"] = options.time_stamp
 
         new_memo = schedule.AppointmentMemo(**self.values)
         meta.session.add(new_memo)
@@ -313,7 +311,9 @@ class UpdateAppointmentCommand(BaseCommand, AppointmentParser):
             sys.exit("Enter in an appointment to update this appointment")
 
         appointment = self.query.filter(schedule.Appointment.id ==
-                                        appointment_id)
+                                        appointment_id).one()
+        agenda = meta.session.query(schedule.Agenda)\
+                 .filter(schedule.Agenda.id == appointment.agenda_id).one()
 
         if options.emergency:
             appointment.emergency = True
@@ -325,9 +325,14 @@ class UpdateAppointmentCommand(BaseCommand, AppointmentParser):
             appointment.treatment = options.treatment.decode("utf_8")
         if options.prognostic:
             appointment.prognostic = options.prognostic.decode("utf_8")
-        if options.advice:
-            appointment.advice = options.advice.decode("utf_8")
+        if options.advise:
+            appointment.advice = options.advise.decode("utf_8")
         if options.next_appointment:
-            appointment.next_appointment = options.next_appointment.decode("utf_8")
+            appointment.next_appointment =\
+            options.next_appointment.decode("utf_8")
+        if options.starttime:
+            agenda.starttime = options.starttime.decode("utf_8")
+        if options.endtime:
+            agenda.endtime = options.endtime.decode("utf_8")
 
         meta.session.commit()
