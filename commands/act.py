@@ -5,11 +5,12 @@
 # Licence BSD
 #
 
-from model import meta, act, administration, schedule, cotation
+from model import meta, act, administration, schedule, cotation, teeth
 from base import BaseCommand
 
 from sqlalchemy import or_
 from gettext import gettext as _
+import sqlalchemy
 import os
 import sys
 
@@ -84,7 +85,8 @@ class AddActTypeCommand(BaseCommand, ActTypeParser):
         else:
             self.values["alias"] = options.name.decode("utf_8")
         if options.cotationfr_id:
-            self.values["cotationfr_id"] = options.cotationfr_id.decode("utf_8")
+            self.values["cotationfr_id"] =\
+            options.cotationfr_id.decode("utf_8")
         if options.color:
             self.values["color"] = options.color.decode("utf_8")
 
@@ -195,3 +197,44 @@ class ListActTypeCommand(BaseCommand):
         for acte in query:
             print(_(u"{}. {} || {}"\
                 .format(acte.id, acte.alias, acte.name).encode("utf_8")))
+
+
+class ListPatientActCommand(BaseCommand, AppointmentActReferenceParser):
+    """ """
+
+    command_name = "list_patientact"
+
+    def __init__(self):
+        self.query = meta.session.query(act.AppointmentActReference)
+        self.appointment = meta.session.query(schedule.Appointment)
+        self.act = meta.session.query(act.ActType)
+        self.tooth = meta.session.query(teeth.Tooth)
+        self.toothevent = meta.session.query(teeth.ToothEvent)
+        self.crownevent = meta.session.query(teeth.CrownEvent)
+        self.rootevent = meta.session.query(teeth.RootEvent)
+
+    def run(self, args):
+        """ """
+        patient_id = os.getenv("patient_id")
+
+        appointments = self.appointment\
+                       .filter(schedule.Appointment.patient_id == patient_id)
+        for appointment in appointments:
+            acts = self.query.filter(act.AppointmentActReference.appointment_id
+                  == appointment.id)
+            for a in acts:
+                try:
+                    tooth = self.tooth.filter(teeth.Tooth.id == 
+                                              a.tooth_id).one()
+                except sqlalchemy.orm.exc.NoResultFound:
+                    tooth = ""
+
+                event = self.act.filter(act.ActType.id == a.act_id).one()
+
+                if tooth:
+                    print(_(u"{}.\t{}\t|| {}\t: {}\t\t{}"\
+                        .format(a.id, tooth.name, a.code, a.price,
+                        event.alias)))
+                else:
+                    print(_(u"{}.\t{}\t|| {}\t: {}\t\t{}"\
+                        .format(a.id, _(" "), a.code, a.price, event.alias)))
