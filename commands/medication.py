@@ -18,28 +18,38 @@ import code
 
 class DrugPrescribedParser(BaseCommand):
     """ """
-    def parse_args(self, args):
+    def parse_args(self, args, update=""):
 
         parser = self.get_parser()
 
-        parser.add_option("-a", "--alias", action="store",\
-                        type="string", dest="alias",\
-                        help="alias for the drug prescribed.")
-        parser.add_option("-m", "--molecule", action="store",\
-                        type="string", dest="molecule",\
-                        help="The drug or molecule name.")
-        parser.add_option("--packaging", action="store",\
-                        type="string", dest="packaging",\
-                        help="how the drug looks and number in the box.")
-        parser.add_option("-p", "--posologia", action="store",\
-                        type="string", dest="posologia",\
-                        help="Quantity and period of day the drug is taken.")
-        parser.add_option("-d", "--dayssupply", action="store",\
-                        type="string", dest="dayssupply",\
-                        help="how long the drug is taken")
-        parser.add_option("-c", "--comments", action="store",\
-                        type="string", dest="comments",\
-                        help="comments on how to take the drug")
+        if update:
+            parser.add_option("--id", action="store", type="string",
+                            help="id of the anamnesis we want to update",
+                            dest="anamnesis_id")
+
+        parser.add_option("-a", "--alias", action="store", type="string",
+                        help="alias for the drug prescribed.",
+                        dest="alias")
+
+        parser.add_option("-m", "--molecule", action="store", type="string",
+                        help="The drug or molecule name.",
+                        dest="molecule")
+
+        parser.add_option("--packaging", action="store", type="string",
+                        help="how the drug looks and number in the box.",
+                        dest="packaging")
+
+        parser.add_option("-p", "--posologia", action="store", type="string",
+                        help="Quantity and period of day the drug is taken.",
+                        dest="posologia")
+
+        parser.add_option("-d", "--dayssupply", action="store", type="string",
+                        help="how long the drug is taken",
+                        dest="dayssupply")
+
+        parser.add_option("-c", "--comments", action="store", type="string",
+                        help="comments on how to take the drug",
+                        dest="comments")
 
         (options,args) = parser.parse_args(args)
         return options, args

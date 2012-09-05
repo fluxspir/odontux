@@ -15,8 +15,13 @@ import sys
 
 class MedicalHistoryParser(BaseCommand):
     """ """
-    def parse_args(self, args):
+    def parse_args(self, args, update=""):
         parser = self.get_parser()
+
+        if update:
+            parser.add_option("--id", action="store", type="string",
+                            help="Medical history id we want to update",
+                            dest="medicalhistory_id")
 
         parser.add_option("--patient", action="store", type="string",
                           help="id of the patient, mandatory",
@@ -53,8 +58,13 @@ class MedicalHistoryParser(BaseCommand):
 class PastSurgeriesParser(BaseCommand):
     """ """
 
-    def parse_args(self, args):
+    def parse_args(self, args, update=""):
         parser = self.get_parser()
+
+        if update:
+            parser.add_option("--id", action="store", type="string",
+                            help="Medical history id we want to update",
+                            dest="pastsurgeries_id")
 
         parser.add_option("--patient", action="store", type="string",
                           help="id of the patient, mandatory",
@@ -85,9 +95,14 @@ class PastSurgeriesParser(BaseCommand):
 class AllergiesParser(BaseCommand):
     """ """
 
-    def parse_args(self, args):
+    def parse_args(self, args, update=""):
 
         parser = self.get_parser()
+
+        if update:
+            parser.add_option("--id", action="store", type="string",
+                            help="Medical history id we want to update",
+                            dest="allergies_id")
 
         parser.add_option("--patient", action="store", type="string",
                           help="id of the patient, mandatory",
@@ -283,8 +298,9 @@ class ListMedicalHistoryCommand(BaseCommand):
                     ).all()
 
         for q in query:
-            print(_(u"{} {} {} {} {}"
-            .format(q.icd10, q.disease, q.disorder,q.treatment, q.habitus)))
+            print(_(u"{}.\t{}\t{}\t{}\t{}\t{}"
+            .format(q.id, q.icd10, q.disease, q.disorder,q.treatment, 
+                    q.habitus)))
 
 
 class ListSurgeriesCommand(BaseCommand):
@@ -401,3 +417,105 @@ class ListAllergiesCommand(BaseCommand):
             print(u"{} : {}\n{} : {}\n{} : {}\n{} : {}"\
                 .format(_("drug"), allergie.drug, _("metal"), allergie.metal,\
                 _("food"), allergie.food, _("other"), allergie.other))
+
+
+class UpdateMedicalHistoryCommand(BaseCommand, MedicalHistoryParser):
+    """ """
+
+    command_name = "update_medicalhistory"
+
+    def __init__(self):
+        self.query = meta.session.query(anamnesis.MedicalHistory)
+
+    def run(self, args):
+        
+        (options, args) = self.parse_args(args, True)
+
+        if not options.medicalhistory_id:
+            sys.exit(_("please specify the medical history id to update"))
+
+        medhist = self.query.filter(anamnesis.MedicalHistory.id ==
+                                    options.medicalhistory_id).one()
+
+        if options.dentist_id:
+            medhist.dentist_id = options.dentist_id.decode("utf_8")
+        if options.icd10:
+            medhist.icd10 = options.icd10.decode("utf_8").upper()
+        if options.disease:
+            medhist.disease = options.disease.decode("utf_8").title()
+        if options.disorder:
+            medhist.disorder = options.disorder.decode("utf_8")
+        if options.habitus:
+            medhist.habitus = options.habitus.decode("utf_8")
+        if options.treatment:
+            medhist.treatment = options.treatment.decode("utf_8")
+        if options.time_stamp:
+            medhist.time_stamp = options.time_stamp.decode("utf_8")
+
+        meta.session.commit()
+
+
+class UpdatePastSurgeriesCommand(BaseCommand, PastSurgeriesParser):
+
+    command_name = "update_surgeries"
+
+    def __init__(self):
+        self.query = meta.session.query(anamnesis.PastSurgeries)
+
+    def run(self, args):
+        
+        (options, args) = self.parse_args(args, True)
+
+        if not options.pastsurgeries_id:
+            sys.exit(_("please specify the past surgery id to update"))
+       
+        pastsurg = self.query.filter(anamnesis.PastSurgeries.id ==
+                                    aptions.pastsurgeries_id).one()
+
+        if options.dentist_id:
+            pastsurg.dentist_id = options.dentist_id
+        if options.surgery:
+            pastsurg.surgery_type = options.surgery.decode("utf_8")
+        if options.problem:
+            pastsurg.problem = options.problem.decode("utf_8")
+        if options.complication:
+            pastsurg.complication = options.complication.decode("utf_8")
+        if options.time_stamp:
+            pastsurg.time_stamp = options.time_stamp
+
+        meta.session.commit()
+
+
+class UpdateAllergiesCommand(BaseCommand, AllergiesParser):
+
+    command_name = "update_allergies"
+
+    def __init__(self):
+        self.query = meta.session.query(anamnesis.Allergies)
+
+    def run(self, args):
+        
+        (options, args) = self.parse_args(args, True)
+
+        if not options.allergies_id:
+            sys.exit(_("Please specify allergy id you want to update"))
+       
+        allergy = self.query.filter(anamnesis.Allergies.id ==
+                                    options.allergies_id).one()
+
+        if options.dentist_id:
+            allergy.dentist_id = options.dentist_id
+        if options.drug:
+            allergy.drug = options.drug.decode("utf_8")
+        if options.metal:
+            allergy.metal = options.metal.decode("utf_8")
+        if options.food:
+            allergy.food = options.food.decode("utf_8")
+        if options.other:
+            allergy.other = options.other.decode("utf_8")
+        if options.reaction:
+            allergy.reaction = options.reaction.decode("utf_8")
+        if options.time_stamp:
+            allergy.time_stamp = options.time_stamp
+
+        meta.session.commit()

@@ -44,6 +44,7 @@ class Appointment(Base):
     next_appointment = Column(String)
     administrative_acts = relationship("AppointmentActReference",
                                        backref="appointment")
+#    ordonnance = relationship("Prescription", backref="appointment")  to open on new populate DB
 
 
 class AppointmentMemo(Base):

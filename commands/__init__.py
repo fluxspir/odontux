@@ -18,7 +18,9 @@ from act import (AddActTypeCommand, AddAdministrativeActCommand,
                  ListActTypeCommand, ListPatientActCommand)
 from anamnesis import (AddMedicalHistoryCommand, AddPastSurgeriesCommand,
                        AddAllergiesCommand, ListMedicalHistoryCommand,
-                       ListSurgeriesCommand, ListAllergiesCommand)
+                       ListSurgeriesCommand, ListAllergiesCommand,
+                       UpdateMedicalHistoryCommand, UpdatePastSurgeriesCommand,
+                       UpdateAllergiesCommand)
 from schedule import (AddAppointmentCommand, AddAppointmentMemoCommand,
                       ListAppointmentCommand, ListAppointmentMemoCommand,
                       UpdateAppointmentCommand)

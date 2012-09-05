@@ -105,7 +105,6 @@ odontux add_acttype -n "Exérèse chirurgicale d'un kyste : étendu à un segmen
 cotid=$(odontux add_cotationfr -k 6 -m 10)
 odontux add_acttype -n "Traitement d'une hémorragie post-opératoire dans une séance autre que celle de l'intervention" -s 5 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 50 --adult_cmu_num 1 --exceeding_adult_normal 147.5 --exceeding_adult_cmu 122.5)
-odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -s 6 --cotation $cotid
 odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CCA, couronne coulée métallique" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 50 --adult_cmu_num 3 --exceeding_adult_normal 342.5 --exceeding_adult_cmu 267.5)
 odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CCMonocouche, Couronne Céramo Métallique Monocouche" -s 6 --cotation $cotid
