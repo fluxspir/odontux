@@ -342,8 +342,8 @@ class ListSurgeriesCommand(BaseCommand):
                     ).all()
 
         for q in query:
-            print(_(u"{} {} {}"
-                .format(q.surgery_type, q.complication, q.problem)
+            print(_(u"{}. {} {} {}"
+                .format(q.id, q.surgery_type, q.complication, q.problem)
                 )
              )
 
@@ -365,6 +365,9 @@ class ListAllergiesCommand(BaseCommand):
     def parse_args(self, args):
 
         parser = self.get_parser()
+        parser.add_option("--id", action="store_true", default=False,
+                        help="if we want to print only the allergy id",
+                        dest="allergy_id")
         parser.add_option("--patient", action="store",\
                         type="string", dest="patient_id",\
                         help="the patient id.")
@@ -413,10 +416,14 @@ class ListAllergiesCommand(BaseCommand):
 
         query = query.all()
 
-        for allergie in query:
-            print(u"{} : {}\n{} : {}\n{} : {}\n{} : {}"\
-                .format(_("drug"), allergie.drug, _("metal"), allergie.metal,\
-                _("food"), allergie.food, _("other"), allergie.other))
+        for allergy in query:
+            if options.allergy_id:
+                print(u"{}".format(allergy.id))
+            else:
+                print(u"{}. {} : {}\n{} : {}\n{} : {}\n{} : {}"\
+                    .format(allergy.id, _("drug"), allergy.drug, _("metal"),
+                    allergy.metal, _("food"), allergy.food, _("other"),
+                    allergy.other))
 
 
 class UpdateMedicalHistoryCommand(BaseCommand, MedicalHistoryParser):

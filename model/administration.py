@@ -40,7 +40,8 @@ class Patient(Base):
     head = relationship("Head", uselist=False, backref="patient")
     neck = relationship("Neck", uselist=False, backref="patient") 
     mouth = relationship("Mouth", uselist=False, backref="patient") 
-    appointments = relationship("Appointment", backref="patient") 
+    appointments = relationship("Appointment", backref="patient")
+    address = relationship("Address")
 
     def age(self):
         return (
@@ -54,3 +55,12 @@ class Patient(Base):
         else:
             return False
 
+class Address(Base):
+    __tablename__ = 'address'
+    id = Column(Integer, primary_key=True)
+    addr
+    city
+    county
+    country
+    postal_code
+    

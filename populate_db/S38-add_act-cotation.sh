@@ -18,7 +18,7 @@ odontux add_acttype -n "Obturation coronaire 2 faces, technique directe" -a "Com
 odontux add_acttype -n "Obturation coronaire 2 faces, technique directe" -a "CVI 2 faces" -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 17 --kid_multiplicator 20) 
 odontux add_acttype -n "Obturation coronaire 3 faces, technique directe" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 3 faces, technique directe" -a "Amalgame 3 faces "-s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 3 faces, technique directe" -a "Amalgame 3 faces " -s 3 --cotation $cotid
 odontux add_acttype -n "Obturation coronaire 3 faces, technique directe" -a "Composite 3 faces " -s 3 --cotation $cotid
 odontux add_acttype -n "Obturation coronaire 3 faces, technique directe" -a "CVI 3 faces" -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 33)

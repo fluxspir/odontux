@@ -42,4 +42,4 @@ class AppointmentActReference(Base):
     tooth_id = Column(Integer, ForeignKey(teeth.Tooth.id))
     code = Column(String, nullable=False)
     price = Column(Numeric, nullable=False)
-
+#    paid = Column(Boolean, default=False, nullable=False)
