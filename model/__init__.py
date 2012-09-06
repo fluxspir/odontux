@@ -14,9 +14,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from users import OdontuxUser, DentalOffice
-from administration import City, Address, Patient
+from md import MedecineDoctor
+from administration import Address, Patient
+from anamnesis import MedicalHistory, PastSurgeries, Allergies
 from headneck import Head, Neck, Mouth
-from anamnesis import MedecineDoctor, MedicalHistory, PastSurgeries, Allergies
 from medication import DrugPrescribed, Prescription, PrescribedDrugReference
 from schedule import Agenda, Appointment, AppointmentMemo
 from softtissues import (SuperiorLip, InferiorLip, LeftCheek, RightCheek,

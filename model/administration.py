@@ -4,8 +4,9 @@
 # v0.4
 # licence BSD
 #
+
 from meta import Base
-import users, anamnesis
+import users, md
 import sqlalchemy
 import datetime
 
@@ -39,7 +40,7 @@ class Address(Base):
 #    city_id = Column(Integer, ForeignKey(City.id)
     county = Column(String, default="")
     country = Column(String, default="France")
-    update_date = Column(Date, default=today())
+    update_date = Column(Date, default=today)
 
 
 class Patient(Base):
@@ -61,7 +62,7 @@ class Patient(Base):
     inactive = Column(Boolean, default=False)
     office_id = Column(Integer, ForeignKey(users.DentalOffice.id), default=1)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
-    gen_doc_id = Column(Integer, ForeignKey(anamnesis.MedecineDoctor.id))
+    gen_doc_id = Column(Integer, ForeignKey(md.MedecineDoctor.id))
     time_stamp = Column(Date, default=today)
     head = relationship("Head", uselist=False, backref="patient", 
                         cascade="all, delete, delete-orphan")

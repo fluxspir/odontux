@@ -10,32 +10,12 @@ import sqlalchemy
 import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
-from sqlalchemy import MetaData, ForeignKey
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 
 now = datetime.datetime.now()
 today = datetime.date.today()
-
-
-md_address_table = Table('md_address', Base.metadata,
-Column('md_id', Integer, ForeignKey('md.id')),
-Column('address_id', Integer, ForeignKey('address.id'))
-)
-
-
-
-class MedecineDoctor(Base):
-    __tablename__ = 'medecine_doctor'
-    id = Column(Integer, primary_key=True)
-    lastname = Column(String, nullable=False)
-    firstname = Column(String)
-    address = relationship("Address", secondary=md_address,
-                           backref="md")
-    city = Column(String)
-    address = Column(String)
-    phone = Column(String)
-    mail = Column(String)
-    patient = relationship("administration.Patient", backref="md")
 
 
 class MedicalHistory(Base):

@@ -6,6 +6,8 @@
 
 from specialty import AddSpecialtyCommand, ListSpecialtyCommand
 from users import AddOdontuxUserCommand, AddDentalOfficeCommand
+from md import (AddMedecineDoctorCommand, ListMedecineDoctorCommand,
+                UpdateMedecineDoctorCommand)
 from cotation import (AddNgapKeyFrCommand, AddCmuKeyFrCommand,
                       AddMajorationFrCommand, AddCotationFrCommand,
                       ListNgapKeyFrCommand, ListCmuKeyFrCommand,
@@ -14,9 +16,7 @@ from administration import (AddPatientCommand, ListPatientCommand,
                             UpdatePatientCommand)
 from act import (AddActTypeCommand, AddAdministrativeActCommand,
                  ListActTypeCommand, ListPatientActCommand)
-from anamnesis import (AddMedecineDoctorCommand, ListMedecineDoctorCommand,
-                       UpdateMedecineDoctorCommand,
-                       AddMedicalHistoryCommand, AddPastSurgeriesCommand,
+from anamnesis import (AddMedicalHistoryCommand, AddPastSurgeriesCommand,
                        AddAllergiesCommand, ListMedicalHistoryCommand,
                        ListSurgeriesCommand, ListAllergiesCommand,
                        UpdateMedicalHistoryCommand, UpdatePastSurgeriesCommand,

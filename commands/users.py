@@ -84,14 +84,14 @@ class OdontuxUserParser(BaseCommand):
 
 
         parser.add_option("--address_id", action="store", type="string",
-                        help="address id in DB from the person"
-                        dest="address"
+                        help="address id in DB from the person",
+                        dest="address")
 
         parser.add_option("--address", action="store", type="string",
                         help="street and number",
                         dest="addr")
     
-        parser.add_optiont("--building", action="store", type="string",
+        parser.add_option("--building", action="store", type="string",
                         help="building, stair... any complement for address",
                         dest="building")
 

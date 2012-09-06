@@ -95,7 +95,7 @@ class PatientParser(BaseCommand):
 class AddressParser(BaseCommand):
     """ """
 
-    def parse_args(self, args, update=False)
+    def parse_args(self, args, update=False):
         """ """
         if update:
             parser.add_option("--id", action="store_true", dest="address_id",
