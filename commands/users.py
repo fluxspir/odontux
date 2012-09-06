@@ -169,7 +169,7 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
 
 
         new_user = users.OdontuxUser(**self.values)
-        new_user.address = administration.Address(
+        new_user.address.append = administration.Address(
                            street = options.street.decode("utf_8"),
                            building = options.building.decode("utf_8"),
                            city = options.city.decode("utf_8"),
