@@ -14,7 +14,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from users import OdontuxUser, DentalOffice
-from md import GeneralistDoctor
 from administration import City, Address, Patient
 from headneck import Head, Neck, Mouth
 from anamnesis import MedecineDoctor, MedicalHistory, PastSurgeries, Allergies

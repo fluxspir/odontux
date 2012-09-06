@@ -5,7 +5,7 @@
 # licence BSD
 #
 
-from model import meta, administration, md, teeth
+from model import meta, administration, anamnesis, teeth
 from base import BaseCommand
 
 from sqlalchemy import or_
@@ -191,7 +191,7 @@ class ListPatientCommand(BaseCommand, PatientParser):
 
     def __init__(self):
         self.query = meta.session.query(administration.Patient)
-        self.querydoc = meta.session.query(md.GeneralistDoctor)
+        self.querydoc = meta.session.query(anamnesis.MedecineDoctor)
 
     def parse_args(self, args):
         parser = self.get_parser()
@@ -232,7 +232,7 @@ class ListPatientCommand(BaseCommand, PatientParser):
 
         else:
             for patient in query:
-                doc = self.querydoc.filter(md.GeneralistDoctor.id ==
+                doc = self.querydoc.filter(anamnesis.MedecineDoctor.id ==
                                            patient.gen_doc_id).first()
                 if patient.sex:
                     sex=_("M")
