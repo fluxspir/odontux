@@ -6,7 +6,7 @@
 #
 
 from base import BaseCommand
-from model import meta, users
+from model import meta, users, administration
 import sys
 
 
@@ -85,11 +85,11 @@ class OdontuxUserParser(BaseCommand):
 
         parser.add_option("--address_id", action="store", type="string",
                         help="address id in DB from the person",
-                        dest="address")
+                        dest="address_id")
 
-        parser.add_option("--address", action="store", type="string",
+        parser.add_option("--street", action="store", type="string",
                         help="street and number",
-                        dest="addr")
+                        dest="street")
     
         parser.add_option("--building", action="store", type="string",
                         help="building, stair... any complement for address",
@@ -167,13 +167,12 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
         if options.time_stamp:
             self.values["time_stamp"] = options.time_stamp
 
-        if options.city:
-            new_user.address = Address(city = options.city.decode("utf_8")
-        if options.addr:
-            new_user.address = Address(addr = options.addr.decode("utf_8")
-
 
         new_user = users.OdontuxUser(**self.values)
+        if options.city:
+            new_user.address = administration.Address(city = options.city.decode("utf_8"))
+        if options.street:
+            new_user.street = administration.Address(addr = options.street.decode("utf_8"))
         meta.session.add(new_user)
         meta.session.commit()
 

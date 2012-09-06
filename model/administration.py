@@ -33,7 +33,7 @@ Column('address_id', Integer, ForeignKey('address.id'))
 class Address(Base):
     __tablename__ = 'address'
     id = Column(Integer, primary_key=True)
-    addr = Column(String)
+    street = Column(String)
     building = Column(String)
     city = Column(String, default="")
     postal_code = Column(String, default="")
