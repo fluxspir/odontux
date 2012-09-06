@@ -15,22 +15,22 @@ Base = declarative_base()
 session = None
 
 
-patient_address_table = Table('patient_address', Base.metadata,
-Column('patient_id', Integer, ForeignKey('patient.id')),
-Column('address_id', Integer, ForeignKey('address.id'))
-)
-
-md_address_table = Table('md_address', Base.metadata,
-Column('md_id', Integer, ForeignKey('md.id')),
-Column('address_id', Integer, ForeignKey('address.id'))
-)
-
-odontux_user_address_table = Table('user_address', Base.metadata,
-Column('user_id', Integer, ForeignKey('user.id')),
-Column('address_id', Integer, ForeignKey('address.id'))
-)
-
-dental_office_address_table = Table('user_address', Base.metadata,
-Column('user_id', Integer, ForeignKey('user.id')),
-Column('address_id', Integer, ForeignKey('address.id'))
-)
+#patient_address_table = Table('patient_address', Base.metadata,
+#Column('patient_id', Integer, ForeignKey('patient.id')),
+#Column('address_id', Integer, ForeignKey('address.id'))
+#)
+#
+#md_address_table = Table('md_address', Base.metadata,
+#Column('md_id', Integer, ForeignKey('md.id')),
+#Column('address_id', Integer, ForeignKey('address.id'))
+#)
+#
+#odontux_user_address_table = Table('user_address', Base.metadata,
+#Column('user_id', Integer, ForeignKey('user.id')),
+#Column('address_id', Integer, ForeignKey('address.id'))
+#)
+#
+#dental_office_address_table = Table('user_address', Base.metadata,
+#Column('user_id', Integer, ForeignKey('user.id')),
+#Column('address_id', Integer, ForeignKey('address.id'))
+#)

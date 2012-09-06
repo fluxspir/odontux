@@ -10,12 +10,22 @@ import sqlalchemy
 import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 
 
 now = datetime.datetime.now()
 today = datetime.date.today()
 
+odontux_user_address_table = Table('user_address', Base.metadata,
+Column('user_id', Integer, ForeignKey('user.id')),
+Column('address_id', Integer, ForeignKey('address.id'))
+)
+
+dental_office_address_table = Table('user_address', Base.metadata,
+Column('user_id', Integer, ForeignKey('user.id')),
+Column('address_id', Integer, ForeignKey('address.id'))
+)
 
 class DentalOffice(Base):
     __tablename__ = 'dental_office'

@@ -16,6 +16,14 @@ from sqlalchemy import MetaData, ForeignKey
 now = datetime.datetime.now()
 today = datetime.date.today()
 
+
+md_address_table = Table('md_address', Base.metadata,
+Column('md_id', Integer, ForeignKey('md.id')),
+Column('address_id', Integer, ForeignKey('address.id'))
+)
+
+
+
 class MedecineDoctor(Base):
     __tablename__ = 'medecine_doctor'
     id = Column(Integer, primary_key=True)
@@ -27,7 +35,7 @@ class MedecineDoctor(Base):
     address = Column(String)
     phone = Column(String)
     mail = Column(String)
-#    patients = relationship("administration.Patient")
+    patient = relationship("administration.Patient", backref="md")
 
 
 class MedicalHistory(Base):

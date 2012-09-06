@@ -15,8 +15,8 @@ from administration import (AddPatientCommand, ListPatientCommand,
 from act import (AddActTypeCommand, AddAdministrativeActCommand,
                  ListActTypeCommand, ListPatientActCommand)
 from anamnesis import (AddMedecineDoctorCommand, ListMedecineDoctorCommand,
-                       UpdateMedecineDoctorComman
-                       dAddMedicalHistoryCommand, AddPastSurgeriesCommand,
+                       UpdateMedecineDoctorCommand,
+                       AddMedicalHistoryCommand, AddPastSurgeriesCommand,
                        AddAllergiesCommand, ListMedicalHistoryCommand,
                        ListSurgeriesCommand, ListAllergiesCommand,
                        UpdateMedicalHistoryCommand, UpdatePastSurgeriesCommand,

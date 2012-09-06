@@ -79,8 +79,41 @@ class OdontuxUserParser(BaseCommand):
                         dest="modified_by")
 
         parser.add_option("--time_stamp", action="store", type="string",
-                        help="patient's file creation, default=now",
+                        help="user's file creation, default=now",
                         dest="time_stamp")
+
+
+        parser.add_option("--address_id", action="store", type="string",
+                        help="address id in DB from the person"
+                        dest="address"
+
+        parser.add_option("--address", action="store", type="string",
+                        help="street and number",
+                        dest="addr")
+    
+        parser.add_optiont("--building", action="store", type="string",
+                        help="building, stair... any complement for address",
+                        dest="building")
+
+        parser.add_option("--city", action="store", type="string",
+                        help="name of the city",
+                        dest="city")
+
+        parser.add_option("--postalcode", action="store", type="string",
+                        help="postal code of the city",
+                        dest="postal_code")
+
+        parser.add_option("--county", action="store", type="string",
+                        help="county's name",
+                        dest="county")
+
+        parser.add_option("--country", action="store", type="string",
+                        help="country",
+                        dest="country")
+
+        parser.add_option("--update_date", action="store", type="string",
+                        help="date since when the person lives here",
+                        dest="update_date")
 
         (options,args) = parser.parse_args()
         return options, args
@@ -108,7 +141,8 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
         self.values["lastname"] = options.lastname.decode("utf_8").upper()
         self.values["firstname"] = options.firstname.decode("utf_8").title()
         if options.qualifications:
-            self.values["qualifications"] = options.qualifications.decode("utf_8").title()
+            self.values["qualifications"] =\
+            options.qualifications.decode("utf_8").title()
         if options.registration:
             self.values["registration"] = options.registration.decode("utf_8")
         if options.correspondence_name:
@@ -132,6 +166,9 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
             self.values["modified_by"] = options.modified_by.decode("utf_8")
         if options.time_stamp:
             self.values["time_stamp"] = options.time_stamp
+
+        if options.city:
+            self.values["address.city"] = options.city
 
         new_user = users.OdontuxUser(**self.values)
         meta.session.add(new_user)

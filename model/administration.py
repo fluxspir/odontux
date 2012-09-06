@@ -18,19 +18,25 @@ now = datetime.datetime.now()
 today = datetime.date.today()
 
 
-class City(Base):
-    __tablename__ = "city"
-    id = Column(Integer, primary_key=True)
-    city = Column(String, default="")
-    postal_code = Column(String, default="")
-
+patient_address_table = Table('patient_address', Base.metadata,
+Column('patient_id', Integer, ForeignKey('patient.id')),
+Column('address_id', Integer, ForeignKey('address.id'))
+)
+#class City(Base):
+#    __tablename__ = "city"
+#    id = Column(Integer, primary_key=True)
+#    city = Column(String, default="")
+#    postal_code = Column(String, default="")
+#
 
 class Address(Base):
     __tablename__ = 'address'
     id = Column(Integer, primary_key=True)
     addr = Column(String)
     building = Column(String)
-    city_id = Column(Integer, ForeignKey(City.id)
+    city = Column(String, default="")
+    postal_code = Column(String, default="")
+#    city_id = Column(Integer, ForeignKey(City.id)
     county = Column(String, default="")
     country = Column(String, default="France")
     update_date = Column(Date, default=today())
@@ -57,10 +63,14 @@ class Patient(Base):
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
     gen_doc_id = Column(Integer, ForeignKey(anamnesis.MedecineDoctor.id))
     time_stamp = Column(Date, default=today)
-    head = relationship("Head", uselist=False, backref="patient")
-    neck = relationship("Neck", uselist=False, backref="patient") 
-    mouth = relationship("Mouth", uselist=False, backref="patient") 
-    appointments = relationship("Appointment", backref="patient")
+    head = relationship("Head", uselist=False, backref="patient", 
+                        cascade="all, delete, delete-orphan")
+    neck = relationship("Neck", uselist=False, backref="patient",
+                        cascade="all, delete, delete-orphan")
+    mouth = relationship("Mouth", uselist=False, backref="patient", 
+                        cascade="all, delete, delete-orphan")
+    appointments = relationship("Appointment", backref="patient",
+                        cascade="all, delete, delete-orphan")
 
     def age(self):
         return (
