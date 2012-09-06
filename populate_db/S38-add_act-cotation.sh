@@ -40,6 +40,8 @@ odontux add_acttype -n "Pulpectomie coronaire et radiculaire, groupe molaires" -
 cotid=$(odontux add_cotationfr -k 3 -m 12)
 odontux add_acttype -n "Détartrage" -a "Detartrage" -s 2 --cotation $cotid
 odontux add_acttype -n "Détartrage 2nde séance" -s 2 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 27)
+odontux add_acttype -n "Aero Polissage" -a "Polissage" -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 8)
 odontux add_acttype -n "Ligature métallique dans les parodontopathies" -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 40)

@@ -17,14 +17,29 @@ from sqlalchemy.orm import relationship, backref
 now = datetime.datetime.now()
 today = datetime.date.today()
 
-odontux_user_address_table = Table('user_address', Base.metadata,
+odontux_user_address_table = Table('odontux_user_address', Base.metadata,
 Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),
 Column('address_id', Integer, ForeignKey('address.id'))
 )
-
+odontux_user_mail_table = Table('odontux_user_mail', Base.metadata,
+Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),
+Column('mail_id', Integer, ForeignKey('mail.id'))
+)
+odontux_user_phone_table = Table('odontux_user_phone', Base.metadata,
+Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),
+Column('phone_id', Integer, ForeignKey('phone.id'))
+)
 dental_office_address_table = Table('dental_office_address', Base.metadata,
 Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
 Column('address_id', Integer, ForeignKey('address.id'))
+)
+dental_office_mail_table = Table('dental_office_mail', Base.metadata,
+Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
+Column('mail_id', Integer, ForeignKey('mail.id'))
+)
+dental_office_phone_table = Table('dental_office_phone', Base.metadata,
+Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
+Column('phone_id', Integer, ForeignKey('phone.id'))
 )
 
 class DentalOffice(Base):
@@ -35,8 +50,10 @@ class DentalOffice(Base):
     dentist_firstname = Column(String)
     addresses = relationship("Address", secondary=dental_office_address_table,
                            backref="dental_office")
-    phone = Column(String)
-    mail = Column(String)
+    phones = relationship("Phone", secondary=dental_office_phone_table,
+                          backref="dental_office")
+    mails = relationship("Mail", secondary=dental_office_mail_table,
+                         backref="dental_office")
     patients = relationship("Patient", backref="office")
 
 
@@ -58,8 +75,10 @@ class OdontuxUser(Base):
     dob = Column(Date)
     status = Column(Boolean, default=True)
     comments = Column(String)
-    mail = Column(String)
-    phone = Column(String)
+    mails = relationship("Mail", secondary=odontux_user_mail_table,
+                        backref="odontux_user")
+    phones = relationship("Phone", secondary=odontux_user_phone_table,
+                         backref="odontux_user")
     avatar_id = Column(Integer)
     display_order = Column(Integer)
     modified_by = Column(Integer)

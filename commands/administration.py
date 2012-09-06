@@ -56,17 +56,9 @@ class PatientParser(BaseCommand):
                         help="User's date of birth",
                         dest="dob")
 
-        parser.add_option("--phone", action="store", type="string",
-                        help="User's phone number",
-                        dest="phone")
-
         parser.add_option("-j", "--job", action="store", type="string",
                         help="patient's job",
                         dest="job")
-
-        parser.add_option("--mail", action="store", type="string",
-                        help="User's email.",
-                        dest="mail")
 
         parser.add_option("--inactive", action="store_true", default=False,
                         help="if status of patient is inactive",
@@ -88,39 +80,80 @@ class PatientParser(BaseCommand):
                         type="string", dest="time_stamp",
                         help="patient's file creation, default=now")
 
+        parser.add_option("--phone", action="store", type="string",
+                          help="Phone of the generalist doctor.",
+                          dest="phone_num")
+
+        parser.add_option("--mail", action="store", type="string",
+                          help="Email address of the generalist doctor.",
+                          dest="email")
+
+        parser.add_option("--address_id", action="store", type="string",
+                        help="address id in DB from the person",
+                        dest="address_id")
+
+        parser.add_option("--street", action="store", type="string",
+                        help="street and number",
+                        dest="street")
+    
+        parser.add_option("--building", action="store", type="string",
+                        help="building, stair... any complement for address",
+                        dest="building")
+
+        parser.add_option("--city", action="store", type="string",
+                        help="name of the city",
+                        dest="city")
+
+        parser.add_option("--postal_code", action="store", type="string",
+                        help="postal code of the city",
+                        dest="postal_code")
+
+        parser.add_option("--county", action="store", type="string",
+                        help="county's name",
+                        dest="county")
+
+        parser.add_option("--country", action="store", type="string",
+                        help="country",
+                        dest="country")
+
+        parser.add_option("--update_date", action="store", type="string",
+                        help="date since when the person lives here",
+                        dest="update_date")
+
+
         (options,args) = parser.parse_args(args)
         return options, args
 
 
-class AddressParser(BaseCommand):
-    """ """
-
-    def parse_args(self, args, update=False):
-        """ """
-        if update:
-            parser.add_option("--id", action="store_true", dest="address_id",
-                            help="Specify the address we want to update")
-        
-        parser.add_option("-a", "--address", action="store", type="string",
-                        help="street name, with number",
-                        dest="addr")
-        
-        parser.add_option("-b", "--building", action="store", type="string",
-                        help="building, stair... complete the address",
-                        dest="building")
-
-        parser.add_option("--county", action="store", type="string",
-                        help="county name",
-                        dest="county")
-
-        parser.add_option("-c", "--country", action="store", type="string",
-                        help="country",
-                        dest="country")
-
-        parser.add_option("-p", "--postalcode", action="store", type="string",
-                        help="city postal code",
-                        dest="postal_code")
-
+#class AddressParser(BaseCommand):
+#    """ """
+#
+#    def parse_args(self, args, update=False):
+#        """ """
+#        if update:
+#            parser.add_option("--id", action="store_true", dest="address_id",
+#                            help="Specify the address we want to update")
+#        
+#        parser.add_option("-a", "--address", action="store", type="string",
+#                        help="street name, with number",
+#                        dest="addr")
+#        
+#        parser.add_option("-b", "--building", action="store", type="string",
+#                        help="building, stair... complete the address",
+#                        dest="building")
+#
+#        parser.add_option("--county", action="store", type="string",
+#                        help="county name",
+#                        dest="county")
+#
+#        parser.add_option("-c", "--country", action="store", type="string",
+#                        help="country",
+#                        dest="country")
+#
+#        parser.add_option("-p", "--postal_code", action="store", type="string",
+#                        help="city postal code",
+#                        dest="postal_code")
+#
 class AddPatientCommand(BaseCommand, PatientParser):
     """ """
     
@@ -160,10 +193,6 @@ class AddPatientCommand(BaseCommand, PatientParser):
             self.values["dob"] = options.dob
         if options.job:
             self.values["job"] = options.job.decode("utf_8")
-        if options.phone:
-            self.values["phone"] = options.phone.decode("utf_8")
-        if options.mail:
-            self.values["mail"] = options.mail.decode("utf_8")
         if options.inactive:
             self.values["inactive"] = True
         if options.office_id:
@@ -173,9 +202,42 @@ class AddPatientCommand(BaseCommand, PatientParser):
             self.values["gen_doc_id"] = options.gen_doc_id
         if options.time_stamp:
             self.values["time_stamp"] = options.time_stamp
+        if options.street:
+            options.street = options.street.decode("utf_8")
+        if options.building:
+            options.building = options.building.decode("utf_8")
+        if options.postal_code:
+            options.postal_code = options.postal_code.decode("utf_8")
+        if options.city:
+            options.city = options.city.decode("utf_8").title()
+        if options.county:
+            options.county = options.county.decode("utf_8").title()
+        if options.country:
+            options.country = options.country.decode("utf_8").title()
+        if options.email:
+            options.email = options.email.decode("utf_8").lower()
+
 
         new_patient = administration.Patient(**self.values)
         meta.session.add(new_patient)
+        new_patient.addresses.append(administration.Address(
+                    street = options.street,
+                    building = options.building,
+                    city = options.city,
+                    postal_code = options.postal_code,
+                    county = options.county,
+                    country = options.country,
+                    update_date = options.update_date
+                    ))
+        if options.phone_num:
+            new_patient.phones.append(administration.Phone(
+                            phone_num = options.phone_num
+                            ))
+        if options.email:
+            new_patient.mails.append(administration.Mail(
+                            email = options.email.decode("utf_8").lower()
+                            ))
+
         meta.session.commit()
 
         print(new_patient.id)

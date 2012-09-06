@@ -23,12 +23,17 @@ patient_address_table = Table('patient_address', Base.metadata,
 Column('patient_id', Integer, ForeignKey('patient.id')),
 Column('address_id', Integer, ForeignKey('address.id'))
 )
-#class City(Base):
-#    __tablename__ = "city"
-#    id = Column(Integer, primary_key=True)
-#    city = Column(String, default="")
-#    postal_code = Column(String, default="")
-#
+
+patient_mail_table = Table('patient_mail', Base.metadata,
+Column('patient_id', Integer, ForeignKey('patient.id')),
+Column('mail_id', Integer, ForeignKey('mail.id'))
+)
+
+patient_phone_table = Table('patient_phone', Base.metadata,
+Column('patient_id', Integer, ForeignKey('patient.id')),
+Column('phone_id', Integer, ForeignKey('phone.id'))
+)
+
 
 class Address(Base):
     __tablename__ = 'address'
@@ -37,11 +42,23 @@ class Address(Base):
     building = Column(String)
     city = Column(String, default="")
     postal_code = Column(String, default="")
-#    city_id = Column(Integer, ForeignKey(City.id)
     county = Column(String, default="")
     country = Column(String, default="France")
     update_date = Column(Date, default=today)
 
+
+class Mail(Base):
+    __tablename__ = 'mail'
+    id = Column(Integer, primary_key=True)
+    email = Column(String)
+    update_date = Column(Date, default=today)
+
+
+class Phone(Base):
+    __tablename__ = 'phone'
+    id = Column(Integer, primary_key=True)
+    phone_num = Column(String)
+    update_date = Column(Date, default=today)
 
 class Patient(Base):
     __tablename__ = 'patient'
@@ -52,13 +69,15 @@ class Patient(Base):
     qualifications = Column(String)
     preferred_name = Column(String)
     correspondence_name = Column(String)
-    address = relationship("Address", secondary=patient_address_table,
+    addresses = relationship("Address", secondary=patient_address_table,
                            backref="patient")
     sex = Column(Boolean)
     dob = Column(Date, default="19700101")                  # date of birth
     job = Column(String)
-    phone = Column(String)
-    mail = Column(String)
+    phones = relationship("Phone", secondary=patient_phone_table,
+                         backref="patient")
+    mails = relationship("Mail", secondary=patient_mail_table,
+                        backref="patient")
     inactive = Column(Boolean, default=False)
     office_id = Column(Integer, ForeignKey(users.DentalOffice.id), default=1)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)

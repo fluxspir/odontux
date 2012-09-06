@@ -82,6 +82,13 @@ class OdontuxUserParser(BaseCommand):
                         help="user's file creation, default=now",
                         dest="time_stamp")
 
+        parser.add_option("--phone", action="store", type="string",
+                        help="user's phone number",
+                        dest="phone_num")
+
+        parser.add_option("--mail", action="store", type="string",
+                        help="user's email",
+                        dest="email")
 
         parser.add_option("--address_id", action="store", type="string",
                         help="address id in DB from the person",
@@ -89,31 +96,31 @@ class OdontuxUserParser(BaseCommand):
 
         parser.add_option("--street", action="store", type="string",
                         help="street and number",
-                        dest="street", default="")
+                        dest="street")
     
         parser.add_option("--building", action="store", type="string",
                         help="building, stair... any complement for address",
-                        dest="building", default="")
+                        dest="building")
 
         parser.add_option("--city", action="store", type="string",
                         help="name of the city",
-                        dest="city", default="")
+                        dest="city")
 
-        parser.add_option("--postalcode", action="store", type="string",
+        parser.add_option("--postal_code", action="store", type="string",
                         help="postal code of the city",
-                        dest="postal_code", default="")
+                        dest="postal_code")
 
         parser.add_option("--county", action="store", type="string",
                         help="county's name",
-                        dest="county", default="")
+                        dest="county")
 
         parser.add_option("--country", action="store", type="string",
                         help="country",
-                        dest="country", default="")
+                        dest="country")
 
         parser.add_option("--update_date", action="store", type="string",
                         help="date since when the person lives here",
-                        dest="update_date", default=None)
+                        dest="update_date")
 
         (options,args) = parser.parse_args()
         return options, args
@@ -166,19 +173,40 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
             self.values["modified_by"] = options.modified_by.decode("utf_8")
         if options.time_stamp:
             self.values["time_stamp"] = options.time_stamp
-
+        if options.street:
+            options.street = options.street.decode("utf_8")
+        if options.building:
+            options.building = options.building.decode("utf_8")
+        if options.postal_code:
+            options.postal_code = options.postal_code.decode("utf_8")
+        if options.city:
+            options.city = options.city.decode("utf_8").title()
+        if options.county:
+            options.county = options.county.decode("utf_8").title()
+        if options.country:
+            options.country = options.country.decode("utf_8").title()
+        if options.email:
+            options.email = options.email.decode("utf_8").lower()
 
         new_user = users.OdontuxUser(**self.values)
         meta.session.add(new_user)
         new_user.addresses.append(administration.Address(
-                           street = options.street.decode("utf_8"),
-                           building = options.building.decode("utf_8"),
-                           city = options.city.decode("utf_8"),
-                           postal_code = options.postal_code.decode("utf_8"),
-                           county = options.county.decode("utf_8"),
-                           country = options.country.decode("utf_8"),
+                           street = options.street,
+                           building = options.building,
+                           city = options.city,
+                           postal_code = options.postal_code,
+                           county = options.county,
+                           country = options.country,
                            update_date = options.update_date
                            ))
+        if options.phone_num:
+            new_user.phones.append(administration.Phone(
+                            phone_num = options.phone_num
+                            ))
+        if options.email:
+            new_user.mails.append(administration.Mail(
+                            email = options.email
+                            ))
 
         meta.session.commit()
 
@@ -202,21 +230,47 @@ class DentalOfficeParser(BaseCommand):
                         help="Firstname of dentist.",
                         dest="firstname")
 
-        parser.add_option("-c", "--city", action="store", type="string",
-                        help="City where the dentist office is.",
-                        dest="city")
-
-        parser.add_option("-a", "--address", action="store", type="string",
-                        help="Address of the dentist office.",
-                        dest="address")
-
         parser.add_option("-p", "--phone", action="store", type="string",
                         help="Phone of the dentist.",
-                        dest="phone")
+                        dest="phone_num")
 
         parser.add_option("-m", "--mail", action="store", type="string",
                         help="Email address of the dentist.",
-                        dest="mail")
+                        dest="email")
+
+
+        parser.add_option("--address_id", action="store", type="string",
+                        help="address id in DB from the person",
+                        dest="address_id")
+
+        parser.add_option("--street", action="store", type="string",
+                        help="street and number",
+                        dest="street")
+    
+        parser.add_option("--building", action="store", type="string",
+                        help="building, stair... any complement for address",
+                        dest="building")
+
+        parser.add_option("--city", action="store", type="string",
+                        help="name of the city",
+                        dest="city")
+
+        parser.add_option("--postal_code", action="store", type="string",
+                        help="postal code of the city",
+                        dest="postal_code")
+
+        parser.add_option("--county", action="store", type="string",
+                        help="county's name",
+                        dest="county")
+
+        parser.add_option("--country", action="store", type="string",
+                        help="country",
+                        dest="country")
+
+        parser.add_option("--update_date", action="store", type="string",
+                        help="date since when the person lives here",
+                        dest="update_date")
+
 
         (options,args) = parser.parse_args(args)
         return options, args
@@ -244,17 +298,39 @@ class AddDentalOfficeCommand(BaseCommand, DentalOfficeParser):
         if options.firstname:
             self.values["dentist_firstname"] =\
             options.firstname.decode("utf_8").title()
+        if options.street:
+            options.street = options.street.decode("utf_8")
+        if options.building:
+            options.building = options.building.decode("utf_8")
+        if options.postal_code:
+            options.postal_code = options.postal_code.decode("utf_8")
         if options.city:
-            self.values["city"] = options.city.decode("utf_8").title()
-        if options.address:
-            self.values["address"] = options.address.decode("utf_8").title()
-        if options.phone:
-            self.values["phone"] = options.phone.decode("utf_8")
-        if options.mail:
-            self.values["mail"] = options.mail.decode("utf_8").lower()
+            options.city = options.city.decode("utf_8").title()
+        if options.county:
+            options.county = options.county.decode("utf_8").title()
+        if options.country:
+            options.country = options.country.decode("utf_8").title()
+        if options.email:
+            options.email = options.email.decode("utf_8").lower()
 
         new_dental_office = users.DentalOffice(**self.values)
-
         meta.session.add(new_dental_office)
+        new_dental_office.addresses.append(administration.Address(
+                           street = options.street,
+                           building = options.building,
+                           city = options.city,
+                           postal_code = options.postal_code,
+                           county = options.county,
+                           country = options.country,
+                           update_date = options.update_date
+                           ))
+        if options.phone_num:
+            new_dental_office.phones.append(administration.Phone(
+                            phone_num = options.phone_num
+                            ))
+        if options.email:
+            new_dental_office.mails.append(administration.Mail(
+                            email = options.email
+                            ))
 
         meta.session.commit()
