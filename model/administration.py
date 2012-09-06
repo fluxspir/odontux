@@ -5,7 +5,7 @@
 # licence BSD
 #
 from meta import Base
-import users, md
+import users, anamnesis
 import sqlalchemy
 import datetime
 
@@ -54,7 +54,7 @@ class Patient(Base):
     inactive = Column(Boolean, default=False)
     office_id = Column(Integer, ForeignKey(users.DentalOffice.id), default=1)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
-    gen_doc_id = Column(Integer, ForeignKey(md.GeneralistDoctor.id))
+    gen_doc_id = Column(Integer, ForeignKey(anamnesis.MedecineDoctor.id))
     time_stamp = Column(Date, default=today)
     head = relationship("Head", uselist=False, backref="patient")
     neck = relationship("Neck", uselist=False, backref="patient") 
