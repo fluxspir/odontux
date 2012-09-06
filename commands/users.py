@@ -167,12 +167,14 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
         if options.time_stamp:
             self.values["time_stamp"] = options.time_stamp
 
+        if options.city:
+            new_user.address = Address(city = options.city.decode("utf_8")
+        if options.addr:
+            new_user.address = Address(addr = options.addr.decode("utf_8")
+
 
         new_user = users.OdontuxUser(**self.values)
         meta.session.add(new_user)
-        meta.session.commit()
-        if options.city:
-            new_user.address.city = options.city.decode("utf_8")
         meta.session.commit()
 
 
