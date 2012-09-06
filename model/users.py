@@ -23,8 +23,8 @@ class DentalOffice(Base):
     office_name = Column(String)
     dentist_lastname = Column(String)
     dentist_firstname = Column(String)
-    city = Column(String)
-    address = Column(String)
+    address = relationship("Address", secondary=dental_office_address_table,
+                           backref="dental_office")
     phone = Column(String)
     mail = Column(String)
     patients = relationship("Patient", backref="office")
@@ -42,6 +42,8 @@ class OdontuxUser(Base):
     qualifications = Column(String)
     registration = Column(String)
     correspondence_name = Column(String)
+    address = relationship("Address", secondary=odontux_user_address_table,
+                           backref="odontux_user")
     sex = Column(Boolean)
     dob = Column(Date)
     status = Column(Boolean, default=True)

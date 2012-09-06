@@ -33,6 +33,7 @@ class Address(Base):
     city_id = Column(Integer, ForeignKey(City.id)
     county = Column(String, default="")
     country = Column(String, default="France")
+    update_date = Column(Date, default=today())
 
 
 class Patient(Base):

@@ -25,7 +25,12 @@ Column('md_id', Integer, ForeignKey('md.id')),
 Column('address_id', Integer, ForeignKey('address.id'))
 )
 
-user_address_table = Table('user_address', Base.metadata,
+odontux_user_address_table = Table('user_address', Base.metadata,
+Column('user_id', Integer, ForeignKey('user.id')),
+Column('address_id', Integer, ForeignKey('address.id'))
+)
+
+dental_office_address_table = Table('user_address', Base.metadata,
 Column('user_id', Integer, ForeignKey('user.id')),
 Column('address_id', Integer, ForeignKey('address.id'))
 )
