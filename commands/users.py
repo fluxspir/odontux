@@ -169,9 +169,10 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
 
 
         new_user = users.OdontuxUser(**self.values)
+        meta.session.add(new_user)
+        meta.session.commit()
         if options.city:
             new_user.address.city = options.city.decode("utf_8")
-        meta.session.add(new_user)
         meta.session.commit()
 
 
@@ -228,11 +229,14 @@ class AddDentalOfficeCommand(BaseCommand, DentalOfficeParser):
         if not options.lastname:
             sys.exit("a lastname must be provide to add a new medecine doctor")
 
-        self.values["dentist_lastname"] = options.lastname.decode("utf_8").upper()
+        self.values["dentist_lastname"] =\
+        options.lastname.decode("utf_8").upper()
         if options.office_name:
-            self.values["office_name"] = options.office_name.decode("utf_8").title()
+            self.values["office_name"] =\
+            options.office_name.decode("utf_8").title()
         if options.firstname:
-            self.values["dentist_firstname"] = options.firstname.decode("utf_8").title()
+            self.values["dentist_firstname"] =\
+            options.firstname.decode("utf_8").title()
         if options.city:
             self.values["city"] = options.city.decode("utf_8").title()
         if options.address:
