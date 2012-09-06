@@ -52,7 +52,7 @@ class OdontuxUser(Base):
     qualifications = Column(String)
     registration = Column(String)
     correspondence_name = Column(String)
-    address = relationship("Address", secondary=odontux_user_address_table,
+    addresses = relationship("Address", secondary=odontux_user_address_table,
                            backref="odontux_user")
     sex = Column(Boolean)
     dob = Column(Date)
