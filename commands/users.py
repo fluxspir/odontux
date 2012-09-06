@@ -89,31 +89,31 @@ class OdontuxUserParser(BaseCommand):
 
         parser.add_option("--street", action="store", type="string",
                         help="street and number",
-                        dest="street")
+                        dest="street", default="")
     
         parser.add_option("--building", action="store", type="string",
                         help="building, stair... any complement for address",
-                        dest="building")
+                        dest="building", default="")
 
         parser.add_option("--city", action="store", type="string",
                         help="name of the city",
-                        dest="city")
+                        dest="city", default="")
 
         parser.add_option("--postalcode", action="store", type="string",
                         help="postal code of the city",
-                        dest="postal_code")
+                        dest="postal_code", default="")
 
         parser.add_option("--county", action="store", type="string",
                         help="county's name",
-                        dest="county")
+                        dest="county", default="")
 
         parser.add_option("--country", action="store", type="string",
                         help="country",
-                        dest="country")
+                        dest="country", default="")
 
         parser.add_option("--update_date", action="store", type="string",
                         help="date since when the person lives here",
-                        dest="update_date")
+                        dest="update_date", default="")
 
         (options,args) = parser.parse_args()
         return options, args
@@ -169,10 +169,15 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
 
 
         new_user = users.OdontuxUser(**self.values)
-        if  options.city:
-            new_user.address = administration.Address(city = options.city.decode("utf_8"))
-        if options.street:
-            new_user.adress = administration.Address(street = options.street.decode("utf_8"))
+        new_user.address = administration.Address(
+                           street = options.street.decode("utf_8"),
+                           building = options.building.decode("utf_8"),
+                           city = options.city.decode("utf_8"),
+                           postal_code = options.postal_code.decode("utf_8"),
+                           county = options.county.decode("utf_8"),
+                           country = options.country.decode("utf_8"),
+                           update_date = options.update_date.decode("utf_8")
+                           )
         meta.session.add(new_user)
         meta.session.commit()
 
