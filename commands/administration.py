@@ -92,6 +92,35 @@ class PatientParser(BaseCommand):
         return options, args
 
 
+class AddressParser(BaseCommand):
+    """ """
+
+    def parse_args(self, args, update=False)
+        """ """
+        if update:
+            parser.add_option("--id", action="store_true", dest="address_id",
+                            help="Specify the address we want to update")
+        
+        parser.add_option("-a", "--address", action="store", type="string",
+                        help="street name, with number",
+                        dest="addr")
+        
+        parser.add_option("-b", "--building", action="store", type="string",
+                        help="building, stair... complete the address",
+                        dest="building")
+
+        parser.add_option("--county", action="store", type="string",
+                        help="county name",
+                        dest="county")
+
+        parser.add_option("-c", "--country", action="store", type="string",
+                        help="country",
+                        dest="country")
+
+        parser.add_option("-p", "--postalcode", action="store", type="string",
+                        help="city postal code",
+                        dest="postal_code")
+
 class AddPatientCommand(BaseCommand, PatientParser):
     """ """
     

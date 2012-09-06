@@ -18,6 +18,23 @@ now = datetime.datetime.now()
 today = datetime.date.today()
 
 
+class City(Base):
+    __tablename__ = "city"
+    id = Column(Integer, primary_key=True)
+    city = Column(String, default="")
+    postal_code = Column(String, default="")
+
+
+class Address(Base):
+    __tablename__ = 'address'
+    id = Column(Integer, primary_key=True)
+    addr = Column(String)
+    building = Column(String)
+    city_id = Column(Integer, ForeignKey(City.id)
+    county = Column(String, default="")
+    country = Column(String, default="France")
+
+
 class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
@@ -27,6 +44,8 @@ class Patient(Base):
     qualifications = Column(String)
     preferred_name = Column(String)
     correspondence_name = Column(String)
+    address = relationship("Address", secondary=patient_address_table,
+                           backref=patients)
     sex = Column(Boolean)
     dob = Column(Date, default="19700101")                  # date of birth
     job = Column(String)
@@ -41,7 +60,6 @@ class Patient(Base):
     neck = relationship("Neck", uselist=False, backref="patient") 
     mouth = relationship("Mouth", uselist=False, backref="patient") 
     appointments = relationship("Appointment", backref="patient")
-    address = relationship("Address")
 
     def age(self):
         return (
@@ -55,13 +73,3 @@ class Patient(Base):
         else:
             return False
 
-class Address(Base):
-    __tablename__ = 'address'
-    id = Column(Integer, primary_key=True)
-    addr = Column(String)
-    building = Column(String)
-    city = Column(String, default="")
-    county = Column(String, default="")
-    country = Column(String, default="")
-    postal_code = Column(String, default="")
-    
