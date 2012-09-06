@@ -17,13 +17,15 @@ now = datetime.datetime.now()
 today = datetime.date.today()
 
 
-class GeneralistDoctor(Base):
+class MedecineDoctor(Base):
 
-    __tablename__ = 'generalist_doctor'
+    __tablename__ = 'medecine_doctor'
 
     id = Column(Integer, primary_key=True)
     lastname = Column(String, nullable=False)
     firstname = Column(String)
+    address = relationship("Address", secondary=md_address,
+                           backref="md")
     city = Column(String)
     address = Column(String)
     phone = Column(String)

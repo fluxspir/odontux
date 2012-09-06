@@ -45,7 +45,7 @@ class Patient(Base):
     preferred_name = Column(String)
     correspondence_name = Column(String)
     address = relationship("Address", secondary=patient_address_table,
-                           backref=patients)
+                           backref="patient")
     sex = Column(Boolean)
     dob = Column(Date, default="19700101")                  # date of birth
     job = Column(String)
