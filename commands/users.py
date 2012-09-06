@@ -169,10 +169,10 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
 
 
         new_user = users.OdontuxUser(**self.values)
-        if options.city:
+        if  options.city:
             new_user.address = administration.Address(city = options.city.decode("utf_8"))
         if options.street:
-            new_user.street = administration.Address(street = options.street.decode("utf_8"))
+            new_user.adress = administration.Address(street = options.street.decode("utf_8"))
         meta.session.add(new_user)
         meta.session.commit()
 
