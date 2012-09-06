@@ -19,7 +19,7 @@ today = datetime.date.today()
 
 
 class Patient(Base):
-    __tablename__ = 'patient_admin'
+    __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
     title = Column(String)
     lastname = Column(String, nullable=False)
@@ -58,9 +58,10 @@ class Patient(Base):
 class Address(Base):
     __tablename__ = 'address'
     id = Column(Integer, primary_key=True)
-    addr
-    city
-    county
-    country
-    postal_code
+    addr = Column(String)
+    building = Column(String)
+    city = Column(String, default="")
+    county = Column(String, default="")
+    country = Column(String, default="")
+    postal_code = Column(String, default="")
     
