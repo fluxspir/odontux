@@ -113,7 +113,7 @@ class OdontuxUserParser(BaseCommand):
 
         parser.add_option("--update_date", action="store", type="string",
                         help="date since when the person lives here",
-                        dest="update_date", default="")
+                        dest="update_date", default=None)
 
         (options,args) = parser.parse_args()
         return options, args
@@ -170,15 +170,15 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
 
         new_user = users.OdontuxUser(**self.values)
         meta.session.add(new_user)
-        new_user.addresses.append = administration.Address(
+        new_user.addresses.append(administration.Address(
                            street = options.street.decode("utf_8"),
                            building = options.building.decode("utf_8"),
                            city = options.city.decode("utf_8"),
                            postal_code = options.postal_code.decode("utf_8"),
                            county = options.county.decode("utf_8"),
                            country = options.country.decode("utf_8"),
-                           update_date = options.update_date.decode("utf_8")
-                           )
+                           update_date = options.update_date
+                           ))
 
         meta.session.commit()
 
