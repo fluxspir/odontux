@@ -33,7 +33,7 @@ class DentalOffice(Base):
     office_name = Column(String)
     dentist_lastname = Column(String)
     dentist_firstname = Column(String)
-    address = relationship("Address", secondary=dental_office_address_table,
+    addresses = relationship("Address", secondary=dental_office_address_table,
                            backref="dental_office")
     phone = Column(String)
     mail = Column(String)
