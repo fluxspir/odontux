@@ -169,6 +169,7 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
 
 
         new_user = users.OdontuxUser(**self.values)
+        meta.session.add(new_user)
         new_user.addresses.append = administration.Address(
                            street = options.street.decode("utf_8"),
                            building = options.building.decode("utf_8"),
@@ -178,7 +179,7 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
                            country = options.country.decode("utf_8"),
                            update_date = options.update_date.decode("utf_8")
                            )
-        meta.session.add(new_user)
+
         meta.session.commit()
 
 
