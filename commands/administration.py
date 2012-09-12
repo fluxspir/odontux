@@ -80,16 +80,20 @@ class PatientParser(BaseCommand):
                         help="patient's file creation, default=now")
 
         parser.add_option("--phone", action="store", type="string",
-                          help="Phone of the generalist doctor.",
-                          dest="phone_num")
+                        help="Phone of the generalist doctor.",
+                        dest="phone_num")
 
         parser.add_option("--mail", action="store", type="string",
-                          help="Email address of the generalist doctor.",
-                          dest="email")
+                        help="Email address of the generalist doctor.",
+                        dest="email")
 
-        parser.add_option("--address_id", action="store", type="string",
-                        help="address id in DB from the person",
-                        dest="address_id")
+        parser.add_option("--payer", action="store_true", default=False,
+                        help="Is the patient payer for family",
+                        dest="payer")
+
+        parser.add_option("--family_id", action="store", type="string",
+                        help="family id in DB from the person",
+                        dest="family_id")
 
         parser.add_option("--street", action="store", type="string",
                         help="street and number",
@@ -171,33 +175,49 @@ class AddPatientCommand(BaseCommand, PatientParser):
             self.values["gen_doc_id"] = options.gen_doc_id
         if options.time_stamp:
             self.values["time_stamp"] = options.time_stamp
-        if options.street:
-            options.street = options.street.decode("utf_8")
-        if options.building:
-            options.building = options.building.decode("utf_8")
-        if options.postal_code:
-            options.postal_code = options.postal_code.decode("utf_8")
-        if options.city:
-            options.city = options.city.decode("utf_8").title()
-        if options.county:
-            options.county = options.county.decode("utf_8").title()
-        if options.country:
-            options.country = options.country.decode("utf_8").title()
-        if options.email:
-            options.email = options.email.decode("utf_8").lower()
+        if options.payer:
+            self.values["payer"] = options.payer
+        if options.family_id:
+            self.values["family_id"] = options.family_id
+        else:
+            if options.street:
+                options.street = options.street.decode("utf_8")
+            if options.building:
+                options.building = options.building.decode("utf_8")
+            if options.postal_code:
+                options.postal_code = options.postal_code.decode("utf_8")
+            if options.city:
+                options.city = options.city.decode("utf_8").title()
+            if options.county:
+                options.county = options.county.decode("utf_8").title()
+            if options.country:
+                options.country = options.country.decode("utf_8").title()
+            if options.email:
+                options.email = options.email.decode("utf_8").lower()
 
 
         new_patient = administration.Patient(**self.values)
         meta.session.add(new_patient)
-        new_patient.addresses.append(administration.Address(
-                    street = options.street,
-                    building = options.building,
-                    city = options.city,
-                    postal_code = options.postal_code,
-                    county = options.county,
-                    country = options.country,
-                    update_date = options.update_date
-                    ))
+        if not options.family_id:
+            family = administration.Family()
+            meta.session.add(family)
+            new_patient.family_id = family.id
+            family.addresses.append(administration.Address(
+                        street = options.street,
+                        building = options.building,
+                        city = options.city,
+                        postal_code = options.postal_code,
+                        county = options.county,
+                        country = options.country,
+                        update_date = options.update_date
+                        ))
+        else:
+            family = meta.session.query(administration.Family)\
+                    .filter(administration.Family.id ==
+                            options.family_id).one()
+        payer = administration.Payer()
+            meta.
+
         if options.phone_num:
             new_patient.phones.append(administration.Phone(
                             phone_num = options.phone_num

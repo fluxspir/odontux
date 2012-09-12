@@ -77,7 +77,7 @@ class SocialSecurityFr(Base):
     __tablename__ = 'social_security_fr'
     id = Column(Integer, primary_key=True)
     number = Column(String, unique=True)
-    owner_id = Column(Integer, ForeignKey(Patient.id))
+    beneficiaries = relationship("Patient", backref="socialsecurity")
     cmu = Column(Boolean, default=False)
     insurance = Column(String)
 
@@ -85,6 +85,7 @@ class SocialSecurityFr(Base):
 class Payer(Base):
     __tablename__ = 'payer'
     id = Column(Integer, primary_key=True)
+    payer = Column(Boolean)
 
 
 class Family(Base):
@@ -100,7 +101,7 @@ class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
     family_id = Column(Integer, ForeignKey(Family.id))
-    socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityLocale.id))
+    socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityFr.id))
     payers = relationship("Payer", secondary=family_patient_payer_table,
                            backref="patient")
     title = Column(String)
