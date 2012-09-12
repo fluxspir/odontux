@@ -74,7 +74,7 @@ class SocialSecurityFr(Base):
     patients = relationship("Patient", backref="socialsecuritynumber")
     payer = Column(Integer, ForeignKey(Patient.id))
     cmu = Column(Boolean, default=False)
-
+    insurance = Column(String)
 
 class Patient(Base):
     __tablename__ = 'patient'
@@ -86,14 +86,14 @@ class Patient(Base):
     preferred_name = Column(String)
     correspondence_name = Column(String)
     addresses = relationship("Address", secondary=patient_address_table,
-                           backref="patient")
+                             backref="patient")
     sex = Column(Boolean)
     dob = Column(Date, default="19700101")                  # date of birth
     job = Column(String)
     phones = relationship("Phone", secondary=patient_phone_table,
-                         backref="patient")
+                          backref="patient")
     mails = relationship("Mail", secondary=patient_mail_table,
-                        backref="patient")
+                         backref="patient")
     inactive = Column(Boolean, default=False)
     office_id = Column(Integer, ForeignKey(users.DentalOffice.id), default=2)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
