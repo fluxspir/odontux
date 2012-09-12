@@ -175,8 +175,6 @@ class AddPatientCommand(BaseCommand, PatientParser):
             self.values["gen_doc_id"] = options.gen_doc_id
         if options.time_stamp:
             self.values["time_stamp"] = options.time_stamp
-        if options.payer:
-            self.values["payer"] = options.payer
         if options.family_id:
             self.values["family_id"] = options.family_id
         else:
@@ -215,8 +213,12 @@ class AddPatientCommand(BaseCommand, PatientParser):
             family = meta.session.query(administration.Family)\
                     .filter(administration.Family.id ==
                             options.family_id).one()
-        payer = administration.Payer()
-            meta.
+
+        valuepayer = {}
+        if options.payer:
+            self.valuepayer["payer"] = options.payer
+        payer = administration.Payer(**valuepayer)
+            meta.session.add(payer)
 
         if options.phone_num:
             new_patient.phones.append(administration.Phone(
