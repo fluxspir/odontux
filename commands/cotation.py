@@ -391,7 +391,6 @@ class UpdateCotationFrCommand(BaseCommand, CotationFrParser):
         (options, args) = self.parse_args(args, True)
         if not options.cotation_id:
             sys.exit(_("Please specify which cotation we need to upgrade"))
-
         newcotation = self.query.filter(cotation.CotationFr.id ==
                                         options.cotation_id).one()
 

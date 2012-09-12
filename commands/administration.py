@@ -5,13 +5,12 @@
 # licence BSD
 #
 
-from model import meta, administration, anamnesis, teeth
+from model import meta, administration, md, teeth
 from base import BaseCommand
 
 from sqlalchemy import or_
 from gettext import gettext as _
 import sys
-
 
 
 class PatientParser(BaseCommand):
@@ -124,36 +123,6 @@ class PatientParser(BaseCommand):
         (options,args) = parser.parse_args(args)
         return options, args
 
-
-#class AddressParser(BaseCommand):
-#    """ """
-#
-#    def parse_args(self, args, update=False):
-#        """ """
-#        if update:
-#            parser.add_option("--id", action="store_true", dest="address_id",
-#                            help="Specify the address we want to update")
-#        
-#        parser.add_option("-a", "--address", action="store", type="string",
-#                        help="street name, with number",
-#                        dest="addr")
-#        
-#        parser.add_option("-b", "--building", action="store", type="string",
-#                        help="building, stair... complete the address",
-#                        dest="building")
-#
-#        parser.add_option("--county", action="store", type="string",
-#                        help="county name",
-#                        dest="county")
-#
-#        parser.add_option("-c", "--country", action="store", type="string",
-#                        help="country",
-#                        dest="country")
-#
-#        parser.add_option("-p", "--postal_code", action="store", type="string",
-#                        help="city postal code",
-#                        dest="postal_code")
-#
 class AddPatientCommand(BaseCommand, PatientParser):
     """ """
     
@@ -235,12 +204,120 @@ class AddPatientCommand(BaseCommand, PatientParser):
                             ))
         if options.email:
             new_patient.mails.append(administration.Mail(
-                            email = options.email.decode("utf_8").lower()
+                            email = options.email
                             ))
 
         meta.session.commit()
 
         print(new_patient.id)
+
+class PatientMovingInCommand(BaseCommand):
+    """
+    When the user moves (used mainly for dentists who make replacements...
+    """
+
+    command_name = "patient_movingin"
+
+    def __init__(self):
+        pass
+
+    def parse_args(self, args):
+
+        parser = self.get_parser()
+
+        parser.add_option("--patient_id", action="store", type="string",
+                        help="Id of user we want to change/update address",
+                        dest="patient_id")
+        
+        parser.add_option("--address_id", action="store", type="string",
+                        help="address id in DB from the person",
+                        dest="address_id")
+
+        parser.add_option("--street", action="store", type="string",
+                        help="street and number",
+                        dest="street")
+    
+        parser.add_option("--building", action="store", type="string",
+                        help="building, stair... any complement for address",
+                        dest="building")
+
+        parser.add_option("--city", action="store", type="string",
+                        help="name of the city",
+                        dest="city")
+
+        parser.add_option("--postal_code", action="store", type="string",
+                        help="postal code of the city",
+                        dest="postal_code")
+
+        parser.add_option("--county", action="store", type="string",
+                        help="county's name",
+                        dest="county")
+
+        parser.add_option("--country", action="store", type="string",
+                        help="country",
+                        dest="country")
+
+        parser.add_option("--update_date", action="store", type="string",
+                        help="date since when the person lives here",
+                        dest="update_date")
+
+        (options, args) = parser.parse_args(args)
+        return options, args
+
+    def run(self, args):
+
+        (options, args) = self.parse_args(args)
+
+        if options.patient_id:
+            patient_id = options.patient_id
+        else:
+            patient_id = os.getenv("patient_id")
+
+        patient = meta.session.query(administration.Patient)\
+                     .filter(administration.Patient.id ==
+                     patient_id).one()
+
+        if options.street:
+            options.street = options.street.decode("utf_8")
+        if options.building:
+            options.building = options.building.decode("utf_8")
+        if options.postal_code:
+            options.postal_code = options.postal_code.decode("utf_8")
+        if options.city:
+            options.city = options.city.decode("utf_8").title()
+        if options.county:
+            options.county = options.county.decode("utf_8").title()
+        if options.country:
+            options.country = options.country.decode("utf_8").title()
+
+        if options.address_id:
+            options.address_id = int(options.address_id)
+            for addr in patient.addresses:
+                if addr.id == options.address_id:
+                    if options.street:
+                        addr.street = options.street
+                    if options.building:
+                        addr.building = options.building
+                    if options.postal_code:
+                        addr.postal_code = options.postal_code
+                    if options.city:
+                        addr.city = options.city
+                    if options.county:
+                        addr.county = options.county
+                    if options.country:
+                        addr.country = options.country
+                    meta.session.commit()
+        else:
+            patient.addresses.append(administration.Address(
+                                            street = options.street,
+                                            building = options.building,
+                                            city = options.city,
+                                            postal_code = options.postal_code,
+                                            county = options.county,
+                                            country = options.country,
+                                            update_date = options.update_date
+                                            ))
+        meta.session.commit()
 
 
 class ListPatientCommand(BaseCommand, PatientParser):
@@ -253,7 +330,7 @@ class ListPatientCommand(BaseCommand, PatientParser):
 
     def __init__(self):
         self.query = meta.session.query(administration.Patient)
-        self.querydoc = meta.session.query(anamnesis.MedecineDoctor)
+        self.querydoc = meta.session.query(md.MedecineDoctor)
 
     def parse_args(self, args):
         parser = self.get_parser()
@@ -294,7 +371,7 @@ class ListPatientCommand(BaseCommand, PatientParser):
 
         else:
             for patient in query:
-                doc = self.querydoc.filter(anamnesis.MedecineDoctor.id ==
+                doc = self.querydoc.filter(md.MedecineDoctor.id ==
                                            patient.gen_doc_id).first()
                 if patient.sex:
                     sex=_("M")
@@ -350,10 +427,10 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
             patient.dob = options.dob
         if options.job:
             patient.job = options.job.decode("utf_8")
-        if options.phone:
-            patient.phone = options.phone.decode("utf_8")
-        if options.mail:
-            patient.mail = options.mail.decode("utf_8")
+        if options.phone_num:
+            patient.phone_num = options.phone_num.decode("utf_8")
+        if options.email:
+            patient.email = options.email.decode("utf_8")
         if options.inactive:
             patient.inactive = True
         if options.office_id:

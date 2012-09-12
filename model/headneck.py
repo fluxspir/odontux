@@ -41,15 +41,25 @@ class Mouth(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                         nullable=False)
-    superiorlip = relationship("SuperiorLip", uselist=False, backref="mouth")
-    inferiorlip = relationship("InferiorLip", uselist=False, backref="mouth")
-    leftcheek = relationship("LeftCheek", uselist=False, backref="mouth")
-    rightcheek = relationship("RightCheek", uselist=False, backref="mouth")
-    hardpalate = relationship("HardPalate", uselist=False, backref="mouth")
-    softpalate = relationship("SoftPalate", uselist=False, backref="mouth")
-    tongue = relationship("Tongue", uselist=False, backref="mouth")
-    mouthbase = relationship("MouthBase", uselist=False, backref="mouth")
-    superiorgum = relationship("SuperiorGum", uselist=False, backref="mouth")
-    inferiorgum = relationship("InferiorGum", uselist=False, backref="mouth")
-    teeth = relationship("Tooth", backref="mouth")
-    time_stamp = Column(DateTime, default=now)
+    superiorlip = relationship("SuperiorLip", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    inferiorlip = relationship("InferiorLip", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    leftcheek = relationship("LeftCheek", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    rightcheek = relationship("RightCheek", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    hardpalate = relationship("HardPalate", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    softpalate = relationship("SoftPalate", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    tongue = relationship("Tongue", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    mouthbase = relationship("MouthBase", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    superiorgum = relationship("SuperiorGum", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    inferiorgum = relationship("InferiorGum", uselist=False, backref="mouth",
+                               cascade="all, delete, delete-orphan")
+    teeth = relationship("Tooth", backref="mouth",
+                               cascade="all, delete, delete-orphan")

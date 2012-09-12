@@ -15,6 +15,12 @@ from sqlalchemy import MetaData, ForeignKey
 from sqlalchemy.orm import relationship, backref
 
 
+locale = "fr"
+socialsecuritylocale = "SocialSecurity" + locale.title()
+SocialSecurityLocale = socialsecuritylocale
+#SocialSecurityLocale = getattr(administration, socialsecuritylocale)
+
+
 now = datetime.datetime.now()
 today = datetime.date.today()
 
@@ -60,6 +66,16 @@ class Phone(Base):
     phone_num = Column(String)
     update_date = Column(Date, default=today)
 
+
+class SocialSecurityFr(Base):
+    __tablename__ = 'social_security_fr'
+    id = Column(Integer, primary_key=True)
+    number = Column(String)
+    patients = relationship("Patient", backref="socialsecuritynumber")
+    payer = Column(Integer, ForeignKey(Patient.id))
+    cmu = Column(Boolean, default=False)
+
+
 class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
@@ -79,7 +95,7 @@ class Patient(Base):
     mails = relationship("Mail", secondary=patient_mail_table,
                         backref="patient")
     inactive = Column(Boolean, default=False)
-    office_id = Column(Integer, ForeignKey(users.DentalOffice.id), default=1)
+    office_id = Column(Integer, ForeignKey(users.DentalOffice.id), default=2)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
     gen_doc_id = Column(Integer, ForeignKey(md.MedecineDoctor.id))
     time_stamp = Column(Date, default=today)
@@ -91,6 +107,8 @@ class Patient(Base):
                         cascade="all, delete, delete-orphan")
     appointments = relationship("Appointment", backref="patient",
                         cascade="all, delete, delete-orphan")
+    socialsecuritynumber_id = Column(Integer, 
+                              ForeignKey(SocialSecurityLocale.id))
 
     def age(self):
         return (

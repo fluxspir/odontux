@@ -61,6 +61,10 @@ class EventParser(BaseCommand):
             parser.add_option("-m", "--mobility", action="store", 
                             type="string", dest="mobility",
                             help="tells the degree of mobility (1-2-3)")
+
+            parser.add_option("-f", "--fracture", action="store", 
+                            type="string", dest="fracture",
+                            help="Radicular, Crown, or Rad-Crown")
                            
             parser.add_option("-a", "--absence", "--missing", action="store",
                             help="use it if the tooth is missing",
@@ -76,16 +80,29 @@ class EventParser(BaseCommand):
 
         if chunk == "crown":
             parser.add_option("-s", "--side", action="store", type="string",
-                            help="The crown side : O, M, D, V/B, L/P",
+                            help="The crown side : O, M, D, V/B, L/P or A(ll)",
                             dest="side")
+
+            parser.add_option("--sealing", action="store", type="string",
+                            help="Sealing",
+                            dest="sealing")
 
             parser.add_option("-d", "--decay", action="store", type="string",
                             help="if the crown is decayed, black or sista",
                             dest="decay")
 
-            parser.add_option("-f", "--filled", action="store", type="string",
-                            help="the filling the tooth has",
-                            dest="filling")
+            parser.add_option("-o", "--obturation", action="store", 
+                            type="string", dest="obturation",
+                            help="the filling the tooth has")
+
+            parser.add_option("-C", "--crown", action="store", type="string",
+                            help="The type of crown",
+                            dest="crowned")
+
+            parser.add_option("-B", "--bridge", action="store", type="string",
+                            help="There is a bridge",
+                            dest="bridge")
+
 
         if chunk == "root":
             parser.add_option("-r", "--rootcanal", action="store", 
@@ -100,9 +117,13 @@ class EventParser(BaseCommand):
                             help="to tell if there is an abscess",
                             dest="abscess")
 
-            parser.add_option("-f", "--filling", action="store", type="string",
-                            help="use it to tell that the root is filled",
-                            dest="filling")
+            parser.add_option("-o", "--obturation", action="store", 
+                            type="string", dest="obturation",
+                            help="use it to tell that the root is filled")
+
+            parser.add_option("-I", "--inlaycore", action="store", 
+                            type="string", dest="inlaycore",
+                            help="use of pilier in the root")
   
         (options, args) = parser.parse_args(args)
         return options, args
@@ -164,8 +185,12 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
             self.toothevent_values["sane"] = options.sane.decode("utf_8")
         if options.mobility:
             state = "m" 
-            self.toothevent_values["mobility"] = options.mobility\
-                                                        .decode("utf_8")
+            self.toothevent_values["mobility"] =\
+            options.mobility.decode("utf_8")
+        if options.fracture:
+            state = "f"
+            self.toothevent_values["fracture"] =\
+            options.fracture.decode("utf_8")
         if options.absence:
             state = "a"
             self.toothevent_values["absence"] = options.absence.decode("utf_8")
@@ -174,7 +199,7 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
             self.toothevent_values["replaced"] = options.replaced\
                                                         .decode("utf_8")
         if options.implant:
-            state = "i"
+            state = "I"
             self.toothevent_values["implant"] = options.implant.decode("utf_8")
         if options.comments:
             self.toothevent_values["comments"] = options.comments\
@@ -242,15 +267,25 @@ class AddCrownEventCommand(BaseCommand, EventParser, AddEventCommand):
             os.getenv("appointment_id")
 
         self.crownevent_values["side"] = options.side.decode("utf_8")
+        if options.sealing:
+            state = "x"
+            self.crownevent_values["sealing"] = options.sealing.decode("utf_8")
         if options.decay:
             state = "d"
             self.crownevent_values["decay"] = options.decay.decode("utf_8")
-        if options.filling:
-            state = "f"
-            self.crownevent_values["filling"] = options.filling.decode("utf_8")
+        if options.obturation:
+            state = "o"
+            self.crownevent_values["obturation"] =\
+            options.obturation.decode("utf_8")
+        if options.crowned:
+            state = "c"
+            self.crownevent_values["crowned"] = options.crowned.decode("utf_8")
+        if options.bridge:
+            state = "b"
+            self.crownevent_values["bridge"] = options.bridge.decode("utf_8")
         if options.comments:
-            self.crownevent_values["comments"] = options.comments\
-                                                        .decode("utf_8")
+            self.crownevent_values["comments"] =\
+            options.comments.decode("utf_8")
         if options.color:
             self.crownevent_values["color"] = options.color.decode("utf_8")
         if options.pic:
@@ -315,15 +350,19 @@ class AddRootEventCommand(BaseCommand, EventParser, AddEventCommand):
 
         self.rootevent_values["canal"] = options.canal.decode("utf_8")
         if options.infected:
-            self.rootevent_values["infected"] = options.infected\
-                                                        .decode("utf_8")
+            self.rootevent_values["infected"] =\
+            options.infected.decode("utf_8")
         if options.abscess:
             self.rootevent_values["abscess"] = options.abscess.decode("utf_8")
-        if options.filling:
-            self.rootevent_values["filling"] = options.filling.decode("utf_8")
+        if options.obturation:
+            self.rootevent_values["obturation"] =\
+            options.obturation.decode("utf_8")
+        if options.inlaycore:
+            self.rootevent_values["inlaycore"] =\
+            options.inlaycore.decode("utf_8")
         if options.comments:
-            self.rootevent_values["comments"] = options.comments\
-                                                       .decode("utf_8")
+            self.rootevent_values["comments"] =\
+            options.comments.decode("utf_8")
         if options.color:
             self.rootevent_values["color"] = options.color
         if options.pic:

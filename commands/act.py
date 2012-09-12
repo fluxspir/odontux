@@ -14,7 +14,6 @@ import sqlalchemy
 import os
 import sys
 
-
 class ActTypeParser(BaseCommand):
     """ """
     def parse_args(self, args):
@@ -127,7 +126,6 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
         execution = meta.session.query(cotation.CotationFr)\
                 .filter(cotation.CotationFr.id == 
                         actual_act.cotationfr_id).one()
-
         appointment = meta.session.query(schedule.Appointment)\
                 .filter(schedule.Appointment.id == appointment_id).one()
         patient_id = appointment.patient.id

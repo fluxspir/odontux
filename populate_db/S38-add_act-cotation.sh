@@ -6,6 +6,8 @@ cotid=$(odontux add_cotationfr -k 1 -m 0)
 odontux add_acttype -n "Consultation gratuite" -a "Consultation free, offerte" --cotation $cotid
 cotid=$(odontux add_cotationfr -k 1 -m 1 --exceeding_adult_normal 4 --exceeding_adult_cmu 4)
 odontux add_acttype -n "Bilan Bucco Dentaire" -a "BBD" -s 9 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 1 -m 1 --exceeding_adult_normal 15 --exceeding_adult_cmu 15)
+odontux add_acttype -n "Bilan Bucco Dentaire 1 ou 2 radios" -a "BBD 1-2 radio" -s 9 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 7 --kid_multiplicator 8)
 odontux add_acttype -n "Obturation coronaire 1 face, technique directe" -s 3 --cotation $cotid
 odontux add_acttype -n "Obturation coronaire 1 face, technique directe" -a "Amalgame 1 face" -s 3 --cotation $cotid
@@ -25,6 +27,8 @@ cotid=$(odontux add_cotationfr -k 3 -m 33)
 odontux add_acttype -n "Obturation coronaire d'au moins 2 faces par insertion d'un matériau en phase plastique avec ancrage radiculaire" -s 3 --cotation $cotid
 odontux add_acttype -n "Obturation coronaire d'au moins 2 faces par insertion d'un matériau en phase plastique avec ancrage radiculaire" -a "RCR amalgame" -s 3 --cotation $cotid
 odontux add_acttype -n "Obturation coronaire d'au moins 2 faces par insertion d'un matériau en phase plastique avec ancrage radiculaire" -a "RCR composite" -s 3 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 3 -m 17 --exceeding_adult_normal 179.03)
+odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en métal" -a "inlay 3 faces métal" -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 17 --exceeding_adult_normal 303.03)
 odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en céramique" -a "Inlay 3 faces ceramique" -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 9)
@@ -42,6 +46,8 @@ odontux add_acttype -n "Détartrage" -a "Detartrage" -s 2 --cotation $cotid
 odontux add_acttype -n "Détartrage 2nde séance" -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 27)
 odontux add_acttype -n "Aero Polissage" -a "Polissage" -s 2 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 500)
+odontux add_acttype -n "blanchiment, blanchiement, blanchissement, éclaircissement" -a "eclaircissement" -s 10 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 8)
 odontux add_acttype -n "Ligature métallique dans les parodontopathies" -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 40)
@@ -121,6 +127,8 @@ cotid=$(odontux add_cotationfr -k 4 -m 67 --exceeding_adult_normal 45.95)
 odontux add_acttype -n "Conception, adaptation et pose d'un inlay-core à clavette" -a "Inlay Core à clavette" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 35 --adult_cmu_num 4 --exceeding_adult_cmu 0)
 odontux add_acttype -n "Dent à tenon, dans groupe incisivo-canin-prémolaire" -s 6 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 35 --exceeding_adult_cmu 0)
+odontux add_acttype -n "Dépose de prothèse conjointes métalliques" -a "Dépose couronne" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 18)
 odontux add_acttype -n "Dépose de prothèses conjointes métalliques, pour TTT radiothérapique de tumeurs faciales, obturation provisoire comprise, par élément pilier" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 28 --exceeding_kid_normal 28 --exceeding_adult_cmu 0)
@@ -159,8 +167,8 @@ cotid=$(odontux add_cotationfr -k 4 -m 80 --keycmu 1 --adult_cmu_num 16 --exceed
 odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 13 dents" -a "PAP resine" -s 6 --cotation $cotid
 odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 13 dents" -a "PAP resine" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 85 --keycmu 1 --adult_cmu_num 17 --exceeding_adult_normal 1342.25 --exceeding_adult_cmu 473.25)
-odontux add_acttype -n "Prothèse amovible totale maxillaire" -a "PAT resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible totale mandibulaire" -a "PAT resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible totale maxillaire résine" -a "PAT maxillaire resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible totale mandibulaire résine" -a "PAT maxillaire resine" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 1 -m 90 --adult_cmu_num 6 --exceeding_adult_cmu 128.5)
 odontux add_acttype -n "Prothèse amovible partielle adjointe métallique maxillaire, de 1 à 3 dents" -a "PAP metal stellite" -s 6 --cotation $cotid
 odontux add_acttype -n "Prothèse amovible partielle adjointe métallique mandibulaire, de 1 à 3 dents" -a "PAP metal stellite" -s 6 --cotation $cotid

@@ -7,7 +7,10 @@
 
 from base import BaseCommand
 from model import md, meta, administration
+
+
 from sqlalchemy import or_
+from gettext import gettext as _
 import sys
 
 class MedecineDoctorParser(BaseCommand):
@@ -139,7 +142,7 @@ class ListMedecineDoctorCommand(BaseCommand):
     command_name = "list_md"
 
     def __init__(self):
-        self.query = meta.session.query(MedecineDoctor)
+        self.query = meta.session.query(md.MedecineDoctor)
 
     def parse_args(self, args):
         parser = self.get_parser()
@@ -157,9 +160,10 @@ class ListMedecineDoctorCommand(BaseCommand):
             for keyword in args:
                 keyword = '%{}%'.format(keyword)
                 query = query.filter(or_(
-                                MedecineDoctor.lastname.ilike(keyword),
-                                MedecineDoctor.firstname.ilike(keyword),
-                                MedecineDoctor.city.ilike(keyword)))
+                                md.MedecineDoctor.lastname.ilike(keyword),
+                                md.MedecineDoctor.firstname.ilike(keyword)
+                                )
+                       )
 
         if options.md_id:
             query = query.one()
@@ -167,7 +171,7 @@ class ListMedecineDoctorCommand(BaseCommand):
         else:
             for doc in query:
                 print(u"{}. {} {},\t{}".format(doc.id, doc.lastname,
-                                           doc.firstname, doc.city))
+                                           doc.firstname, _("Todo : city")))
 
 
 class UpdateMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
@@ -176,7 +180,7 @@ class UpdateMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
     command_name = "update_md"
 
     def __init__(self):
-        self.query = meta.session.query(MedecineDoctor)
+        self.query = meta.session.query(md.MedecineDoctor)
 
     def run(self, args):
         (options, args) = self.parse_args(args, True)
@@ -184,7 +188,7 @@ class UpdateMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
         if not options.md_id:
             sys.exit("the id of md must be provide to update md")
 
-        doc = self.query.filter(MedecineDoctor.id ==
+        doc = self.query.filter(md.MedecineDoctor.id ==
                                 options.md_id).one()
 
         if options.lastname:

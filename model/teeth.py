@@ -22,14 +22,18 @@ class Tooth(Base):
     A tooth has to be in a mouth ;
     A tooth has to have a name, the choice is free to name it whatever you want
     A tooth is either :
-        * s = None : The tooth never made speak from her.
-        * s = 0 : sane ; a root-infected tooth may appear sane !
-        * f = 1 : filled
-        * d = 2 : decayed
-        * m = 3 : mobility
-        * a = 4 : absent
-        * r = 5 : replaced (prosthetic mobile)
-        * i = 6 : implant
+        * None : The tooth never made speak from her.
+        * s : sane ; a root-infected tooth may appear sane !
+        * x : sealing
+        * o : obturation
+        * C : crowned
+        * d : decayed
+        * m : mobility
+        * f : fracture
+        * a : absent
+        * B : bridge
+        * r : resin (prosthetic mobile)
+        * I : implant
     We may put it under surveillance.
     """
     __tablename__ = 'tooth'
@@ -47,7 +51,9 @@ class ToothEvent(Base):
     A tooth event has to occur to a tooth (tooth_id)
     We have to note it during an appointment (appointment_id)
     Event that can occur :
+        * sane
         * mobility
+        * fracture
         * absence
         * replaced
         * implant
@@ -62,6 +68,7 @@ class ToothEvent(Base):
                                                 nullable=False)
     sane = Column(String)
     mobility = Column(String)
+    fracture = Column(String)
     absence = Column(String)
     replaced = Column(String)
     implant = Column(String)
@@ -81,9 +88,13 @@ class CrownEvent(Base):
         * d : Distal
         * v/b : Vestibular / Buccal
         * l/p : Lingual / Palatal
+        * a : All (usually, when the tooth is crowned)
     A crown is either :
         * s : sane
-        * f : filled
+        * x : sealed
+        * c : crowned
+        * b : bridge
+        * o : obturation
         * d : decayed
     We may add comments
     We may use a color-code for what happened
@@ -95,8 +106,11 @@ class CrownEvent(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
     side = Column(String, nullable=False)
+    sealing = Column(String)
     decay = Column(String)
-    filling = Column(String)
+    obturation = Column(String)
+    crowned = Column(String)
+    bridge = Column(String)
     comments = Column(String)
     color = Column(String)
     pic = Column(String)
@@ -116,9 +130,10 @@ class RootEvent(Base):
         * ml/mp : Mesio-Lingual / Mesio-Palatal
         * d : Distal
         * dv : Disto-Vestibular
+        * a : all
     A canal may be either :
         * sane
-        * filled
+        * obturation
         * infected
         * abscess
     We may add comments
@@ -133,9 +148,9 @@ class RootEvent(Base):
     canal = Column(String, nullable=False)
     infected = Column(String)
     abscess = Column(String)
-    filling = Column(String)
+    obturation = Column(String)
+    inlaycore = Column(String)
     comments = Column(String)
     color = Column(String)
     pic = Column(String)
-
 

@@ -5,7 +5,8 @@
 # Licence BSD
 
 from specialty import AddSpecialtyCommand, ListSpecialtyCommand
-from users import AddOdontuxUserCommand, AddDentalOfficeCommand
+from users import (AddOdontuxUserCommand, AddDentalOfficeCommand,
+                   UserMovingInCommand)
 from md import (AddMedecineDoctorCommand, ListMedecineDoctorCommand,
                 UpdateMedecineDoctorCommand)
 from cotation import (AddNgapKeyFrCommand, AddCmuKeyFrCommand,
