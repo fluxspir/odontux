@@ -25,8 +25,8 @@ now = datetime.datetime.now()
 today = datetime.date.today()
 
 
-patient_address_table = Table('patient_address', Base.metadata,
-Column('patient_id', Integer, ForeignKey('patient.id')),
+family_address_table = Table('family_address', Base.metadata,
+Column('family_id', Integer, ForeignKey('family.id')),
 Column('address_id', Integer, ForeignKey('address.id'))
 )
 
@@ -40,6 +40,11 @@ Column('patient_id', Integer, ForeignKey('patient.id')),
 Column('phone_id', Integer, ForeignKey('phone.id'))
 )
 
+family_patient_payer_table = Table('family_patient_payer', Base.metadata,
+Column('family_id', Integer, ForeignKey('family.id')),
+Column('patient_id', Integer, ForeignKey('patient.id')),
+Column('payer_id', Integer, ForeignKey('payer.id'))
+)
 
 class Address(Base):
     __tablename__ = 'address'
@@ -63,6 +68,7 @@ class Mail(Base):
 class Phone(Base):
     __tablename__ = 'phone'
     id = Column(Integer, primary_key=True)
+    name = Column(String)
     phone_num = Column(String)
     update_date = Column(Date, default=today)
 
@@ -70,23 +76,39 @@ class Phone(Base):
 class SocialSecurityFr(Base):
     __tablename__ = 'social_security_fr'
     id = Column(Integer, primary_key=True)
-    number = Column(String)
-    patients = relationship("Patient", backref="socialsecuritynumber")
-    payer = Column(Integer, ForeignKey(Patient.id))
+    number = Column(String, unique=True)
+    owner_id = Column(Integer, ForeignKey(Patient.id))
     cmu = Column(Boolean, default=False)
     insurance = Column(String)
+
+
+class Payer(Base):
+    __tablename__ = 'payer'
+    id = Column(Integer, primary_key=True)
+
+
+class Family(Base):
+    __tablename__ = 'family'
+    id = Column(Integer, primary_key=True)
+    addresses = relationship("Address", secondary=family_address_table,
+                             backref="family")
+    payers = relationship("Payer", secondary=family_patient_payer_table,
+                           backref="family")
+
 
 class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
+    family_id = Column(Integer, ForeignKey(Family.id))
+    socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityLocale.id))
+    payers = relationship("Payer", secondary=family_patient_payer_table,
+                           backref="patient")
     title = Column(String)
     lastname = Column(String, nullable=False)
     firstname = Column(String)
     qualifications = Column(String)
     preferred_name = Column(String)
     correspondence_name = Column(String)
-    addresses = relationship("Address", secondary=patient_address_table,
-                             backref="patient")
     sex = Column(Boolean)
     dob = Column(Date, default="19700101")                  # date of birth
     job = Column(String)
@@ -107,8 +129,6 @@ class Patient(Base):
                         cascade="all, delete, delete-orphan")
     appointments = relationship("Appointment", backref="patient",
                         cascade="all, delete, delete-orphan")
-    socialsecuritynumber_id = Column(Integer, 
-                              ForeignKey(SocialSecurityLocale.id))
 
     def age(self):
         return (
