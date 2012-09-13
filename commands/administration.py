@@ -218,7 +218,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
         if options.payer:
             self.valuepayer["payer"] = options.payer
         payer = administration.Payer(**valuepayer)
-            meta.session.add(payer)
+        meta.session.add(payer)
 
         if options.phone_num:
             new_patient.phones.append(administration.Phone(

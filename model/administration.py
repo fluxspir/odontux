@@ -9,6 +9,7 @@ from meta import Base
 import users, md
 import sqlalchemy
 import datetime
+import locales
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
@@ -19,7 +20,6 @@ locale = "fr"
 socialsecuritylocale = "SocialSecurity" + locale.title()
 SocialSecurityLocale = socialsecuritylocale
 #SocialSecurityLocale = getattr(administration, socialsecuritylocale)
-
 
 now = datetime.datetime.now()
 today = datetime.date.today()
@@ -101,7 +101,7 @@ class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
     family_id = Column(Integer, ForeignKey(Family.id))
-    socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityFr.id))
+    socialsecurity_id = Column(Integer, ForeignKey(locales()[SocialSecurityLocale]))
     payers = relationship("Payer", secondary=family_patient_payer_table,
                            backref="patient")
     title = Column(String)
