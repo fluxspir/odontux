@@ -15,6 +15,26 @@ import sys
 
 
 
+class ListFamilyTool(BaseCommand):
+    """ """
+    tool_name = "list_family"
+
+    def __init__(self):
+        self.query = meta.session.query(administration.Family)
+    
+    def parse_args(self, args):
+        parser = self.get_parser()
+
+        parser.add_option("--id", action="store_true", default=False,
+                        help="to get the family id",
+                        dest="family_id")
+
+        (options, args) = parser.parse_args(args)
+        return options, args
+
+    def run(self, args):
+        (options, args) = self.parse_args(args)
+
 ## REPLACE BY   list_patient -i
 #
 #class GetPatientIdTool(BaseCommand):
