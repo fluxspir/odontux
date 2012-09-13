@@ -16,6 +16,8 @@ from sqlalchemy.orm import relationship, backref
 
 
 locale = "fr"
+socialsecuritylocale = "SocialSecurity" + locale.title()
+SocialSecurityLocale = locals()[socialsecuritylocale]
 #SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 now = datetime.datetime.now()
@@ -94,14 +96,11 @@ class Family(Base):
                            backref="family")
 
 
-socialsecuritylocale = "SocialSecurity" + locale.title()
-SocialSecurityLocale = socialsecuritylocale
-
 class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
     family_id = Column(Integer, ForeignKey(Family.id))
-    socialsecurity_id = Column(Integer, ForeignKey(locals()[SocialSecurityLocale].id))
+    socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityLocale.id))
     payers = relationship("Payer", secondary=family_patient_payer_table,
                            backref="patient")
     title = Column(String)

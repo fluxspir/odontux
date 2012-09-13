@@ -106,11 +106,13 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
         
         (options, args) = self.parse_args(args)
 
+        # define precisely when the act was done
         if options.appointment_id:
             appointment_id = options.appointment_id
         else:
             appointment_id = os.getenv("appointment_id")
 
+        # add possible majoration for night, holidays(...)
         if options.majoration_id:
             majoration = meta.session.query(cotation.MajorationFr)\
                 .filter(cotation.MajorationFr.id == 

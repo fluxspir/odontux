@@ -4,6 +4,7 @@
 # v0.4
 # Licence BSD
 
+from administration import GetFamilyIdTool
 from createdb import CreateOdontuxDatabaseTool
 from act import GetActPriceTool, GetActTypeIdTool, GetActCotationFrIdTool
 from cotation import GetNgapPriceTool

@@ -15,25 +15,33 @@ import sys
 
 
 
-class ListFamilyTool(BaseCommand):
-    """ """
-    tool_name = "list_family"
+class GetFamilyIdTool(BaseCommand):
+    """ 
+    prints the id of the family for a patient.
+    """
+    tool_name = "get_familyid"
 
     def __init__(self):
-        self.query = meta.session.query(administration.Family)
+        self.query = meta.session.query(administration.Patient)
     
-    def parse_args(self, args):
-        parser = self.get_parser()
-
-        parser.add_option("--id", action="store_true", default=False,
-                        help="to get the family id",
-                        dest="family_id")
-
-        (options, args) = parser.parse_args(args)
-        return options, args
-
     def run(self, args):
-        (options, args) = self.parse_args(args)
+        query = self.query
+        for keyword in args:
+            keyword = "%{}%".format(keyword)
+            query = meta.session.query(administration.Patient).filter(or_(
+                    administration.Patient.lastname.ilike(keyword),
+                    administration.Patient.firstname.ilike(keyword),
+                    administration.Patient.preferred_name.ilike(keyword),
+                    administration.Patient.correspondence_name.ilike(keyword))
+                    )
+        
+#        try:
+        family_id = query.one().family_id
+        print(family_id)
+#        except ???:
+#        for patient in query.all():
+#           print .....
+
 
 ## REPLACE BY   list_patient -i
 #
