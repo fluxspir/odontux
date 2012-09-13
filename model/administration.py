@@ -15,6 +15,7 @@ from sqlalchemy import MetaData, ForeignKey
 from sqlalchemy.orm import relationship, backref
 
 
+locale = "fr"
 #SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 now = datetime.datetime.now()
@@ -93,7 +94,6 @@ class Family(Base):
                            backref="family")
 
 
-locale = "fr"
 socialsecuritylocale = "SocialSecurity" + locale.title()
 SocialSecurityLocale = socialsecuritylocale
 
