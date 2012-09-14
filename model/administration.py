@@ -82,7 +82,7 @@ class SocialSecurityFr(Base):
 class Payer(Base):
     __tablename__ = 'payer'
     id = Column(Integer, primary_key=True)
-    payer = Column(Boolean)
+    payer = Column(Boolean, default=True)
 
 
 class Family(Base):
@@ -121,6 +121,7 @@ class Patient(Base):
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
     gen_doc_id = Column(Integer, ForeignKey(md.MedecineDoctor.id))
     time_stamp = Column(Date, default=today)
+    creation_date = Column(Date, default=today)
     head = relationship("Head", uselist=False, backref="patient", 
                         cascade="all, delete, delete-orphan")
     neck = relationship("Neck", uselist=False, backref="patient",

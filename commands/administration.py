@@ -87,7 +87,7 @@ class PatientParser(BaseCommand):
                         help="Email address of the generalist doctor.",
                         dest="email")
 
-        parser.add_option("--payer", action="store_true", default=False,
+        parser.add_option("--nopayer", action="store_false", default=True,
                         help="Is the patient payer for family",
                         dest="payer")
 
@@ -123,6 +123,17 @@ class PatientParser(BaseCommand):
                         help="date since when the person lives here",
                         dest="update_date")
 
+        parser.add_option("--socialsecuritynum", action="store", type="string",
+                        help="social security number",
+                        dest="socialsecuritynum")
+
+        parser.add_option("--cmu", action="store_true", default=False,
+                        help="the patient has cmu",
+                        dest="cmu")
+
+        parser.add_option("--insurance", action="store", type="string",
+                        help="name of the patient's insurance",
+                        dest="insurance")
 
         (options,args) = parser.parse_args(args)
         return options, args
@@ -143,6 +154,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
             sys.exit("a lastname must be provide to add a new patient to\
                                                                     database")
 
+        # Insering patient's name
         self.values["lastname"] = options.lastname.decode("utf_8").upper()
         if options.title:
             self.values["title"] = options.title.decode("utf_8").title()
@@ -158,6 +170,8 @@ class AddPatientCommand(BaseCommand, PatientParser):
         if options.correspondence_name:
             self.values["correspondence_name"] = options.correspondence_name\
                                                  .decode("utf_8").upper()
+
+        # patient's caracteristics
         if options.sex is "1" or options.sex is "M" or options.sex is "m":
             self.values["sex"] = True
         else:
@@ -166,17 +180,29 @@ class AddPatientCommand(BaseCommand, PatientParser):
             self.values["dob"] = options.dob
         if options.job:
             self.values["job"] = options.job.decode("utf_8")
+
+        # The patient is a patient that may be seen
         if options.inactive:
             self.values["inactive"] = True
+
+        # The dentist, the office... where the patient is actually treated.
         if options.office_id:
             self.values["office_id"] = options.office_id
         self.values["dentist_id"] = options.dentist_id
         if options.gen_doc_id:
             self.values["gen_doc_id"] = options.gen_doc_id
+
+        # Last time the patient data where update
         if options.time_stamp:
             self.values["time_stamp"] = options.time_stamp
+            self.values["creation_date"] = options.time_stamp
+
+        # The family the patient's belong to
         if options.family_id:
             self.values["family_id"] = options.family_id
+
+        # A family have already an address ; if not in family, create a family 
+        # with its own address.
         else:
             if options.street:
                 options.street = options.street.decode("utf_8")
@@ -193,10 +219,13 @@ class AddPatientCommand(BaseCommand, PatientParser):
             if options.email:
                 options.email = options.email.decode("utf_8").lower()
 
-
+        # Adding the new patient.
         new_patient = administration.Patient(**self.values)
         meta.session.add(new_patient)
-        if not options.family_id:
+
+            # If doesn't belong to already know family, create a family and its
+            # address.
+            if not options.family_id:
             family = administration.Family()
             meta.session.add(family)
             new_patient.family_id = family.id
@@ -214,20 +243,49 @@ class AddPatientCommand(BaseCommand, PatientParser):
                     .filter(administration.Family.id ==
                             options.family_id).one()
 
+        # Telling if this patient (belonging to family above), is the payer.
         valuepayer = {}
         if options.payer:
             self.valuepayer["payer"] = options.payer
         payer = administration.Payer(**valuepayer)
         meta.session.add(payer)
 
+        # Patient's phone number
         if options.phone_num:
             new_patient.phones.append(administration.Phone(
                             phone_num = options.phone_num
                             ))
+
+        # Patient's email
         if options.email:
             new_patient.mails.append(administration.Mail(
                             email = options.email
                             ))
+
+        # Patient's social security :
+        SS_values = {}
+        if options.socialsecuritynum:
+            try:
+                SSN_id =\
+                meta.session.query(administration.SocialSecurityLocale)\
+                    .filter(administration.SocialSecurityLocale.number ==
+                            options.socialsecuritynum).one().id
+                new_patient.socialsecurity_id = SSN_id
+
+            except sqlalchemy.orm.exc.NoResultFound:
+                SSN_values["number"] = options.socialsecuritynum
+                if options.cmu:
+                    SSN_values["cmu"] = options.cmu
+                if options.insurance:
+                    SSN_values["insurance"] = options.insurance.decode("utf_8")
+                socialsecurity =\
+                administration.SocialSecurityLocale(**SSN_values)
+                meta.session.add(socialsecurity)
+                new_patient.socialsecurity_id = SSN_values["id"]
+            
+        else:
+            
+
 
         meta.session.commit()
 
