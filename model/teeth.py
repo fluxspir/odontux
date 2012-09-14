@@ -28,6 +28,7 @@ class Tooth(Base):
         * o : obturation
         * C : crowned
         * d : decayed
+        * p : place
         * m : mobility
         * f : fracture
         * a : absent
@@ -52,6 +53,7 @@ class ToothEvent(Base):
     We have to note it during an appointment (appointment_id)
     Event that can occur :
         * sane
+        * place
         * mobility
         * fracture
         * absence
@@ -67,6 +69,7 @@ class ToothEvent(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
     sane = Column(String)
+    place = Column(String)
     mobility = Column(String)
     fracture = Column(String)
     absence = Column(String)

@@ -14,6 +14,12 @@ import sqlalchemy
 import os
 import sys
 
+KID_AGE = 13
+
+locale = "fr"
+socialsecuritylocale = "SocialSecurity" + locale.title()
+SocialSecurityLocale = getattr(administration, socialsecuritylocale)
+
 class ActTypeParser(BaseCommand):
     """ """
     def parse_args(self, args):
@@ -123,33 +129,65 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
 
         if not options.act_id:
             sys.exit(_("Please enter the act id with option -a"))
+
+        # get type_id, the one who correspond to what dentist done.
         actual_act = meta.session.query(act.ActType)\
                 .filter(act.ActType.id == options.act_id).one()
+        # get the data to "create" the price for the act done.
         execution = meta.session.query(cotation.CotationFr)\
                 .filter(cotation.CotationFr.id == 
                         actual_act.cotationfr_id).one()
+        # tell in which appointment, to whom, the act was made.
         appointment = meta.session.query(schedule.Appointment)\
                 .filter(schedule.Appointment.id == appointment_id).one()
         patient_id = appointment.patient.id
         patient = meta.session.query(administration.Patient)\
                 .filter(administration.Patient.id == patient_id).one()
-        if patient.age() < 13:
+        # When the patient is under 13, the cotation for the act may change.
+        # as well as the price ; 
+        # We'll adapt the price later for CMU's, if needed.
+        if patient.age() < KID_AGE:
             multiplicator = execution.kid_multiplicator
             exceeding = execution.exceeding_kid_normal
         else:
             multiplicator = execution.adult_multiplicator
             exceeding = execution.exceeding_adult_normal
 
+        # For some acts, people getting CMU have another prices.
+        patient_right = meta.session.query(SocialSecurityLocale)\
+                        .filter(SocialSecurityLocale.id ==
+                                patient.socialsecurity_id).one()
+
         key = meta.session.query(cotation.NgapKeyFr)\
                 .filter(cotation.NgapKeyFr.id == execution.key_id).one()
 
+        # In the appointment-acttype table, we'll store :
+        # The appointment
         self.values["appointment_id"] = appointment_id
+        # The optional tooth where the act was made
         if options.tooth_id:
             self.values["tooth_id"] = options.tooth_id
+        # The act that was made
         self.values["act_id"] = options.act_id
-        self.values["code"] = key.key + str(multiplicator)
-        self.values["price"] = execution.get_price(multiplicator, exceeding, 
-                                                   majoration)
+
+        # The code for this act
+        if patient_right.cmu:
+            if execution.key_cmu_id:
+                cmu_key = meta.session.query(cotation.CmuKeyFr)\
+                           .filter(cotation.CmuKeyFr.id ==
+                                   execution.key_cmu_id).one().key
+                self.values["code"] = cmu_key + str(execution.adult_cmu_num)
+                exceeding = execution.exceeding_adult_cmu
+                if patient.age() < KID_AGE:
+                    exceeding = execution.exceeding_kid_cmu
+            else:
+                self.values["code"] = key.key + str(multiplicator)
+        else:
+            self.values["code"] = key.key + str(multiplicator)
+
+        # The price of this act
+        self.values["price"] = execution.get_price(multiplicator, 
+                               exceeding, majoration)
 
         new_act = act.AppointmentActReference(**self.values)
         meta.session.add(new_act)

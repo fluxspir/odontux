@@ -58,6 +58,10 @@ class EventParser(BaseCommand):
                             help="when the tooth looks healthy, but hurts",
                             dest="sane")
 
+            parser.add_option("-p", "--place", action="store", type="string",
+                            help="vest, pal...",
+                            dest="place")
+
             parser.add_option("-m", "--mobility", action="store", 
                             type="string", dest="mobility",
                             help="tells the degree of mobility (1-2-3)")
@@ -183,6 +187,9 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
         if options.sane:
             state = "s"
             self.toothevent_values["sane"] = options.sane.decode("utf_8")
+        if options.place:
+            state = "s"
+            self.toothevent_values["place"] = options.sane.decode("utf_8")
         if options.mobility:
             state = "m" 
             self.toothevent_values["mobility"] =\
