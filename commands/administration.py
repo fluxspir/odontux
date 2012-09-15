@@ -263,7 +263,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
                             ))
 
         # Patient's social security :
-        SS_values = {}
+        SSN_values = {}
         if options.socialsecuritynum:
             try:
                 SSN_id =\
@@ -284,8 +284,14 @@ class AddPatientCommand(BaseCommand, PatientParser):
                 new_patient.socialsecurity_id = SSN_values["id"]
             
         else:
-            
-
+            SSN_values["number"] = None
+            if options.cmu
+                SSN_values["cmu"] = options.cmu
+            if options.insurance:
+                SSN_values["insurance"] = options.insurance.decode("utf_8")
+            socialsecurity = administration.SocialSecurityLocale(**SSN_values)
+            meta.session.add(socialsecurity)
+            new_patient.social_security_id = SSN_values["id"]
 
         meta.session.commit()
 
