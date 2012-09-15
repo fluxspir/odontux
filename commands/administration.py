@@ -223,9 +223,9 @@ class AddPatientCommand(BaseCommand, PatientParser):
         new_patient = administration.Patient(**self.values)
         meta.session.add(new_patient)
 
-            # If doesn't belong to already know family, create a family and its
-            # address.
-            if not options.family_id:
+        # If doesn't belong to already know family, create a family and its
+        # address.
+        if not options.family_id:
             family = administration.Family()
             meta.session.add(family)
             new_patient.family_id = family.id
@@ -246,7 +246,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
         # Telling if this patient (belonging to family above), is the payer.
         valuepayer = {}
         if options.payer:
-            self.valuepayer["payer"] = options.payer
+            valuepayer["payer"] = options.payer
         payer = administration.Payer(**valuepayer)
         meta.session.add(payer)
 
@@ -285,7 +285,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
             
         else:
             SSN_values["number"] = None
-            if options.cmu
+            if options.cmu:
                 SSN_values["cmu"] = options.cmu
             if options.insurance:
                 SSN_values["insurance"] = options.insurance.decode("utf_8")
