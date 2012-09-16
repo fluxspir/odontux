@@ -77,6 +77,10 @@ class PaymentParser(Base):
     def parse_args(self, args):
         parser = self.get_parser()
 
+        parser.add_option("-p", "--payer", action="store", type="string",
+                        help="Id of the patient who will pay the act",
+                        dest="payer_id")
+        
         parser.add_option("-a", "--amount", action="store", type="string",
                         help="Amount of money in that payment",
                         dest="amount")
@@ -107,7 +111,7 @@ class AddPaymentCommand(Base, PaymentParser):
     def run(self, args):
         (options, args) = self.parse_args(args)
 
-        self.values["patient_id"] = options.patient_id.decode("utf_8")
+        self.values["payer_id"] = options.payer_id.decode("utf_8")
         self.values["mean_id"] = options.mean_id.decode("utf_8")
         self.values["amount"] = options.amount.decode("utf_8")
         self.values["advance"] = options.advance

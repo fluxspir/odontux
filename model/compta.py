@@ -35,12 +35,13 @@ class Payment(Base):
     """
     __tablename__ = 'payment'
     id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
+    payer_id = Column(Integer, ForeignKey(administration.Patient.id), 
                         nullable=False)
     mean_id = Column(Integer, ForeignKey(PaymentType.id), nullable=False)
     amount = Column(Numeric, nullable=False)
     advance = Column(Boolean, default=False, nullable=False)
     comments = Column(String)
+
 
 class PaymentActReference(Base):
     """ 
@@ -49,5 +50,5 @@ class PaymentActReference(Base):
     __tablename__ = 'payment_act_reference'
     id = Column(Integer, primary_key=True)
     act_id = Column(Integer, ForeignKey(act.AppointmentActReference.id),
-                    nullable=False, unique=True)
+                    nullable=False)
     payment_id = Column(Integer, ForeignKey(Payment.id))
