@@ -57,6 +57,12 @@ class Mouth(Base):
                                cascade="all, delete, delete-orphan")
     mouthbase = relationship("MouthBase", uselist=False, backref="mouth",
                                cascade="all, delete, delete-orphan")
+#    superioralveolarbone = relationship("SuperiorAlveolarBone", uselist=False,
+#                               backref="mouth", 
+#                               cascade="all, delete, delete-orphan")
+#    inferioralveolarbone = relationship("InferiorAlveolarBone", uselist=False,
+#                               backref="mouth", 
+#                               cascade="all, delete, delete-orphan")
     superiorgum = relationship("SuperiorGum", uselist=False, backref="mouth",
                                cascade="all, delete, delete-orphan")
     inferiorgum = relationship("InferiorGum", uselist=False, backref="mouth",

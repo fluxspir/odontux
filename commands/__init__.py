@@ -30,3 +30,5 @@ from teeth import (AddToothEventCommand, GetToothIdCommand,
                    ListPatientTeethCommand)
 from medication import (AddDrugPrescribedCommand, MakePrescriptionCommand, 
                         ListDrugCommand)
+from compta import (AddPaymentTypeCommand, UpdatePaymentTypeCommand)
+

@@ -10,6 +10,7 @@ import cotation, schedule, headneck, teeth
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, Numeric
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, backref
 
 
 locale = "fr"
@@ -30,6 +31,7 @@ class ActType(Base):
     cotationfr_id = Column(Integer, ForeignKey(CotationLocale.id))
     name = Column(String, nullable=False)
     alias = Column(String)
+    code = Column(String, unique=True)
     color = Column(String, default="#000000")
 
 
@@ -42,4 +44,5 @@ class AppointmentActReference(Base):
     tooth_id = Column(Integer, ForeignKey(teeth.Tooth.id))
     code = Column(String, nullable=False)
     price = Column(Numeric, nullable=False)
-#    paid = Column(Boolean, default=False, nullable=False)
+    compta = relationship("Compta", backref="act",
+                           cascade="all, delete, delete-orphan")

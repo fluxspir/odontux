@@ -28,6 +28,7 @@ from periodonte import (SuperiorGum, InferiorGum, SuperiorAlveolarBone,
 from teeth import Tooth, ToothEvent, CrownEvent, RootEvent
 from act import Specialty, ActType, AppointmentActReference
 from cotation import NgapKeyFr, CmuKeyFr, MajorationFr, CotationFr
+from compta import PaymentType, Payment, PaymentActReference
 
 
 def init():

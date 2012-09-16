@@ -1,53 +1,49 @@
 #!/bin/bash --rcfile ~/.bashodontuxrc
 
 cotid=$(odontux add_cotationfr -k 1 -m 1) 
-odontux add_acttype -n "Consultation" --cotation $cotid
+odontux add_acttype -n "Consultation" -c C --cotation $cotid
 cotid=$(odontux add_cotationfr -k 1 -m 0)
-odontux add_acttype -n "Consultation gratuite" -a "Consultation free, offerte" --cotation $cotid
+odontux add_acttype -n "Consultation gratuite" -a "Consult free, offerte" -c CG --cotation $cotid
 cotid=$(odontux add_cotationfr -k 1 -m 1 --exceeding_adult_normal 4 --exceeding_adult_cmu 4)
-odontux add_acttype -n "Bilan Bucco Dentaire" -a "BBD" -s 9 --cotation $cotid
+odontux add_acttype -n "Bilan Bucco Dentaire" -a "BBD" -c BBD -s 9 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 1 -m 1 --exceeding_adult_normal 15 --exceeding_adult_cmu 15)
-odontux add_acttype -n "Bilan Bucco Dentaire 1 ou 2 radios" -a "BBD 1-2 radio" -s 9 --cotation $cotid
+odontux add_acttype -n "Bilan Bucco Dentaire 1 ou 2 radios" -a "BBD 1-2 radio" -c BBDrad -s 9 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 7 --kid_multiplicator 8)
-odontux add_acttype -n "Obturation coronaire 1 face, technique directe" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 1 face, technique directe" -a "Amalgame 1 face" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 1 face, technique directe" -a "Composite 1 face" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 1 face, technique directe" -a "CVI 1 face" -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 1 face amalgame, technique directe" -a "Amalgame 1 face" -c amal1f -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 1 face composite, technique directe" -a "Composite 1 face" -c compo1f -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 1 face CVI, technique directe" -a "CVI 1 face" -c cvi1f -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 12 --kid_multiplicator 14)
-odontux add_acttype -n "Obturation coronaire 2 faces, technique directe" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 2 faces, technique directe" -a "Amalgame 2 faces" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 2 faces, technique directe" -a "Composite 2 faces" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 2 faces, technique directe" -a "CVI 2 faces" -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 2 faces amalgame, technique directe" -a "Amalgame 2 faces" -c amal2f -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 2 faces composite, technique directe" -a "Composite 2 faces" -c compo2f -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 2 faces CVI, technique directe" -a "CVI 2 faces" -s 3 -c cvi2f --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 17 --kid_multiplicator 20) 
-odontux add_acttype -n "Obturation coronaire 3 faces, technique directe" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 3 faces, technique directe" -a "Amalgame 3 faces " -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 3 faces, technique directe" -a "Composite 3 faces " -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire 3 faces, technique directe" -a "CVI 3 faces" -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 3 faces amalgame, technique directe" -a "Amalgame 3 faces" -c amal3f -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 3 faces composite, technique directe" -a "Composite 3 faces" -c compo3f -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire 3 faces CVI, technique directe" -a "CVI 3 faces" -c cvi3f -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 33)
-odontux add_acttype -n "Obturation coronaire d'au moins 2 faces par insertion d'un matériau en phase plastique avec ancrage radiculaire" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire d'au moins 2 faces par insertion d'un matériau en phase plastique avec ancrage radiculaire" -a "RCR amalgame" -s 3 --cotation $cotid
-odontux add_acttype -n "Obturation coronaire d'au moins 2 faces par insertion d'un matériau en phase plastique avec ancrage radiculaire" -a "RCR composite" -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire d'au moins 2 faces par insertion d'un matériau en phase plastique avec ancrage radiculaire" -a "RCR amalgame" -c RCRamal -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire d'au moins 2 faces par insertion d'un matériau en phase plastique avec ancrage radiculaire" -a "RCR composite" -c RCRcompo -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 17 --exceeding_adult_normal 179.03)
-odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en métal" -a "inlay 3 faces métal" -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en métal" -a "inlay 3 faces métal" -c IN3fmet -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 17 --exceeding_adult_normal 303.03)
-odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en céramique" -a "Inlay 3 faces ceramique" -s 3 --cotation $cotid
+odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en céramique" -a "Inlay 3 faces ceramique" -c IN3fceram -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 9)
-odontux add_acttype -n "Scellement prophylactique des puits, sillons et fissures, par dent (valable avant 14 ans, sur les x6 et x7)" -a "Sealant" -s 3 --cotation $cotid
+odontux add_acttype -n "Scellement prophylactique des puits, sillons et fissures, par dent (valable avant 14 ans, sur les x6 et x7)" -a "Sealant" -c seal -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 7 --kid_multiplicator 10)
-odontux add_acttype -n "Pulpotomie, pulpectomie coronaire, avec obturation de la chambre pulpaire" -s 4 --cotation $cotid
+odontux add_acttype -n "Pulpotomie, pulpectomie coronaire, avec obturation de la chambre pulpaire" -c pulpo -s 4 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 14 --kid_multiplicator 16)
-odontux add_acttype -n "Pulpectomie coronaire et radiculaire, groupe incisivo-canin" -s 4 --cotation $cotid
+odontux add_acttype -n "Pulpectomie coronaire et radiculaire, groupe incisivo-canin" -c pulpecinci -s 4 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 20 --kid_multiplicator 24)
-odontux add_acttype -n "Pulpectomie coronaire et radiculaire, groupe prémolaires" -s 4 --cotation $cotid
+odontux add_acttype -n "Pulpectomie coronaire et radiculaire, groupe prémolaires" -c pulpecpremol -s 4 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 34 --kid_multiplicator 39)
-odontux add_acttype -n "Pulpectomie coronaire et radiculaire, groupe molaires" -s 4 --cotation $cotid
+odontux add_acttype -n "Pulpectomie coronaire et radiculaire, groupe molaires" -c pulpecmol -s 4 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 12)
-odontux add_acttype -n "Détartrage" -a "Detartrage" -s 2 --cotation $cotid
-odontux add_acttype -n "Détartrage 2nde séance" -s 2 --cotation $cotid
+odontux add_acttype -n "Détartrage" -a "Detartrage" -c det -s 2 --cotation $cotid
+odontux add_acttype -n "Détartrage 2nde séance" -c det2 -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 27)
-odontux add_acttype -n "Aero Polissage" -a "Polissage" -s 2 --cotation $cotid
+odontux add_acttype -n "Aero Polissage" -a "Polissage" -c poli -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 500)
-odontux add_acttype -n "blanchiment, blanchiement, blanchissement, éclaircissement" -a "eclaircissement" -s 10 --cotation $cotid
+odontux add_acttype -n "blanchiment, blanchiement, blanchissement, éclaircissement" -a "eclaircissement" -c blanc -s 10 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 8)
 odontux add_acttype -n "Ligature métallique dans les parodontopathies" -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 40)

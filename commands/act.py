@@ -25,21 +25,30 @@ class ActTypeParser(BaseCommand):
     def parse_args(self, args):
         parser = self.get_parser()
 
-        parser.add_option("-s", "--specialty", action="store",\
-                        type="string", dest="specialty_id",\
-                        help="id of the specialty for this kind of act")
-        parser.add_option("-n", "--name", action="store",\
-                        type="string", dest="name",\
-                        help="name describing exactly the act")
-        parser.add_option("-a", "--alias", action="store",\
-                        type="string", dest="alias",\
-                        help="alias for the act")
-        parser.add_option("-k", "--cotation", action="store",\
-                        type="string", dest="cotationfr_id",\
-                        help="id of the cotation for this act")
-        parser.add_option("-c", "--color", action="store",\
-                        type="string", dest="color",\
-                        help="color for this act")
+        parser.add_option("-s", "--specialty", action="store", type="string",
+                        help="id of the specialty for this kind of act",
+                        dest="specialty_id")
+
+        parser.add_option("-n", "--name", action="store", type="string",
+                        help="name describing exactly the act",
+                        dest="name")
+
+        parser.add_option("-a", "--alias", action="store", type="string",
+                        help="alias for the act",
+                        dest="alias")
+
+        parser.add_option("-c", "--code", action="store", type="string",
+                        help="code user may tell to simplify",
+                        dest="code")
+
+        parser.add_option("-k", "--cotation", action="store", type="string",
+                        help="id of the cotation for this act",
+                        dest="cotationfr_id")
+
+        parser.add_option("--color", action="store", type="string",
+                        help="color for this act",
+                        dest="color")
+
 
         (options, args) = parser.parse_args(args)
 
@@ -89,6 +98,8 @@ class AddActTypeCommand(BaseCommand, ActTypeParser):
             self.values["alias"] = options.alias.decode("utf_8")
         else:
             self.values["alias"] = options.name.decode("utf_8")
+        if options.code:
+            self.values["code"] = options.code.decode("utf_8")
         if options.cotationfr_id:
             self.values["cotationfr_id"] =\
             options.cotationfr_id.decode("utf_8")
@@ -106,7 +117,7 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
     command_name = "add_administrativeact"
 
     def __init__(self):
-            self.values = {}
+        self.values = {}
 
     def run(self, args):
         
@@ -233,8 +244,9 @@ class ListActTypeCommand(BaseCommand):
                         )
                             
         for acte in query:
-            print(_(u"{}. {} || {}"\
-                .format(acte.id, acte.alias, acte.name).encode("utf_8")))
+            print(_(u"{}.\t{}\t {} || {}"\
+                .format(acte.id, acte.code, acte.alias, acte.name)\
+                .encode("utf_8")))
 
 
 class ListPatientActCommand(BaseCommand, AppointmentActReferenceParser):
