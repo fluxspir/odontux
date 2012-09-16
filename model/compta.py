@@ -37,8 +37,8 @@ class Payment(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
                         nullable=False)
-    amount = Column(Numeric, nullable=False)
     mean_id = Column(Integer, ForeignKey(PaymentType.id), nullable=False)
+    amount = Column(Numeric, nullable=False)
     advance = Column(Boolean, default=False, nullable=False)
     comments = Column(String)
 

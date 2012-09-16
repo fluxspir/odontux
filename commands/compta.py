@@ -107,8 +107,9 @@ class AddPaymentCommand(Base, PaymentParser):
     def run(self, args):
         (options, args) = self.parse_args(args)
 
-        self.values["amount"] = options.amount.decode("utf_8")
+        self.values["patient_id"] = options.patient_id.decode("utf_8")
         self.values["mean_id"] = options.mean_id.decode("utf_8")
+        self.values["amount"] = options.amount.decode("utf_8")
         self.values["advance"] = options.advance
         if options.comments:
             self.values["comments"] = options.comments.decode("utf_8")
@@ -116,3 +117,17 @@ class AddPaymentCommand(Base, PaymentParser):
         new_payment = compta.Payment(**values)
         meta.session.add(new_payment)
         meta.session.commit()
+
+class AddPaymentActReferenceCommand(Base):
+    """ """
+
+    command_name = "add_paymentactreference"
+
+    def __init__(self):
+        values = {}
+
+    def run(self, args):
+        (options, args) = self.parse_args(args)
+
+        self.values["act_id"] = options.act_id.decode("utf_8")
+        self.values["payment_id"] = options.payment_id.decode("utf_8")
