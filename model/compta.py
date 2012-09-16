@@ -8,8 +8,13 @@
 from meta import Base
 import act
 
-from sqlalchemy import Column, Integer, String, Boolean, Numeric
+from sqlalchemy import Table, Column, Integer, String, Boolean, Numeric
 from sqlalchemy import ForeignKey
+
+payment_act_table = Table('payment_act', Base.metadata,
+Column('act_id', Integer, ForeignKey('act_appointment_reference.id')),
+Column('payment_id', Integer, ForeignKey('payment.id'))
+)
 
 class PaymentType(Base):
     """
@@ -41,14 +46,9 @@ class Payment(Base):
     amount = Column(Numeric, nullable=False)
     advance = Column(Boolean, default=False, nullable=False)
     comments = Column(String)
+    cash_in = Column(Boolean, default=False)
+    act_id = relationship("ActAppointmentReference",
+                          secondary=payment_act_table,
+                          backref="payment")
 
 
-class PaymentActReference(Base):
-    """ 
-    Table that tells exactly which act was paid.
-    """
-    __tablename__ = 'payment_act_reference'
-    id = Column(Integer, primary_key=True)
-    act_id = Column(Integer, ForeignKey(act.AppointmentActReference.id),
-                    nullable=False)
-    payment_id = Column(Integer, ForeignKey(Payment.id))
