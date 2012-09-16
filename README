@@ -1,6 +1,12 @@
 What is odontux :
 Odontux wants to be a open-source application for a dental practice.
 
+What does it need :
+python, sqlalchemy, postgresql
+What will it need :
+gnucash, gimp
+
+
 How to :
 
 create a directory with odontux, cloning the git :
