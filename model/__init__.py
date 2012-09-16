@@ -15,7 +15,8 @@ from sqlalchemy.orm import sessionmaker
 
 from users import OdontuxUser, DentalOffice
 from md import MedecineDoctor
-from administration import Address, Patient
+from administration import (Address, Mail, Phone, SocialSecurityFr, Payer, 
+                            Family, Patient)
 from anamnesis import MedicalHistory, PastSurgeries, Allergies
 from headneck import Head, Neck, Mouth
 from medication import DrugPrescribed, Prescription, PrescribedDrugReference

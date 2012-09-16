@@ -195,14 +195,14 @@ class UpdateMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
             doc.lastname = options.lastname.decode("utf_8").upper()
         if options.firstname:
             doc.firstname = options.firstname.decode("utf8").title()
-        if options.city:
-            doc.city = options.city.decode("utf_8").title()
-        if options.address:
-            doc.address = options.address.decode("utf_8").title()
-        if options.phone:
-            doc.phone = options.phone.decode("utf_8")
-        if options.mail:
-            doc.mail = options.mail.decode("utf_8").lower()
+#        if options.city:
+#            doc.city = options.city.decode("utf_8").title()
+#        if options.address:
+#            doc.address = options.address.decode("utf_8").title()
+#        if options.phone:
+#            doc.phone = options.phone.decode("utf_8")
+#        if options.mail:
+#            doc.mail = options.mail.decode("utf_8").lower()
 
         meta.session.commit()
 

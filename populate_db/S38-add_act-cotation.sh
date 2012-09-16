@@ -121,9 +121,9 @@ odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de co
 odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CCC, Couronne Céramo Céramique" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 455.5 --exceeding_adult_cmu 128.5)
 odontux add_acttype -n "Inter de brigde en céramique" -a "Inter CCM ceramique" -s 6 --cotation $cotid
-cotid=$(odontux add_cotationfr -k 4 -m 57 --exceeding_adult_normal 47.45)
+cotid=$(odontux add_cotationfr -k 4 -m 57 --exceeding_adult_normal 47.45 --exceeding_adult_cmu 0)
 odontux add_acttype -n "Conception, adaptation et pose d'une infrastructure corono-radiculaire métallique coulée à ancrage radiculaire (inlay-core)" -a "Inlay Core" -s 6 --cotation $cotid
-cotid=$(odontux add_cotationfr -k 4 -m 67 --exceeding_adult_normal 45.95)
+cotid=$(odontux add_cotationfr -k 4 -m 67 --exceeding_adult_normal 45.95 --exceeding_adult_cmu 0)
 odontux add_acttype -n "Conception, adaptation et pose d'un inlay-core à clavette" -a "Inlay Core à clavette" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 35 --adult_cmu_num 4 --exceeding_adult_cmu 0)
 odontux add_acttype -n "Dent à tenon, dans groupe incisivo-canin-prémolaire" -s 6 --cotation $cotid
@@ -168,7 +168,7 @@ odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire
 odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 13 dents" -a "PAP resine" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 85 --keycmu 1 --adult_cmu_num 17 --exceeding_adult_normal 1342.25 --exceeding_adult_cmu 473.25)
 odontux add_acttype -n "Prothèse amovible totale maxillaire résine" -a "PAT maxillaire resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible totale mandibulaire résine" -a "PAT maxillaire resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible totale mandibulaire résine" -a "PAT mandibulaire resine" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 1 -m 90 --adult_cmu_num 6 --exceeding_adult_cmu 128.5)
 odontux add_acttype -n "Prothèse amovible partielle adjointe métallique maxillaire, de 1 à 3 dents" -a "PAP metal stellite" -s 6 --cotation $cotid
 odontux add_acttype -n "Prothèse amovible partielle adjointe métallique mandibulaire, de 1 à 3 dents" -a "PAP metal stellite" -s 6 --cotation $cotid
@@ -203,8 +203,8 @@ cotid=$(odontux add_cotationfr -k 4 -m 140 --keycmu 1 --adult_cmu_num 16 --excee
 odontux add_acttype -n "Prothèse amovible partielle adjointe métallique maxillaire, de 13 dents" -a "PAP metal stellite" -s 6 --cotation $cotid
 odontux add_acttype -n "Prothèse amovible partielle adjointe métallique mandibulaire, de 13 dents" -a "PAP metal stellite" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 145 --keycmu 1 --adult_cmu_num 17 --exceeding_adult_normal 1342.25 --exceeding_adult_cmu 473.25)
-odontux add_acttype -n "Prothèse amovible totale métallique maxillaire" -a "PAT metal stellite" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible totale métallique mandibulaire" -a "PAT metal stellite" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible totale métallique maxillaire" -a "PAT metal stellite haut" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible totale métallique mandibulaire" -a "PAT metal stellite bas" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 60 --keycmu 1 --adult_cmu_num 22 --exceeding_adult_cmu 171.00)
 odontux add_acttype -n "Plaque base métallique, supplément" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 10 --keycmu 2 --adult_cmu_num 20 --exceeding_adult_normal 93.5 --exceeding_adult_cmu 43.5)

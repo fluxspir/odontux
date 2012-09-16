@@ -10,6 +10,7 @@ from base import BaseCommand
 
 from gettext import gettext as _
 from sqlalchemy import or_, and_
+import sqlalchemy
 import os
 import sys
 
@@ -28,19 +29,20 @@ class GetFamilyIdTool(BaseCommand):
         query = self.query
         for keyword in args:
             keyword = "%{}%".format(keyword)
-            query = meta.session.query(administration.Patient).filter(or_(
+            query = query.filter(or_(
                     administration.Patient.lastname.ilike(keyword),
                     administration.Patient.firstname.ilike(keyword),
                     administration.Patient.preferred_name.ilike(keyword),
                     administration.Patient.correspondence_name.ilike(keyword))
                     )
         
-#        try:
-        family_id = query.one().family_id
-        print(family_id)
-#        except ???:
-#        for patient in query.all():
-#           print .....
+        try:
+            family_id = query.one().family_id
+            print(family_id)
+        except sqlalchemy.orm.exc.MultipleResultsFound:
+            for patient in query.all():
+                print(_(u"{}. {} {}".format(patient.id, patient.lastname, 
+                                            patient.firstname)))
 
 
 ## REPLACE BY   list_patient -i

@@ -37,8 +37,7 @@ Column('patient_id', Integer, ForeignKey('patient.id')),
 Column('phone_id', Integer, ForeignKey('phone.id'))
 )
 
-family_patient_payer_table = Table('family_patient_payer', Base.metadata,
-Column('family_id', Integer, ForeignKey('family.id')),
+patient_payer_table = Table('patient_payer', Base.metadata,
 Column('patient_id', Integer, ForeignKey('patient.id')),
 Column('payer_id', Integer, ForeignKey('payer.id'))
 )
@@ -90,8 +89,6 @@ class Family(Base):
     id = Column(Integer, primary_key=True)
     addresses = relationship("Address", secondary=family_address_table,
                              backref="family")
-    payers = relationship("Payer", secondary=family_patient_payer_table,
-                           backref="family")
 
 socialsecuritylocale = "SocialSecurity" + locale.title()
 SocialSecurityLocale = locals()[socialsecuritylocale]
@@ -101,7 +98,7 @@ class Patient(Base):
     id = Column(Integer, primary_key=True)
     family_id = Column(Integer, ForeignKey(Family.id))
     socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityLocale.id))
-    payers = relationship("Payer", secondary=family_patient_payer_table,
+    payers = relationship("Payer", secondary=patient_payer_table,
                            backref="patient")
     title = Column(String)
     lastname = Column(String, nullable=False)

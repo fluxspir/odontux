@@ -5,12 +5,17 @@
 # licence BSD
 #
 
-from model import meta, administration, md, teeth
+from model import meta, administration, cotation, md, teeth
 from base import BaseCommand
 
 from sqlalchemy import or_
 from gettext import gettext as _
 import sys
+import pdb
+
+locale = "fr"
+socialsecuritylocale = "SocialSecurity" + locale.title()
+SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 
 class PatientParser(BaseCommand):
@@ -222,12 +227,13 @@ class AddPatientCommand(BaseCommand, PatientParser):
         # Adding the new patient.
         new_patient = administration.Patient(**self.values)
         meta.session.add(new_patient)
-
+        meta.session.commit()
         # If doesn't belong to already know family, create a family and its
         # address.
         if not options.family_id:
             family = administration.Family()
             meta.session.add(family)
+            meta.session.commit()
             new_patient.family_id = family.id
             family.addresses.append(administration.Address(
                         street = options.street,
@@ -238,17 +244,21 @@ class AddPatientCommand(BaseCommand, PatientParser):
                         country = options.country,
                         update_date = options.update_date
                         ))
+            meta.session.commit()
         else:
             family = meta.session.query(administration.Family)\
                     .filter(administration.Family.id ==
                             options.family_id).one()
 
-        # Telling if this patient (belonging to family above), is the payer.
-        valuepayer = {}
-        if options.payer:
-            valuepayer["payer"] = options.payer
-        payer = administration.Payer(**valuepayer)
-        meta.session.add(payer)
+        # Telling if this patient (belonging to family above), is the payer
+        new_patient.payers.append(administration.Payer(payer = options.payer))
+        meta.session.commit()
+#        valuepayer = {}
+#        if options.payer:
+#            valuepayer["payer"] = options.payer
+#        payer = administration.Payer(**valuepayer)
+#        meta.session.add(payer)
+#        meta.session.commit()
 
         # Patient's phone number
         if options.phone_num:
@@ -267,8 +277,8 @@ class AddPatientCommand(BaseCommand, PatientParser):
         if options.socialsecuritynum:
             try:
                 SSN_id =\
-                meta.session.query(administration.SocialSecurityLocale)\
-                    .filter(administration.SocialSecurityLocale.number ==
+                meta.session.query(SocialSecurityLocale)\
+                    .filter(SocialSecurityLocale.number ==
                             options.socialsecuritynum).one().id
                 new_patient.socialsecurity_id = SSN_id
 
@@ -278,10 +288,9 @@ class AddPatientCommand(BaseCommand, PatientParser):
                     SSN_values["cmu"] = options.cmu
                 if options.insurance:
                     SSN_values["insurance"] = options.insurance.decode("utf_8")
-                socialsecurity =\
-                administration.SocialSecurityLocale(**SSN_values)
+                socialsecurity = SocialSecurityLocale(**SSN_values)
                 meta.session.add(socialsecurity)
-                new_patient.socialsecurity_id = SSN_values["id"]
+                new_patient.socialsecurity_id = socialsecurity.id
             
         else:
             SSN_values["number"] = None
@@ -289,9 +298,10 @@ class AddPatientCommand(BaseCommand, PatientParser):
                 SSN_values["cmu"] = options.cmu
             if options.insurance:
                 SSN_values["insurance"] = options.insurance.decode("utf_8")
-            socialsecurity = administration.SocialSecurityLocale(**SSN_values)
+            socialsecurity = SocialSecurityLocale(**SSN_values)
             meta.session.add(socialsecurity)
-            new_patient.social_security_id = SSN_values["id"]
+            meta.session.commit()
+            new_patient.socialsecurity_id = socialsecurity.id
 
         meta.session.commit()
 

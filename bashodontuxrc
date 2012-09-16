@@ -40,7 +40,7 @@ if [ -f ~/.bashodontuxaliases ]; then
 fi
 
 if [ -f ~/.bashodontuxvar ]; then
-    (. ~/.bashodontuxvar) &
+    . ~/.bashodontuxvar
 fi
 
 set_prompt () {
