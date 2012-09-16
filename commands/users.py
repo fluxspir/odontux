@@ -84,9 +84,13 @@ class OdontuxUserParser(BaseCommand):
                         help="user's file creation, default=now",
                         dest="time_stamp")
 
-        parser.add_option("--phone", action="store", type="string",
+        parser.add_option("--phonenum", action="store", type="string",
                         help="user's phone number",
                         dest="phone_num")
+
+        parser.add_option("--phonename", action="store", type="string",
+                        help="user's phone number",
+                        dest="phone_name")
 
         parser.add_option("--mail", action="store", type="string",
                         help="user's email",
@@ -202,9 +206,12 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
                            country = options.country,
                            update_date = options.update_date
                            ))
-        if options.phone_num:
+        if options.phonenum:
+            if not options.phonename:
+                options.phonename = "defaut"
             new_user.phones.append(administration.Phone(
-                            phone_num = options.phone_num
+                            name = options.phonename.decode("utf_8"),
+                            number = options.phonenum.decode("utf_8")
                             ))
         if options.email:
             new_user.mails.append(administration.Mail(
@@ -343,7 +350,11 @@ class DentalOfficeParser(BaseCommand):
                         help="Firstname of dentist.",
                         dest="firstname")
 
-        parser.add_option("-p", "--phone", action="store", type="string",
+        parser.add_option("--phonename", action="store", type="string",
+                        help="Phone of the dentist.",
+                        dest="phone_name")
+
+        parser.add_option("--phonenum", action="store", type="string",
                         help="Phone of the dentist.",
                         dest="phone_num")
 
@@ -437,9 +448,12 @@ class AddDentalOfficeCommand(BaseCommand, DentalOfficeParser):
                            country = options.country,
                            update_date = options.update_date
                            ))
-        if options.phone_num:
+        if options.phonenum:
+            if not options.phonename:
+                options.phonename = "defaut"
             new_dental_office.phones.append(administration.Phone(
-                            phone_num = options.phone_num
+                            phone_name = options.phonename.decode("utf_8")
+                            phone_num = options.phonenum.decode("utf_8")
                             ))
         if options.email:
             new_dental_office.mails.append(administration.Mail(

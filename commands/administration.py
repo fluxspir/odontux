@@ -84,7 +84,11 @@ class PatientParser(BaseCommand):
                         type="string", dest="time_stamp",
                         help="patient's file creation, default=now")
 
-        parser.add_option("--phone", action="store", type="string",
+        parser.add_option("--phonename", action="store", type="string",
+                        help="Name of the phone (cellular...)",
+                        dest="phone_name")
+
+        parser.add_option("--phonenum", action="store", type="string",
                         help="Phone of the generalist doctor.",
                         dest="phone_num")
 
@@ -253,17 +257,14 @@ class AddPatientCommand(BaseCommand, PatientParser):
         # Telling if this patient (belonging to family above), is the payer
         new_patient.payers.append(administration.Payer(payer = options.payer))
         meta.session.commit()
-#        valuepayer = {}
-#        if options.payer:
-#            valuepayer["payer"] = options.payer
-#        payer = administration.Payer(**valuepayer)
-#        meta.session.add(payer)
-#        meta.session.commit()
 
         # Patient's phone number
         if options.phone_num:
+            if not options.phone_name:
+                options.phone_name = "default"
             new_patient.phones.append(administration.Phone(
-                            phone_num = options.phone_num
+                            name = options.phone_name.decode("utf_8")
+                            number = options.phone_num.decode("utf_8")
                             ))
 
         # Patient's email

@@ -7,9 +7,12 @@
 
 from meta import Base
 import act
+import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Boolean, Numeric
 from sqlalchemy import ForeignKey
+
+today = datetime.date.today()
 
 payment_act_table = Table('payment_act', Base.metadata,
 Column('act_id', Integer, ForeignKey('act_appointment_reference.id')),
@@ -46,9 +49,8 @@ class Payment(Base):
     amount = Column(Numeric, nullable=False)
     advance = Column(Boolean, default=False, nullable=False)
     comments = Column(String)
-    cash_in = Column(Boolean, default=False)
-    act_id = relationship("ActAppointmentReference",
+    cashin_date = Column(Date, default=today)
+    acts_id = relationship("ActAppointmentReference",
                           secondary=payment_act_table,
-                          backref="payment")
-
+                          backref="payments")
 

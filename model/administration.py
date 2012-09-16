@@ -65,7 +65,7 @@ class Phone(Base):
     __tablename__ = 'phone'
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    phone_num = Column(String)
+    number = Column(String)
     update_date = Column(Date, default=today)
 
 

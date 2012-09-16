@@ -9,6 +9,8 @@
 from base import BaseCommand
 from model import compta
 
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
+
 from gettext import gettext as _
 
 
@@ -71,6 +73,45 @@ class UpdatePaymentTypeCommand(Base, PaymentTypeParser):
         meta.session.commit()
 
 
+class ListPaymentTypeCommand(Base):
+    """ """
+
+    command_name = "list_paymenttype"
+
+    def __init__(self):
+        query = meta.session.query(compta.PaymentType)
+
+    def parse_args(self, args):
+        parser = self.get_parser()
+        parser.add_option("--id", action="store_true", default=False,
+                        help="Use this option to get only command type id",
+                        desd="paymenttype_id")
+        (options, args) = parser.parse_args(args)
+        return options, args
+
+    def run(self, args):
+        (options, args) = self.parse_args(args)
+        query = self.query
+        for keyword in args:
+            keyword = "%{}%".format(keyword)
+            query = query.filter(or_(
+                    compta.PaymentType.name.ilike(keyword),
+                    compta.PaymentType.alias.ilike(keyword)))
+
+        if options.paymenttype_id:
+            try:
+                paymenttype = query.one()
+                print(paymenttype.id)
+            except NoResultFound:
+                sys.exit(_("No result found")
+            except MultipleResultsFound:
+                sys.exit(_("Multiple result found")
+        else:
+            paymenttypes = query.all()
+            for p in paymenttypes:
+                print(_("{}.\t{}\t{}"\
+                        .format(p.id, p.name, p.alias)))
+
 class PaymentParser(Base):
     """ """
 
@@ -97,6 +138,10 @@ class PaymentParser(Base):
                         help="Précision about this payment",
                         dest="comments")
 
+        parser.add_option("--cashin", action="store", type="string",
+                        help="Date when the cash enters",
+                        dest="cashin_date")
+
         (options, args) = parser.parse_args(args)
         return options, args
 
@@ -117,21 +162,44 @@ class AddPaymentCommand(Base, PaymentParser):
         self.values["advance"] = options.advance
         if options.comments:
             self.values["comments"] = options.comments.decode("utf_8")
+        if options.cashin_date:
+            self.values["cashin_date"] = options.cashin_date
 
         new_payment = compta.Payment(**values)
         meta.session.add(new_payment)
         meta.session.commit()
 
-class AddPaymentActReferenceCommand(Base):
+
+class LinkPaymentActCommand(Base):
     """ """
 
-    command_name = "add_paymentactreference"
+    command_name = "link_paymentact"
 
     def __init__(self):
-        values = {}
+        query = meta.session.query(compta.Payment)
+
+    def parse_args(self, args):
+        parser = self.get_parser()
+
+        parser.add_option("--act", action="store", type="string",
+                        help="act id we're telling that was paid",
+                        dest="act_id")
+
+        parser.add_option("--payment", action="store", type="string",
+                        help="payment id to link to act_id"
+                        dest="payment_id")
+
+        (options, args) = parser.parse_args(args)
+        return options, args
 
     def run(self, args):
         (options, args) = self.parse_args(args)
 
-        self.values["act_id"] = options.act_id.decode("utf_8")
-        self.values["payment_id"] = options.payment_id.decode("utf_8")
+        query = self.query.filter(compta.Payment.id ==
+                           options.payment_id)
+
+        payment = query.one()
+        payment.acts_id.append(act.ActAppointmentReference(
+                        act_id = options.act_id
+                        ))
+        meta.session.commit()

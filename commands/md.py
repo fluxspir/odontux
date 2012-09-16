@@ -32,7 +32,11 @@ class MedecineDoctorParser(BaseCommand):
                           help="Firstname of generalist doctor.",
                           dest="firstname")
 
-        parser.add_option("-p", "--phone", action="store", type="string",
+        parser.add_option("--phonename", action="store", type="string",
+                           help="Phone of the generalist doctor.",
+                           dest="phone_name")
+
+        parser.add_option("--phonenum", action="store", type="string",
                            help="Phone of the generalist doctor.",
                            dest="phone_num")
 
@@ -124,9 +128,12 @@ class AddMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
                            country = options.country,
                            update_date = options.update_date
                            ))
-        if options.phone_num:
+        if options.phonenum:
+            if not options.phonename:
+                options.phonename = "defaut"
             new_medecine_doctor.phones.append(administration.Phone(
-                            phone_num = options.phone_num
+                            phone_name = options.phonename.decode("utf_8"),
+                            phone_num = options.phonenum.decode("utf_8")
                             ))
         if options.email:
             new_medecine_doctor.mails.append(administration.Mail(
