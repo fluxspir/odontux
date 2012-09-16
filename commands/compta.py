@@ -199,7 +199,5 @@ class LinkPaymentActCommand(Base):
                            options.payment_id)
 
         payment = query.one()
-        payment.acts_id.append(act.ActAppointmentReference(
-                        act_id = options.act_id
-                        ))
+        payment.acts_id.append(act.ActAppointmentReference())
         meta.session.commit()
