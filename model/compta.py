@@ -10,8 +10,7 @@ from tables import payment_act_table
 import act, administration
 import datetime
 
-from sqlalchemy import (Table, Column, Integer, String, Boolean, Numeric, Date,
-                        Boolean)
+from sqlalchemy import (Table, Column, Integer, String, Boolean, Numeric, Date)
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 
@@ -49,7 +48,7 @@ class Payment(Base):
     advance = Column(Boolean, default=False, nullable=False)
     comments = Column(String)
     cashin_date = Column(Date, default=today)
-    acts_id = relationship("AppointmentActReference",
+    acts = relationship("AppointmentActReference",
                           secondary=payment_act_table,
                           backref="payments")
 

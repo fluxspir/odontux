@@ -203,7 +203,7 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
         new_act = act.AppointmentActReference(**self.values)
         meta.session.add(new_act)
         meta.session.commit()
-
+        print(new_act.id)
 
 class ListActTypeCommand(BaseCommand):
     """ """

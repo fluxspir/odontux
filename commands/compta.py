@@ -7,7 +7,7 @@
 #
 
 from base import BaseCommand
-from model import meta, compta, administration, act, schedule
+from model import meta, compta, administration, act, schedule, tables
 
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
@@ -172,6 +172,7 @@ class AddPaymentCommand(BaseCommand, PaymentParser):
         new_payment = compta.Payment(**self.values)
         meta.session.add(new_payment)
         meta.session.commit()
+        print(new_payment.id)
 
 
 class ListPaymentCommand(BaseCommand):
@@ -259,16 +260,12 @@ class LinkPaymentActCommand(BaseCommand):
 
     def run(self, args):
         (options, args) = self.parse_args(args)
-
+        # select the payment
+        payment = self.payment.filter(compta.Payment.id ==
+                           options.payment_id).one()
+        # select the act 
+        acte = self.acte.filter(act.AppointmentActReference.id ==
+                           options.act_id).one()
         
-
-#        payment = self.payment.filter(compta.Payment.id ==
-#                           options.payment_id).one()
-#        acte = self.acte.filter(act.AppointmentActReference.id ==
-#                           options.act_id).one()
-#        acte.payments.
-#        for x in payment.acts_id:
-#            if x.id == options.act_id:
-#                x.paid = True
-#                continue
+        payment.acts.append(acte)
         meta.session.commit()
