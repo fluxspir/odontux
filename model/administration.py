@@ -10,6 +10,10 @@ import users, md
 import sqlalchemy
 import datetime
 
+from tables import (family_address_table, patient_mail_table, 
+                    patient_phone_table, patient_payer_table)
+                    
+
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
 from sqlalchemy.orm import relationship, backref
@@ -22,25 +26,6 @@ now = datetime.datetime.now()
 today = datetime.date.today()
 
 
-family_address_table = Table('family_address', Base.metadata,
-Column('family_id', Integer, ForeignKey('family.id')),
-Column('address_id', Integer, ForeignKey('address.id'))
-)
-
-patient_mail_table = Table('patient_mail', Base.metadata,
-Column('patient_id', Integer, ForeignKey('patient.id')),
-Column('mail_id', Integer, ForeignKey('mail.id'))
-)
-
-patient_phone_table = Table('patient_phone', Base.metadata,
-Column('patient_id', Integer, ForeignKey('patient.id')),
-Column('phone_id', Integer, ForeignKey('phone.id'))
-)
-
-patient_payer_table = Table('patient_payer', Base.metadata,
-Column('patient_id', Integer, ForeignKey('patient.id')),
-Column('payer_id', Integer, ForeignKey('payer.id'))
-)
 
 class Address(Base):
     __tablename__ = 'address'

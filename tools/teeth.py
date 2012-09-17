@@ -6,7 +6,7 @@
 #
 
 from model import meta, headneck, teeth
-from base import BaseCommand
+from base import BaseTool
 
 from sqlalchemy import and_, or_
 from gettext import gettext as _
@@ -15,7 +15,7 @@ import os
 import sys
 
 
-class GetToothTool(BaseCommand):
+class GetToothTool(BaseTool):
     """ """
 
     tool_name = "get_toothid"
@@ -60,7 +60,7 @@ class GetToothTool(BaseCommand):
                 sys.exit(0)
         print(_("The tooth isn't in database yet"))
 
-class GetToothUnderSurveillanceTool(BaseCommand):
+class GetToothUnderSurveillanceTool(BaseTool):
     """ """
     
     tool_name = "get_toothundersurveillance"

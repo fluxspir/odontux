@@ -7,14 +7,14 @@
 
 
 from model import meta, administration, schedule
-from base import BaseCommand
+from base import BaseTool
 
 import sqlalchemy
 import os
 import sys
 
 
-class GetPatientPromptTool(BaseCommand):
+class GetPatientPromptTool(BaseTool):
     """ """
 
     tool_name = "get_patientprompt"
@@ -30,7 +30,7 @@ class GetPatientPromptTool(BaseCommand):
         print(u"{}".format(patient_name).encode("utf_8"))
 
 
-class TestPatientAppointmentTool(BaseCommand):
+class TestPatientAppointmentTool(BaseTool):
     """ """
 
     tool_name = "test_patientappointment"

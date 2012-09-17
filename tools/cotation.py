@@ -6,10 +6,10 @@
 #
 
 from model import meta, cotation
-from base import BaseCommand
+from base import BaseTool
 
 
-class GetNgapPriceTool(BaseCommand):
+class GetNgapPriceTool(BaseTool):
     """ """
     
     tool_name = "get_ngapprice"

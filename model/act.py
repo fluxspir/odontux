@@ -6,9 +6,10 @@
 #
 
 from meta import Base
+from tables import payment_act_table
 import cotation, schedule, headneck, teeth
 import sqlalchemy
-from sqlalchemy import Table, Column, Integer, String, Numeric
+from sqlalchemy import Table, Column, Integer, String, Numeric, Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 
@@ -16,7 +17,6 @@ from sqlalchemy.orm import relationship, backref
 locale = "fr"
 cotationlocale = "Cotation" + locale.title()
 CotationLocale = getattr(cotation, cotationlocale)
-
 
 class Specialty(Base):
     __tablename__ = 'specialty'
@@ -44,3 +44,4 @@ class AppointmentActReference(Base):
     tooth_id = Column(Integer, ForeignKey(teeth.Tooth.id))
     code = Column(String, nullable=False)
     price = Column(Numeric, nullable=False)
+    paid = Column(Boolean, default=False)

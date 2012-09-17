@@ -6,7 +6,7 @@
 #
 
 from model import meta, act, administration, cotation
-from base import BaseCommand
+from base import BaseTool
 
 from gettext import gettext as _
 from sqlalchemy import or_
@@ -14,7 +14,7 @@ import os
 import sys
 
 
-class GetActPriceTool(BaseCommand):
+class GetActPriceTool(BaseTool):
     """ """
 
     tool_name = "get_actprice"
@@ -77,7 +77,7 @@ class GetActPriceTool(BaseCommand):
         print(price)
 
 
-class GetActTypeIdTool(BaseCommand):
+class GetActTypeIdTool(BaseTool):
     """ """
 
     tool_name = "get_acttypeid"
@@ -116,7 +116,7 @@ class GetActTypeIdTool(BaseCommand):
         if query:
             print(_(u"{}".format(query.id).encode("utf_8")))
 
-class GetActCotationFrIdTool(BaseCommand):
+class GetActCotationFrIdTool(BaseTool):
     """ """
 
     tool_name = "get_actcotationfrid"

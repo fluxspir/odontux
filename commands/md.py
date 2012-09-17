@@ -128,12 +128,12 @@ class AddMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
                            country = options.country,
                            update_date = options.update_date
                            ))
-        if options.phonenum:
-            if not options.phonename:
-                options.phonename = "defaut"
+        if options.phone_num:
+            if not options.phone_name:
+                options.phone_name = "defaut"
             new_medecine_doctor.phones.append(administration.Phone(
-                            phone_name = options.phonename.decode("utf_8"),
-                            phone_num = options.phonenum.decode("utf_8")
+                            name = options.phone_name.decode("utf_8"),
+                            number = options.phone_num.decode("utf_8")
                             ))
         if options.email:
             new_medecine_doctor.mails.append(administration.Mail(

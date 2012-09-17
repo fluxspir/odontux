@@ -32,5 +32,5 @@ from medication import (AddDrugPrescribedCommand, MakePrescriptionCommand,
                         ListDrugCommand)
 from compta import (AddPaymentTypeCommand, UpdatePaymentTypeCommand, 
                     ListPaymentTypeCommand, AddPaymentCommand, 
-                    LinkPaymentActCommand)
+                    ListPaymentCommand, LinkPaymentActCommand)
 

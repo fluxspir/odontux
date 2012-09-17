@@ -6,14 +6,14 @@
 #
 
 from model import meta, schedule
-from base import BaseCommand
+from base import BaseTool
 
 import sqlalchemy
 import os
 import sys
 
 
-class GetAppointmentTool(BaseCommand):
+class GetAppointmentTool(BaseTool):
     """
     Prints the last appointment id for the patient
     Needed for the switch_patient function in bashodontuxrc, to set the 
@@ -40,7 +40,7 @@ class GetAppointmentTool(BaseCommand):
         print(appointment_id)
 
 
-class GetAppointmentPatientTool(BaseCommand):
+class GetAppointmentPatientTool(BaseTool):
     """
     Prints patient_id who assist on appointment in args
     Needed for the "next_appointment" function in bashodontuxrc

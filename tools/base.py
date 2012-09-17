@@ -8,7 +8,7 @@
 
 from optparse import OptionParser
 
-class BaseCommand():
+class BaseTool():
     
     def get_parser(self):
         return OptionParser(usage="%prog {}".format(self.tool_name))

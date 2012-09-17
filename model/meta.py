@@ -7,7 +7,6 @@
 
 from sqlalchemy.ext.declarative import declarative_base
 
-
 Base = declarative_base()
 
 # This variable gets populated by model.init(). It is shared across the entire

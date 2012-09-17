@@ -5,7 +5,7 @@
 # licence BSD
 #
 
-import meta
+import meta, tables
 import sqlalchemy
 import ConfigParser
 import os
@@ -28,7 +28,7 @@ from periodonte import (SuperiorGum, InferiorGum, SuperiorAlveolarBone,
 from teeth import Tooth, ToothEvent, CrownEvent, RootEvent
 from act import Specialty, ActType, AppointmentActReference
 from cotation import NgapKeyFr, CmuKeyFr, MajorationFr, CotationFr
-from compta import PaymentType, Payment, PaymentActReference
+from compta import PaymentType, Payment
 
 
 def init():

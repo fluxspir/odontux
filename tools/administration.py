@@ -6,7 +6,7 @@
 #
 
 from model import meta, administration
-from base import BaseCommand
+from base import BaseTool
 
 from gettext import gettext as _
 from sqlalchemy import or_, and_
@@ -16,7 +16,7 @@ import sys
 
 
 
-class GetFamilyIdTool(BaseCommand):
+class GetFamilyIdTool(BaseTool):
     """ 
     prints the id of the family for a patient.
     """
@@ -47,7 +47,7 @@ class GetFamilyIdTool(BaseCommand):
 
 ## REPLACE BY   list_patient -i
 #
-#class GetPatientIdTool(BaseCommand):
+#class GetPatientIdTool(BaseTool):
 #    """ """
 #
 #    tool_name = "get_patientid"

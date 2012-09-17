@@ -206,12 +206,12 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
                            country = options.country,
                            update_date = options.update_date
                            ))
-        if options.phonenum:
-            if not options.phonename:
-                options.phonename = "defaut"
+        if options.phone_num:
+            if not options.phone_name:
+                options.phone_name = "defaut"
             new_user.phones.append(administration.Phone(
-                            name = options.phonename.decode("utf_8"),
-                            number = options.phonenum.decode("utf_8")
+                            name = options.phone_name.decode("utf_8"),
+                            number = options.phone_num.decode("utf_8")
                             ))
         if options.email:
             new_user.mails.append(administration.Mail(
@@ -448,12 +448,12 @@ class AddDentalOfficeCommand(BaseCommand, DentalOfficeParser):
                            country = options.country,
                            update_date = options.update_date
                            ))
-        if options.phonenum:
-            if not options.phonename:
-                options.phonename = "defaut"
+        if options.phone_num:
+            if not options.phone_name:
+                options.phone_name = "defaut"
             new_dental_office.phones.append(administration.Phone(
-                            phone_name = options.phonename.decode("utf_8")
-                            phone_num = options.phonenum.decode("utf_8")
+                            name = options.phone_name.decode("utf_8"),
+                            number = options.phone_num.decode("utf_8")
                             ))
         if options.email:
             new_dental_office.mails.append(administration.Mail(

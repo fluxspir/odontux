@@ -9,6 +9,10 @@ from meta import Base
 import sqlalchemy
 import datetime
 
+from tables import (odontux_user_address_table, odontux_user_mail_table,
+                    odontux_user_phone_table, dental_office_address_table,
+                    dental_office_mail_table, dental_office_phone_table)
+
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
@@ -17,30 +21,6 @@ from sqlalchemy.orm import relationship, backref
 now = datetime.datetime.now()
 today = datetime.date.today()
 
-odontux_user_address_table = Table('odontux_user_address', Base.metadata,
-Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),
-Column('address_id', Integer, ForeignKey('address.id'))
-)
-odontux_user_mail_table = Table('odontux_user_mail', Base.metadata,
-Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),
-Column('mail_id', Integer, ForeignKey('mail.id'))
-)
-odontux_user_phone_table = Table('odontux_user_phone', Base.metadata,
-Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),
-Column('phone_id', Integer, ForeignKey('phone.id'))
-)
-dental_office_address_table = Table('dental_office_address', Base.metadata,
-Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
-Column('address_id', Integer, ForeignKey('address.id'))
-)
-dental_office_mail_table = Table('dental_office_mail', Base.metadata,
-Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
-Column('mail_id', Integer, ForeignKey('mail.id'))
-)
-dental_office_phone_table = Table('dental_office_phone', Base.metadata,
-Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
-Column('phone_id', Integer, ForeignKey('phone.id'))
-)
 
 class DentalOffice(Base):
     __tablename__ = 'dental_office'

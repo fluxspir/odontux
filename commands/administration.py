@@ -263,7 +263,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
             if not options.phone_name:
                 options.phone_name = "default"
             new_patient.phones.append(administration.Phone(
-                            name = options.phone_name.decode("utf_8")
+                            name = options.phone_name.decode("utf_8"),
                             number = options.phone_num.decode("utf_8")
                             ))
 
