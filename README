@@ -1,10 +1,18 @@
 What is odontux :
 Odontux wants to be a open-source application for a dental practice.
 
+Required :
 What does it need :
-python, sqlalchemy, postgresql
+	* bash : for command-line interface
+	* python : odontux-core is written in that language
+	* sqlalchemy : for database access
+	* postgresql : that may be change to sqlite or others, in model/__init__.py
+
 What will it need :
-gnucash, gimp
+	* gnucash libdbd-pgsql python-gnucash
+	* gimp
+	* remind
+	* ...
 
 
 How to :
@@ -15,11 +23,19 @@ create a directory with odontux, cloning the git :
 First, create a postgresql database ; for example :
 	$ sudo -u postgres createuser -P my_user              (you may respond "no" to all 3 questions)
 	$ sudo -u postgres createdb -O my_user odontux
+	$ sudo -u postgres createdb -O my_user professionnal_accounting          (for gnucash accounting purpose)
 
 Then write in ~/.odontuxrc :
 	[db]
-	url = postgresql+psycopg2://user:password@127.0.0.1/odontux
+	url = postgresql+psycopg2://my_user:password@127.0.0.1/odontux
+	[gnucashdb]
+	url = postgres://my_user:password@127.0.0.1/professionnal_accounting
 
+
+Start gnucash, create a "new file", in "business account", save it to postgresql "professionnal_accounting", erasing the existing one you just manually created.
+I strongly advice to read gnucash doc to know how to use it, since the accounting side will be done directly in gnucash, ouside of odontux.
+The business part of gnucash begins at chapter 12 (Account receivable) ; but having read all the manual (even the parts before for a home-user accounting) will probably be necessary to understand and use gnucash for the dental office accounting the most efficiently.
+Odontux will "speak" with gnucash db only to add incomes from patient after the acts made by dentist. All the rest may be done directly in gnucash.
 
 Link the bash_dots_odontux in ~ (not mandatory, adapt after if you are not)
 	$ cd ~

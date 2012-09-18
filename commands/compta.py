@@ -15,6 +15,13 @@ from sqlalchemy import or_
 from gettext import gettext as _
 import sys
 
+try:
+    import gnucash
+    GNUCASH_ACCOUNT = True
+
+except ImportError:
+    GNUCASH_ACCOUNT = False
+
 class PaymentTypeParser(BaseCommand):
     """ """
     def parse_args(self, args, update=False):
