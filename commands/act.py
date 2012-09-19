@@ -15,6 +15,15 @@ import sqlalchemy
 import os
 import sys
 
+try:
+    import gnucash
+    from gnucash import Session as GCSession
+    from gnucash.gnucash_business import Invoice
+    GNUCASH_ACCOUNT = True
+except ImportError:
+    GNUCASH_ACCOUNT = False
+
+
 locale = "fr"
 socialsecuritylocale = "SocialSecurity" + locale.title()
 SocialSecurityLocale = getattr(administration, socialsecuritylocale)

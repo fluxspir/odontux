@@ -13,7 +13,6 @@ import os
 from sqlalchemy import or_
 from gettext import gettext as _
 import sys
-import pdb
 
 try:
     import gnucash
@@ -40,6 +39,7 @@ class GnuCashCustomer(GnuCash):
     def _set_name(self):
         """return customer instance, and his name"""
         # patient_name :  M. LASTNAME Firstname
+        pdb.set_trace()
         name = self.patient.title + " " + self.patient.lastname + " " \
                + self.patient.firstname
         new_customer = Customer(self.book, self.gcpatient_id, self.currency, 
@@ -433,7 +433,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
             comptability = GnuCashCustomer(new_patient.id)
             new_customer = comptability.add_customer()
        
-        print(new_patient.id)
+#        print(new_patient.id)
         sys.exit(new_patient.id)
 
 class PatientMovingInCommand(BaseCommand):
