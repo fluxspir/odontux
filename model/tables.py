@@ -33,14 +33,9 @@ Column('patient_id', Integer, ForeignKey('patient.id')),
 Column('phone_id', Integer, ForeignKey('phone.id'))
 )
 
-patient_payer_table = Table('patient_payer', Base.metadata,
-Column('patient_id', Integer, ForeignKey('patient.id')),
+family_payer_table = Table('family_payer', Base.metadata,
+Column('family_id', Integer, ForeignKey('family.id')),
 Column('payer_id', Integer, ForeignKey('payer.id'))
-)
-
-patient_family_table = Table('patient_family', Base.metadata,
-Column('patient_id', Integer, ForeignKey('patient.id')),
-Column('family_id', Integer, ForeignKey('family.id'))
 )
 
 # user.py / administration.py

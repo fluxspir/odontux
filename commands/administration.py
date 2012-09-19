@@ -14,6 +14,7 @@ from sqlalchemy import or_
 from gettext import gettext as _
 import sys
 import pdb
+
 try:
     import gnucash
     from gnucash import Session as GCSession
@@ -62,19 +63,23 @@ class GnuCashCustomer(GnuCash):
                  .filter(administration.Family.id ==
                         self.patient.family_id).one()
         # Here, first, we're gonna find who paying for the patient
-        if self.patient.payers:
+        pdb.set_trace()
+        if self.patient.family.payers:
             # The patient pays for himself
+            pdb.set_trace()
             payername = patientname
 
         else:
             # The patient (child for example) won't pay
             # We're checking in database peoples from his family
             # and that are categorized as people who pay
-            payer = meta.session.query(administration.Patient)\
-                    .filter(administration.Family.id == 
-                            self.patient.family_id)\
-                    .filter(administration.Payer.payer == True).all()
-
+#            payer = meta.session.query(administration.Patient)\
+#                    .filter(administration.Family.id == 
+#                            self.patient.family_id)\
+#                    .filter(administration.Payer.payer == True).all()
+            pdb.set_trace()
+            payer = self.patient.family.payers
+            pdb.set_trace()
             if payer and len(payer) > 1:
                 # Case where several people may pay for the child (father, 
                 # mother, uncle, dog...)
@@ -327,9 +332,10 @@ class AddPatientCommand(BaseCommand, PatientParser):
 
         # The family the patient's belong to
         if options.family_id:
-            family = meta.session.query(administration.Family)\
-                     .filter(administration.Family.id ==
-                             options.family_id).one()
+            self.values["family_id"] = options.family_id
+#            family = meta.session.query(administration.Family)\
+#                     .filter(administration.Family.id ==
+#                             options.family_id).one()
 
         # A family have already an address ; if not in family, create a family 
         # with its own address.
@@ -359,7 +365,10 @@ class AddPatientCommand(BaseCommand, PatientParser):
             family = administration.Family()
             meta.session.add(family)
             meta.session.commit()
-            family.addresses.append(administration.Address(
+            new_patient.family_id = family.id
+            meta.session.commit()
+
+            new_patient.family.addresses.append(administration.Address(
                         street = options.street,
                         building = options.building,
                         city = options.city,
@@ -369,11 +378,12 @@ class AddPatientCommand(BaseCommand, PatientParser):
                         update_date = options.update_date
                         ))
             meta.session.commit()
-        else:
-            family.append(new_patient)
+#        else:
+#            family.append(new_patient)
 
         # Telling if this patient (belonging to family above), is the payer
-        new_patient.payers.append(administration.Payer(payer = options.payer))
+        new_patient.family.payers.append(administration.Payer(payer = 
+                                                              options.payer))
         meta.session.commit()
 
         # Patient's phone number
@@ -409,6 +419,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
                     SSN_values["insurance"] = options.insurance.decode("utf_8")
                 socialsecurity = SocialSecurityLocale(**SSN_values)
                 meta.session.add(socialsecurity)
+                meta.session.commit()
                 new_patient.socialsecurity_id = socialsecurity.id
             
         else:
@@ -425,10 +436,10 @@ class AddPatientCommand(BaseCommand, PatientParser):
         meta.session.commit()
 
         if GNUCASH_ACCOUNT:
-            print(new_patient.id)
             comptability = GnuCashCustomer(new_patient.id)
             new_customer = comptability.add_customer()
-        
+       
+        print(new_patient.id)
         sys.exit(new_patient.id)
 
 class PatientMovingInCommand(BaseCommand):

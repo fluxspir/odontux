@@ -157,7 +157,7 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser,
         # When the patient is under 13, the cotation for the act may change.
         # as well as the price ; 
         # We'll adapt the price later for CMU's, if needed.
-        if patient.age() < KID_AGE:
+        if patient.age() < constants.KID_AGE:
             multiplicator = execution.kid_multiplicator
             exceeding = execution.exceeding_kid_normal
         else:
@@ -189,7 +189,7 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser,
                                    execution.key_cmu_id).one().key
                 self.values["code"] = cmu_key + str(execution.adult_cmu_num)
                 exceeding = execution.exceeding_adult_cmu
-                if patient.age() < KID_AGE:
+                if patient.age() < constants.KID_AGE:
                     exceeding = execution.exceeding_kid_cmu
             else:
                 self.values["code"] = key.key + str(multiplicator)
