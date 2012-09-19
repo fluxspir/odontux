@@ -8,15 +8,16 @@
 from model import meta, administration, cotation, md, teeth
 from base import BaseCommand, GnuCash
 
+import ConfigParser
+import os
 from sqlalchemy import or_
 from gettext import gettext as _
 import sys
 import pdb
-
 try:
     import gnucash
+    from gnucash import Session as GCSession
     from gnucash.gnucash_business import Customer, Address
-#    from gnucash.gnucash_core import Book
     GNUCASH_ACCOUNT = True
 except ImportError:
     GNUCASH_ACCOUNT = False
@@ -31,6 +32,7 @@ class GnuCashCustomer(GnuCash):
     """
     This class is meant to manage "Customers" informations in gnucash.
     """
+
     def _test_id_already_in_database(self):
         return self.book.CustomerLookupByID(self.gcpatient_id)
 
@@ -40,7 +42,8 @@ class GnuCashCustomer(GnuCash):
         name = self.patient.title + " " + self.patient.lastname + " " \
                + self.patient.firstname
         new_customer = Customer(self.book, self.gcpatient_id, self.currency, 
-                                name)
+                                name.encode("utf_8"))
+        self.gcsession.save()
         return new_customer, name
 
     def _update_name(self):
@@ -48,12 +51,16 @@ class GnuCashCustomer(GnuCash):
         name = self.patient.title + " " + self.patient.lastname + " " \
                + self.patient.firstname
         customer = self.book.CustomerLookupByID(self.gcpatient_id)
-        customer.SetName(name)
+        customer.SetName(name.encode("utf_8"))
+        self.gcsession.save()
         return customer, name
 
     def _set_address(self, customer, patientname):
         """ needs a customer_instance """
 
+        family = meta.session.query(administration.Family)\
+                 .filter(administration.Family.id ==
+                        self.patient.family_id).one()
         # Here, first, we're gonna find who paying for the patient
         if self.patient.payers:
             # The patient pays for himself
@@ -64,10 +71,11 @@ class GnuCashCustomer(GnuCash):
             # We're checking in database peoples from his family
             # and that are categorized as people who pay
             payer = meta.session.query(administration.Patient)\
-                    .filter(administration.Family.id == self.patient.family_id)
+                    .filter(administration.Family.id == 
+                            self.patient.family_id)\
                     .filter(administration.Payer.payer == True).all()
 
-            if payer and if len(payer) > 1:
+            if payer and len(payer) > 1:
                 # Case where several people may pay for the child (father, 
                 # mother, uncle, dog...)
                 payers = []
@@ -78,7 +86,7 @@ class GnuCashCustomer(GnuCash):
                 payername = person[0][0] + " " + person[0][1] + " " + \
                             person[0][2]
                     
-            elif payer and if len(payer) == 1:
+            elif payer and len(payer) == 1:
                 # Case only one people is listed as a payer for this child
                 for p in payer:
                     payername = p.title + " " + p.lastname + " " + p.firstname
@@ -92,26 +100,41 @@ class GnuCashCustomer(GnuCash):
                 payername = patientname
 
         address = customer.GetAddr()
-        address.SetName(payername)
-        address.SetAddr1(self.patient.addresses[-1].street)
-        address.SetAddr2(self.patient.addresses[-1].building)
-        address.SetAddr3(self.patient.addresses[-1].postal_code + " " +
-                         self.patient.addresses[-1].city)
-        address.SetAddr4(self.patient.addresses[-1].county + " " +
-                         self.patient.addresses[-1].country)
-      
+        address.SetName(payername.encode("utf_8"))
+        if family.addresses[-1].street:
+            address.SetAddr1(family.addresses[-1].street.encode("utf_8"))
+        if family.addresses[-1].building:
+            address.SetAddr2(family.addresses[-1].building.encode("utf_8"))
+        postal_code = ""
+        city = ""
+        if family.addresses[-1].postal_code:
+            postal_code = family.addresses[-1].postal_code.encode("utf_8")
+        if family.addresses[-1].city:
+            city = family.addresses[-1].city.encode("utf_8")
+        address.SetAddr3(postal_code  + " " + city)
+        county = ""
+        country = ""
+        if family.addresses[-1].county:
+            county = family.addresses[-1].county.encode("utf_8")
+        if family.addresses[-1].country:
+            country = family.addresses[-1].country.encode("utf_8")
+        address.SetAddr4(county + " " + country)
+
+        self.gcsession.save()
+
+
     def add_customer(self):
-        if _test_id_already_in_database():
+        if self._test_id_already_in_database():
             self.update_customer()
-        (new_customer, name) = _set_name()
-        _set_address(new_customer, name)
+        (new_customer, name) = self._set_name()
+        self._set_address(new_customer, name)
         return True
 
     def update_customer(self):
         if not _test_id_already_in_database():
-            self.add_customer()
-        (customer, name) = _update_name()
-        _set_address(customer, name)
+            self.self.add_customer()
+        (customer, name) = self._update_name()
+        self._set_address(customer, name)
         return True
 
 class PatientParser(BaseCommand):
@@ -402,10 +425,12 @@ class AddPatientCommand(BaseCommand, PatientParser):
 
         meta.session.commit()
 
-        comptability = GnuCashCustomer(new_patient.id)
-        new_customer = comptability.add_customer()
-
-        print(new_patient.id)
+        if GNUCASH_ACCOUNT:
+            print(new_patient.id)
+            comptability = GnuCashCustomer(new_patient.id)
+            new_customer = comptability.add_customer()
+        
+        sys.exit(new_patient.id)
 
 class PatientMovingInCommand(BaseCommand):
     """
@@ -515,8 +540,9 @@ class PatientMovingInCommand(BaseCommand):
                                             ))
         meta.session.commit()
 
-        comptability = GnuCashCustomer(patient.id)
-        customer = comptability.update_customer()
+        if GNUCASH_ACCOUNT:
+            comptability = GnuCashCustomer(patient.id)
+            customer = comptability.update_customer()
 
 
 class ListPatientCommand(BaseCommand, PatientParser):
@@ -642,6 +668,7 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
 
         meta.session.commit()
 
-        comptability = GnuCashCustomer(patient.id)
-        customer = comptability.update_customer()
+        if GNUCASH_ACCOUNT:
+            comptability = GnuCashCustomer(patient.id)
+            customer = comptability.update_customer()
 
