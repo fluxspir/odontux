@@ -6,17 +6,111 @@
 #
 
 from model import meta, administration, cotation, md, teeth
-from base import BaseCommand
+from base import BaseCommand, GnuCash
 
 from sqlalchemy import or_
 from gettext import gettext as _
 import sys
 import pdb
 
+try:
+    import gnucash
+    from gnucash.gnucash_business import Customer, Address
+#    from gnucash.gnucash_core import Book
+    GNUCASH_ACCOUNT = True
+except ImportError:
+    GNUCASH_ACCOUNT = False
+
+
 locale = "fr"
 socialsecuritylocale = "SocialSecurity" + locale.title()
 SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
+
+class GnuCashCustomer(GnuCash):
+    """
+    This class is meant to manage "Customers" informations in gnucash.
+    """
+    def _test_id_already_in_database(self):
+        return self.book.CustomerLookupByID(self.id)
+
+    def _set_name(self):
+        """return customer instance, and his name"""
+        # patient_name :  M. LASTNAME Firstname
+        name = self.patient.title + " " + self.patient.lastname + " " \
+               + self.patient.firstname
+        new_customer = Customer(self.book, self.id, self.currency, name)
+        return new_customer, name
+
+    def _update_name(self):
+        """return customer instance, and his name"""
+        name = self.patient.title + " " + self.patient.lastname + " " \
+               + self.patient.firstname
+        customer = self.book.CustomerLookupByID(self.id)
+        customer.SetName(name)
+        return customer, name
+
+    def _set_address(self, customer, patientname):
+        """ needs a customer_instance """
+
+        # Here, first, we're gonna find who paying for the patient
+        if self.patient.payers:
+            # The patient pays for himself
+            payername = patientname
+
+        else:
+            # The patient (child for example) won't pay
+            # We're checking in database peoples from his family
+            # and that are categorized as people who pay
+            payer = meta.session.query(administration.Patient)\
+                    .filter(administration.Family.id == self.patient.family_id)
+                    .filter(administration.Payer.payer == True).all()
+
+            if payer and if len(payer) > 1:
+                # Case where several people may pay for the child (father, 
+                # mother, uncle, dog...)
+                payers = []
+                for p in payer:
+                    person = (p.title, p.lastname, p.firstname)
+                    payers.append(person)
+                # Let's take the first one who appear... better than nothing.
+                payername = person[0][0] + " " + person[0][1] + " " + \
+                            person[0][2]
+                    
+            elif payer and if len(payer) == 1:
+                # Case only one people is listed as a payer for this child
+                for p in payer:
+                    payername = p.title + " " + p.lastname + " " + p.firstname
+
+            else:
+                # Guess what... that twisted... normally, we shouldn't get 
+                # there because it means that nobody will pay :/
+                # So let's say, finally, that's the patient himself will be the
+                # payer. We'll have to remind to update the patient file when 
+                # we'll add a payer for him.
+                payername = patientname
+
+        address = customer.GetAddr()
+        address.SetName(payername)
+        address.SetAddr1(self.patient.addresses[-1].street)
+        address.SetAddr2(self.patient.addresses[-1].building)
+        address.SetAddr3(self.patient.addresses[-1].postal_code + " " +
+                         self.patient.addresses[-1].city)
+        address.SetAddr4(self.patient.addresses[-1].county + " " +
+                         self.patient.addresses[-1].country)
+      
+    def add_customer(self):
+        if _test_id_already_in_database():
+            return 
+        (new_customer, name) = _set_name()
+        _set_address(new_customer, name)
+
+
+    def update_customer(self):
+        if not _test_id_already_in_database():
+            add_customer()
+        (customer, name) = _set_name()
+        _set_address(customer, name)
 
 class PatientParser(BaseCommand):
     """ """
