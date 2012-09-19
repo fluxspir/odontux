@@ -57,55 +57,39 @@ class GnuCashCustomer(GnuCash):
         return customer, name
 
     def _set_address(self, customer, patientname):
-        """ needs a customer_instance """
-
-
-
-        family = meta.session.query(administration.Family)\
-                 .filter(administration.Family.id ==
-                        self.patient.family_id).one()
-        # Here, first, we're gonna find who paying for the patient
-
-        pdb.set_trace()
-        if self.patient.family.payers:
-            # The patient pays for himself
-            pdb.set_trace()
-            payername = patientname
-
-        else:
-            # The patient (child for example) won't pay
-            # We're checking in database peoples from his family
-            # and that are categorized as people who pay
-#            payer = meta.session.query(administration.Patient)\
-#                    .filter(administration.Family.id == 
-#                            self.patient.family_id)\
-#                    .filter(administration.Payer.payer == True).all()
-            pdb.set_trace()
-            payer = self.patient.family.payers
-            pdb.set_trace()
-            if payer and len(payer) > 1:
-                # Case where several people may pay for the child (father, 
-                # mother, uncle, dog...)
-                payers = []
-                for p in payer:
-                    person = (p.title, p.lastname, p.firstname)
-                    payers.append(person)
-                # Let's take the first one who appear... better than nothing.
-                payername = person[0][0] + " " + person[0][1] + " " + \
-                            person[0][2]
-                    
-            elif payer and len(payer) == 1:
-                # Case only one people is listed as a payer for this child
-                for p in payer:
-                    payername = p.title + " " + p.lastname + " " + p.firstname
-
-            else:
-                # Guess what... that twisted... normally, we shouldn't get 
-                # there because it means that nobody will pay :/
-                # So let's say, finally, that's the patient himself will be the
-                # payer. We'll have to remind to update the patient file when 
-                # we'll add a payer for him.
+        """ needs a customer_instance 
+        This address, in gnucash, is asked for billing purpose
+        We'll keep the patient's name as the customer ;
+        the billing's name will be wether patient's name if he's alone
+        in the family, and the " Family patient.lastname " if there
+        is several patients / payers in this family
+        """
+        # Get the payers' names
+        payername = ""
+        payerlist = []
+        for payer in self.patient.family.payers:
+            # The patient is noted as a payer
+            if payer.patient_id == self.patient_id:
+                # The patient pays for himself
                 payername = patientname
+                continue
+            else:
+                payerlist.append(payer.patient_id)
+
+        if not payername:
+            # Case the patient ain't recorded as a payer
+            if not payerlist:
+                # Curious case where nobody recorded as a payer for this family
+                # The patient will finally be the payer for gnucash.Customer
+                payername = patientname
+            else:
+                for patient_id in payerlist:
+                    payer = meta.session.query(administration.Patient)\
+                            .filter(administration.Patient.id == patient_id)
+                    payer = payer.one()
+                    payer = payer.title + " " + payer.lastname + " " +\
+                            payer.firstname
+                    payername.join(", ", payer)
 
         address = customer.GetAddr()
         address.SetName(payername.encode("utf_8"))
@@ -504,6 +488,11 @@ class PatientMovingInCommand(BaseCommand):
 
         (options, args) = self.parse_args(args)
 
+        sys.exit(_("""Need to upgrade this method with the family ; the 
+        movin_in will depend wether all the family is moving, or the
+        patient is starting a new family, quitting his parents"""))
+
+    
         if options.patient_id:
             patient_id = options.patient_id
         else:
