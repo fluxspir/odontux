@@ -59,10 +59,13 @@ class GnuCashCustomer(GnuCash):
     def _set_address(self, customer, patientname):
         """ needs a customer_instance """
 
+
+
         family = meta.session.query(administration.Family)\
                  .filter(administration.Family.id ==
                         self.patient.family_id).one()
         # Here, first, we're gonna find who paying for the patient
+
         pdb.set_trace()
         if self.patient.family.payers:
             # The patient pays for himself
@@ -325,7 +328,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
         if options.gen_doc_id:
             self.values["gen_doc_id"] = options.gen_doc_id
 
-        # Last time the patient data where update
+        # Last time the patient data were updated
         if options.time_stamp:
             self.values["time_stamp"] = options.time_stamp
             self.values["creation_date"] = options.time_stamp
@@ -333,9 +336,6 @@ class AddPatientCommand(BaseCommand, PatientParser):
         # The family the patient's belong to
         if options.family_id:
             self.values["family_id"] = options.family_id
-#            family = meta.session.query(administration.Family)\
-#                     .filter(administration.Family.id ==
-#                             options.family_id).one()
 
         # A family have already an address ; if not in family, create a family 
         # with its own address.
@@ -359,6 +359,8 @@ class AddPatientCommand(BaseCommand, PatientParser):
         new_patient = administration.Patient(**self.values)
         meta.session.add(new_patient)
         meta.session.commit()
+
+        # Dealing with the patient's family :
         # If doesn't belong to already know family, create a family and its
         # address.
         if not options.family_id:
@@ -378,13 +380,16 @@ class AddPatientCommand(BaseCommand, PatientParser):
                         update_date = options.update_date
                         ))
             meta.session.commit()
-#        else:
-#            family.append(new_patient)
 
-        # Telling if this patient (belonging to family above), is the payer
-        new_patient.family.payers.append(administration.Payer(payer = 
-                                                              options.payer))
-        meta.session.commit()
+        # Now, we have to tell if the patient may pay for himself and his 
+        # family.
+        if options.payer:
+            payer_values = {}
+            payer_values["patient_id"] = new_patient.id
+            payer = administration.Payer(**payer_values)
+            meta.session.add(payer)
+            new_patient.family.payers.append(payer)
+            meta.session.commit()
 
         # Patient's phone number
         if options.phone_num:
@@ -670,7 +675,8 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
             patient.inactive = True
         if options.office_id:
             patient.office_id = options.office_id
-        patient.dentist_id = options.dentist_id
+        if options.dentist_id:
+            patient.dentist_id = options.dentist_id
         if options.gen_doc_id:
             patient.gen_doc_id = options.gen_doc_id
         if options.time_stamp:
@@ -682,3 +688,9 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
             comptability = GnuCashCustomer(patient.id)
             customer = comptability.update_customer()
 
+
+class AddPatientPhoneCommand(BaseCommand):
+    pass
+
+class UpdatePatientPhoneCommand(BaseCommand):
+    pass

@@ -63,12 +63,6 @@ class SocialSecurityFr(Base):
     insurance = Column(String)
 
 
-class Payer(Base):
-    __tablename__ = 'payer'
-    id = Column(Integer, primary_key=True)
-    payer = Column(Boolean, default=True)
-
-
 class Family(Base):
     __tablename__ = 'family'
     id = Column(Integer, primary_key=True)
@@ -125,4 +119,11 @@ class Patient(Base):
             return True
         else:
             return False
+
+
+class Payer(Base):
+    __tablename__ = 'payer'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(Patient.id))
+
 
