@@ -32,21 +32,22 @@ class GnuCashCustomer(GnuCash):
     This class is meant to manage "Customers" informations in gnucash.
     """
     def _test_id_already_in_database(self):
-        return self.book.CustomerLookupByID(self.id)
+        return self.book.CustomerLookupByID(self.gcpatient_id)
 
     def _set_name(self):
         """return customer instance, and his name"""
         # patient_name :  M. LASTNAME Firstname
         name = self.patient.title + " " + self.patient.lastname + " " \
                + self.patient.firstname
-        new_customer = Customer(self.book, self.id, self.currency, name)
+        new_customer = Customer(self.book, self.gcpatient_id, self.currency, 
+                                name)
         return new_customer, name
 
     def _update_name(self):
         """return customer instance, and his name"""
         name = self.patient.title + " " + self.patient.lastname + " " \
                + self.patient.firstname
-        customer = self.book.CustomerLookupByID(self.id)
+        customer = self.book.CustomerLookupByID(self.gcpatient_id)
         customer.SetName(name)
         return customer, name
 
@@ -101,16 +102,17 @@ class GnuCashCustomer(GnuCash):
       
     def add_customer(self):
         if _test_id_already_in_database():
-            return 
+            self.update_customer()
         (new_customer, name) = _set_name()
         _set_address(new_customer, name)
-
+        return True
 
     def update_customer(self):
         if not _test_id_already_in_database():
-            add_customer()
-        (customer, name) = _set_name()
+            self.add_customer()
+        (customer, name) = _update_name()
         _set_address(customer, name)
+        return True
 
 class PatientParser(BaseCommand):
     """ """
@@ -400,11 +402,14 @@ class AddPatientCommand(BaseCommand, PatientParser):
 
         meta.session.commit()
 
+        comptability = GnuCashCustomer(new_patient.id)
+        new_customer = comptability.add_customer()
+
         print(new_patient.id)
 
 class PatientMovingInCommand(BaseCommand):
     """
-    When the user moves (used mainly for dentists who make replacements...
+    When the user moves (used mainly for dentists who make replacements...)
     """
 
     command_name = "patient_movingin"
@@ -509,6 +514,9 @@ class PatientMovingInCommand(BaseCommand):
                                             update_date = options.update_date
                                             ))
         meta.session.commit()
+
+        comptability = GnuCashCustomer(patient.id)
+        customer = comptability.update_customer()
 
 
 class ListPatientCommand(BaseCommand, PatientParser):
@@ -633,3 +641,7 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
             patient.time_stamp = options.time_stamp
 
         meta.session.commit()
+
+        comptability = GnuCashCustomer(patient.id)
+        customer = comptability.update_customer()
+

@@ -30,9 +30,10 @@ Then write in ~/.odontuxrc :
 	url = postgresql+psycopg2://my_user:password@127.0.0.1/odontux
 	[gnucashdb]
 	url = postgres://my_user:password@127.0.0.1/professionnal_accounting
-
+	currency = EUR
 
 Start gnucash, create a "new file", in "business account", save it to postgresql "professionnal_accounting", erasing the existing one you just manually created.
+Set the currency you want to use ; adapt in the ~/.odontuxrc above for the same currency...
 I strongly advice to read gnucash doc to know how to use it, since the accounting side will be done directly in gnucash, ouside of odontux.
 The business part of gnucash begins at chapter 12 (Account receivable) ; but having read all the manual (even the parts before for a home-user accounting) will probably be necessary to understand and use gnucash for the dental office accounting the most efficiently.
 Odontux will "speak" with gnucash db only to add incomes from patient after the acts made by dentist. All the rest may be done directly in gnucash.

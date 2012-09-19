@@ -15,16 +15,19 @@ class BaseCommand():
 
 class GnuCash():
     """ """
-    def __init__(self, id):
+    def __init__(self, patient_id):
         parser = ConfigParser.ConfigParser()
         home = os.path.expanduser("~")
         parser.read(os.path.join(home, ".odontuxrc"))
         professionnalaccounting_url = parser.get("gnucashdb", "url")
 
         # Precise on which patient we'll work on
-        self.id = id
+        self.patient_id = patient_id
         self.patient = meta.session.query(administration.Patient)\
-                        .filter(administration.Patient.id == id).one()
+                        .filter(administration.Patient.id == patient_id).one()
+
+        # Set the gnucash patient_id
+        self.gcpatient_id = "patient_" + self.patient_id
 
         # Set up the Book for accounting
         self.gcsession = Session(professionnalaccounting_url, True)
