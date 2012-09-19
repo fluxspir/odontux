@@ -121,7 +121,7 @@ class GnuCashCustomer(GnuCash):
         address.SetAddr4(county + " " + country)
 
         self.gcsession.save()
-
+        self.gcsession.end()
 
     def add_customer(self):
         if self._test_id_already_in_database():
@@ -131,7 +131,7 @@ class GnuCashCustomer(GnuCash):
         return True
 
     def update_customer(self):
-        if not _test_id_already_in_database():
+        if not self._test_id_already_in_database():
             self.self.add_customer()
         (customer, name) = self._update_name()
         self._set_address(customer, name)
@@ -327,7 +327,9 @@ class AddPatientCommand(BaseCommand, PatientParser):
 
         # The family the patient's belong to
         if options.family_id:
-            self.values["family_id"] = options.family_id
+            family = meta.session.query(administration.Family)\
+                     .filter(administration.Family.id ==
+                             options.family_id).one()
 
         # A family have already an address ; if not in family, create a family 
         # with its own address.
@@ -357,7 +359,6 @@ class AddPatientCommand(BaseCommand, PatientParser):
             family = administration.Family()
             meta.session.add(family)
             meta.session.commit()
-            new_patient.family_id = family.id
             family.addresses.append(administration.Address(
                         street = options.street,
                         building = options.building,
@@ -369,9 +370,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
                         ))
             meta.session.commit()
         else:
-            family = meta.session.query(administration.Family)\
-                    .filter(administration.Family.id ==
-                            options.family_id).one()
+            family.append(new_patient)
 
         # Telling if this patient (belonging to family above), is the payer
         new_patient.payers.append(administration.Payer(payer = options.payer))

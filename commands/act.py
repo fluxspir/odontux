@@ -6,15 +6,14 @@
 #
 
 from model import meta, act, administration, schedule, cotation, teeth
-from base import BaseCommand
+from base import BaseCommand, GnuCash
+import constants
 
 from sqlalchemy import or_
 from gettext import gettext as _
 import sqlalchemy
 import os
 import sys
-
-KID_AGE = 13
 
 locale = "fr"
 socialsecuritylocale = "SocialSecurity" + locale.title()
@@ -111,7 +110,8 @@ class AddActTypeCommand(BaseCommand, ActTypeParser):
         meta.session.commit()
 
 
-class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
+class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser,
+                                  GnuCash):
     """ """
 
     command_name = "add_administrativeact"

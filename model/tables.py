@@ -38,6 +38,11 @@ Column('patient_id', Integer, ForeignKey('patient.id')),
 Column('payer_id', Integer, ForeignKey('payer.id'))
 )
 
+patient_family_table = Table('patient_family', Base.metadata,
+Column('patient_id', Integer, ForeignKey('patient.id')),
+Column('family_id', Integer, ForeignKey('family.id'))
+)
+
 # user.py / administration.py
 odontux_user_address_table = Table('odontux_user_address', Base.metadata,
 Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),

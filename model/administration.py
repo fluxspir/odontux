@@ -11,7 +11,8 @@ import sqlalchemy
 import datetime
 
 from tables import (family_address_table, patient_mail_table, 
-                    patient_phone_table, patient_payer_table)
+                    patient_phone_table, patient_payer_table,
+                    patient_family_table)
                     
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
@@ -81,10 +82,12 @@ SocialSecurityLocale = locals()[socialsecuritylocale]
 class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
-    family_id = Column(Integer, ForeignKey(Family.id))
-    socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityLocale.id))
+#    family_id = Column(Integer, ForeignKey(Family.id))
+    family = relationship("Family", secondary=patient_family_table,
+                           backref="patient")
     payers = relationship("Payer", secondary=patient_payer_table,
                            backref="patient")
+    socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityLocale.id))
     title = Column(String)
     lastname = Column(String, nullable=False)
     firstname = Column(String)

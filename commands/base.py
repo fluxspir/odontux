@@ -39,7 +39,7 @@ class GnuCash():
                         .filter(administration.Patient.id == patient_id).one()
 
         # Set the gnucash patient_id
-        self.gcpatient_id = "patient_" + str(self.patient_id)
+        self.gcpatient_id = "pat_" + str(self.patient_id)
 
         # Set up the Book for accounting
         self.gcsession = GCSession(professionnalaccounting_url, True)
