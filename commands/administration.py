@@ -72,7 +72,7 @@ class GnuCashCustomer(GnuCash):
             if payer.patient_id == self.patient_id:
                 # The patient pays for himself
                 payername = patientname
-                continue
+                break
             else:
                 payerlist.append(payer.patient_id)
 
@@ -93,23 +93,26 @@ class GnuCashCustomer(GnuCash):
 
         address = customer.GetAddr()
         address.SetName(payername.encode("utf_8"))
-        if family.addresses[-1].street:
-            address.SetAddr1(family.addresses[-1].street.encode("utf_8"))
-        if family.addresses[-1].building:
-            address.SetAddr2(family.addresses[-1].building.encode("utf_8"))
+        if self.patient.family.addresses[-1].street:
+            address.SetAddr1(self.patient.family.addresses[-1]
+                             .street.encode("utf_8"))
+        if self.patient.family.addresses[-1].building:
+            address.SetAddr2(self.patient.family.addresses[-1]
+                             .building.encode("utf_8"))
         postal_code = ""
         city = ""
-        if family.addresses[-1].postal_code:
-            postal_code = family.addresses[-1].postal_code.encode("utf_8")
-        if family.addresses[-1].city:
-            city = family.addresses[-1].city.encode("utf_8")
+        if self.patient.family.addresses[-1].postal_code:
+            postal_code = self.patient.family.addresses[-1]\
+                          .postal_code.encode("utf_8")
+        if self.patient.family.addresses[-1].city:
+            city = self.patient.family.addresses[-1].city.encode("utf_8")
         address.SetAddr3(postal_code  + " " + city)
         county = ""
         country = ""
-        if family.addresses[-1].county:
-            county = family.addresses[-1].county.encode("utf_8")
-        if family.addresses[-1].country:
-            country = family.addresses[-1].country.encode("utf_8")
+        if self.patient.family.addresses[-1].county:
+            county = self.patient.family.addresses[-1].county.encode("utf_8")
+        if self.patient.family.addresses[-1].country:
+            country = self.patient.family.addresses[-1].country.encode("utf_8")
         address.SetAddr4(county + " " + country)
 
         self.gcsession.save()
@@ -118,6 +121,7 @@ class GnuCashCustomer(GnuCash):
     def add_customer(self):
         if self._test_id_already_in_database():
             self.update_customer()
+            return True
         (new_customer, name) = self._set_name()
         self._set_address(new_customer, name)
         return True
@@ -125,6 +129,7 @@ class GnuCashCustomer(GnuCash):
     def update_customer(self):
         if not self._test_id_already_in_database():
             self.self.add_customer()
+            return True
         (customer, name) = self._update_name()
         self._set_address(customer, name)
         return True
