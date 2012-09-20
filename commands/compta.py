@@ -17,6 +17,7 @@ import sys
 
 try:
     import gnucash
+    from gnucash import GncNumeric
     from base import GnuCash
     GNUCASH_ACCOUNT = True
 
@@ -161,7 +162,32 @@ class PaymentParser(BaseCommand):
 class GnuCashPayment(GnuCash):
     """ GnuCashPayment tries to 
     """
-    def add_payment(self):
+    def _get_payer(self, gcpayer_id):
+        return self.book.CustomerLookupByID(gcpayer_id)
+
+    def _get_paymenttype(self, mean_id):
+        mean = meta.session.query(compta.PaymentType)\
+               .filter(compta.PaymentType.id == mean_id).one()
+        
+        paymenttype = self.parser.get("gnucashdb", mean.name)
+        return self.dentalfund.lookup_by_name(paymenttype)
+            
+    def add_payment(self, mean_id, amount, date):
+        try:
+            payer = self._get_payer(self.gcpatient_id)
+            dest_account = self._get_paymenttype(mean_id)
+            amount = self.gnc_numeric_from_decimal(amount)
+
+            payer.ApplyPayment(invoice=None, self.receivables, dest_account, 
+                            amount, exch=GncNumeric(1), date, memo="", num="")
+            
+            gcsession.save()
+            gcsession.end()
+            return True
+        except:
+            gcsession.end()
+            raise
+
 
 class AddPaymentCommand(BaseCommand, PaymentParser):
     """ """
@@ -189,8 +215,9 @@ class AddPaymentCommand(BaseCommand, PaymentParser):
 
         # Telling gnucash the patient paid (not telling for what)
         if GNUCASH_ACCOUNT:
-            patient_payment = GnuCashPayment(payer_id)
-
+            gcpayment = GnuCashPayment(payer_id)
+            gcpayment.add_payment(new_payment.mean_id, new_payment.amount, 
+                                        new_payment.cashin_date)
             
         sys.exit(new_payment.id)
 

@@ -29,14 +29,15 @@ class BaseCommand():
 class GnuCash():
     """ """
     def __init__(self, patient_id):
-        parser = ConfigParser.ConfigParser()
+        self.parser = ConfigParser.ConfigParser()
         home = os.path.expanduser("~")
         parser.read(os.path.join(home, ".odontuxrc"))
-        professionnalaccounting_url = parser.get("gnucashdb", "url")
-        assets = parser.get("gnucashdb", "assets")
-        receivables = parser.get("gnucashdb", "receivables")
-        incomes = parser.get("gnucashdb", "incomes")
-        dentalincomes = parser.get("gnucashdb", "dentalincomes")
+        professionnalaccounting_url = self.parser.get("gnucashdb", "url")
+        assets = self.parser.get("gnucashdb", "assets")
+        receivables = self.parser.get("gnucashdb", "receivables")
+        dentalfund = self.parser.get("gnucashdb", "dentalfund")
+        incomes = self.parser.get("gnucashdb", "incomes")
+        dentalincomes = self.parser.get("gnucashdb", "dentalincomes")
 
         # Precise on which patient we'll work on
         self.patient_id = patient_id
@@ -53,8 +54,17 @@ class GnuCash():
 
             # Set up the root on accounting book
             self.root = self.book.get_root_account()
+            # Assets
             self.assets = self.root.lookup_by_name(assets)
+            # What the patient owes to dental office
             self.receivables = self.assets.lookup_by_name(receivables)
+            # What the patient paid to dental office, but not usable
+            # because it needs to pass by the bank.
+            # the detail of dental fund is build in commands/compta.py
+            # while getting the paymenttype.
+            self.dentalfund = self.assets.lookup_by_name(dentalfund)
+
+            # Incomes
             self.incomes = self.root.lookup_by_name(incomes)
             self.dentalincomes = self.incomes.lookup_by_name(dentalincomes)
 
