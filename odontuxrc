@@ -1,0 +1,16 @@
+[db]
+url = postgresql+psycopg2://my_user:password@127.0.0.1/odontux
+
+[gnucashdb]
+url = postgres://my_user:password@127.0.0.1/professionnal_accounting
+currency = EUR
+assets = Assets
+receivables = Receivables Account
+dentalfund = Dental's fund
+check = Chèques
+cash = Espèces
+card = Carte Bleue
+transfer = Virement
+paypal = Paypal
+incomes = Incomes
+dentalincomes = Dentals
