@@ -39,7 +39,6 @@ class GnuCashCustomer(GnuCash):
     def _set_name(self):
         """return customer instance, and his name"""
         # patient_name :  M. LASTNAME Firstname
-        pdb.set_trace()
         name = self.patient.title + " " + self.patient.lastname + " " \
                + self.patient.firstname
         new_customer = Customer(self.book, self.gcpatient_id, self.currency, 

@@ -100,13 +100,13 @@ class AddAppointmentCommand(BaseCommand, AppointmentParser):
             self.agenda_values["endtime"] = options.endtime
 
 
-        new_schedule = schedule.Agenda(**self.agenda_values)
-        meta.session.add(new_schedule)
-        meta.session.commit()
-
-        self.appointment_values["agenda_id"] = new_schedule.id
         new_appointment = schedule.Appointment(**self.appointment_values)
         meta.session.add(new_appointment)
+        meta.session.commit()
+
+        self.agenda_values["appointment_id"] = new_appointment.id
+        new_schedule = schedule.Agenda(**self.agenda_values)
+        meta.session.add(new_schedule)
         meta.session.commit()
 
         print(new_appointment.id)
@@ -227,14 +227,10 @@ class ListAppointmentCommand(BaseCommand):
         print(_(u"Seen {} {}".format(patient.lastname, patient.firstname)))
         
         for appointment in query:
-            # get all the appointments dates
-            appointment_date = meta.session.query(schedule.Agenda)\
-                    .filter(schedule.Agenda.id == appointment.agenda_id).one()
-
             print(_(u"{}\t{}\t{} {} {} {}"\
                     .format(appointment.id, "||", _("from"), 
-                            appointment_date.starttime, _("to"),
-                            appointment_date.endtime)))
+                            appointment.agenda.starttime, _("to"),
+                            appointment.agenda.endtime)))
             if not options.quiet:
                 if appointment.emergency:
                     print(_(u"{}".format(_("EMERGENCY"))))
@@ -312,8 +308,6 @@ class UpdateAppointmentCommand(BaseCommand, AppointmentParser):
 
         appointment = self.query.filter(schedule.Appointment.id ==
                                         appointment_id).one()
-        agenda = meta.session.query(schedule.Agenda)\
-                 .filter(schedule.Agenda.id == appointment.agenda_id).one()
 
         if options.emergency:
             appointment.emergency = True
@@ -331,8 +325,8 @@ class UpdateAppointmentCommand(BaseCommand, AppointmentParser):
             appointment.next_appointment =\
             options.next_appointment.decode("utf_8")
         if options.starttime:
-            agenda.starttime = options.starttime.decode("utf_8")
+            appointment.agenda.starttime = options.starttime.decode("utf_8")
         if options.endtime:
-            agenda.endtime = options.endtime.decode("utf_8")
+            appointment.agenda.endtime = options.endtime.decode("utf_8")
 
         meta.session.commit()

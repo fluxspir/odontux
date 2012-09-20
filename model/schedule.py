@@ -19,13 +19,6 @@ now = datetime.datetime.now()
 today = datetime.date.today()
 
 
-class Agenda(Base):
-    __tablename__ = 'agenda'
-    id = Column(Integer, primary_key=True)
-    starttime = Column(DateTime, nullable=False)
-    endtime = Column(DateTime, nullable=False)
-
-
 class Appointment(Base):
     __tablename__ = 'appointment'
     id = Column(Integer, primary_key=True)
@@ -33,7 +26,8 @@ class Appointment(Base):
                         nullable=False)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id),
                         nullable=False, default=1)
-    agenda_id = Column(Integer, ForeignKey(Agenda.id), nullable=False)
+    agenda = relationship("Agenda", backref="appointment", 
+                           cascade="all, delete, delete-orphan")
     emergency = Column(Boolean, default=False)
     reason = Column(String, default="dentist didn't precise the appointment's "
                                     "reason.", nullable=False)
@@ -46,6 +40,14 @@ class Appointment(Base):
                                        backref="appointment")
     ordonnance = relationship("Prescription", backref="appointment",
                               cascade="all, delete, delete-orphan")
+
+
+class Agenda(Base):
+    __tablename__ = 'agenda'
+    id = Column(Integer, primary_key=True)
+    appointment_id = Column(Integer, ForeignKey(Appointment.id))
+    starttime = Column(DateTime, nullable=False)
+    endtime = Column(DateTime, nullable=False)
 
 
 class AppointmentMemo(Base):

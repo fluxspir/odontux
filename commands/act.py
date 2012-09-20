@@ -12,8 +12,13 @@ import constants
 from sqlalchemy import or_
 from gettext import gettext as _
 import sqlalchemy
+import datetime
 import os
 import sys
+
+import pdb
+
+today = datetime.date.today()
 
 try:
     import gnucash
@@ -27,6 +32,63 @@ except ImportError:
 locale = "fr"
 socialsecuritylocale = "SocialSecurity" + locale.title()
 SocialSecurityLocale = getattr(administration, socialsecuritylocale)
+
+
+class GnuCashInvoice(GnuCash):
+    """ 
+    The GnuCashInvoice deals with gnucash to enter act and price in an Invoice.
+    As it hasn't been cashed, but that the act "is selled", it will be stocked
+    in an "Receivable Account".
+    An individual invoice will contain every act made on a unique patient
+    during an unique appointment.
+    """
+    def __init__(self, patient_id, appointment_id):
+        # Initialize the self.vars from Parent : GnuCash
+        #   * self.gcsession
+        #   * self.book
+        #   * self.root, self.assets, self.receivables, self.incomes, 
+        #   self.dental
+        #   * self.gcpatient and self.patient
+        #   * self.currency
+        GnuCash.__init__(self, patient_id)
+        # get the patient (customer) instance from gnucash database
+        self.owner = self.book.CustomerLookupByID(self.gcpatient_id)
+        # invoice_id is build as
+        # Date + appointment_id
+        self.invoice_id = "inv_" + str(today) + "_" + str(appointment_id)
+        
+        self.date = meta.session.query(schedule.Appointment)\
+                    .filter(schedule.Appointment.id ==
+                            appointment_id).one()
+                            #.agenda.endtime
+
+    def _create_invoice_instance(self):
+        return Invoice(self.book, self.invoice_id, self.currency, 
+                       self.owner, self.date)
+        
+    def add_act(self, code, price):
+        # Get an instance for the invoice
+        if self.book.InvoiceLookupByID(self.invoice_id):
+            invoice = self.book.InvoiceLookupByID(self.invoice_id)
+        else:
+            invoice = self._create_invoice_instance()
+
+        description = code
+        invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
+
+        invoice_entry = Entry(self.book, invoice)
+        invoice_entry.SetDescription(description)
+        invoice_entry.SetQuantify( GncNumeric(1) )
+        invoice_entry.SetInvAccount(self.dental)
+        invoice_entry.SetInvPrice(invoice_value)
+
+        invoice.PostToAccount(self.receivables, self.date, self.date,
+                              "memo... comment l'utiliser ?", True)
+        self.gcsession.save()
+        self.gcsession.end()
+
+        return self.invoice_id
+        
 
 class ActTypeParser(BaseCommand):
     """ """
@@ -90,7 +152,15 @@ class AppointmentActReferenceParser(BaseCommand):
 
 
 class AddActTypeCommand(BaseCommand, ActTypeParser):
-    """ """
+    """ An ActType is an act made by the dentist
+    This act has a scientific / administrative name (or description)
+    The act also has an alias : a sort name use in everyday life
+    The act has a code, without whitespaces, to enter it quicker
+    The "cotation" is the code the social security will give it, and the 
+    cotation may change whether the act is on adult, child...
+    The color is for gui purpose.
+    
+    """
 
     command_name = "add_acttype"
 
@@ -119,9 +189,20 @@ class AddActTypeCommand(BaseCommand, ActTypeParser):
         meta.session.commit()
 
 
-class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser,
-                                  GnuCash):
-    """ """
+class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
+    """ The Administrative Act
+    
+    An administrative act is recorded as it was made while an Appointment 
+    (linking it this way to a patient, a dentist, a dental office, and a 
+    datetime).
+    Each act will get his own administrativeact instance, that will stock :
+        * the act
+        * the appointment
+        * the social_security code for this act
+        * the actual price of this act
+    If GnuCash is enabled, it will also make the Invoice.
+    
+    """
 
     command_name = "add_administrativeact"
 
@@ -212,6 +293,17 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser,
         new_act = act.AppointmentActReference(**self.values)
         meta.session.add(new_act)
         meta.session.commit()
+       
+
+
+        date = meta.session.query(schedule.Appointment).filter(schedule.Appointment.id == appointment_id).one()
+        pdb.set_trace()
+        if GNUCASH_ACCOUNT:
+            invoice = GnuCashInvoice(patient_id, appointment_id)
+            invoice_id = invoice.add_act(self.values["code"], 
+                                         self.values["price"])
+            new_act.invoice_id = invoice_id
+            meta.session.commit()
         print(new_act.id)
 
 class ListActTypeCommand(BaseCommand):
