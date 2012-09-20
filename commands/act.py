@@ -6,11 +6,12 @@
 #
 
 from model import meta, act, administration, schedule, cotation, teeth
-from base import BaseCommand, GnuCash
+from base import BaseCommand
 import constants
 
 from sqlalchemy import or_
 from gettext import gettext as _
+from decimal import Decimal
 import sqlalchemy
 import datetime
 import os
@@ -22,8 +23,10 @@ today = datetime.date.today()
 
 try:
     import gnucash
+    from base import GnuCash
     from gnucash import Session as GCSession
-    from gnucash.gnucash_business import Invoice
+    from gnucash import GncNumeric
+    from gnucash.gnucash_business import Invoice, Entry
     GNUCASH_ACCOUNT = True
 except ImportError:
     GNUCASH_ACCOUNT = False
@@ -47,7 +50,7 @@ class GnuCashInvoice(GnuCash):
         #   * self.gcsession
         #   * self.book
         #   * self.root, self.assets, self.receivables, self.incomes, 
-        #   self.dental
+        #   self.dentalincomes
         #   * self.gcpatient and self.patient
         #   * self.currency
         GnuCash.__init__(self, patient_id)
@@ -59,8 +62,7 @@ class GnuCashInvoice(GnuCash):
         
         self.date = meta.session.query(schedule.Appointment)\
                     .filter(schedule.Appointment.id ==
-                            appointment_id).one()
-                            #.agenda.endtime
+                            appointment_id).one().agenda.endtime
 
     def _create_invoice_instance(self):
         return Invoice(self.book, self.invoice_id, self.currency, 
@@ -68,26 +70,32 @@ class GnuCashInvoice(GnuCash):
         
     def add_act(self, code, price):
         # Get an instance for the invoice
-        if self.book.InvoiceLookupByID(self.invoice_id):
-            invoice = self.book.InvoiceLookupByID(self.invoice_id)
-        else:
-            invoice = self._create_invoice_instance()
+        try:
+            if self.book.InvoiceLookupByID(self.invoice_id):
+                invoice = self.book.InvoiceLookupByID(self.invoice_id)
+            else:
+                invoice = self._create_invoice_instance()
 
-        description = code
-        invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
+            description = code
+            invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
 
-        invoice_entry = Entry(self.book, invoice)
-        invoice_entry.SetDescription(description)
-        invoice_entry.SetQuantify( GncNumeric(1) )
-        invoice_entry.SetInvAccount(self.dental)
-        invoice_entry.SetInvPrice(invoice_value)
+            invoice_entry = Entry(self.book, invoice)
+            invoice_entry.SetDescription(description.encode("utf_8"))
+            invoice_entry.SetQuantity( GncNumeric(1) )
+            invoice_entry.SetInvAccount(self.dentalincomes)
+            invoice_entry.SetInvPrice(invoice_value)
 
-        invoice.PostToAccount(self.receivables, self.date, self.date,
-                              "memo... comment l'utiliser ?", True)
-        self.gcsession.save()
-        self.gcsession.end()
+            invoice.PostToAccount(self.receivables, self.date, self.date,
+                                  description.encode("utf_8"), True)
+            self.gcsession.save()
+            self.gcsession.end()
+            return self.invoice_id
+        
+        except:
+            self.gcsession.end()
+            raise
+            return False
 
-        return self.invoice_id
         
 
 class ActTypeParser(BaseCommand):
@@ -293,18 +301,15 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
         new_act = act.AppointmentActReference(**self.values)
         meta.session.add(new_act)
         meta.session.commit()
-       
 
-
-        date = meta.session.query(schedule.Appointment).filter(schedule.Appointment.id == appointment_id).one()
-        pdb.set_trace()
         if GNUCASH_ACCOUNT:
             invoice = GnuCashInvoice(patient_id, appointment_id)
             invoice_id = invoice.add_act(self.values["code"], 
                                          self.values["price"])
             new_act.invoice_id = invoice_id
             meta.session.commit()
-        print(new_act.id)
+
+        sys.exit(new_act.id)
 
 class ListActTypeCommand(BaseCommand):
     """ """
