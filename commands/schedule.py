@@ -109,7 +109,7 @@ class AddAppointmentCommand(BaseCommand, AppointmentParser):
         meta.session.add(new_schedule)
         meta.session.commit()
 
-        print(new_appointment.id)
+        sys.exit(new_appointment.id)
 
 
 class AddAppointmentMemoCommand(BaseCommand):

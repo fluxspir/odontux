@@ -6,7 +6,7 @@
 #
 
 from model import meta, administration, cotation, md, teeth
-from base import BaseCommand, GnuCash
+from base import BaseCommand
 
 import ConfigParser
 import os
@@ -16,6 +16,7 @@ import sys
 
 try:
     import gnucash
+    from base import GnuCash
     from gnucash import Session as GCSession
     from gnucash.gnucash_business import Customer, Address
     GNUCASH_ACCOUNT = True
@@ -118,21 +119,30 @@ class GnuCashCustomer(GnuCash):
         self.gcsession.end()
 
     def add_customer(self):
-        if self._test_id_already_in_database():
-            self.update_customer()
+        try:
+            if self._test_id_already_in_database():
+                self.update_customer()
+                return True
+            (new_customer, name) = self._set_name()
+            self._set_address(new_customer, name)
             return True
-        (new_customer, name) = self._set_name()
-        self._set_address(new_customer, name)
-        return True
+        except:
+            gcsession.end()
+            raise
+            return False
 
     def update_customer(self):
-        if not self._test_id_already_in_database():
-            self.self.add_customer()
+        try:
+            if not self._test_id_already_in_database():
+                self.self.add_customer()
+                return True
+            (customer, name) = self._update_name()
+            self._set_address(customer, name)
             return True
-        (customer, name) = self._update_name()
-        self._set_address(customer, name)
-        return True
-
+        except:
+            gcsession.end()
+            raise
+            return False
 class PatientParser(BaseCommand):
     """ """
     def parse_args(self, args, update=False):

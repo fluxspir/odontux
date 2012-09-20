@@ -10,11 +10,13 @@ from model import meta, administration
 import ConfigParser
 from optparse import OptionParser
 
+from decimal import Decimal
 import os
 
 try:
     import gnucash
     from gnucash import Session as GCSession
+    from gnucash import GncNumeric
     from gnucash.gnucash_business import Customer
 except ImportError:
     pass
@@ -44,21 +46,25 @@ class GnuCash():
         # Set the gnucash patient_id
         self.gcpatient_id = "pat_" + str(self.patient_id)
 
-        # Set up the Book for accounting
-        self.gcsession = GCSession(professionnalaccounting_url, True)
-        self.book = self.gcsession.get_book()
+        try:
+            # Set up the Book for accounting
+            self.gcsession = GCSession(professionnalaccounting_url, True)
+            self.book = self.gcsession.get_book()
 
-        # Set up the root on accounting book
-        self.root = self.book.get_root_account()
-        self.assets = self.root.lookup_by_name(assets)
-        self.receivables = self.assets.lookup_by_name(receivables)
-        self.incomes = self.root.lookup_by_name(incomes)
-        self.dentalincomes = self.incomes.lookup_by_name(dentalincomes)
+            # Set up the root on accounting book
+            self.root = self.book.get_root_account()
+            self.assets = self.root.lookup_by_name(assets)
+            self.receivables = self.assets.lookup_by_name(receivables)
+            self.incomes = self.root.lookup_by_name(incomes)
+            self.dentalincomes = self.incomes.lookup_by_name(dentalincomes)
 
-        # set the currency we'll use
-        currency = parser.get("gnucashdb", "currency")
-        commod_tab = self.book.get_table()
-        self.currency = commod_tab.lookup("CURRENCY", currency)
+            # set the currency we'll use
+            currency = parser.get("gnucashdb", "currency")
+            commod_tab = self.book.get_table()
+            self.currency = commod_tab.lookup("CURRENCY", currency)
+        except:
+            self.gcsession.end()
+            raise
 
     def gnc_numeric_from_decimal(self, decimal_value):
         sign, digits, exponent = decimal_value.as_tuple()

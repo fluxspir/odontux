@@ -17,6 +17,7 @@ import sys
 
 try:
     import gnucash
+    from base import GnuCash
     GNUCASH_ACCOUNT = True
 
 except ImportError:
@@ -156,6 +157,12 @@ class PaymentParser(BaseCommand):
         (options, args) = parser.parse_args(args)
         return options, args
 
+
+class GnuCashPayment(GnuCash):
+    """ GnuCashPayment tries to 
+    """
+    def add_payment(self):
+
 class AddPaymentCommand(BaseCommand, PaymentParser):
     """ """
     
@@ -179,7 +186,13 @@ class AddPaymentCommand(BaseCommand, PaymentParser):
         new_payment = compta.Payment(**self.values)
         meta.session.add(new_payment)
         meta.session.commit()
-        print(new_payment.id)
+
+        # Telling gnucash the patient paid (not telling for what)
+        if GNUCASH_ACCOUNT:
+            patient_payment = GnuCashPayment(payer_id)
+
+            
+        sys.exit(new_payment.id)
 
 
 class ListPaymentCommand(BaseCommand):
