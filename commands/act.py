@@ -58,11 +58,14 @@ class GnuCashInvoice(GnuCash):
         self.owner = self.book.CustomerLookupByID(self.gcpatient_id)
         # invoice_id is build as
         # Date + appointment_id
-        self.invoice_id = "inv_" + str(today) + "_" + str(appointment_id)
-        
         self.date = meta.session.query(schedule.Appointment)\
                     .filter(schedule.Appointment.id ==
                             appointment_id).one().agenda.endtime
+
+        self.invoice_id = "inv_" + str(self.date.year)+\
+                                   str(self.date.month) +\
+                                   str(self.date.day) + "_" +\
+                                   str(appointment_id)
 
     def _create_invoice_instance(self):
         return Invoice(self.book, self.invoice_id, self.currency, 
@@ -73,6 +76,10 @@ class GnuCashInvoice(GnuCash):
         try:
             if self.book.InvoiceLookupByID(self.invoice_id):
                 invoice = self.book.InvoiceLookupByID(self.invoice_id)
+                invoice.Unpost(True)
+                entries = invoice.GetEntries()
+                for entry in entries:
+                    invoice.AddEntry(entry)
             else:
                 invoice = self._create_invoice_instance()
 
@@ -97,7 +104,6 @@ class GnuCashInvoice(GnuCash):
             return False
 
         
-
 class ActTypeParser(BaseCommand):
     """ """
     def parse_args(self, args):

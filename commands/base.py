@@ -31,7 +31,7 @@ class GnuCash():
     def __init__(self, patient_id):
         self.parser = ConfigParser.ConfigParser()
         home = os.path.expanduser("~")
-        parser.read(os.path.join(home, ".odontuxrc"))
+        self.parser.read(os.path.join(home, ".odontuxrc"))
         professionnalaccounting_url = self.parser.get("gnucashdb", "url")
         assets = self.parser.get("gnucashdb", "assets")
         receivables = self.parser.get("gnucashdb", "receivables")
@@ -47,34 +47,30 @@ class GnuCash():
         # Set the gnucash patient_id
         self.gcpatient_id = "pat_" + str(self.patient_id)
 
-        try:
-            # Set up the Book for accounting
-            self.gcsession = GCSession(professionnalaccounting_url, True)
-            self.book = self.gcsession.get_book()
+        # Set up the Book for accounting
+        self.gcsession = GCSession(professionnalaccounting_url, True)
+        self.book = self.gcsession.get_book()
 
-            # Set up the root on accounting book
-            self.root = self.book.get_root_account()
-            # Assets
-            self.assets = self.root.lookup_by_name(assets)
-            # What the patient owes to dental office
-            self.receivables = self.assets.lookup_by_name(receivables)
-            # What the patient paid to dental office, but not usable
-            # because it needs to pass by the bank.
-            # the detail of dental fund is build in commands/compta.py
-            # while getting the paymenttype.
-            self.dentalfund = self.assets.lookup_by_name(dentalfund)
+        # Set up the root on accounting book
+        self.root = self.book.get_root_account()
+        # Assets
+        self.assets = self.root.lookup_by_name(assets)
+        # What the patient owes to dental office
+        self.receivables = self.assets.lookup_by_name(receivables)
+        # What the patient paid to dental office, but not usable
+        # because it needs to pass by the bank.
+        # the detail of dental fund is build in commands/compta.py
+        # while getting the paymenttype.
+        self.dentalfund = self.assets.lookup_by_name(dentalfund)
 
-            # Incomes
-            self.incomes = self.root.lookup_by_name(incomes)
-            self.dentalincomes = self.incomes.lookup_by_name(dentalincomes)
+        # Incomes
+        self.incomes = self.root.lookup_by_name(incomes)
+        self.dentalincomes = self.incomes.lookup_by_name(dentalincomes)
 
-            # set the currency we'll use
-            currency = parser.get("gnucashdb", "currency")
-            commod_tab = self.book.get_table()
-            self.currency = commod_tab.lookup("CURRENCY", currency)
-        except:
-            self.gcsession.end()
-            raise
+        # set the currency we'll use
+        currency = self.parser.get("gnucashdb", "currency")
+        commod_tab = self.book.get_table()
+        self.currency = commod_tab.lookup("CURRENCY", currency)
 
     def gnc_numeric_from_decimal(self, decimal_value):
         sign, digits, exponent = decimal_value.as_tuple()

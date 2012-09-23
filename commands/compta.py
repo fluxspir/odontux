@@ -178,14 +178,16 @@ class GnuCashPayment(GnuCash):
             dest_account = self._get_paymenttype(mean_id)
             amount = self.gnc_numeric_from_decimal(amount)
 
-            payer.ApplyPayment(invoice=None, self.receivables, dest_account, 
-                            amount, exch=GncNumeric(1), date, memo="", num="")
+#            payer.ApplyPayment(invoice=None, self.receivables, dest_account, 
+#                            amount, exch=GncNumeric(1), date, memo="", num="")
+            payer.ApplyPayment(None, self.receivables, dest_account, 
+                            amount, GncNumeric(1), date, "", "")
             
-            gcsession.save()
-            gcsession.end()
+            self.gcsession.save()
+            self.gcsession.end()
             return True
         except:
-            gcsession.end()
+            self.gcsession.end()
             raise
 
 
@@ -215,7 +217,7 @@ class AddPaymentCommand(BaseCommand, PaymentParser):
 
         # Telling gnucash the patient paid (not telling for what)
         if GNUCASH_ACCOUNT:
-            gcpayment = GnuCashPayment(payer_id)
+            gcpayment = GnuCashPayment(new_payment.payer_id)
             gcpayment.add_payment(new_payment.mean_id, new_payment.amount, 
                                         new_payment.cashin_date)
             
@@ -266,7 +268,7 @@ class ListPaymentCommand(BaseCommand):
             mean = self.mean.filter(compta.PaymentType.id == 
                                     payment.mean_id).one()
             # list acts covered by this payment :
-            for acte in payment.acts_id:
+            for acte in payment.acts:
                 # get acte date
                 exc_date = self.date.filter(schedule.Appointment.id ==
                                             acte.appointment_id)
@@ -281,6 +283,11 @@ class ListPaymentCommand(BaseCommand):
                     payment.cashin_date)\
                     .encode("utf_8")))
                     
+
+class GnuCashInvoice(GnuCash):
+    """ """
+    def confirm_invoice_payment(self):
+
 
 class LinkPaymentActCommand(BaseCommand):
     """ """
@@ -313,6 +320,14 @@ class LinkPaymentActCommand(BaseCommand):
         # select the act 
         acte = self.acte.filter(act.AppointmentActReference.id ==
                            options.act_id).one()
-        
+
         payment.acts.append(acte)
+        acte.paid = True
         meta.session.commit()
+
+        unpaid_acts = self.acte.filter(act.AppointmentActReference.invoice_id 
+                                == acte.invoice_id)\
+                                .filter(act.AppointmentActReference.paid
+                                == False).all()
+        if len(unpaid_acts) == 0:
+            pass

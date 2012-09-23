@@ -127,7 +127,7 @@ class GnuCashCustomer(GnuCash):
             self._set_address(new_customer, name)
             return True
         except:
-            gcsession.end()
+            self.gcsession.end()
             raise
             return False
 
@@ -140,7 +140,7 @@ class GnuCashCustomer(GnuCash):
             self._set_address(customer, name)
             return True
         except:
-            gcsession.end()
+            self.gcsession.end()
             raise
             return False
 class PatientParser(BaseCommand):
@@ -257,9 +257,9 @@ class PatientParser(BaseCommand):
                         help="date since when the person lives here",
                         dest="update_date")
 
-        parser.add_option("--socialsecuritynum", action="store", type="string",
+        parser.add_option("--SSN", "--socialsecuritynum", action="store",
                         help="social security number",
-                        dest="socialsecuritynum")
+                        dest="socialsecuritynum", type="string")
 
         parser.add_option("--cmu", action="store_true", default=False,
                         help="the patient has cmu",

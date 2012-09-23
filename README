@@ -7,7 +7,8 @@ Required :
 	* python : odontux-core is written in that language
 	* sqlalchemy : for database access
 	* postgresql : that may be change to sqlite or others, in model/__init__.py
-Advised :
+	* python-setuptools
+Recommanded :
 	* gnucash, python-gnucash, libdbd-pgsql
 
 What will it need :
@@ -61,6 +62,10 @@ And then, add a dental_office (this probably will be you, or the dental office y
 	$ switch_patient "patient_id"
 	$ {next,prev}appointment
 
+
+####
+	$ sudo easyinstall virtualenv
+	$ virtualenv --no-site-packages env
 
 Any question ? Ask Franck on the irc  oftc.net   (i'm working... the response could arrive late)
 or send me a mail   franck {att} kernlog.net
