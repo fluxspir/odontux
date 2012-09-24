@@ -9,7 +9,7 @@ from meta import Base
 from tables import payment_act_table
 import cotation, schedule, headneck, teeth
 import sqlalchemy
-from sqlalchemy import Table, Column, Integer, String, Numeric
+from sqlalchemy import Table, Column, Integer, String, Numeric, Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 
@@ -45,3 +45,4 @@ class AppointmentActReference(Base):
     code = Column(String, nullable=False)
     price = Column(Numeric, nullable=False)
     invoice_id = Column(String)
+    paid = Column(Boolean, default=False)

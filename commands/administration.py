@@ -14,6 +14,8 @@ from sqlalchemy import or_
 from gettext import gettext as _
 import sys
 
+import pdb
+
 try:
     import gnucash
     from base import GnuCash
@@ -44,7 +46,7 @@ class GnuCashCustomer(GnuCash):
                + self.patient.firstname
         new_customer = Customer(self.book, self.gcpatient_id, self.currency, 
                                 name.encode("utf_8"))
-        self.gcsession.save()
+#        self.gcsession.save()
         return new_customer, name
 
     def _update_name(self):
@@ -53,7 +55,7 @@ class GnuCashCustomer(GnuCash):
                + self.patient.firstname
         customer = self.book.CustomerLookupByID(self.gcpatient_id)
         customer.SetName(name.encode("utf_8"))
-        self.gcsession.save()
+#        self.gcsession.save()
         return customer, name
 
     def _set_address(self, customer, patientname):
@@ -114,9 +116,7 @@ class GnuCashCustomer(GnuCash):
         if self.patient.family.addresses[-1].country:
             country = self.patient.family.addresses[-1].country.encode("utf_8")
         address.SetAddr4(county + " " + country)
-
-        self.gcsession.save()
-        self.gcsession.end()
+#        self.gcsession.save()
 
     def add_customer(self):
         try:
@@ -125,6 +125,7 @@ class GnuCashCustomer(GnuCash):
                 return True
             (new_customer, name) = self._set_name()
             self._set_address(new_customer, name)
+            self.gcsession.end()
             return True
         except:
             self.gcsession.end()
@@ -138,11 +139,14 @@ class GnuCashCustomer(GnuCash):
                 return True
             (customer, name) = self._update_name()
             self._set_address(customer, name)
+            self.gcsession.end()
             return True
         except:
             self.gcsession.end()
             raise
             return False
+
+
 class PatientParser(BaseCommand):
     """ """
     def parse_args(self, args, update=False):

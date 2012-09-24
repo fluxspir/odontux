@@ -11,8 +11,11 @@ from model import meta, compta, administration, act, schedule, tables
 
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
+#from gnucash.gnucash_business import Invoice
+
 from sqlalchemy import or_
 from gettext import gettext as _
+import os
 import sys
 
 try:
@@ -155,6 +158,10 @@ class PaymentParser(BaseCommand):
                         help="Date when the cash enters",
                         dest="cashin_date")
 
+        parser.add_option("-i", "--invoice", action="append", type="string",
+                        help="invoices that are paid with this payment",
+                        dest="invoices")
+
         (options, args) = parser.parse_args(args)
         return options, args
 
@@ -178,12 +185,16 @@ class GnuCashPayment(GnuCash):
             dest_account = self._get_paymenttype(mean_id)
             amount = self.gnc_numeric_from_decimal(amount)
 
+#            invoices_list = []
+#            for invoice_id in invoices_id:
+#                invoices_list.append(self.book.InvoiceLookupByID(invoice_id))
+                
 #            payer.ApplyPayment(invoice=None, self.receivables, dest_account, 
 #                            amount, exch=GncNumeric(1), date, memo="", num="")
             payer.ApplyPayment(None, self.receivables, dest_account, 
                             amount, GncNumeric(1), date, "", "")
             
-            self.gcsession.save()
+#            self.gcsession.save()
             self.gcsession.end()
             return True
         except:
@@ -210,6 +221,8 @@ class AddPaymentCommand(BaseCommand, PaymentParser):
             self.values["comments"] = options.comments.decode("utf_8")
         if options.cashin_date:
             self.values["cashin_date"] = options.cashin_date
+        if options.invoices:
+            options.invoices = options.invoices.decode("utf_8")
 
         new_payment = compta.Payment(**self.values)
         meta.session.add(new_payment)
@@ -219,7 +232,7 @@ class AddPaymentCommand(BaseCommand, PaymentParser):
         if GNUCASH_ACCOUNT:
             gcpayment = GnuCashPayment(new_payment.payer_id)
             gcpayment.add_payment(new_payment.mean_id, new_payment.amount, 
-                                        new_payment.cashin_date)
+                                  new_payment.cashin_date)
             
         sys.exit(new_payment.id)
 
@@ -284,11 +297,15 @@ class ListPaymentCommand(BaseCommand):
                     .encode("utf_8")))
                     
 
-class GnuCashInvoice(GnuCash):
-    """ """
-    def confirm_invoice_payment(self):
-
-
+#class GnuCashInvoice(GnuCash):
+#    """ """
+#    def confirm_invoice_payment(self, invoice_id):
+#        invoice = self.book.InvoiceLookupByID(invoice_id)
+#        patient =  self.book.CustomerLookupByID(self.gcpatient_id)
+#        patient.ApplyPayment(invoice)
+#
+#
+#
 class LinkPaymentActCommand(BaseCommand):
     """ """
 
@@ -300,6 +317,10 @@ class LinkPaymentActCommand(BaseCommand):
 
     def parse_args(self, args):
         parser = self.get_parser()
+
+        parser.add_option("--patient", action="store", type="string",
+                        help="the patient",
+                        dest="patient_id")
 
         parser.add_option("--act", action="store", type="string",
                         help="act id we're telling that was paid",
@@ -314,6 +335,10 @@ class LinkPaymentActCommand(BaseCommand):
 
     def run(self, args):
         (options, args) = self.parse_args(args)
+        if not options.patient_id:
+            patient_id = os.getenv("patient_id")
+        else:
+            patient_id = options.patient_id
         # select the payment
         payment = self.payment.filter(compta.Payment.id ==
                            options.payment_id).one()
@@ -329,5 +354,6 @@ class LinkPaymentActCommand(BaseCommand):
                                 == acte.invoice_id)\
                                 .filter(act.AppointmentActReference.paid
                                 == False).all()
-        if len(unpaid_acts) == 0:
-            pass
+#        if len(unpaid_acts) == 0:
+#            invoice = GnuCashInvoice(patient_id)
+#            invoice.confirm_invoice_payment(acte.invoice_id)

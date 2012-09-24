@@ -77,21 +77,22 @@ class GnuCashInvoice(GnuCash):
             if self.book.InvoiceLookupByID(self.invoice_id):
                 invoice = self.book.InvoiceLookupByID(self.invoice_id)
                 invoice.Unpost(True)
-                entries = invoice.GetEntries()
-                for entry in entries:
-                    invoice.AddEntry(entry)
+                invoice.BeginEdit()
             else:
                 invoice = self._create_invoice_instance()
+                invoice.BeginEdit()
 
             description = code
             invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
 
             invoice_entry = Entry(self.book, invoice)
+            invoice_entry.BeginEdit()
             invoice_entry.SetDescription(description.encode("utf_8"))
             invoice_entry.SetQuantity( GncNumeric(1) )
             invoice_entry.SetInvAccount(self.dentalincomes)
             invoice_entry.SetInvPrice(invoice_value)
-
+            invoice_entry.CommitEdit()
+            invoice.CommitEdit()
             invoice.PostToAccount(self.receivables, self.date, self.date,
                                   description.encode("utf_8"), True)
             self.gcsession.save()

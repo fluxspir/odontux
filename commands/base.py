@@ -12,6 +12,7 @@ from optparse import OptionParser
 
 from decimal import Decimal
 import os
+import pdb
 
 try:
     import gnucash
@@ -46,7 +47,6 @@ class GnuCash():
 
         # Set the gnucash patient_id
         self.gcpatient_id = "pat_" + str(self.patient_id)
-
         # Set up the Book for accounting
         self.gcsession = GCSession(professionnalaccounting_url, True)
         self.book = self.gcsession.get_book()
