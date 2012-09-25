@@ -7,7 +7,7 @@ Required :
 	* python : odontux-core is written in that language
 	* sqlalchemy : for database access
 	* postgresql : that may be change to sqlite or others, in model/__init__.py
-	* python-setuptools
+	* python-setuptools, python-pyramid, python-virtualenv
 Recommanded :
 	* gnucash, python-gnucash, libdbd-pgsql
 
