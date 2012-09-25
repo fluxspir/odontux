@@ -2,7 +2,7 @@
 
 # go to odontux dir, and add it to PATH
 cd ~/odontux
-PATH=~/odontux:~/bin:"${PATH}"
+PATH=~/odontux/odontux:~/bin:"${PATH}"
 
 _odontux() 
 {
@@ -21,7 +21,7 @@ _odontux()
     fi
 
 }
-complete -F _odontux odontux
+complete -F _odontux odt
 
 #odontuxsubcommandlist > subcommandlist
 #complete -F _odontux_subcommand odontux
@@ -44,11 +44,11 @@ if [ -f ~/.bashodontuxvar ]; then
 fi
 
 set_prompt () {
-    odontux test_patientappointment
+    odt test_patientappointment
     if [ $? == 0 ] ; then
-        PS1="${Green}\u${White}@${BIYellow}${patient_id}${White}_${BICyan}`odontux get_patientprompt ${patient_id}`${White}-${Blue}${appointment_id}${White}:${Purple}\w${Color_Off}$ "
+        PS1="${Green}\u${White}@${BIYellow}${patient_id}${White}_${BICyan}`odt get_patientprompt ${patient_id}`${White}-${Blue}${appointment_id}${White}:${Purple}\w${Color_Off}$ "
     elif [ $? == 1 ] ; then
-        PS1="${Green}\u${White}@${BIYellow}${patient_id}${White}_${BICyan}`odontux get_patientprompt ${patient_id}`${White}-${UYellow}OUT${White}:${Purple}\w${Color_Off}$ "
+        PS1="${Green}\u${White}@${BIYellow}${patient_id}${White}_${BICyan}`odt get_patientprompt ${patient_id}`${White}-${UYellow}OUT${White}:${Purple}\w${Color_Off}$ "
     else
         PS1="LAID"
     fi
@@ -57,7 +57,7 @@ set_prompt () {
 switch_patient () {
     patient_id=$1
     export patient_id
-    appointment_id=$(odontux get_appointment)
+    appointment_id=$(odt get_appointment)
     export appointment_id
     set_prompt
 }
@@ -70,14 +70,14 @@ switch_appointment () {
 
 next_appointment () {
     next_appointment=$(($appointment_id + 1))
-    patient_id=$(odontux get_appointmentpatient $next_appointment)
+    patient_id=$(odt get_appointmentpatient $next_appointment)
     switch_patient $patient_id
     switch_appointment $next_appointment
 }
 
 prev_appointment () {
     next_appointment=$(($appointment_id - 1))
-    patient_id=$(odontux get_appointmentpatient $next_appointment)
+    patient_id=$(odt get_appointmentpatient $next_appointment)
     switch_patient $patient_id
     switch_appointment $next_appointment
 }
