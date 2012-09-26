@@ -10,9 +10,8 @@ from pyramid.paster import (
     )
 
 from ..models import (
-    DBSession,
-    MyModel,
-    Base,
+    meta,
+    users,
     )
 
 def usage(argv):
@@ -28,8 +27,17 @@ def main(argv=sys.argv):
     setup_logging(config_uri)
     settings = get_appsettings(config_uri)
     engine = engine_from_config(settings, 'sqlalchemy.')
-    DBSession.configure(bind=engine)
-    Base.metadata.create_all(engine)
+    meta.session.configure(bind=engine)
+    meta.Base.metadata.create_all(engine)
     with transaction.manager:
-        model = MyModel(name='one', value=1)
-        DBSession.add(model)
+#        model = MyModel(name='one', value=1)
+#        DBSession.add(model)
+        values_user = { "username" : "franck",
+                "password" : "secret",
+                "role" : 1,
+                "lastname" : "labadille".upper(),
+                "firstname" : "franck".title(),
+                "title" : "Dr",
+                }
+        my_user = users.OdontuxUser(**values_user)
+        meta.session.add(my_user)

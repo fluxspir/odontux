@@ -12,7 +12,6 @@ from optparse import OptionParser
 
 from decimal import Decimal
 import os
-import pdb
 
 try:
     import gnucash

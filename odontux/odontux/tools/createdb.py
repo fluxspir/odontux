@@ -7,7 +7,7 @@
 import sqlalchemy
 from sqlalchemy import create_engine
 import models
-from model import meta
+from models import meta
 
 
 class CreateOdontuxDatabaseTool():
@@ -19,5 +19,5 @@ class CreateOdontuxDatabaseTool():
         pass
 
     def run(self, args):
-        model.init()
+        models.init()
         meta.Base.metadata.create_all(bind=meta.session.bind.engine)

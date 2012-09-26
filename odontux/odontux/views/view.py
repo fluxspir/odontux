@@ -7,10 +7,10 @@
 
 from pyramid.view import view_config
 
-from model import meta, administration
+from ..models import meta, users
 
 @view_config(route_name='home', renderer='templates/template.pt')
 def my_view(request):
-    one = meta.session.query(administration.Patient)\
-          .filter(administration.Patient.id == 1).one()
-    return {'one':one ; 'project':'odontux'}
+    one = meta.session.query(users.OdontuxUser)\
+          .filter(users.OdontuxUser == 1).one()
+    return {'one':one , 'project':'odontux'}

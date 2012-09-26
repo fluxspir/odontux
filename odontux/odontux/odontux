@@ -11,7 +11,7 @@ import sys
 
 import commands
 import tools
-import model
+import models
 
 def get_command(command_name):
     """Find the command class.
@@ -50,7 +50,7 @@ def get_tool(tool_name):
     return None
 
 
-model.init()
+models.init()
 
 command_name = sys.argv[1]
 args = sys.argv[2:]

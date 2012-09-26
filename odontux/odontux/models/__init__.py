@@ -11,7 +11,7 @@ import ConfigParser
 import os
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from zope.sqlalchemy import ZopeTransactionExtension
 
 from users import OdontuxUser, DentalOffice
@@ -41,6 +41,6 @@ def init():
     engine = create_engine(db_url, echo=False)
     #Session = sessionmaker(bind=engine)
     Session = scoped_session(sessionmaker(
-                             extension=ZopeTransactionExtension()))
+                             extension=ZopeTransactionExtension(bind=engine)))
     meta.session = Session()
 

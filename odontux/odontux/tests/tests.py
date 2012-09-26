@@ -18,23 +18,23 @@ class TestMyView(unittest.TestCase):
         self.config = testing.setUp()
         from sqlalchemy import create_engine
         engine = create_engine(db_url)
-        from .models import (
-            tables
-            users
-            administration
-            md
-            anamnesis
-            headneck
-            softtissues
-            periodonte
-            teeth
-            schedule
-            medication
-            act
-            cotation
-            compta
+        from ..models import (
+            tables,
+            users,
+            administration,
+            md,
+            anamnesis,
+            headneck,
+            softtissues,
+            periodonte,
+            teeth,
+            schedule,
+            medication,
+            act,
+            cotation,
+            compta,
             )
-        from constants import (
+        from ..constants import (
             ROLE_DENTIST,
             ROLE_NURSE,
             ROLE_ASSISTANT,
@@ -43,7 +43,7 @@ class TestMyView(unittest.TestCase):
             )
 
         meta.session.configure(bind=engine)
-        Base.metadata.create_all(engine)
+        meta.Base.metadata.create_all(engine)
         with transaction.manager:
 #            model = MyModel(name='one', value=55)
 #            DBSession.add(model)
@@ -55,7 +55,8 @@ class TestMyView(unittest.TestCase):
                 "firstname" : "franck".title(),
                 "title" : "Dr",
                 }
-
+            my_user = users.OdontuxUser(**values_user)
+            meta.session.add(my_user)
 
     def tearDown(self):
         meta.session.remove()
