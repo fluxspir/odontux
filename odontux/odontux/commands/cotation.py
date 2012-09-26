@@ -6,7 +6,7 @@
 #
 
 from base import BaseCommand
-from models import act, cotation, meta
+from odontux.models import act, cotation, meta
 
 from sqlalchemy import or_
 from gettext import gettext as _

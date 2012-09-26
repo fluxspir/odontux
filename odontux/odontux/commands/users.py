@@ -6,7 +6,7 @@
 #
 
 from base import BaseCommand
-from models import meta, users, administration
+from odontux.models import meta, users, administration
 
 import os
 import sys

@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from models import meta, medication
+from odontux.models import meta, medication
 from base import BaseCommand
 
 from gettext import gettext as _

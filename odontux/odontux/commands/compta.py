@@ -7,7 +7,7 @@
 #
 
 from base import BaseCommand
-from models import meta, compta, administration, act, schedule, tables
+from odontux.models import meta, compta, administration, act, schedule, tables
 
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 

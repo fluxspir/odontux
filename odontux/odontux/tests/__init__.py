@@ -5,7 +5,7 @@ import os
 
 from pyramid import testing
 
-from .models import meta
+from models import meta
 
 class TestMyView(unittest.TestCase):
     def setUp(self):

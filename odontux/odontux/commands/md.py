@@ -6,7 +6,7 @@
 #
 
 from base import BaseCommand
-from models import md, meta, administration
+from odontux.models import md, meta, administration
 
 
 from sqlalchemy import or_

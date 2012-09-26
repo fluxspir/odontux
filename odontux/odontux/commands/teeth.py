@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from models import meta, teeth, headneck
+from odontux.models import meta, teeth, headneck
 from base import BaseCommand
 
 from sqlalchemy import and_

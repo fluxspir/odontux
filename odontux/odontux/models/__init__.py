@@ -39,9 +39,8 @@ def init():
     db_url = parser.get("db", "url")
 
     engine = create_engine(db_url, echo=False)
-    #Session = sessionmaker(bind=engine)
-    Session = scoped_session(sessionmaker(
-                             extension=ZopeTransactionExtension()))
+    Session = sessionmaker(bind=engine)
+    #Session = scoped_session(sessionmaker(
+#                             extension=ZopeTransactionExtension()))
     meta.session = Session()
-    meta.session.configure(bind=engine)
 

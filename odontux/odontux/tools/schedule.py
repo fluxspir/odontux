@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from models import meta, schedule
+from odontux.models import meta, schedule
 from base import BaseTool
 
 import sqlalchemy

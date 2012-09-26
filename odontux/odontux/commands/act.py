@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from models import meta, act, administration, schedule, cotation, teeth
+from odontux.models import meta, act, administration, schedule, cotation, teeth
 from base import BaseCommand
 import constants
 

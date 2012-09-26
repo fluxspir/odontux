@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from models import meta, cotation
+from odontux.models import meta, cotation
 from base import BaseTool
 
 

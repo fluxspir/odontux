@@ -5,7 +5,7 @@
 # licence BSD
 #
 
-from models import meta, administration, cotation, md, teeth
+from odontux.models import meta, administration, cotation, md, teeth
 from base import BaseCommand
 
 import ConfigParser

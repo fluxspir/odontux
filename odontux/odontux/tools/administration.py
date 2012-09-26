@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from models import meta, administration
+from odontux.models import meta, administration
 from base import BaseTool
 
 from gettext import gettext as _
