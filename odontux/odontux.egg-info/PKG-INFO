@@ -1,0 +1,35 @@
+Metadata-Version: 1.1
+Name: odontux
+Version: 0.0
+Summary: odontux
+Home-page: labadille.net
+Author: Franck LABADILLE
+Author-email: franck@labadille.net
+License: UNKNOWN
+Description: odontux README
+        ==================
+        
+        Getting Started
+        ---------------
+        
+        - cd <directory containing this file>
+        
+        - $venv/bin/python setup.py develop
+        
+        - $venv/bin/initialize_odontux_db development.ini
+        
+        - $venv/bin/pserve development.ini
+        
+        
+        
+        0.0
+        ---
+        
+        -  Initial version
+        
+Keywords: odontux odontology dental
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Framework :: Pyramid
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Internet :: WWW/HTTP :: WSGI :: Application

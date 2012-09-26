@@ -5,8 +5,6 @@
 # Licence BSD
 #
 
-import model
-from model import meta
 from meta import Base
 import sqlalchemy
 import datetime

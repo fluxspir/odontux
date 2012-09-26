@@ -12,6 +12,7 @@ import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from zope.sqlalchemy import ZopeTransactionExtension
 
 from users import OdontuxUser, DentalOffice
 from md import MedecineDoctor
@@ -36,9 +37,10 @@ def init():
     home = os.path.expanduser("~")
     parser.read(os.path.join(home, ".odontuxrc"))
     db_url = parser.get("db", "url")
-#    db_url = parser.get("db_test", "url_test")
 
     engine = create_engine(db_url, echo=False)
-    Session = sessionmaker(bind=engine)
+    #Session = sessionmaker(bind=engine)
+    Session = scoped_session(sessionmaker(
+                             extension=ZopeTransactionExtension()))
     meta.session = Session()
 
