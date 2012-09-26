@@ -41,6 +41,7 @@ def init():
     engine = create_engine(db_url, echo=False)
     #Session = sessionmaker(bind=engine)
     Session = scoped_session(sessionmaker(
-                             extension=ZopeTransactionExtension(bind=engine)))
+                             extension=ZopeTransactionExtension()))
     meta.session = Session()
+    meta.session.configure(bind=engine)
 
