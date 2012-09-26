@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from model import meta, teeth, headneck
+from models import meta, teeth, headneck
 from base import BaseCommand
 
 from sqlalchemy import and_

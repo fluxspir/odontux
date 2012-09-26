@@ -4,7 +4,7 @@
 # Licence BSD
 #
 
-from model import anamnesis, meta
+from models import anamnesis, meta
 from base import BaseCommand
 
 from gettext import gettext as _

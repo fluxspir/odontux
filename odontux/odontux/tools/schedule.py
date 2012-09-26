@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from model import meta, schedule
+from models import meta, schedule
 from base import BaseTool
 
 import sqlalchemy

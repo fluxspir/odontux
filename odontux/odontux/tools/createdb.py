@@ -6,7 +6,7 @@
 
 import sqlalchemy
 from sqlalchemy import create_engine
-import model
+import models
 from model import meta
 
 

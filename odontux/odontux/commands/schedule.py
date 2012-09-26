@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from model import meta, schedule, administration
+from models import meta, schedule, administration
 from base import BaseCommand
 
 from gettext import gettext as _

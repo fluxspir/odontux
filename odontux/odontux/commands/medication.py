@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from model import meta, medication
+from models import meta, medication
 from base import BaseCommand
 
 from gettext import gettext as _

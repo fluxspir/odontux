@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Franck Labadille
+# 2012/08/26
+# v0.4
+# Licence BSD
+#
+
+import sys
+
+import commands
+import tools
+import model
+
+def get_command(command_name):
+    """Find the command class.
+
+    Returns the class itself or None if not found.
+
+    """
+    for attrname in dir(commands):
+        if "Command" not in attrname:
+            continue
+
+        attr = getattr(commands, attrname)
+
+        if hasattr(attr, "command_name"):
+            if attr.command_name == command_name:
+                return attr
+
+    return None
+
+def get_tool(tool_name):
+    """Find the tool class.
+
+    Returns the class itself or None if not found.
+
+    """
+    for attrname in dir(tools):
+        if "Tool" not in attrname:
+            continue
+
+        attr = getattr(tools, attrname)
+
+        if hasattr(attr, "tool_name"):
+            if attr.tool_name == tool_name:
+                return attr
+
+    return None
+
+
+model.init()
+
+command_name = sys.argv[1]
+args = sys.argv[2:]
+
+CommandClass = get_command(command_name)
+
+if CommandClass is None:
+    # TODO: call usage/help
+#    raise ValueError("Unknown command '{}'.".format(command_name))
+    
+    tool_name = command_name
+
+    ToolClass = get_tool(tool_name)
+
+    if ToolClass is None:
+        # TODO: call usage/help
+        raise ValueError("Unknown command/tool '{}'.".format(tool_name))
+    tool = ToolClass()
+    tool.run(args)
+    sys.exit(0)
+
+cmd = CommandClass()
+cmd.run(args)

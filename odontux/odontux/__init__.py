@@ -9,12 +9,10 @@ from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
 from model import meta
-import os
 
 
 def main(global_config, **settings):
-    """
-    This functions returns a WSGI application.
+    """ This functions returns a WSGI application.
     """
     engine = engine_from_config(settings, "sqlalchemy.")
     meta.session.configure(bind=engine)

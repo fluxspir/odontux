@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from model import meta, administration
+from models import meta, administration
 
 import ConfigParser
 from optparse import OptionParser

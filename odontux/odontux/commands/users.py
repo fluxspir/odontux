@@ -6,7 +6,7 @@
 #
 
 from base import BaseCommand
-from model import meta, users, administration
+from models import meta, users, administration
 
 import os
 import sys

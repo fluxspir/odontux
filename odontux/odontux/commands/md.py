@@ -6,7 +6,7 @@
 #
 
 from base import BaseCommand
-from model import md, meta, administration
+from models import md, meta, administration
 
 
 from sqlalchemy import or_

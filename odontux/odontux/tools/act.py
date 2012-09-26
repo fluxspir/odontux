@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from model import meta, act, administration, cotation
+from models import meta, act, administration, cotation
 from base import BaseTool
 
 from gettext import gettext as _

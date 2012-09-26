@@ -7,3 +7,5 @@ lala*
 *-OLD
 bashodontuxvar
 virtualenv
+development.ini
+production.ini
