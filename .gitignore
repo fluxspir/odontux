@@ -9,3 +9,7 @@ bashodontuxvar
 virtualenv
 development.ini
 production.ini
+bin
+include
+lib
+local

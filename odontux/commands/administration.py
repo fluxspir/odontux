@@ -16,14 +16,14 @@ import sys
 
 import pdb
 
-try:
-    import gnucash
-    from base import GnuCash
-    from gnucash import Session as GCSession
-    from gnucash.gnucash_business import Customer, Address
-    GNUCASH_ACCOUNT = True
-except ImportError:
-    GNUCASH_ACCOUNT = False
+#try:
+import gnucash
+from base import GnuCash
+from gnucash import Session as GCSession
+from gnucash.gnucash_business import Customer, Address
+GNUCASH_ACCOUNT = True
+#except ImportError:
+#    GNUCASH_ACCOUNT = False
 
 
 locale = "fr"
