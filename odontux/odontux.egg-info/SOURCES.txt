@@ -57,6 +57,7 @@ odontux/static/pyramid-small.png
 odontux/static/pyramid.png
 odontux/static/transparent.gif
 odontux/templates/mytemplate.pt
+odontux/tests/__init__.py
 odontux/tools/__init__.py
 odontux/tools/act.py
 odontux/tools/administration.py
