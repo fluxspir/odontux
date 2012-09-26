@@ -11,4 +11,3 @@ Getting Started
 - $venv/bin/initialize_odontux_db development.ini
 
 - $venv/bin/pserve development.ini
-

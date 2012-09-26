@@ -21,7 +21,6 @@ Description: odontux README
         - $venv/bin/pserve development.ini
         
         
-        
         0.5
         ___
         
