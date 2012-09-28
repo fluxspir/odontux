@@ -6,8 +6,8 @@
 
 import sqlalchemy
 from sqlalchemy import create_engine
-import odontux.models
-from odontux.models import meta
+import models
+from models import meta
 
 
 class CreateOdontuxDatabaseTool():

@@ -6,7 +6,7 @@
 #
 
 
-from odontux.models import meta, administration, schedule
+from models import meta, administration, schedule
 from base import BaseTool
 
 import sqlalchemy
