@@ -57,7 +57,7 @@ class GetToothTool(BaseTool):
         for tooth in query:
             if tooth.name == options.name:
                 print(_(tooth.id))
-                sys.exit(0)
+                sys.exit(tooth.id)
         print(_("The tooth isn't in database yet"))
 
 class GetToothUnderSurveillanceTool(BaseTool):
