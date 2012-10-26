@@ -1,19 +1,0 @@
-Ä}q(U	collectorqUcoverage v3.5.2qUlinesq}q(UL/home/franck/bin/src_script/projects/python/odontux/odontux/commands/base.pyq]q(KK
-KKKKKKKKKKKKKJeUJ/home/franck/bin/src_script/projects/python/odontux/odontux/models/meta.pyq]q	(KK
-KeUP/home/franck/bin/src_script/projects/python/odontux/odontux/models/periodonte.pyq
-]q(KK	K
-KKKKKKKKKKKKKKK K#K$K%K&eUV/home/franck/bin/src_script/projects/python/odontux/odontux/commands/administration.pyq]q(KK	KKKKKKKKKKKKKK"eUG/home/franck/bin/src_script/projects/python/odontux/odontux/__init__.pyq]qKaUN/home/franck/bin/src_script/projects/python/odontux/odontux/models/__init__.pyq]q(KK	K
-KKKKKKKKKKKKKKKKK K#eUJ/home/franck/bin/src_script/projects/python/odontux/odontux/commands/md.pyq]q(KK	KKKKKKKUKVKXKZK]KíKìKïKóKöK£K∏KπKªKΩK¿eUN/home/franck/bin/src_script/projects/python/odontux/odontux/models/headneck.pyq]q(KKK	K
-KKKKKKKKKKKKKKK K!K"K#K$K'K(K)K*K+K,K-K.K/K0K1K2K3K4K5K6K7K8K9K:K;KBKCKDKEKFKGeUO/home/franck/bin/src_script/projects/python/odontux/odontux/models/anamnesis.pyq]q(KKK	K
-KKKKKKKKKKKKKKKKK"K#K$K%K&K'K(K)K*K-K.K/K0K1K2K3K4K5K6K7eUN/home/franck/bin/src_script/projects/python/odontux/odontux/models/cotation.pyq]q(KK	K
-KKKKKKKKKKKKKKK K#K$K%K&K'K*K+K,K-K.K/K0K1K2K3K4K5K6K7K9KAKDeUK/home/franck/bin/src_script/projects/python/odontux/odontux/models/teeth.pyq]q(KKK	K
-KKKKKK'K(K)K*K+K,K-K0KAKBKCKDKEKFKGKHKIKJKKKLKMKNKOKPKSKiKjKkKlKmKnKoKpKqKrKsKtKuKvKwKzKëKíKìKîKïKñKóKòKôKöKõKúKùKûeUL/home/franck/bin/src_script/projects/python/odontux/odontux/models/compta.pyq]q(KK	K
-KKKKKKKKKKKK"K)K*K+K,K-K.K/K0K1K2K3K4K5eUI/home/franck/bin/src_script/projects/python/odontux/odontux/models/act.pyq]q(KK	K
-KKKKKKKKKKKKKKKKK K!K"K#K&K'K(K)K*K+K,K-K.K/K0eUP/home/franck/bin/src_script/projects/python/odontux/odontux/commands/cotation.pyq ]q!(KK	KKKKKKKKSK[K]K_KbKrKKÑKÖKáKäKóK¢K£K•KßK™K∑K√KƒK∆K»KÀK˛KˇMMMMMMM!M#M&M0M=M>M@MBMEMOM~MMÅMÉMÜeUK/home/franck/bin/src_script/projects/python/odontux/odontux/models/users.pyq"]q#(KK	K
-KKKKKKKKKKKKKK K!K"K#K$K%K(K)K*K+K,K-K.K/K0K1K2K3K4K5K6K7K8K9K:K;K<K=K>K?K@KAKBeUP/home/franck/bin/src_script/projects/python/odontux/odontux/commands/__init__.pyq$]q%(KKK
-KKeUP/home/franck/bin/src_script/projects/python/odontux/odontux/models/medication.pyq&]q'(KKK	K
-KKKKKKKKKKKKKKK K!K"K#K$K%K&K'K*K+K,K-K.K/eUL/home/franck/bin/src_script/projects/python/odontux/odontux/models/tables.pyq(]q)(KK
-KKKKKKKKKKKK K!K$K%K&K*K+K,K.K/K0K2K3K4K6K7K8K:K;K<K>K?K@KDKEKFKHKIKJKLKMKNeUQ/home/franck/bin/src_script/projects/python/odontux/odontux/commands/specialty.pyq*]q+(KK	KKKKKKKK!K#K&K0K4K6K8K;eUM/home/franck/bin/src_script/projects/python/odontux/odontux/commands/users.pyq,]q-(KK	KKKKKKàKâKãKçKêK‡K„KÂKÁKÍMMNMOMQMíMìMïMóMöeUT/home/franck/bin/src_script/projects/python/odontux/odontux/models/administration.pyq.]q/(KK	K
-KKKKKKKKKKK K!K"K#K$K%K&K'K*K+K,K-K.K1K2K3K4K5K6K9K:K;K<K=K>K?KBKCKDKEKFKGKHKIKKKLKNKOKPKQKRKSKTKUKVKWKXKYKZK[K\K]K^K_K`KaKbKcKdKeKfKgKhKiKjKkKlKmKoKuK|K}K~KeUN/home/franck/bin/src_script/projects/python/odontux/odontux/models/schedule.pyq0]q1(KK	K
-KKKKKKKKKKKKKKKKK K!K"K#K$K%K&K'K(K)K*K-K.K/K0K1K2K5K6K7K8K9K:K;K<eUH/home/franck/bin/src_script/projects/python/odontux/odontux/models/md.pyq2]q3(K	KKKKKKKKKKKKKKKKKeUQ/home/franck/bin/src_script/projects/python/odontux/odontux/models/softtissues.pyq4]q5(KK	K
-KKKKKKKKKKKKKKK K!K"K#K$K'K(K)K*K+K,K-K0K1K2K3K4K5K6K9K:K;K<K=K>K?KBKCKDKEKFKGKHKKKLKMKNKOKPKQKTKUKVKWKXKYKZeuu.
