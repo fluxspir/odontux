@@ -446,8 +446,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
             comptability = GnuCashCustomer(new_patient.id)
             new_customer = comptability.add_customer()
        
-#        print(new_patient.id)
-        sys.exit(new_patient.id)
+        print(new_patient.id)
 
 class PatientMovingInCommand(BaseCommand):
     """

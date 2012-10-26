@@ -6,6 +6,7 @@
 #
 
 from meta import Base
+import meta
 import sqlalchemy
 import datetime
 

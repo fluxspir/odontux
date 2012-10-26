@@ -38,9 +38,10 @@ def init():
     parser.read(os.path.join(home, ".odontuxrc"))
     db_url = parser.get("db", "url")
 
-    engine = create_engine(db_url, echo=False)
-    Session = sessionmaker(bind=engine)
-    #Session = scoped_session(sessionmaker(
-#                             extension=ZopeTransactionExtension()))
+    engine = create_engine(db_url, echo=False, convert_unicode=True)
+#    Session = sessionmaker(bind=engine)
+    Session = scoped_session(sessionmaker(autocommit=False,
+                                          autoflush=False,
+                                          bind=engine))
     meta.session = Session()
 

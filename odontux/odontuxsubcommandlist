@@ -11,9 +11,7 @@ import sys
 
 import commands
 import tools
-import model
-
-import pdb
+import models
 
 def get_command(commandlist):
     """Find the command class.

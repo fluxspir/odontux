@@ -234,7 +234,7 @@ class AddPaymentCommand(BaseCommand, PaymentParser):
             gcpayment.add_payment(new_payment.mean_id, new_payment.amount, 
                                   new_payment.cashin_date)
             
-        sys.exit(new_payment.id)
+        print(new_payment.id)
 
 
 class ListPaymentCommand(BaseCommand):

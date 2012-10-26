@@ -144,4 +144,4 @@ class GetActCotationFrIdTool(BaseTool):
                         act.ActType.alias.ilike(keyword)))
         
         act_id = query.one()
-        sys.exit(act_id.cotationfr_id)
+        print(act_id.cotationfr_id)

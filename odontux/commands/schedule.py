@@ -12,7 +12,6 @@ from gettext import gettext as _
 from sqlalchemy import or_
 import os
 import sys
-import pdb
 
 class AppointmentParser(BaseCommand):
     """ """
@@ -109,7 +108,7 @@ class AddAppointmentCommand(BaseCommand, AppointmentParser):
         meta.session.add(new_schedule)
         meta.session.commit()
 
-        sys.exit(new_appointment.id)
+        print(new_appointment.id)
 
 
 class AddAppointmentMemoCommand(BaseCommand):

@@ -316,7 +316,7 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
             new_act.invoice_id = invoice_id
             meta.session.commit()
 
-        sys.exit(new_act.id)
+        print(new_act.id)
 
 class ListActTypeCommand(BaseCommand):
     """ """
