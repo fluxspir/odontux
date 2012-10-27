@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
-# This variable gets populated by model.init(). It is shared across the entire
+# This variable gets populated by models.init(). It is shared across the entire
 # application and serves as the main session.
 session = None
 
