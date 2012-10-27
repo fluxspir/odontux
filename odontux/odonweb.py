@@ -7,14 +7,23 @@
 from flask import Flask, request, session, g, redirect, url_for, \
      abort, render_template, flash
 
+from gettext import gettext as _
 from models import meta
+import sys
 
-from 
+try:
+    from secret import SECRET_KEY, USERNAME, PASSWORD
+except:
+    print(_("""Please create odontux/odontux/secret.py
+with inside :
+
+SECRET_KEY = "somethinghard2find93*9{];;;;eiir!!?|"
+USERNAME = "username"
+PASSWORD = "password"
+"""))
+    sys.exit(1)
 
 DEBUG = True
-SECRET_KEY = "development key"
-USERNAME = "admin"
-PASSWORD = "default"
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -27,6 +36,14 @@ app.config.from_object(__name__)
 @app.route('/')
 def index():
     return "odontux / odonweb"
+
+@app.route('/index.html')
+def index_html():
+    return "odontux"
+
+@app.route('/suite/')
+def index_html():
+    return "suite"
 
 if __name__ == "__main__":
     app.debug = DEBUG
