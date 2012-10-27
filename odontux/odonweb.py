@@ -9,6 +9,8 @@ from flask import Flask, request, session, g, redirect, url_for, \
 
 from models import meta
 
+from 
+
 DEBUG = True
 SECRET_KEY = "development key"
 USERNAME = "admin"
@@ -18,6 +20,14 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 
-@app.teardown_request
-def shutdown_session(exception=None):
-    meta.session.remove()
+#@app.teardown_request
+#def shutdown_session(exception=None):
+#    meta.session.remove()
+
+@app.route('/')
+def index():
+    return "odontux / odonweb"
+
+if __name__ == "__main__":
+    app.debug = DEBUG
+    app.run()
