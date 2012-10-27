@@ -35,7 +35,7 @@ app.config.from_object(__name__)
 
 @app.route('/')
 def index():
-    return "odontux / odonweb"
+    return render_template('mytemplate.pt')
 
 @app.route('/index.html')
 def index_html():
