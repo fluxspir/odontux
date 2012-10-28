@@ -6,7 +6,7 @@
 
 from specialty import AddSpecialtyCommand, ListSpecialtyCommand
 from users import (AddOdontuxUserCommand, AddDentalOfficeCommand,
-                   UserMovingInCommand)
+                   UserMovingInCommand, UpdateUserCommand)
 from md import (AddMedecineDoctorCommand, ListMedecineDoctorCommand,
                 UpdateMedecineDoctorCommand)
 from cotation import (AddNgapKeyFrCommand, AddCmuKeyFrCommand,

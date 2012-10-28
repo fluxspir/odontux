@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Franck Labadille
-# 2012/08/26
-# v0.4
+# 2012/10/28
+# v0.5
 # licence BSD
 #
 
@@ -10,19 +10,27 @@ from models import meta, users, administration
 
 import os
 import sys
+import datetime
 
+now = datetime.datetime.now()
+today = datetime.date.today()
 
 class OdontuxUserParser(BaseCommand):
     """ """
-    def parse_args(self, args):
+    def parse_args(self, args, update=False):
         parser = self.get_parser()
 
+        if update:
+            parser.add_option("--id", action="store", type="string",
+                            help="ID of the user we're gonna uptate",
+                            dest="user_id")
+                            
         parser.add_option("-u", "--username", action="store", type="string",
                         help="username of the person allowed using software",
                         dest="username")
 
         parser.add_option("-p", "--password", action="store", type="string",
-                        help="Password, NOT IMPLEMENTED YET",
+                        help="Password",
                         dest="password")
 
         parser.add_option("-r", "--role", action="store", type="string",
@@ -147,9 +155,8 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
         if not options.lastname:
             sys.exit("a lastname is mandatory to add a new user to database")
 
-        self.values["username"] = options.username.decode("utf_8")
-        if options.password:
-            self.values["password"] = options.password.decode("utf_8")
+        self.values["username"] = options.username.decode("utf_8").lower()
+        self.values["password"] = options.password.decode("utf_8")
         self.values["role"] = options.role.decode("utf_8")
         self.values["title"] = options.title.decode("utf_8").title()
         self.values["lastname"] = options.lastname.decode("utf_8").upper()
@@ -220,6 +227,60 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
 
         meta.session.commit()
 
+class UpdateUserCommand(BaseCommand, OdontuxUserParser):
+    """ To change password or others stuff that are not address/phone related
+    """
+
+    command_name = "update_user"
+
+    def __init__(self):
+        self.query = meta.session.query(users.OdontuxUser)
+
+    def run(self, args):
+        (options, args) = self.parse_args(args, True)
+        if not options.user_id:
+            print(_("the user's id must be provide to update odontux user"))
+            sys.exit(1)
+        user = self.query.filter(users.OdontuxUser.id ==
+                                 options.user_id).one()
+
+        if options.username:
+            user.username = options.username.decode("utf_8").lower()
+        if options.password:
+            user.password = options.password.decode("utf_8")
+        if options.role:
+            user.role = options.password.decode("utf_8")
+        if options.title:
+            user.role = options.role.decode("utf_8").title()
+        if options.lastname:
+            user.lastname = options.lastname.decode("utf_8").upper()
+        if options.firstname:
+            user.firstname = options.firstname.decode("utf_8").title()
+        if options.qualifications:
+            user.qualifications = options.qualifications.decode("utf_8")
+        if options.registration:
+            user.registration = options.registration.decode("utf_8")
+        if options.correspondence_name:
+            user.correspondence_name = \
+            options.correspondence_name.decode("utf_8")
+        if options.inactive:
+            user.status = False
+        if options.sex:
+            user.sex = options.sex
+        if options.dob:
+            user.dob = options.dob
+        if options.comments:
+            user.comments = options.comments.decode("utf_8")
+        if options.avatar_id:
+            user.avatar_id = options.avatar_id
+        if options.display_order:
+            user.display_order = options.display_order
+        if options.time_stamp:
+            user.time_stamp = options.time_stamp
+        else:
+            user.time_stamp = today
+
+        meta.session.commit()      
 
 class UserMovingInCommand(BaseCommand):
     """

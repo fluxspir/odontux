@@ -5,12 +5,49 @@
 # Licence BSD
 #
 
-from pyramid.view import view_config
+from flask import session, render_template, request, redirect, url_for
+import sqlalchemy
+from odontux.models import meta, users
+from odontux.secret import SECRET_KEY
+from odontux.odonweb import app
 
-from ..models import meta, users
+from gettext import gettext as _
 
-@view_config(route_name='home', renderer='templates/template.pt')
-def my_view(request):
-    one = meta.session.query(users.OdontuxUser)\
-          .filter(users.OdontuxUser == 1).one()
-    return {'one':one , 'project':'odontux'}
+
+@app.route('/')
+def index():
+    if 'username' in session:
+        return _("Logged in as {}".format(session['username']))
+    return _("You're not logged in")
+
+
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        try:
+            user = meta.session.query(users.OdontuxUser).filter\
+                   (users.OdontuxUser.username == request.form['username'])\
+                   .one()
+            if request.form['password'] == user.password:
+                session['username'] = request.form['username']
+                session['role'] = user.role
+                return redirect(url_for('index'))
+            return redirect(url_for('logout'))
+        except sqlalchemy.orm.exc.NoResultFound:
+            return redirect(url_for('logout'))
+    
+    return '''
+            <form action="" method="post">
+                <p><input type=text name=username>
+                <p><input type=password name=password>
+                <p><input type=submit value=Login>
+            </form>
+            '''
+
+
+@app.route('/logout/')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+app.secret_key = SECRET_KEY

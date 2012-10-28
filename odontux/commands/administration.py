@@ -14,16 +14,11 @@ from sqlalchemy import or_
 from gettext import gettext as _
 import sys
 
-import pdb
-
-#try:
 import gnucash
 from base import GnuCash
 from gnucash import Session as GCSession
 from gnucash.gnucash_business import Customer, Address
 GNUCASH_ACCOUNT = True
-#except ImportError:
-#    GNUCASH_ACCOUNT = False
 
 
 locale = "fr"
@@ -645,7 +640,8 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
         (options, args) = self.parse_args(args, True)
 
         if not options.patient_id:
-            sys.exit("the patient's id must be provide to update the database")
+            print(_("the patient's id must be provide to update the database"))
+            sys.exit(1)
 
         patient = self.query.filter(administration.Patient.id == 
                                     options.patient_id).one()

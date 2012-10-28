@@ -5,6 +5,4 @@
 # Licence BSD
 #
 
-import odontux.models
-
-from view import *
+pass
