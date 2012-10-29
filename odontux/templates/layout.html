@@ -18,15 +18,17 @@
     {% endblock %}
   </head>
   <body>
-    {% block odontitle %}
-    <a href="https://github.com/fluxspir/odontux" target="_blank">
-      <center><h1>O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</h1></center>
-    </a> 
+    <div id="header">
+    {% block header %}
+      {% block odontitle %}
+      <a href="https://github.com/fluxspir/odontux" target="_blank"><center><h1>O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</h1></center></a> 
+      {% endblock %}
     {% endblock %}
 
-    <div id="content">{% block content %}
-    <p>{{ msg }}</p>
-    {% endblock %}</div>
+    <div id="content">
+    {% block content %}
+    {% endblock %}
+    </div>
     
     <br><br> 
     <div id="footer">

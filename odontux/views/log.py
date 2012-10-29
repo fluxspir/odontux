@@ -17,7 +17,7 @@ from gettext import gettext as _
 @app.route('/')
 def index():
     if 'username' in session:
-        return render_template('layout.html',
+        return render_template('index.html',
                msg=_("Logged in as {}".format(session['username'])))
     return redirect(url_for('login'))
 
@@ -37,14 +37,7 @@ def login():
         except sqlalchemy.orm.exc.NoResultFound:
             return redirect(url_for('logout'))
     
-    return '''
-            <form action="" method="post">
-                <p>Username : <input type=text name=username>
-                <p>Password : <input type=password name=password>
-                <p><input type=submit value=Login>
-            </form>
-            '''
-
+    return render_template('login.html')
 
 @app.route('/logout/')
 def logout():
