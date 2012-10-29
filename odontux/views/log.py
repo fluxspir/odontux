@@ -36,7 +36,6 @@ def login():
             return redirect(url_for('logout'))
         except sqlalchemy.orm.exc.NoResultFound:
             return redirect(url_for('logout'))
-    
     return render_template('login.html')
 
 @app.route('/logout/')

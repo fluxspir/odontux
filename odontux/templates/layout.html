@@ -3,34 +3,34 @@
   <head>
     {% block head %}
       {% block base %}
-      <base href="static/">
+      	<base href="static/">
       {% endblock %}
       {% block meta %}
-      <meta name="description" content="Odontux odonweb">
-      <meta name="keywords" content="odontux odonweb">
-      <meta name="author" content="Franck LABADILLE">
-      <meta charset="UTF-8">
+      	<meta name="description" content="Odontux odonweb">
+      	<meta name="keywords" content="odontux odonweb">
+      	<meta name="author" content="Franck LABADILLE">
+      	<meta charset="UTF-8">
       {% endblock %}
       {% block link %} 
-      <link rel="stylesheet" type="text/css" href="style.css"> 
+      	<link rel="stylesheet" type="text/css" href="style.css"> 
       {% endblock %}
-      <title>{% block title %}Odontux{% endblock %}</title>
+      	<title>{% block title %}Odontux{% endblock %}</title>
     {% endblock %}
   </head>
   <body>
     <div id="header">
     {% block header %}
       {% block odontitle %}
-      <a href="https://github.com/fluxspir/odontux" target="_blank"><center><h1>O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</h1></center></a> 
+      	<a href="https://github.com/fluxspir/odontux" target="_blank"><center><h1>O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</h1></center></a> 
       {% endblock %}
     {% endblock %}
-
+    </div>
+    <br /><br />
     <div id="content">
     {% block content %}
     {% endblock %}
     </div>
-    
-    <br><br> 
+    <br /><br /> 
     <div id="footer">
       {% block footer %}
       &copy; Copyright 2012 by <a href="mailto:franck@kernlog.net">Franck LABADILLE</a>.

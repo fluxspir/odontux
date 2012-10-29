@@ -6,4 +6,4 @@
 #
 
 from log import *
-from admninistration import *
+from administration import *
