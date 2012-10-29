@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # Franck Labadille
-# 2012/09/25
+# 2012/08/26
 # v0.4
-# Licence BSD
+# licence BSD
 #
 
-from log import *
+

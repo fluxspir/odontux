@@ -17,8 +17,9 @@ from gettext import gettext as _
 @app.route('/')
 def index():
     if 'username' in session:
-        return _("Logged in as {}".format(session['username']))
-    return _("You're not logged in")
+        return render_template('layout.html',
+               msg=_("Logged in as {}".format(session['username'])))
+    return redirect(url_for('login'))
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -38,8 +39,8 @@ def login():
     
     return '''
             <form action="" method="post">
-                <p><input type=text name=username>
-                <p><input type=password name=password>
+                <p>Username : <input type=text name=username>
+                <p>Password : <input type=password name=password>
                 <p><input type=submit value=Login>
             </form>
             '''
