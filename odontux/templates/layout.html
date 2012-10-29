@@ -17,12 +17,21 @@
       	<title>{% block title %}Odontux{% endblock %}</title>
     {% endblock %}
   </head>
+
+
   <body>
     <div id="header">
     {% block header %}
+      <div id="odontitle">
       {% block odontitle %}
       	<a href="https://github.com/fluxspir/odontux" target="_blank"><center><h1>O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</h1></center></a> 
       {% endblock %}
+      </div>
+      <div id="user">
+      {% block user %}
+        <a href="/logout">Logout</a>
+      {% endblock %}
+      </div>
     {% endblock %}
     </div>
     <br /><br />
