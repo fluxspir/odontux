@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block mainsummary %}
+  {{ session['patient_id'] }}
+  {{ patient['lastname'] }}
+{% endblock %}
+{% block main %}
+  <div id="dental_schema">
+  {% block dental_schema %}
+    dental schema
+  {% endblock %}
+  </div>
+  <div id="act_history">
+  {% block act_history %}
+    <table>
+    </table>
+  {% endblock %}
+  </div>
+{% endblock %}
