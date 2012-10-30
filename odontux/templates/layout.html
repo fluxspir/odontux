@@ -3,7 +3,7 @@
   <head>
     {% block head %}
       {% block base %}
-      	<base href="static/">
+      	<base href="/static/">
       {% endblock %}
       {% block meta %}
       	<meta name="description" content="Odontux odonweb">
@@ -12,7 +12,10 @@
       	<meta charset="UTF-8">
       {% endblock %}
       {% block link %} 
-      	<link rel="stylesheet" type="text/css" href="style.css"> 
+      	<link rel="stylesheet" type="text/css" href="style.css">
+      	<link rel="stylesheet" type="text/css" href="header.css">
+      	<link rel="stylesheet" type="text/css" href="main.css">
+      	<link rel="stylesheet" type="text/css" href="footer.css">
       {% endblock %}
       	<title>{% block title %}Odontux{% endblock %}</title>
     {% endblock %}
@@ -20,30 +23,46 @@
 
 
   <body>
-    <div id="header">
+    <header>
     {% block header %}
-      <div id="odontitle">
-      {% block odontitle %}
-      	<a href="https://github.com/fluxspir/odontux" target="_blank"><center><h1>O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</h1></center></a> 
+      <div id="generalinfo">
+      {% block generalinfo %}
+        <div id="user">
+	{% block user %}
+	  {{ session['username'] }}
+	{% endblock %}
+	</div>
       {% endblock %}
       </div>
-      <div id="user">
-      {% block user %}
-        <a href="/logout">Logout</a>
+      <div id="logo">
+      {% block logo %}
+      	<a href="https://github.com/fluxspir/odontux" target="_blank"><h1>O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</h1></a> 
       {% endblock %}
       </div>
+      <div id="mainsummary">
+      {% block mainsummary %}
+      {% endblock %}
+      </div>
+      <nav>
+      {% block nav %}
+      navigation
+      {% endblock %}
+      </nav>
     {% endblock %}
-    </div>
+    </header>
+    
     <br /><br />
-    <div id="content">
-    {% block content %}
+    <section class="main">
+    {% block main %}
     {% endblock %}
-    </div>
+    </section>
     <br /><br /> 
-    <div id="footer">
+
+
+    <footer>
       {% block footer %}
-      &copy; Copyright 2012 by <a href="mailto:franck@kernlog.net">Franck LABADILLE</a>.
+      &copy; Copyright 2012 by <a class="footer" href="mailto:franck@kernlog.net">Flux</a>.
       {% endblock %}
-    </div>
+    </footer>
   </body>
 </html>

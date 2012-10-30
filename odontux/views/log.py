@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Franck Labadille
-# 2012/09/25
-# v0.4
+# 2012/10/26
+# v0.5
 # Licence BSD
 #
 
@@ -18,7 +18,7 @@ from gettext import gettext as _
 def index():
     if 'username' in session:
         return render_template('index.html',
-               msg=_("Logged in as {}".format(session['username'])))
+               session=session)
     return redirect(url_for('login'))
 
 
@@ -30,8 +30,10 @@ def login():
                    (users.OdontuxUser.username == request.form['username'])\
                    .one()
             if request.form['password'] == user.password:
-                session['username'] = request.form['username']
+                session['username'] = user.username
                 session['role'] = user.role
+                session['email'] = user.email
+                session['avatar_id'] = user.avatar_id
                 return redirect(url_for('index'))
             return redirect(url_for('logout'))
         except sqlalchemy.orm.exc.NoResultFound:

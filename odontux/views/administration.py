@@ -1,8 +1,31 @@
 # -*- coding: utf-8 -*-
 # Franck Labadille
-# 2012/08/26
-# v0.4
+# 2012/10/30
+# v0.5
 # licence BSD
 #
 
-pass
+from flask import session, render_template, request, redirect, url_for
+import sqlalchemy
+from odontux.models import meta, administration
+from odontux.secret import SECRET_KEY
+from odontux.odonweb import app
+from gettext import gettext as _
+
+from odontux.views.log import index
+
+@app.route('/patient/')
+def selectpatient():
+    msg = _("TODO : Select Patient")
+    return render_template('todo.html', msg=msg)
+
+@app.route('/patient/<int:patient_id>/')
+def patient(patient_id):
+    patient = meta.session.query(administration.Patient)\
+              .filter(administration.Patient.id == patient_id)\
+              .one()
+
+    if patient:
+        session['patient_id'] = patient_id
+        return render_template('patient_file.html', session=session,
+                               patient=patient)

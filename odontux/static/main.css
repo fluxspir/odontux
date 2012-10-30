@@ -1,0 +1,15 @@
+.main {
+position:fixed;
+width:100%;
+top:15%;
+height:80%;
+left:0%;
+background-color:white;
+margin:0%;
+padding:0%;
+}
+
+.todo {
+color:red;
+font-size:2em;
+}
