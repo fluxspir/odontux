@@ -13,18 +13,18 @@ from odontux.odonweb import app
 from gettext import gettext as _
 
 from odontux.views.log import index
+from odontux.views.forms import ColorInput
 
-from wtforms import Form, BooleanField, TextField, PasswordField, validators
+from wtforms import Form, BooleanField, TextField, TextAreaField, validators
+
 
 class ActTypeForm(Form):
-    def __init__(self, acttype):
-        super(Form, self).__init__()
-
     specialty_id = TextField('specialty_id')
     cotationfr_id = TextField('cotationfr_id')
-    code = TextField('code', default=acttype.code)
-    alias = TextField('alias')
-    name = TextField('name')
+    code = TextField('code')
+    alias = TextAreaField('alias')
+    name = TextAreaField('name')
+    color = ColorInput('color')
 
 @app.route('/act/')
 def list_acttype():
@@ -37,8 +37,8 @@ def update_acttype(acttype_id):
               (act.ActType.id == acttype_id).one()
     if not acttype:
         return redirect(url_for('/act'))
+    form = ActTypeForm(request.form)
 
-    form = ActTypeForm(request.form, actype)
     if request.method == 'POST' and form.validate():
         acttype.specialty_id = form.specialty_id.data
         acttype.cotationfr_id = form.cotationfr_id.data
@@ -48,4 +48,4 @@ def update_acttype(acttype_id):
         acttype.color = form.color.data
         meta.session.commit()
         return redirect(url_for('index'))
-    return render_template('/update_act.html', form=form)
+    return render_template('/update_act.html', form=form, acttype=acttype)
