@@ -17,9 +17,12 @@ from odontux.views.log import index
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
 
 class ActTypeForm(Form):
+    def __init__(self, acttype):
+        super(Form, self).__init__()
+
     specialty_id = TextField('specialty_id')
     cotationfr_id = TextField('cotationfr_id')
-    code = TextField('code', default=self.acttype.code)
+    code = TextField('code', default=acttype.code)
     alias = TextField('alias')
     name = TextField('name')
 
@@ -32,10 +35,10 @@ def list_acttype():
 def update_acttype(acttype_id):
     acttype = meta.session.query(act.ActType).filter\
               (act.ActType.id == acttype_id).one()
-    form = ActTypeForm(request.form, acttype)
-
     if not acttype:
         return redirect(url_for('/act'))
+
+    form = ActTypeForm(request.form, actype)
     if request.method == 'POST' and form.validate():
         acttype.specialty_id = form.specialty_id.data
         acttype.cotationfr_id = form.cotationfr_id.data
