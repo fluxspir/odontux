@@ -15,9 +15,9 @@ from gettext import gettext as _
 from odontux.views.log import index
 
 @app.route('/patient/')
-def selectpatient():
-    msg = _("TODO : Select Patient")
-    return render_template('todo.html', msg=msg)
+def allpatients():
+    patients = meta.session.query(administration.Patient).all()
+    return render_template('search.html', patients=patients)
 
 @app.route('/patient/<int:patient_id>/')
 def patient(patient_id):
@@ -27,5 +27,7 @@ def patient(patient_id):
 
     if patient:
         session['patient_id'] = patient_id
+        age = patient.age()
+        birthday = patient.is_birthday()
         return render_template('patient_file.html', session=session,
-                               patient=patient)
+                               patient=patient, age=age, birthday=birthday)

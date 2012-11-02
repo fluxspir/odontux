@@ -5,7 +5,8 @@ top:0%;
 left:0%;
 width:100% ;
 height:15% ;
-background-color:lightgrey;
+/*background-color:lightgrey;*/
+background-image: url("headerbg.png")
 }
 
 #generalinfo
@@ -15,7 +16,7 @@ position:fixed;
 top:0%;
 width:100% ;
 height:3% ;
-background-color:blue;
+/*background-color:blue;*/
 color:white;
 }
 
@@ -24,10 +25,19 @@ color:white;
 display:inline-block;
 position:fixed;
 right:0%;
+height:3%;
 font-size:1.22em;
+background-color:green;
+overflow:hidden;
+z-index:3;
+transition: height 2s;
+-moz-transition: height 2s; /* Firefox 4 */
+-webkit-transition: height 2s; /* Safari and Chrome */
+-o-transition: height 2s; /* Opera */
 }
-#user:hover{
-color:black;
+#user:hover {
+height:10%;
+overflow:visible;
 }
 
 #logo
@@ -38,7 +48,6 @@ top:3%;
 left:0%;
 width:12% ;
 height:12%;
-/*background-color:black;*/
 }
 #logo h1 {
 text-align:center;
@@ -54,7 +63,8 @@ top:3%;
 left:12%;
 width:88%;
 height:8%;
-background-color:green;
+z-index:2;
+/*background-color:green;*/
 }
 
 nav
@@ -62,9 +72,20 @@ nav
 display=inline-block;
 position:fixed;
 top:11% ;
-right:0%;
-width:88% ;
+left:12%;
+width:63% ;
 height:4%;
-background-color:yellow;
-/* nav li {display:inline;} */
+/*background-color:yellow;*/
+}
+nav ul {list-style-type:none;}
+nav li {display:inline;} 
+
+#search
+{
+display=inline-block;
+position:fixed;
+top:11% ;
+right:0%;
+width 25%;
+height:4%;
 }

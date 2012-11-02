@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 {% block mainsummary %}
-  {{ session['patient_id'] }}
-  {{ patient['lastname'] }}
+  {% block patient %}
+    {{ patient['lastname'] }} {{ patient['firstname'] }} {{ age }}
+  {% endblock %}
 {% endblock %}
 {% block main %}
   <div id="dental_schema">

@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block main %}
+{% block list_acttype %}
+<div id="list_acttype">
+  <table border=1>
+    <tr>
+      <th>ID</th>
+      <th>Code</th>
+      <th>Alias</th>
+      <th>Name</th>
+      <th>Modify</th>
+    </tr>
+  {% for gesture in gestures %}
+    <tr>
+      <td>{{ gesture.id }}</td><td>{{ gesture.code }}</td><td>{{ gesture.alias }}</td><td>{{ gesture.name }}</td>
+      <td><a href="/act/update_acttype={{ gesture.id }}/">Update</a>
+    </tr>
+  {% endfor %}
+  </table>
+</div>
+{% endblock %}
+{% endblock %}

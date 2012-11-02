@@ -30,6 +30,9 @@
         <div id="user">
 	{% block user %}
 	  {{ session['username'] }}
+	  <div class="user_hidden">
+	    <a href="/logout">Logout</a>
+	  </div>
 	{% endblock %}
 	</div>
       {% endblock %}
@@ -45,18 +48,31 @@
       </div>
       <nav>
       {% block nav %}
-      navigation
+        <a href="/patient">Patients</a>
+	<a href="/act">Acts</a>
+        <div id="search">
+        {% block search %}
+          <form action="search" method="post" autocomplete="on">
+	    <input type="search" name="query" placeholder=search_pattern />
+	    <select name="dbtable" id="dbtable">
+	      <option value="patient">Patient</option>
+	      <option value="act">Act</option>
+	      <option value="odontuxuser">User</option>
+	      <option value="doctor">Doctor</option>
+ 	    </select>
+	    <input type="submit" value="Find" />
+	  </form>
+        {% endblock %}
+        </div>
       {% endblock %}
       </nav>
     {% endblock %}
     </header>
     
-    <br /><br />
     <section class="main">
     {% block main %}
     {% endblock %}
     </section>
-    <br /><br /> 
 
 
     <footer>

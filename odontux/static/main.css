@@ -2,14 +2,22 @@
 position:fixed;
 width:100%;
 top:15%;
-height:80%;
+height:82%;
 left:0%;
 background-color:white;
 margin:0%;
 padding:0%;
+overflow:auto;
 }
+
 
 .todo {
 color:red;
 font-size:2em;
 }
+
+#list_acttype a:link { color: blue ; text-decoration : underline}
+#list_acttype a:visited { color: blue ; text-decoration : underline}
+#list_acttype a:hover { color: blue ; text-decoration : underline}
+#list_acttype a:active { color: blue ; text-decoration : underline}
+

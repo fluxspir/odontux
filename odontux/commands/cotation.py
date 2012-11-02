@@ -420,7 +420,7 @@ class UpdateCotationFrCommand(BaseCommand, CotationFrParser):
             if options.adult_cmu_num:
                 newcotation.kid_cmu_num =\
                 options.adult_cmu_num.decode("utf_8")
-        # Exeeding
+        # Exceeding
         if not options.totalprice_adult_normal:
             if options.exceeding_adult_normal:
                 newcotation.exceeding_adult_normal =\

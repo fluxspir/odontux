@@ -1,22 +1,26 @@
 body
 {
-/*background-color:#F0F0F0 ;*/
-background-color:rgba(125, 125, 125, 0.2);
+background-color:#F0F0F0 ;
+/*background-color:rgba(125, 125, 125, 0.2);*/
 font-size:100% ; /* In order to make the font size in all browsers look the same ; use it with "em"  (1em = 16px) */
-}
-h1 {
 font-family:"Times New Roman", "Helvetica", "Arial", "Sans-serif" ; 
+}
+
+h1 {
 font-size:2.5em ;
 color: #191970;
 text-shadow: 5px 5px 5px #0000ff ;
 } 
+
 p
 {
 font-family:"Helvetica", "Arial", "Sans-serif" ; font-size:1.25em ;
 font-size:20px ;
 }
+
 a:link {color:black ; text-decoration:none ;}
 a:visited {color:black ; text-decoration:none ;}
-a:hover {color:blue ; background-color:#ffffff ;}
+a:hover {color:blue ;}
 a:active {color:red ; text-decoration:none ;}
+
 .center {text-align:center;}

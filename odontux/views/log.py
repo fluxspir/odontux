@@ -32,7 +32,7 @@ def login():
             if request.form['password'] == user.password:
                 session['username'] = user.username
                 session['role'] = user.role
-                session['email'] = user.email
+                session['email'] = user.mails[0]
                 session['avatar_id'] = user.avatar_id
                 return redirect(url_for('index'))
             return redirect(url_for('logout'))
