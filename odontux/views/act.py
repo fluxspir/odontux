@@ -19,11 +19,10 @@ from wtforms import Form, BooleanField, TextField, PasswordField, validators
 class ActTypeForm(Form):
     def __init__(self, acttype):
         super(Form, self).__init__()
-        self.acttype = actype
 
     specialty_id = TextField('specialty_id')
     cotationfr_id = TextField('cotationfr_id')
-    code = TextField('code', default=self.acttype.code)
+    code = TextField('code', default=acttype.code)
     alias = TextField('alias')
     name = TextField('name')
 
