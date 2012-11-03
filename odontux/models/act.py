@@ -27,7 +27,7 @@ class Specialty(Base):
 class ActType(Base):
     __tablename__ = 'act_type'
     id = Column(Integer, primary_key=True)
-    specialty_id = Column(Integer, ForeignKey(Specialty.id))
+    specialty_id = Column(Integer, ForeignKey(Specialty.id), default=None)
     cotationfr_id = Column(Integer, ForeignKey(CotationLocale.id))
     name = Column(String, nullable=False)
     alias = Column(String)

@@ -5,7 +5,15 @@
 # Licence BSD
 #
 
-from wtforms import widgets
+from wtforms import widgets, Field
 
-class ColorInput(widgets.Input):
+class ColorInput(widgets.TextInput):
     input_type = "color"
+
+
+class ColorField(Field):
+    widget = ColorInput()
+    def _value(self):
+        if self.data:
+            return self.data
+

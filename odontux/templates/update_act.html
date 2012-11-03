@@ -8,12 +8,13 @@
     {{ render_field(form.code, value=acttype.code) }}
     {{ render_field(form.alias, placeholder=acttype.alias) }}
     {{ render_field(form.name, placeholder=acttype.name) }}
-    <dt>
+    {{ render_field(form.color, value=acttype.color) }}
+<!--    <dt>
       Color :
       <dd>
-      	<input type="color" name=color />
+      	<input type="color" name={{ form.color }} value="{{ acttype.color }}" />
       </dd>
-    </dt>  
+    </dt>  -->
   </dl>
   <p><input type="submit" value="Update">
 </form>

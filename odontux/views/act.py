@@ -13,7 +13,7 @@ from odontux.odonweb import app
 from gettext import gettext as _
 
 from odontux.views.log import index
-from odontux.views.forms import ColorInput
+from odontux.views.forms import ColorField
 
 from wtforms import Form, BooleanField, TextField, TextAreaField, validators
 
@@ -24,7 +24,7 @@ class ActTypeForm(Form):
     code = TextField('code')
     alias = TextAreaField('alias')
     name = TextAreaField('name')
-    color = ColorInput('color')
+    color = ColorField('color')
 
 @app.route('/act/')
 def list_acttype():
