@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="/act/add/">
+  <dl>
+    {{ render_field(form.specialty_id) }}
+    {{ render_field(form.cotationfr_id) }}
+    {{ render_field(form.code) }}
+    {{ render_field(form.alias) }}
+    {{ render_field(form.name) }}
+    {{ render_field(form.color) }}
+  </dl>
+  <p><input type="submit" value="Add">
+</form>
+{% endblock %}

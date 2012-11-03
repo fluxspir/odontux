@@ -31,6 +31,24 @@ def list_acttype():
     query = meta.session.query(act.ActType).all()
     return render_template('gesture.html', gestures=query)
 
+@app.route('/act/add/', methods=['GET', 'POST'])
+@app.route('/add/act/', methods=['GET', 'POST'])
+def add_acttype():
+    form = ActTypeForm(request.form)
+    if request.method == 'POST' and form.validate():
+        values = {}
+        values['specialty_id'] = form.specialty_id.data
+        values['cotationfr_id'] = form.cotationfr_id.data
+        values['code'] = form.code.data
+        values['alias'] = form.alias.data
+        values['name'] = form.name.data
+        values['color'] = form.color.data
+        new_acttype = act.ActType(**values)
+        meta.session.add(new_acttype)
+        meta.session.commit()
+        return redirect(url_for('list_acttype'))
+    return render_template('/add_act.html', form=form)
+
 @app.route('/act/update_acttype=<int:acttype_id>/', methods=['GET', 'POST'])
 def update_acttype(acttype_id):
     acttype = meta.session.query(act.ActType).filter\
@@ -40,8 +58,8 @@ def update_acttype(acttype_id):
     form = ActTypeForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        if not form.specialty_id.data == "None" \
-        or not form.specialty_id.data == None:
+        if form.specialty_id.data != acttype.specialty_id \
+        and not form.specialty_id.data == "None": 
             acttype.specialty_id = form.specialty_id.data
         if form.cotationfr_id.data != acttype.cotationfr_id:
             acttype.cotationfr_id = form.cotationfr_id.data

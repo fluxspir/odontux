@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="/update/specialty/">
+  <dl>
+    {{ render_field(form.name, specialty.name) }}
+    {{ render_field(form.color, specialty.color) }}
+  </dl>
+  <p><input type="submit" value="Update"></p>
+</form>
+{% endblock %}

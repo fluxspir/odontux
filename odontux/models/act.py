@@ -22,6 +22,7 @@ class Specialty(Base):
     __tablename__ = 'specialty'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    color = Column(String, default="#000000")
 
 
 class ActType(Base):

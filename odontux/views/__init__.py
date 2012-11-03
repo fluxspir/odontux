@@ -5,7 +5,9 @@
 # Licence BSD
 #
 
+from actions import *
 from log import *
 from administration import *
 from search import *
-from act import * 
+from act import *
+from specialty import *

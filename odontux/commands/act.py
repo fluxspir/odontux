@@ -185,8 +185,9 @@ class AddActTypeCommand(BaseCommand, ActTypeParser):
     def run(self, args):
         (options, args) = self.parse_args(args)
 
-        self.values["specialty_id"] = options.specialty_id
         self.values["name"] = options.name
+        if options.specialty_id:
+            self.values["specialty_id"] = options.specialty_id
         if options.alias:
             self.values["alias"] = options.alias.decode("utf_8")
         else:
