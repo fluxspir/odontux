@@ -14,13 +14,20 @@ import sys
 
 
 class SpecialtyParser(BaseCommand):
-     def parse_args(self, args):
+     def parse_args(self, args, update=False):
 
         parser = self.get_parser()
 
-        parser.add_option("-n", "--name", action="store",type="string",
+        if update:
+            parser.add_option("--id", action="store", type="string",
+                            help="ID of specialty to update",
+                            dest="specialty_id")
+        parser.add_option("-n", "--name", action="store", type="string",
                         help="Name of the specialty.",
                         dest="name")
+        parser.add_option("-c", "--color", action="store", type="string",
+                        help="Color of the specialty.",
+                        dest="color")
 
         (options,args) = parser.parse_args(args)
 
@@ -39,9 +46,34 @@ class AddSpecialtyCommand(BaseCommand, SpecialtyParser):
         (options, args) = self.parse_args(args)
 
         self.values["name"] = options.name.decode("utf_8")
+        if options.color:
+            self.values["color"] = options.color.decode("utf_8")
         new_specialty = act.Specialty(**self.values)
         meta.session.add(new_specialty)
 
+        meta.session.commit()
+
+class UpdateSpecialtyCommand(BaseCommand, SpecialtyParser):
+    """ """
+    command_name = "update_specialty"
+    def __init__(self):
+        self.query = meta.session.query(act.Specialty)
+
+    def run(self, args):
+        (options, args) = self.parse_args(args, True)
+        if not options.specialty_id:
+            print(_("Specialty's ID is not in database"))
+            sys.exit(1)
+        try:
+            specialty = self.query.filter(
+                    act.Specialty.id == options.specialty_id).one()
+        except:
+            print(_("Specialty's ID isn't in database"))
+            sys.exit(2)
+        if options.name:
+            specialty.name = options.name
+        if options.color:
+            specialty.color = options.color
         meta.session.commit()
 
 

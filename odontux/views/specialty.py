@@ -23,11 +23,14 @@ class SpecialtyForm(Form):
                      message=_("Must be less than 20 characters"))])
     color = ColorField('color')
 
+
+
 @app.route('/specialty/')
 @app.route('/specialties/')
 def list_specialty():
     query = meta.session.query(act.Specialty).all()
     return render_template('specialty.html', specialties=query)
+
 
 @app.route('/specialty/add/', methods=['GET', 'POST'])
 @app.route('/specialties/add/', methods=['GET', 'POST'])
@@ -44,6 +47,7 @@ def add_specialty():
         meta.session.commit()
         return redirect(url_for('list_specialty'))
     return render_template('/add_specialty.html', form=form)
+
 
 @app.route('/act/update_specialty/id=<int:specialty_id>/', 
             methods=['GET', 'POST'])
