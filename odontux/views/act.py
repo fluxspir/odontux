@@ -36,16 +36,23 @@ def update_acttype(acttype_id):
     acttype = meta.session.query(act.ActType).filter\
               (act.ActType.id == acttype_id).one()
     if not acttype:
-        return redirect(url_for('/act'))
+        return redirect(url_for('list_acttype'))
     form = ActTypeForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        acttype.specialty_id = form.specialty_id.data
-        acttype.cotationfr_id = form.cotationfr_id.data
-        acttype.code = form.code.data
-        acttype.alias = form.alias.data
-        acttype.name = form.name.data
-        acttype.color = form.color.data
-        meta.session.commit()
-        return redirect(url_for('index'))
+        if not form.specialty_id.data == "None" \
+        or not form.specialty_id.data == None:
+            acttype.specialty_id = form.specialty_id.data
+        if form.cotationfr_id.data != acttype.cotationfr_id:
+            acttype.cotationfr_id = form.cotationfr_id.data
+        if form.code.data != acttype.code:
+            acttype.code = form.code.data
+        if form.alias.data != acttype.alias:
+            acttype.alias = form.alias.data
+        if form.name.data != acttype.name:
+            acttype.name = form.name.data
+        if form.color.data != acttype.color:
+            acttype.color = form.color.data
+#        meta.session.commit()
+        return redirect(url_for('list_acttype'))
     return render_template('/update_act.html', form=form, acttype=acttype)
