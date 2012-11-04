@@ -30,8 +30,8 @@ today = datetime.date.today()
 class Address(Base):
     __tablename__ = 'address'
     id = Column(Integer, primary_key=True)
-    street = Column(String)
-    building = Column(String)
+    street = Column(String, default="")
+    building = Column(String, default="")
     city = Column(String, default="")
     postal_code = Column(String, default="")
     county = Column(String, default="")
@@ -42,15 +42,15 @@ class Address(Base):
 class Mail(Base):
     __tablename__ = 'mail'
     id = Column(Integer, primary_key=True)
-    email = Column(String)
+    email = Column(String, default="none@none.com")
     update_date = Column(Date, default=today)
 
 
 class Phone(Base):
     __tablename__ = 'phone'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    number = Column(String)
+    name = Column(String, default="")
+    number = Column(String, default="")
     update_date = Column(Date, default=today)
 
 
@@ -60,7 +60,7 @@ class SocialSecurityFr(Base):
     number = Column(String, unique=True)
     beneficiaries = relationship("Patient", backref="socialsecurity")
     cmu = Column(Boolean, default=False)
-    insurance = Column(String)
+    insurance = Column(String, default="")
 
 
 class Family(Base):
@@ -80,15 +80,15 @@ class Patient(Base):
     id = Column(Integer, primary_key=True)
     family_id = Column(Integer, ForeignKey(Family.id))
     socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityLocale.id))
-    title = Column(String)
+    title = Column(String, default="")
     lastname = Column(String, nullable=False)
-    firstname = Column(String)
-    qualifications = Column(String)
-    preferred_name = Column(String)
+    firstname = Column(String, default="")
+    qualifications = Column(String, default=None)
+    preferred_name = Column(String, default="")
     correspondence_name = Column(String)
-    sex = Column(Boolean)
+    sex = Column(Boolean, default=False)
     dob = Column(Date, default="19700101")                  # date of birth
-    job = Column(String)
+    job = Column(String, default="")
     phones = relationship("Phone", secondary=patient_phone_table,
                           backref="patient")
     mails = relationship("Mail", secondary=patient_mail_table,

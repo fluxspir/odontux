@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% block main %}
+<div id="list_acttype">
+<a href="/md/add">Add new medecine doctor</a><br />
+<table border=1>
+  <tr>
+    <th>ID</th>
+    <th>LastName</th>
+    <th>FirstName</th>
+    <th>Modify</th>
+{% for doc in doctors %}
+  <tr>
+    <td>{{ doc.id }}</td><td>{{ doc.lastname }}</td><td>{{ doc.firstname }}</td><td>
+    <a href="/md/update_md/id={{ doc.id }}">Update</a></td>
+  </tr>
+</div>
+{% endfor %}
+{% endblock %}

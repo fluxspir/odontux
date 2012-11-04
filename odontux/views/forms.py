@@ -17,3 +17,29 @@ class ColorField(Field):
         if self.data:
             return self.data
 
+class EmailInput(widgets.TextInput):
+    input_type = "email"
+
+class EmailField(Field):
+    widget = EmailInput()
+    def _value(self):
+        if self.data:
+            return self.data
+
+class TelInput(widgets.TextInput):
+    input_type = "tel"
+
+class TelField(Field):
+    widget = TelInput()
+    def _value(self):
+        if self.data:
+            return self.data
+
+class DateInput(widgets.TextInput):
+    input_type = "date"
+
+class DateField(Field):
+    widget = DateInput()
+    def _value(self):
+        if self.data:
+            return self.data

@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="/md/update_md/id={{ doctor.id }}/">
+  <dl>
+    {{ render_field(form.lastname, value=doctor.lastname) }}
+    {{ render_field(form.firstname, value=doctor.firstname) }}
+    {{ render_field(form.phonename) }}
+    {{ render_field(form.phonenum) }}
+    {{ render_field(form.email) }}
+    {{ render_field(form.street) }}
+    {{ render_field(form.building) }}
+    {{ render_field(form.city, value=doctor.addresses[-1].city) }}
+    {{ render_field(form.postal_code, value=doctor.addresses[-1].postal_code) }}
+    {{ render_field(form.county, value=doctor.addresses[-1].county) }}
+    {{ render_field(form.country, value=doctor.addresses[-1].country) }}
+  </dl>
+  <p><input type="submit" value="Update">
+</form>
+{% endblock %}
+
+<!---->

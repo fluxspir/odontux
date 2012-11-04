@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block main %}
+<div id="list_acttype">
+<a href="/specialty/add">Add specialty</a><br />
+<table border=1>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Color</th>
+    <th>Modify</th>
+{% for specialty in specialties %}
+  <tr>
+    <td>{{ specialty.id }}</td><td>{{ specialty.name }}</td><td style="background-color:{{ specialty.color }};"></td><td><a href="/update_specialty/id={{ specialty.id }}">Update</a></td>
+  </tr>
+</div>
+{% endfor %}
+{% endblock %}

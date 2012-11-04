@@ -94,8 +94,9 @@ class AddMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
         (options, args) = self.parse_args(args)
 
         if not options.lastname:
-            sys.exit("a lastname must be provide to add "
-                     "a new medecine doctor, please")
+            print(_("a lastname must be provide to add "
+                     "a new medecine doctor, please"))
+            sys.exit(1)
 
         self.values["lastname"] = options.lastname.decode("utf_8").upper()
         if options.firstname:
@@ -130,7 +131,7 @@ class AddMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
                            ))
         if options.phone_num:
             if not options.phone_name:
-                options.phone_name = "defaut"
+                options.phone_name = _("defaut")
             new_medecine_doctor.phones.append(administration.Phone(
                             name = options.phone_name.decode("utf_8"),
                             number = options.phone_num.decode("utf_8")

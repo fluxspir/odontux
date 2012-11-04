@@ -13,9 +13,9 @@ from odontux.odonweb import app
 from gettext import gettext as _
 
 from odontux.views.log import index
-from odontux.views.forms import ColorField
 
 from wtforms import Form, BooleanField, TextField, TextAreaField, validators
+from odontux.views.forms import ColorField
 
 
 class ActTypeForm(Form):
@@ -29,7 +29,7 @@ class ActTypeForm(Form):
 @app.route('/act/')
 def list_acttype():
     query = meta.session.query(act.ActType).all()
-    return render_template('gesture.html', gestures=query)
+    return render_template('list_act.html', gestures=query)
 
 @app.route('/act/add/', methods=['GET', 'POST'])
 @app.route('/add/act/', methods=['GET', 'POST'])

@@ -5,10 +5,9 @@
 # licence BSD
 #
 
-from flask import session, render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for
 import sqlalchemy
 from odontux.models import meta, act
-from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
 from gettext import gettext as _
 
@@ -28,8 +27,8 @@ class SpecialtyForm(Form):
 @app.route('/specialty/')
 @app.route('/specialties/')
 def list_specialty():
-    query = meta.session.query(act.Specialty).all()
-    return render_template('specialty.html', specialties=query)
+    specialties = meta.session.query(act.Specialty).all()
+    return render_template('list_specialty.html', specialties=specialties)
 
 
 @app.route('/specialty/add/', methods=['GET', 'POST'])
@@ -52,10 +51,12 @@ def add_specialty():
 @app.route('/act/update_specialty/id=<int:specialty_id>/', 
             methods=['GET', 'POST'])
 def update_specialty(specialty_id):
-    specialty = meta.session.query(act.Specialty).filter\
+    try:
+        specialty = meta.session.query(act.Specialty).filter\
               (act.Specialty.id == specialty_id).one()
-    if not specialty:
+    except sqlalchemy.orm.exc.NoResultFound:
         return redirect(url_for('list_specialty'))
+
     form = SpecialtyForm(request.form)
 
     if request.method == 'POST' and form.validate():
