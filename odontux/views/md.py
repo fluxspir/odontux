@@ -89,7 +89,7 @@ def update_md(md_id):
         fields = [ "lastname", "firstname" ]
         addressfields = ["street", "building", "city","county", "country",\
                         "update_date" ]
-        phonefields = [ "phonename", "phonenum" ]
+        phonefields = [ ("phonename", "name"), ("phonenum", "number") ]
         mailfields = [ "email" ]
         for f in fields:
             setattr(doctor, f, getattr(form, f).data)
@@ -101,8 +101,13 @@ def update_md(md_id):
                 doctor.addresses.append(administration.Address(
                             f = getattr(form, f).data
                             ))
-        for f in phonefields:
-            setattr(doctor.phones[-1], f, getattr(form, f).data)
+        for (f,g) in phonefields:
+            if doctor.phones[-1]:
+                setattr(doctor.phones[-1], g, getattr(form, f).data)
+            else:
+                doctor.phones.append(administration.Phones(
+                            g = getattr(form, f).data
+                            ))
         for f in mailfields:
             setattr(doctor.mails[-1], f, getattr(form, f).data)
 
