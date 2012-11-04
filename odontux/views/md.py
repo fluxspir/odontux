@@ -86,33 +86,20 @@ def update_md(md_id):
     form = MedecineDoctorForm(request.form)
 
     if request.method == 'POST' and form.validate():
-#        field = [ "lastname", "firstname", "street", "building", "city",\
-#                "county", "country", "email", "phonename", "phonenum",\
-#                "update_date"]
-#        for f in field:
-#            if form.f.data != doctor.f:
-#                doctor.f = form.f.data
-        if form.lastname.data != doctor.lastname:
-            doctor.lastname = form.lastname.data
-        if form.firstname.data != doctor.firstname:
-            doctor.firstname = form.firstname.data
-        if form.phonename.data != doctor.phones[-1].name:
-            doctor.phones[-1].name = form.phonename.data
-        if form.phonenum.data != doctor.phones[-1].number:
-            doctor.phones[-1].number = form.phonenum.data
-        if form.email.data != doctor.mails[-1].email:
-            doctor.mails[-1].email = form.email.data
-        if form.street.data != doctor.addresses[-1].street:
-            doctor.addresses[-1].street = form.street.data
-        if form.building.data != doctor.addresses[-1].building:
-            doctor.addresses[-1].building = form.building.data
-        if form.city.data != doctor.addresses[-1].city:
-            doctor.addresses[-1].city = form.city.data
-        if form.postal_code.data != doctor.addresses[-1].postal_code:
-            doctor.addresses[-1].postal_code = form.postal_code.data
-        if form.county.data != doctor.addresses[-1].county:
-            doctor.addresses[-1].county = form.county.data
-        if form.country.data != doctor.addresses[-1].country:
-            doctor.addresses[-1].country = form.country.data
+        fields = [ "lastname", "firstname" ]
+        addressfields = ["street", "building", "city","county", "country",\
+                        "update_date" ]
+        phonefields = [ "phonename", "phonenum" ]
+        mailfields = [ "email" ]
+        for f in fields:
+            setattr(doctor, f, getattr(form, f).data)
+            # doctor.f = form.f.data
+        for f in addressfields:
+            setattr(doctor.addresses[-1], f, getattr(form, f).data)
+        for f in phonefields:
+            setattr(doctor.phones[-1], f, getattr(form, f).data)
+        for f in mailfields:
+            setattr(doctor.mails[-1], f, getattr(form, f).data)
+
         return redirect(url_for('list_md'))
     return render_template('/update_md.html', form=form, doctor=doctor)
