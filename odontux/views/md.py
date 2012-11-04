@@ -93,27 +93,29 @@ def update_md(md_id):
         mailfields = [ "email" ]
         for f in fields:
             setattr(doctor, f, getattr(form, f).data)
-            # doctor.f = form.f.data
         for f in addressfields:
-            if doctor.addresses[-1]:
-                setattr(doctor.addresses[-1], f, getattr(form, f).data)
-            else:
+            try:
+                if doctor.addresses[-1]:
+                    setattr(doctor.addresses[-1], f, getattr(form, f).data)
+            except IndexError:
                 doctor.addresses.append(administration.Address(
-                            f = getattr(form, f).data
+                            **{f: getattr(form, f).data}
                             ))
         for (f,g) in phonefields:
-            if doctor.phones[-1]:
-                setattr(doctor.phones[-1], g, getattr(form, f).data)
-            else:
+            try:
+                if doctor.phones[-1]:
+                    setattr(doctor.phones[-1], g, getattr(form, f).data)
+            except IndexError:
                 doctor.phones.append(administration.Phones(
-                            g = getattr(form, f).data
+                            **{g: getattr(form, f).data}
                             ))
         for f in mailfields:
-            if doctor.mails[-1]:
-                setattr(doctor.mails[-1], f, getattr(form, f).data)
-            else:
+            try
+                if doctor.mails[-1]:
+                    setattr(doctor.mails[-1], f, getattr(form, f).data)
+            except IndexError:
                 doctor.mails.append(administration.Mail(
-                            f = getattr(form, f).data
+                            **{f = getattr(form, f).data}
                             ))
 
         return redirect(url_for('list_md'))
