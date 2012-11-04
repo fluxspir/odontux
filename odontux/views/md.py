@@ -110,12 +110,12 @@ def update_md(md_id):
                             **{g: getattr(form, f).data}
                             ))
         for f in mailfields:
-            try
+            try:
                 if doctor.mails[-1]:
                     setattr(doctor.mails[-1], f, getattr(form, f).data)
             except IndexError:
                 doctor.mails.append(administration.Mail(
-                            **{f = getattr(form, f).data}
+                            **{f: getattr(form, f).data}
                             ))
 
         return redirect(url_for('list_md'))
