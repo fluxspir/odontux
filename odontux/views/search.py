@@ -11,14 +11,23 @@ from odontux.models import meta, administration, users
 from odontux.odonweb import app
 from gettext import gettext as _
 
-@app.route('/search/?db=<database>?pattern=<pattern>/')
-def find_patient(database, pattern):
-    if database == "patient":
-        pass
-#        database = administration.Patient
-#        pat
+@app.route('/search/', methods=['GET', 'POST'])
+def find(database, keywords):
+    """ """
+    if method = 'GET':
+        if database == "patient":
+            query = meta.session.query(administration.Patient)
 
-#    query = meta.session.query(database).filter(database.
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query = query.filter(or_(
+                administration.Patient.lastname.ilike(keyword),
+                administration.Patient.firstname.ilike(keyword),
+                administration.Patient.preferred_name.ilike(keyword),
+                administration.Patient.correspondence_name.ilike(keyword)
+                ))
+        return render_template('search_patient.html', patients=query.all())
+        
 
 @app.route('/search/user')
 def find_user():
