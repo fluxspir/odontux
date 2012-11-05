@@ -5,16 +5,16 @@
 # Licence BSD
 #
 
-from flask import render_template
+from flask import render_template, request
 import sqlalchemy
 from odontux.models import meta, administration, users
 from odontux.odonweb import app
 from gettext import gettext as _
 
 @app.route('/search/', methods=['GET', 'POST'])
-def find(database, keywords):
+def find():
     """ """
-    if method = 'GET':
+    if request.method == 'GET':
         if database == "patient":
             query = meta.session.query(administration.Patient)
 
