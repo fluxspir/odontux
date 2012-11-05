@@ -14,19 +14,18 @@ from gettext import gettext as _
 @app.route('/search/', methods=['GET', 'POST'])
 def find():
     """ """
-    if request.method == 'GET':
-        if database == "patient":
-            query = meta.session.query(administration.Patient)
+    if request.form["database"] == "patient":
+        query = meta.session.query(administration.Patient)
 
-        for keyword in keywords:
-            keyword = '%{}%'.format(keyword)
-            query = query.filter(or_(
-                administration.Patient.lastname.ilike(keyword),
-                administration.Patient.firstname.ilike(keyword),
-                administration.Patient.preferred_name.ilike(keyword),
-                administration.Patient.correspondence_name.ilike(keyword)
-                ))
-        return render_template('search_patient.html', patients=query.all())
+    for keyword in request.form["keywords"]:
+        keyword = '%{}%'.format(keyword)
+        query = query.filter(or_(
+            administration.Patient.lastname.ilike(keyword),
+            administration.Patient.firstname.ilike(keyword),
+            administration.Patient.preferred_name.ilike(keyword),
+            administration.Patient.correspondence_name.ilike(keyword)
+            ))
+    return render_template('search_patient.html', patients=query.all())
         
 
 @app.route('/search/user')
