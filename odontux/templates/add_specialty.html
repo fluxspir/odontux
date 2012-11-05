@@ -1,4 +1,7 @@
 {% extends 'layout.html' %}
+{% block pagetitle %}
+Adding new specialty
+{% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="/add/specialty/">

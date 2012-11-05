@@ -20,6 +20,12 @@ height:3% ;
 color:white;
 }
 
+#pagetitle {
+display=inline-block;
+position:fixed;
+color:black;
+}
+
 #user
 {
 display:inline-block;

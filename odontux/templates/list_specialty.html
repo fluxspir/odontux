@@ -1,4 +1,7 @@
 {% extends 'layout.html' %}
+{% block pagetitle %}
+List of specialties
+{% endblock %}
 {% block main %}
 <div id="list_acttype">
 <a href="/specialty/add">Add specialty</a><br />
@@ -10,7 +13,7 @@
     <th>Modify</th>
 {% for specialty in specialties %}
   <tr>
-    <td>{{ specialty.id }}</td><td>{{ specialty.name }}</td><td style="background-color:{{ specialty.color }};"></td><td><a href="/update_specialty/id={{ specialty.id }}">Update</a></td>
+    <td>{{ specialty.id }}</td><td>{{ specialty.name }}</td><td style="background-color:{{ specialty.color }};"></td><td><a href="/act/update_specialty/id={{ specialty.id }}">Update</a></td>
   </tr>
 </div>
 {% endfor %}

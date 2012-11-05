@@ -1,4 +1,7 @@
 {% extends 'layout.html' %}
+{% block pagetitle %}
+List of acts
+{% endblock %}
 {% block main %}
 {% block list_acttype %}
 <div id="list_acttype">
@@ -6,6 +9,9 @@
   <table border=1>
     <tr>
       <th>ID</th>
+      {% if specialty %}
+        <th>Specialty<th>
+      {% endif %}
       <th>Code</th>
       <th>Alias</th>
       <th>Name</th>
@@ -14,7 +20,11 @@
     </tr>
   {% for gesture in gestures %}
     <tr>
-      <td>{{ gesture.id }}</td><td>{{ gesture.code }}</td><td>{{ gesture.alias }}</td><td>{{ gesture.name }}</td><td style="background-color:{{ gesture.color }};"></td>
+      <td>{{ gesture.id }}</td>
+      {% if specialty %}
+        <td style="background-color:{{specialty.color}};">{{ specialty.name }}</td>
+      {% endif %}
+      <td>{{ gesture.code }}</td><td>{{ gesture.alias }}</td><td>{{ gesture.name }}</td><td style="background-color:{{ gesture.color }};"></td>
       <td><a href="/act/update_acttype={{ gesture.id }}/">Update</a>
     </tr>
   {% endfor %}

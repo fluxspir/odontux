@@ -42,7 +42,7 @@ class OdontuxUser(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False, unique=True)
     password = Column(String)
-    role = Column(String, nullable=False)
+    role = Column(Integer, nullable=False)
     title = Column(String, nullable=False)
     lastname = Column(String, nullable=False)
     firstname = Column(String, nullable=False)

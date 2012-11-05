@@ -1,4 +1,7 @@
 {% extends 'layout.html' %}
+{% block pagetitle %}
+Update of medecine doctor
+{% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="/md/update_md/id={{ doctor.id }}/">

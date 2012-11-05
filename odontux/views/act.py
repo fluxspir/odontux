@@ -14,12 +14,15 @@ from gettext import gettext as _
 
 from odontux.views.log import index
 
-from wtforms import Form, BooleanField, TextField, TextAreaField, validators
+from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
+                     validators)
 from odontux.views.forms import ColorField
 
 
 class ActTypeForm(Form):
-    specialty_id = TextField('specialty_id')
+    specialty_choices = meta.session.query(act.Specialty).all()
+    choice_list = [ (choice.id, choice.name) for choice in specialty_choices ]
+    specialty_id = SelectField('specialty_id', choices=choice_list)
     cotationfr_id = TextField('cotationfr_id')
     code = TextField('code')
     alias = TextAreaField('alias')
@@ -28,6 +31,17 @@ class ActTypeForm(Form):
 
 @app.route('/act/')
 def list_acttype():
+    if request.form and request.form['specialty']:
+        try:
+            specialty = meta.session.query(act.Specialty)\
+                .filter(act.Specialty.id == request.form['specialty'].one())
+            query = meta.session.query(act.ActType)\
+                .filter(act.ActType.specialty_id == specialty.id).all()
+            return render_template('list_act.html', gestures=query, 
+                                specialty=specialty)
+        except sqlalchemy.orm.exc.NoResultFound:
+            pass
+
     query = meta.session.query(act.ActType).all()
     return render_template('list_act.html', gestures=query)
 
@@ -58,19 +72,14 @@ def update_acttype(acttype_id):
     form = ActTypeForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        if form.specialty_id.data != acttype.specialty_id \
-        and not form.specialty_id.data == "None": 
-            acttype.specialty_id = form.specialty_id.data
-        if form.cotationfr_id.data != acttype.cotationfr_id:
-            acttype.cotationfr_id = form.cotationfr_id.data
-        if form.code.data != acttype.code:
-            acttype.code = form.code.data
-        if form.alias.data != acttype.alias:
+        acttype.specialty_id = form.specialty_id.data
+        acttype.cotationfr_id = form.cotationfr_id.data
+        acttype.code = form.code.data
+        if form.alias.data:
             acttype.alias = form.alias.data
-        if form.name.data != acttype.name:
+        if form.name.data:
             acttype.name = form.name.data
-        if form.color.data != acttype.color:
-            acttype.color = form.color.data
-#        meta.session.commit()
+        acttype.color = form.color.data
+        meta.session.commit()
         return redirect(url_for('list_acttype'))
     return render_template('/update_act.html', form=form, acttype=acttype)

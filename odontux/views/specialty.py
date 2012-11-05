@@ -45,7 +45,7 @@ def add_specialty():
         meta.session.add(new_specialty)
         meta.session.commit()
         return redirect(url_for('list_specialty'))
-    return render_template('/add_specialty.html', form=form)
+    return render_template('add_specialty.html', form=form)
 
 
 @app.route('/act/update_specialty/id=<int:specialty_id>/', 
@@ -60,10 +60,9 @@ def update_specialty(specialty_id):
     form = SpecialtyForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        if form.name.data != acttype.name:
-            acttype.name = form.name.data
-        if form.color.data != acttype.color:
-            acttype.color = form.color.data
+        specialty.name = form.name.data
+        specialty.color = form.color.data
+        meta.session.commit()
         return redirect(url_for('list_specialty'))
-    return render_template('/update_spectialty.html', form=form, 
+    return render_template('update_specialty.html', form=form, 
                             specialty=specialty)

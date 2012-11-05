@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # Franck Labadille
-# 2012/11/03
+# 2012/11/05
 # v0.5
 # Licence BSD
 #
 
 from flask import render_template, request, redirect, url_for
 import sqlalchemy
-from odontux.models import meta, md, administration
+from odontux.models import meta, users, administration
 from odontux.odonweb import app
 from gettext import gettext as _
 
@@ -16,11 +16,23 @@ from odontux.views.log import index
 from wtforms import Form, IntegerField, TextField, FormField, validators
 from odontux.views.forms import EmailField, TelField, DateField
 
-class MedecineDoctorForm(Form):
+class OdontuxUserForm(Form):
+    username = TextField('username', [validators.Required(),
+                         validators.Length(min=1, max=20)])
+    password = PasswordField('password', [validators.Required(),
+                         validators.Length(min=4)])
+    role = IntegerField('role', [validators.Required()])
     lastname = TextField('lastname', [validators.Required(),
                          validators.Length(min=1, max=30,
                          message=_("Need to provide MD's lastname"))])
     firstname = TextField('firstname', [validators.Length(max=30)])
+    qualification = TextField('qualification')
+    registration = TextField('registration')
+    correspondence_name = TextField('correspondence_name')
+    sex = BooleanField('sex')
+    dob = DateField('dob')
+    status = BooleanField('status')
+    comments = TextAreaField('comments')
     phonename = TextField('phonename', [validators.Length(max=15)])
     phonenum = TelField('phonenum')
     address_id = TextField('address_id')
@@ -33,28 +45,44 @@ class MedecineDoctorForm(Form):
     county = TextField('county', [validators.Length(max=15)])
     country = TextField('country', [validators.Length(max=15)])
     email = EmailField('email', [validators.Email()])
+    avatar_id = IntegerField('avatar_id')
+    display_order = IntegerField('display_order')
+    modified_by = IntegerField('modified_by')
     update_date = DateField("update_date")
 
-@app.route('/medecine_doctor/')
-@app.route('/md/')
-def list_md():
-    doctors = meta.session.query(md.MedecineDoctor).all()
-    return render_template('list_md.html', doctors=doctors)
+@app.route('/odontux_user/')
+@app.route('/user/')
+def list_users():
+    if request.form and request.form['role']
+        try:
+            odontuxusers = meta.session.query(users.OdontuxUser)\
+            .filter(users.OdontuxUser.role == request.form['role']).all()
+            return render_template('list_users.html', 
+                                    odontuxusers=odontuxusers)
+    odontuxusers = meta.session.query(users.OdontuxUser).all()
+    return render_template('list_md.html', odontuxusers=odontuxusers)
 
-@app.route('/add/md/', methods=['GET', 'POST'])
-@app.route('/md/add/', methods=['GET', 'POST'])
-def add_md():
-    form = MedecineDoctorForm(request.form)
+@app.route('/add/user/', methods=['GET', 'POST'])
+@app.route('/user/add/', methods=['GET', 'POST'])
+def add_user():
+    form = OdontuxUserForm(request.form)
     if request.method == 'POST' and form.validate():
         values = {}
+        values['username'] = form.username.data
+        values['password'] = form.password.data
+        values['role'] = form.role.data
+        if form.title.data:
+            values['title'] = form.title.data
         values['lastname'] = form.lastname.data
         if form.firstname.data:
             values['firstname'] = form.firstname.data
+        if form.role.data:
+            values['role'] = form.role.data
         
-        new_medecine_doctor = md.MedecineDoctor(**values)
-        meta.session.add(new_medecine_doctor)
+        new_odontuxuser = users.OdontuxUser(**values)
+        meta.session.add(new_odontuxuser)
 
-        new_medecine_doctor.addresses.append(administration.Address(
+        new_odontuxuser.addresses.append(administration.Address(
                             street = form.street.data,
                             building = form.building.data,
                             city = form.city.data,
@@ -65,18 +93,18 @@ def add_md():
         if form.phonenum.data:
             if not form.phonename.data:
                 form.phonename.data = _("default")
-            new_medecine_doctor.phones.append(administration.Phone(
+            new_odontuxuser.phones.append(administration.Phone(
                         name = form.phonename.data,
                         number = form.phonenum.data
                         ))
         if form.email.data:
-            new_medecine_doctor.mails.append(administration.Mail(
+            new_odontuxuser.mails.append(administration.Mail(
                         email = form.email.data
                         ))
         meta.session.commit()
 
 @app.route('/md/update_md/id=<int:md_id>/', methods=['GET', 'POST'])
-def update_md(md_id):
+def update_user(user_id):
     try:
         doctor = meta.session.query(md.MedecineDoctor).filter\
          (md.MedecineDoctor.id == md_id).one()

@@ -28,6 +28,10 @@
     {% block header %}
       <div id="generalinfo">
       {% block generalinfo %}
+        <div id="title">
+	{% block pagetitle %}
+	{% endblock %}
+	</div>
         <div id="user">
 	{% block user %}
 	  {{ session['username'] }}

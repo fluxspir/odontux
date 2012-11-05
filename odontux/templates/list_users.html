@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block pagetitle %}
+List of odontux users
+{% endblock %}
+{% block main %}
+<div id="list_acttype">
+<!--<a href="/users/add">Add new user</a><br />-->
+<table border=1>
+  <tr>
+    <th>ID</th>
+    <th>UserName</th>
+    <th>Role</th>
+    <th>LastName</th>
+    <th>FirstName</th>
+    <th>Modify</th>
+{% for user in odontuxusers %}
+  <tr>
+    <td>{{ user.id }}</td><td>{{user.username}}</td><td>{{user.role}}</td><td>{{ user.lastname }}</td><td>{{ user.firstname }}</td><td>
+    <a href="/users/update_user/id={{ user.id }}">Update</a></td>
+  </tr>
+</div>
+{% endfor %}
+{% endblock %}
