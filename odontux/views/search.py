@@ -7,6 +7,7 @@
 
 from flask import render_template, request
 import sqlalchemy
+from sqlalchemy import or_
 from odontux.models import meta, administration, users
 from odontux.odonweb import app
 from gettext import gettext as _
@@ -17,7 +18,9 @@ def find():
     if request.form["database"] == "patient":
         query = meta.session.query(administration.Patient)
 
-    for keyword in request.form["keywords"]:
+    keywords = request.form["keywords"].split("\s")
+    k_list = [ k_list.append(key[n:]) for n in range(len(key))]
+    for keyword in k_list:
         keyword = '%{}%'.format(keyword)
         query = query.filter(or_(
             administration.Patient.lastname.ilike(keyword),
