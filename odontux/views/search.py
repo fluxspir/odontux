@@ -18,9 +18,9 @@ def find():
     if request.form["database"] == "patient":
         query = meta.session.query(administration.Patient)
 
-    keywords = request.form["keywords"].split("\s")
-    k_list = [ k_list.append(key[n:]) for n in range(len(key))]
-    for keyword in k_list:
+    keywords = request.form["keywords"].split()
+    for keyword in keywords:
+        keyword = keyword.encode("utf_8")
         keyword = '%{}%'.format(keyword)
         query = query.filter(or_(
             administration.Patient.lastname.ilike(keyword),
