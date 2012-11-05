@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% block main %}
+  <div id="searchresult">
+  {% block searchresult %}
+    {% for gesture in gestures %}
+      <a href="/act/{{gesture.id}}">{{ gesture.code }} {{ gesture.name }} {{ gesture.alias }}</a><br />
+    {% endfor %}
+  {% endblock %}
+  </div>
+{% endblock %}

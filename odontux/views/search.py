@@ -8,28 +8,37 @@
 from flask import render_template, request
 import sqlalchemy
 from sqlalchemy import or_
-from odontux.models import meta, administration, users
+from odontux.models import meta, act, administration, users
 from odontux.odonweb import app
 from gettext import gettext as _
 
 @app.route('/search/', methods=['GET', 'POST'])
 def find():
     """ """
+    keywords = request.form["keywords"].encode("utf_8")
     if request.form["database"] == "patient":
         query = meta.session.query(administration.Patient)
 
-    keywords = request.form["keywords"].split()
-    for keyword in keywords:
-        keyword = keyword.encode("utf_8")
-        keyword = '%{}%'.format(keyword)
-        query = query.filter(or_(
-            administration.Patient.lastname.ilike(keyword),
-            administration.Patient.firstname.ilike(keyword),
-            administration.Patient.preferred_name.ilike(keyword),
-            administration.Patient.correspondence_name.ilike(keyword)
-            ))
-    return render_template('search_patient.html', patients=query.all())
-        
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query = query.filter(or_(
+                administration.Patient.lastname.ilike(keyword),
+                administration.Patient.firstname.ilike(keyword),
+                administration.Patient.preferred_name.ilike(keyword),
+                administration.Patient.correspondence_name.ilike(keyword)
+                ))
+        return render_template('search_patient.html', patients=query.all())
+    
+    if request.form["database"] == "act":
+        query = meta.session.query(act.ActType)
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query = query.filter(or_(
+                act.ActType.alias.ilike(keyword),
+                act.ActType.name.ilike(keyword),
+                act.ActType.code.ilike(keyword)
+                ))
+        return render_template('search_act.html', gesturess=query.all())
 
 @app.route('/search/user')
 def find_user():
