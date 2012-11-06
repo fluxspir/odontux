@@ -5,22 +5,22 @@
 # Licence BSD
 #
 
-from flask import render_template, request, redirect, url_for
+from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
 from odontux.models import meta, users, administration
 from odontux.odonweb import app
-import odontux.constants
 from gettext import gettext as _
+
+from odontux.constants import ROLES_LIST
 
 from odontux.views.log import index
 
-from wtforms import Form, IntegerField, TextField, FormField, validators
+from wtforms import (Form, IntegerField, TextField, FormField, PasswordField,
+                    SelectField, BooleanField, TextAreaField, validators)
 from odontux.views.forms import EmailField, TelField, DateField
 
 class OdontuxUserForm(Form):
     # Create the list of role availables :
-    role_list = [ ("dentist", 1), ("nurse", 2), ("assistant", 3),\
-                    ("secretary", 4), ("admin", 5) ]
     title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),\
                    (_("Dr"), _("Dr")) ]
     # Begin Form                    
@@ -28,7 +28,7 @@ class OdontuxUserForm(Form):
                          validators.Length(min=1, max=20)])
     password = PasswordField('password', [validators.Required(),
                          validators.Length(min=4)])
-    role = SelectField('role', [validators.Required(), choices=role_list])
+    role = SelectField('role', choices=ROLES_LIST)
     lastname = TextField('lastname', [validators.Required(),
                          validators.Length(min=1, max=30,
                          message=_("Need to provide MD's lastname"))])
@@ -60,18 +60,23 @@ class OdontuxUserForm(Form):
 @app.route('/odontux_user/')
 @app.route('/user/')
 def list_users():
-    if request.form and request.form['role']
+    if request.form and request.form['role']:
         try:
             odontuxusers = meta.session.query(users.OdontuxUser)\
             .filter(users.OdontuxUser.role == request.form['role']).all()
             return render_template('list_users.html', 
                                     odontuxusers=odontuxusers)
+        except:
+            pass
     odontuxusers = meta.session.query(users.OdontuxUser).all()
-    return render_template('list_md.html', odontuxusers=odontuxusers)
+    return render_template('list_users.html', odontuxusers=odontuxusers)
 
 @app.route('/add/user/', methods=['GET', 'POST'])
 @app.route('/user/add/', methods=['GET', 'POST'])
 def add_user():
+    if session['role'] != ROLE_DENTIST:
+        return redirect(url_for("index"))
+
     form = OdontuxUserForm(request.form)
     if request.method == 'POST' and form.validate():
         values = {}
@@ -110,7 +115,7 @@ def add_user():
                         ))
         meta.session.commit()
 
-@app.route('/md/update_md/id=<int:md_id>/', methods=['GET', 'POST'])
+@app.route('/user/update_user/id=<int:user_id>/', methods=['GET', 'POST'])
 def update_user(user_id):
     try:
         doctor = meta.session.query(md.MedecineDoctor).filter\

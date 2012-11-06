@@ -249,9 +249,9 @@ class UpdateUserCommand(BaseCommand, OdontuxUserParser):
         if options.password:
             user.password = options.password.decode("utf_8")
         if options.role:
-            user.role = options.password.decode("utf_8")
+            user.role = options.role.decode("utf_8")
         if options.title:
-            user.role = options.role.decode("utf_8").title()
+            user.role = options.title.decode("utf_8").title()
         if options.lastname:
             user.lastname = options.lastname.decode("utf_8").upper()
         if options.firstname:

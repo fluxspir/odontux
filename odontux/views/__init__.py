@@ -12,3 +12,4 @@ from search import *
 from act import *
 from specialty import *
 from md import *
+from users import *

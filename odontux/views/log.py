@@ -11,14 +11,15 @@ from odontux.models import meta, users
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
 
+from odontux.constants import ROLES_LIST
+
 from gettext import gettext as _
 
 
 @app.route('/')
 def index():
     if 'username' in session:
-        return render_template('index.html',
-               session=session)
+        return render_template('index.html')
     return redirect(url_for('login'))
 
 
@@ -32,6 +33,7 @@ def login():
             if request.form['password'] == user.password:
                 session['username'] = user.username
                 session['role'] = user.role
+                session['ROLES'] = ROLES_LIST 
                 session['email'] = user.mails[0]
                 session['avatar_id'] = user.avatar_id
                 return redirect(url_for('index'))
