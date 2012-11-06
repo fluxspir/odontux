@@ -9,6 +9,7 @@ from flask import render_template, request, redirect, url_for
 import sqlalchemy
 from odontux.models import meta, users, administration
 from odontux.odonweb import app
+import odontux.constants
 from gettext import gettext as _
 
 from odontux.views.log import index
@@ -17,11 +18,17 @@ from wtforms import Form, IntegerField, TextField, FormField, validators
 from odontux.views.forms import EmailField, TelField, DateField
 
 class OdontuxUserForm(Form):
+    # Create the list of role availables :
+    role_list = [ ("dentist", 1), ("nurse", 2), ("assistant", 3),\
+                    ("secretary", 4), ("admin", 5) ]
+    title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),\
+                   (_("Dr"), _("Dr")) ]
+    # Begin Form                    
     username = TextField('username', [validators.Required(),
                          validators.Length(min=1, max=20)])
     password = PasswordField('password', [validators.Required(),
                          validators.Length(min=4)])
-    role = IntegerField('role', [validators.Required()])
+    role = SelectField('role', [validators.Required(), choices=role_list])
     lastname = TextField('lastname', [validators.Required(),
                          validators.Length(min=1, max=30,
                          message=_("Need to provide MD's lastname"))])
@@ -68,17 +75,17 @@ def add_user():
     form = OdontuxUserForm(request.form)
     if request.method == 'POST' and form.validate():
         values = {}
-        values['username'] = form.username.data
-        values['password'] = form.password.data
-        values['role'] = form.role.data
-        if form.title.data:
-            values['title'] = form.title.data
-        values['lastname'] = form.lastname.data
-        if form.firstname.data:
-            values['firstname'] = form.firstname.data
-        if form.role.data:
-            values['role'] = form.role.data
+        general_fields = [ "username", "password", "role", "title",\
+                           "qualifications", "registration",\
+                           "correspondence_name", "sex", "dob" ]
+        info_fields = [ "status", "comments", "avatar_id", "display_order",\
+                        "modified_by", "time_stamp" ]
+        address_fields = ["street", "building", "city","county", "country" ]
+        phonefields = [ ("phonename", "name"), ("phonenum", "number") ]
+        mailfields = [ "email" ]
         
+       
+
         new_odontuxuser = users.OdontuxUser(**values)
         meta.session.add(new_odontuxuser)
 
@@ -122,26 +129,23 @@ def update_user(user_id):
         for f in fields:
             setattr(doctor, f, getattr(form, f).data)
         for f in addressfields:
-            try:
-                if doctor.addresses[-1]:
-                    setattr(doctor.addresses[-1], f, getattr(form, f).data)
-            except IndexError:
+            if doctor.addresses:
+                setattr(doctor.addresses[-1], f, getattr(form, f).data)
+            else:                
                 doctor.addresses.append(administration.Address(
                             **{f: getattr(form, f).data}
                             ))
         for (f,g) in phonefields:
-            try:
-                if doctor.phones[-1]:
-                    setattr(doctor.phones[-1], g, getattr(form, f).data)
-            except IndexError:
+            if doctor.phones[-1]:
+                setattr(doctor.phones[-1], g, getattr(form, f).data)
+            else:
                 doctor.phones.append(administration.Phones(
                             **{g: getattr(form, f).data}
                             ))
         for f in mailfields:
-            try:
-                if doctor.mails[-1]:
-                    setattr(doctor.mails[-1], f, getattr(form, f).data)
-            except IndexError:
+            if doctor.mails[-1]:
+                setattr(doctor.mails[-1], f, getattr(form, f).data)
+            else:
                 doctor.mails.append(administration.Mail(
                             **{f: getattr(form, f).data}
                             ))

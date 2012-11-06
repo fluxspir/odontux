@@ -74,6 +74,8 @@ def add_md():
                         email = form.email.data
                         ))
         meta.session.commit()
+    return render_template("/add_md.html", form=form)
+
 
 @app.route('/md/update_md/id=<int:md_id>/', methods=['GET', 'POST'])
 def update_md(md_id):

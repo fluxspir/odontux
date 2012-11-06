@@ -20,8 +20,10 @@ from odontux.views.forms import ColorField
 
 
 class ActTypeForm(Form):
+    # Create the list of specialties that exist
     specialty_choices = meta.session.query(act.Specialty).all()
     choice_list = [ (choice.id, choice.name) for choice in specialty_choices ]
+    # Begin Form
     specialty_id = SelectField('specialty_id', choices=choice_list)
     cotationfr_id = TextField('cotationfr_id')
     code = TextField('code')

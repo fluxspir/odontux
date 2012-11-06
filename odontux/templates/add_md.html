@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% block pagetitle %}
+Add a new medecine doctor
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="/md/add/">
+  <dl>
+    {{ render_field(form.lastname) }}
+    {{ render_field(form.firstname) }}
+      {{ render_field(form.phonename) }}
+      {{ render_field(form.phonenum) }}
+      {{ render_field(form.email) }}
+      {{ render_field(form.street) }}
+      {{ render_field(form.building) }}
+      {{ render_field(form.city) }}
+      {{ render_field(form.postal_code) }}
+      {{ render_field(form.county) }}
+      {{ render_field(form.country) }}
+  </dl>
+  <p><input type="submit" value="Add">
+</form>
+{% endblock %}
+
+<!---->
