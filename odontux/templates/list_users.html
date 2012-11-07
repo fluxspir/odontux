@@ -4,7 +4,7 @@ List of odontux users
 {% endblock %}
 {% block main %}
 <div id="list_acttype">
-{% if session.role == session.ROLES[0][1] %}
+{% if session.role == adderuser %}
   <a href="/add/user/">Add new user</a>
 {% endif %}
 <!--<a href="/users/add">Add new user</a><br />-->

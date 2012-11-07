@@ -11,7 +11,7 @@ from odontux.models import meta, users
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
 
-from odontux.constants import ROLES_LIST
+from odontux import constants
 
 from gettext import gettext as _
 
@@ -32,8 +32,8 @@ def login():
                    .one()
             if request.form['password'] == user.password:
                 session['username'] = user.username
-                session['role'] = user.role
-                session['ROLES'] = ROLES_LIST 
+                session['role'] = int(user.role)
+                session['ROLES'] = constants.ROLES_LIST 
                 session['email'] = user.mails[0]
                 session['avatar_id'] = user.avatar_id
                 return redirect(url_for('index'))

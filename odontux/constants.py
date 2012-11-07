@@ -12,12 +12,19 @@ ROLE_ADMIN = 4
 
 ROLES = ( "dentist", "nurse", "assistant", "secretary", "admin" )
 
+#ROLES_LIST = [ 
+#               (ROLES[ROLE_DENTIST], ROLE_DENTIST), 
+#               (ROLES[ROLE_NURSE], ROLE_NURSE), 
+#               (ROLES[ROLE_ASSISTANT], ROLE_ASSISTANT),
+#               (ROLES[ROLE_SECRETARY], ROLE_SECRETARY), 
+#               (ROLES[ROLE_ADMIN], ROLE_ADMIN) 
+#             ]
 ROLES_LIST = [ 
-               (ROLES[ROLE_DENTIST], ROLE_DENTIST), 
-               (ROLES[ROLE_NURSE], ROLE_NURSE), 
-               (ROLES[ROLE_ASSISTANT], ROLE_ASSISTANT),
-               (ROLES[ROLE_SECRETARY], ROLE_SECRETARY), 
-               (ROLES[ROLE_ADMIN], ROLE_ADMIN) 
-             ]
+              (ROLE_DENTIST,ROLES[ROLE_DENTIST]), 
+              (ROLE_NURSE, ROLES[ROLE_NURSE]), 
+              (ROLE_ASSISTANT, ROLES[ROLE_ASSISTANT]),
+              (ROLE_SECRETARY,ROLES[ROLE_SECRETARY]), 
+              (ROLE_ADMIN, ROLES[ROLE_ADMIN]) 
+            ]
 
 KID_AGE = 13
