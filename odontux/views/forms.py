@@ -7,15 +7,25 @@
 
 from wtforms import widgets, Field
 
+def upper_field(value):
+    return value.upper()
+
+def lower_field(value):
+    return value.lower()
+
+def title_field(value):
+    return value.title()
+
+
 class ColorInput(widgets.TextInput):
     input_type = "color"
-
 
 class ColorField(Field):
     widget = ColorInput()
     def _value(self):
         if self.data:
             return self.data
+
 
 class EmailInput(widgets.TextInput):
     input_type = "email"
@@ -26,6 +36,7 @@ class EmailField(Field):
         if self.data:
             return self.data
 
+
 class TelInput(widgets.TextInput):
     input_type = "tel"
 
@@ -34,6 +45,7 @@ class TelField(Field):
     def _value(self):
         if self.data:
             return self.data
+
 
 class DateInput(widgets.TextInput):
     input_type = "date"

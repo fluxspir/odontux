@@ -18,10 +18,10 @@ from odontux.views.log import index
 from wtforms import (Form, IntegerField, TextField, FormField, PasswordField,
                     SelectField, BooleanField, TextAreaField, RadioField,
                     validators)
-from odontux.views.forms import EmailField, TelField, DateField
+from odontux.views import forms
 
-general_fields = [ "username", "password", "role", "title",\
-                    "lastname", "firstname", "qualifications",\
+general_fields = [ "username", "password", "role", "title",
+                    "lastname", "firstname", "qualifications",
                     "registration", "correspondence_name", "sex", "dob"]
 info_fields = [ "status", "comments", "avatar_id", "display_order",\
                 "modified_by", "time_stamp" ]
@@ -30,13 +30,15 @@ phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
 
 
+
 class OdontuxUserForm(Form):
     # Create the list of role availables :
     title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),\
                    (_("Dr"), _("Dr")) ]
     # Begin Form                     
     username = TextField('username', [validators.Required(),
-                            validators.Length(min=1, max=20)])
+                         validators.Length(min=1, max=20)],
+                         filters=[forms.lower_field])
     password = PasswordField('password', [validators.Required(),
                         validators.Length(min=4), 
                         validators.EqualTo('confirm', message="Password must\
@@ -46,31 +48,37 @@ class OdontuxUserForm(Form):
     title = SelectField('title', choices=title_list)
     lastname = TextField('lastname', [validators.Required(),
                             validators.Length(min=1, max=30,
-                            message=_("Need to provide MD's lastname"))])
-    firstname = TextField('firstname', [validators.Length(max=30)])
-    qualifications = TextField('qualifications')
+                            message=_("Need to provide MD's lastname"))],
+                            filters=[forms.upper_field])
+    firstname = TextField('firstname', [validators.Length(max=30)],
+                            filters=[forms.title_field])
+    qualifications = TextField('qualifications', filters=forms.title_field)
     registration = TextField('registration')
-    correspondence_name = TextField('correspondence_name')
+    correspondence_name = TextField('correspondence_name', 
+                                    filters=[forms.upper_field])
     sex = BooleanField('Male')
-    dob = DateField('Date of Birth')
+    dob = forms.DateField('Date of Birth')
     status = BooleanField('status')
     comments = TextAreaField('comments')
     phonename = TextField('phonename', [validators.Length(max=15)])
-    phonenum = TelField('phonenum')
+    phonenum = forms.TelField('phonenum')
     address_id = TextField('address_id')
     street = TextField('street', [validators.Length(max=50, message=_("""Number
     and street must be less than 50 characters please"""))])
     building = TextField('building', [validators.Length(max=50)])
     city = TextField('city', [validators.Length(max=25, message=_("City's name"
-    ))])
+    ))], filters=[forms.title_field])
     postal_code = IntegerField('postal_code')
-    county = TextField('county', [validators.Length(max=15)])
-    country = TextField('country', [validators.Length(max=15)])
-    email = EmailField('email', [validators.Email()])
+    county = TextField('county', [validators.Length(max=15)], 
+                       filters=[forms.title_field])
+    country = TextField('country', [validators.Length(max=15)],
+                        filters=[forms.title_field])
+    email = forms.EmailField('email', [validators.Email()],
+                             filters=[forms.lower_field])
     avatar_id = IntegerField('avatar_id', [validators.Optional()])
     display_order = IntegerField('display_order', [validators.Optional()])
     modified_by = IntegerField('modified_by', [validators.Optional()])
-    time_stamp = DateField("time_stamp")
+    time_stamp = forms.DateField("time_stamp")
 
 @app.route('/odontux_user/')
 @app.route('/user/')
