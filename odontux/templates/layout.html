@@ -34,10 +34,7 @@
 	</div>
         <div id="user">
 	{% block user %}
-	  {{ session['username'] }}
-	  <div class="user_hidden">
-	    <a href="/logout">Logout</a>
-	  </div>
+	  {{ session['username'] }} <a href="/logout">Logout</a>
 	{% endblock %}
 	</div>
       {% endblock %}

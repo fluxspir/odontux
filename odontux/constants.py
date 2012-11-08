@@ -17,21 +17,7 @@ ROLES = { ROLE_DENTIST: "dentist",
           ROLE_ADMIN: "admin",
         }
 
-ROLES_LIST = ROLES.item()
-
-#ROLES_LIST = [ 
-#               (ROLES[ROLE_DENTIST], ROLE_DENTIST), 
-#               (ROLES[ROLE_NURSE], ROLE_NURSE), 
-#               (ROLES[ROLE_ASSISTANT], ROLE_ASSISTANT),
-#               (ROLES[ROLE_SECRETARY], ROLE_SECRETARY), 
-#               (ROLES[ROLE_ADMIN], ROLE_ADMIN) 
-#             ]
-#ROLES_LIST = [ 
-#              (ROLE_DENTIST,ROLES[ROLE_DENTIST]), 
-#              (ROLE_NURSE, ROLES[ROLE_NURSE]), 
-#              (ROLE_ASSISTANT, ROLES[ROLE_ASSISTANT]),
-#              (ROLE_SECRETARY,ROLES[ROLE_SECRETARY]), 
-#              (ROLE_ADMIN, ROLES[ROLE_ADMIN]) 
-#            ]
+#ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
+ROLES_LIST = ROLES.items()
 
 KID_AGE = 13

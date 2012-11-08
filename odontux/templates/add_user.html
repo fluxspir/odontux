@@ -6,7 +6,7 @@ Add a new user
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="/user/add/">
   <dl>
-    {{ render_field(form.username) }}
+    {{ render_field(form.username, autofocus="autofocus") }}
     {{ render_field(form.password) }}
     {{ render_field(form.confirm) }}
     {{ render_field(form.role) }}
@@ -18,7 +18,7 @@ Add a new user
     {{ render_field(form.qualifications) }}
     {{ render_field(form.registration) }}
     {{ render_field(form.correspondence_name) }}
-    {{ render_field(form.status) }}
+    {{ render_field(form.status, default=True) }}
     {{ render_field(form.comments) }}
     {{ render_field(form.avatar_id) }}
     {{ render_field(form.modified_by) }}

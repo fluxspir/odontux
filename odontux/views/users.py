@@ -20,31 +20,39 @@ from wtforms import (Form, IntegerField, TextField, FormField, PasswordField,
                     validators)
 from odontux.views.forms import EmailField, TelField, DateField
 
+general_fields = [ "username", "password", "role", "title",\
+                    "lastname", "firstname", "qualifications",\
+                    "registration", "correspondence_name", "sex", "dob"]
+info_fields = [ "status", "comments", "avatar_id", "display_order",\
+                "modified_by", "time_stamp" ]
+address_fields = ["street", "building", "city","county", "country" ]
+phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
+mail_fields = [ "email" ]
+
+
 class OdontuxUserForm(Form):
     # Create the list of role availables :
     title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),\
                    (_("Dr"), _("Dr")) ]
-#    sex_choices = [ (_('Male'), True), (_('Female'), False) ]
-    sex_choices = [ (True, _('Male')), (False, _('Female')) ]
     # Begin Form                     
     username = TextField('username', [validators.Required(),
-                         validators.Length(min=1, max=20)])
+                            validators.Length(min=1, max=20)])
     password = PasswordField('password', [validators.Required(),
-                         validators.Length(min=4), 
-                         validators.EqualTo('confirm', message="Password must\
-                         match")])
+                        validators.Length(min=4), 
+                        validators.EqualTo('confirm', message="Password must\
+                        match")])
     confirm = PasswordField('Repeat Password')
-    role = SelectField('role', choices=constants.ROLES_LIST)
+    role = SelectField('role', choices=constants.ROLES_LIST, coerce=int)
     title = SelectField('title', choices=title_list)
     lastname = TextField('lastname', [validators.Required(),
-                         validators.Length(min=1, max=30,
-                         message=_("Need to provide MD's lastname"))])
+                            validators.Length(min=1, max=30,
+                            message=_("Need to provide MD's lastname"))])
     firstname = TextField('firstname', [validators.Length(max=30)])
     qualifications = TextField('qualifications')
     registration = TextField('registration')
     correspondence_name = TextField('correspondence_name')
-    sex = RadioField('sex', choices=sex_choices)
-    dob = DateField('dob')
+    sex = BooleanField('Male')
+    dob = DateField('Date of Birth')
     status = BooleanField('status')
     comments = TextAreaField('comments')
     phonename = TextField('phonename', [validators.Length(max=15)])
@@ -67,41 +75,36 @@ class OdontuxUserForm(Form):
 @app.route('/odontux_user/')
 @app.route('/user/')
 def list_users():
+    # when we only want user with role "request.form['role']
     if request.form and request.form['role']:
         try:
             odontuxusers = meta.session.query(users.OdontuxUser)\
             .filter(users.OdontuxUser.role == request.form['role']).all()
-            return render_template('list_users.html', 
-                                    odontuxusers=odontuxusers)
         except:
             pass
-    odontuxusers = meta.session.query(users.OdontuxUser).all()
-    return render_template('list_users.html', odontuxusers=odontuxusers,
-                            adderuser=constants.ROLE_DENTIST)
+    # Print all users in database.
+    else:
+        odontuxusers = meta.session.query(users.OdontuxUser).all()
+
+    # role_admin : role that is allowed to add new users ; should be "admin"
+    return render_template('list_users.html', odontuxusers=odontuxusers, 
+                            roles=constants.ROLES_LIST,
+                            role_admin=constants.ROLE_ADMIN)
 
 @app.route('/add/user/', methods=['GET', 'POST'])
 @app.route('/user/add/', methods=['GET', 'POST'])
 def add_user():
-    if session['role'] != constants.ROLE_DENTIST:
+    if session['role'] != constants.ROLE_ADMIN:
         return redirect(url_for("index"))
 
     form = OdontuxUserForm(request.form)
     if request.method == 'POST' and form.validate():
         values = {}
-        general_fields = [ "username", "password", "role", "title",\
-                           "qualifications", "registration",\
-                           "correspondence_name", "sex", "dob" ]
-        info_fields = [ "status", "comments", "avatar_id", "display_order",\
-                        "modified_by", "time_stamp" ]
-        address_fields = ["street", "building", "city","county", "country" ]
-        phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
-        mail_fields = [ "email" ]
 
         for f in general_fields:
             values[f] = getattr(form, f).data
         for f in info_fields:
             values[f] = getattr(form, f).data
-
 
         new_odontuxuser = users.OdontuxUser(**values)
         meta.session.add(new_odontuxuser)
@@ -120,27 +123,26 @@ def add_user():
                     ))
 
         meta.session.commit()
-        return redirect(url_for('list_user'))
+        return redirect(url_for('list_users'))
     return render_template('/add_user.html/', form=form)
 
 @app.route('/user/update_user/id=<int:user_id>/', methods=['GET', 'POST'])
 def update_user(user_id):
     try:
-        doctor = meta.session.query(md.MedecineDoctor).filter\
-         (md.MedecineDoctor.id == md_id).one()
+        user = meta.session.query(users.OdontuxUser).filter\
+         (users.OdontuxUser.id == user_id).one()
     except sqlalchemy.orm.exc.NoResultFound:
-        return redirect(url_for(list_md))
+        return redirect(url_for('list_users'))
 
-    form = MedecineDoctorForm(request.form)
+    if session['role'] != ROLE_ADMIN \
+    and session['username'] != user.username:
+        return redirect(url_for('list_users'))
+
+    form = OdontuxUserForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        fields = [ "lastname", "firstname" ]
-        addressfields = ["street", "building", "city","county", "country",\
-                        "update_date" ]
-        phonefields = [ ("phonename", "name"), ("phonenum", "number") ]
-        mailfields = [ "email" ]
         for f in fields:
-            setattr(doctor, f, getattr(form, f).data)
+            setattr(user, f, getattr(form, f).data)
         for f in addressfields:
             if doctor.addresses:
                 setattr(doctor.addresses[-1], f, getattr(form, f).data)

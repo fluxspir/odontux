@@ -83,7 +83,7 @@ def update_md(md_id):
         doctor = meta.session.query(md.MedecineDoctor).filter\
          (md.MedecineDoctor.id == md_id).one()
     except sqlalchemy.orm.exc.NoResultFound:
-        return redirect(url_for(list_md))
+        return redirect(url_for('list_md'))
 
     form = MedecineDoctorForm(request.form)
 

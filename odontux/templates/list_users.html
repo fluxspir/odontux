@@ -4,12 +4,9 @@ List of odontux users
 {% endblock %}
 {% block main %}
 <div id="list_acttype">
-{% if session.role == adderuser %}
+{% if session.role == role_admin %}
   <a href="/add/user/">Add new user</a>
 {% endif %}
-<!--<a href="/users/add">Add new user</a><br />-->
-{{ session.role }}
-{{ session.ROLES[0][1] }}
 <table border=1>
   <tr>
     <th>ID</th>
@@ -20,7 +17,14 @@ List of odontux users
     <th>Modify</th>
 {% for user in odontuxusers %}
   <tr>
-    <td>{{ user.id }}</td><td>{{user.username}}</td><td>{{user.role}}</td><td>{{ user.lastname }}</td><td>{{ user.firstname }}</td><td>
+    <td>{{ user.id }}</td><td>{{user.username}}</td>
+    <td>{% for r in roles %}
+    	  {% if r[0] == user.role|int %}
+	    {{ r[1] }}
+	  {% endif %}
+	{% endfor %}
+    </td>
+    <td>{{ user.lastname }}</td><td>{{ user.firstname }}</td><td>
     <a href="/users/update_user/id={{ user.id }}">Update</a></td>
   </tr>
 </div>
