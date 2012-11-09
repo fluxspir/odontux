@@ -8,13 +8,19 @@
 from wtforms import widgets, Field
 
 def upper_field(value):
-    return value.upper()
+    if value:
+        return value.upper()
+    return value
 
 def lower_field(value):
-    return value.lower()
+    if value:
+        return value.lower()
+    return value
 
 def title_field(value):
-    return value.title()
+    if value:
+        return value.title()
+    return value
 
 
 class ColorInput(widgets.TextInput):

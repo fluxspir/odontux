@@ -17,6 +17,7 @@
       	<link rel="stylesheet" type="text/css" href="main.css">
       	<link rel="stylesheet" type="text/css" href="footer.css">
 	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	<script type="text/javascript" src="js/brothel.js"></script>
       {% endblock %}
       	<title>{% block title %}Odontux{% endblock %}</title>
     {% endblock %}
@@ -24,11 +25,16 @@
 
 
   <body>
+  <script>
+  var myVar = setInterval(function(){clock()}, 1000)
+  </script>
     <header>
     {% block header %}
       <div id="generalinfo">
       {% block generalinfo %}
-        <div id="title">
+      	<div id="clock">
+	</div>
+        <div id="pagetitle">
 	{% block pagetitle %}
 	{% endblock %}
 	</div>

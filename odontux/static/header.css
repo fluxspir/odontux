@@ -20,9 +20,17 @@ height:3% ;
 color:white;
 }
 
+#clock {
+display:inline-block;
+width:5%;
+position:fixed;
+color:green;
+}
+
 #pagetitle {
 display=inline-block;
-width:90%;
+width:85%;
+left:5%;
 position:fixed;
 color:black;
 }

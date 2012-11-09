@@ -20,22 +20,20 @@ from wtforms import (Form, IntegerField, TextField, FormField, PasswordField,
                     validators)
 from odontux.views import forms
 
+
 general_fields = [ "username", "password", "role", "title",
                     "lastname", "firstname", "qualifications",
                     "registration", "correspondence_name", "sex", "dob"]
-info_fields = [ "status", "comments", "avatar_id", "display_order",\
+info_fields = [ "status", "comments", "avatar_id", "display_order",
                 "modified_by", "time_stamp" ]
 address_fields = ["street", "building", "city","county", "country" ]
 phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
-
+title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),
+                (_("Mlle"), _("Mlle")), (_("Dr"), _("Dr")) ]
 
 
 class OdontuxUserForm(Form):
-    # Create the list of role availables :
-    title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),\
-                   (_("Dr"), _("Dr")) ]
-    # Begin Form                     
     username = TextField('username', [validators.Required(),
                          validators.Length(min=1, max=20)],
                          filters=[forms.lower_field])
@@ -52,7 +50,7 @@ class OdontuxUserForm(Form):
                             filters=[forms.upper_field])
     firstname = TextField('firstname', [validators.Length(max=30)],
                             filters=[forms.title_field])
-    qualifications = TextField('qualifications', filters=forms.title_field)
+    qualifications = TextField('qualifications', filters=[forms.title_field])
     registration = TextField('registration')
     correspondence_name = TextField('correspondence_name', 
                                     filters=[forms.upper_field])
@@ -60,25 +58,35 @@ class OdontuxUserForm(Form):
     dob = forms.DateField('Date of Birth')
     status = BooleanField('status')
     comments = TextAreaField('comments')
-    phonename = TextField('phonename', [validators.Length(max=15)])
-    phonenum = forms.TelField('phonenum')
+    phonename = TextField('phonename', validators=[validators.Optional(),
+                                        validators.Length(max=15)])
+    phonenum = forms.TelField('phonenum', [validators.Optional()])
     address_id = TextField('address_id')
-    street = TextField('street', [validators.Length(max=50, message=_("""Number
-    and street must be less than 50 characters please"""))])
-    building = TextField('building', [validators.Length(max=50)])
-    city = TextField('city', [validators.Length(max=25, message=_("City's name"
-    ))], filters=[forms.title_field])
-    postal_code = IntegerField('postal_code')
-    county = TextField('county', [validators.Length(max=15)], 
-                       filters=[forms.title_field])
-    country = TextField('country', [validators.Length(max=15)],
-                        filters=[forms.title_field])
-    email = forms.EmailField('email', [validators.Email()],
-                             filters=[forms.lower_field])
+    street = TextField('street', validators=[validators.Optional(),
+                                 validators.Length(max=50, message=_("""Number
+                                 and street must be less than 50 characters 
+                                 please"""))])
+    building = TextField('building', validators=[validators.Optional(), 
+                                     validators.Length(max=50)])
+    city = TextField('city', validators=[validators.Optional(),
+                             validators.Length(max=25,
+                             message=_("City's name"))], 
+                             filters=[forms.title_field])
+    postal_code = IntegerField('postal_code', [validators.Optional()])
+    county = TextField('county', validators=[validators.Optional(), 
+                                  validators.Length(max=15)], 
+                                 filters=[forms.title_field])
+    country = TextField('country', validators=[validators.Optional(),
+                                   validators.Length(max=15)],
+                                   filters=[forms.title_field])
+    email = forms.EmailField('email', validators=[validators.Optional(),
+                                      validators.Email()],
+                                      filters=[forms.lower_field])
     avatar_id = IntegerField('avatar_id', [validators.Optional()])
     display_order = IntegerField('display_order', [validators.Optional()])
     modified_by = IntegerField('modified_by', [validators.Optional()])
     time_stamp = forms.DateField("time_stamp")
+
 
 @app.route('/odontux_user/')
 @app.route('/user/')
@@ -98,6 +106,7 @@ def list_users():
     return render_template('list_users.html', odontuxusers=odontuxusers, 
                             roles=constants.ROLES_LIST,
                             role_admin=constants.ROLE_ADMIN)
+
 
 @app.route('/add/user/', methods=['GET', 'POST'])
 @app.route('/user/add/', methods=['GET', 'POST'])
