@@ -43,19 +43,13 @@ display:inline-block;
 position:fixed;
 top:0%;
 right:0%;
-}
-
-#user .normal
-{
 height:3%;
-font-size:80%;
+font-size:100%;
 background-color:green;
 }
-
-#user .menu
+.userhidden
 {
-font-size:120%;
-background-color:blue;
+visibility:"hidden";
 }
 
 /*

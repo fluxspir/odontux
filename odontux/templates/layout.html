@@ -40,8 +40,9 @@
 	</div>
 	<div id="user" onmouseover="usermenuover(this, username='{{session.username}}')" onmouseout="usermenuout(this, username='{{session.username}}')">
 	{% block user %}
-	  <div class="normal">
 	  {{ session['username'] }}
+          <div id="userhidden">
+	    <a href="/logout/">Try out</a>
 	  </div>
 	{% endblock %}
 	</div>
