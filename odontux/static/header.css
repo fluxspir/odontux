@@ -25,6 +25,8 @@ display:inline-block;
 width:5%;
 position:fixed;
 color:green;
+font-size:120%;
+text-align:center;
 }
 
 #pagetitle {
@@ -41,20 +43,34 @@ display:inline-block;
 position:fixed;
 top:0%;
 right:0%;
+}
+
+#user .normal
+{
 height:3%;
-font-size:1.22em;
+font-size:80%;
 background-color:green;
+}
+
+#user .menu
+{
+font-size:120%;
+background-color:blue;
+}
+
+/*
 overflow:hidden;
 z-index:3;
 transition: height 2s;
--moz-transition: height 2s; /* Firefox 4 */
--webkit-transition: height 2s; /* Safari and Chrome */
--o-transition: height 2s; /* Opera */
+-moz-transition: height 2s;
+-webkit-transition: height 2s;
+-o-transition: height 2s;
 }
 #user:hover {
 height:10%;
 overflow:visible;
 }
+*/
 
 #logo
 {
@@ -64,8 +80,9 @@ top:3%;
 left:0%;
 width:12% ;
 height:12%;
-}
-#logo h1 {
+text-shadow: 5px 5px 5px #0000ff ;
+color: #191970;
+font-size:250% ;
 text-align:center;
 margin:0%;
 padding:0px;
