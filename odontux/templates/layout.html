@@ -30,22 +30,24 @@
       <div id="generalinfo">
       {% block generalinfo %}
       	<div id="clock">
-       </div>
-            <script>
+          <script>
             var myVar = setInterval(function(){clock2()}, 5000)
           </script>
-       <div id="pagetitle">
+	</div>
+        <div id="pagetitle">
         {% block pagetitle %}
 	{% endblock %}
 	</div>
-	<div id="user" onmouseover="usermenuover(this, username='{{session.username}}')" onmouseout="usermenuout(this, username='{{session.username}}')">
+	<ul id="user">
 	{% block user %}
-	  {{ session['username'] }}
-          <div id="userhidden">
-	    <a href="/logout/">Try out</a>
-	  </div>
+	  <li><a href="/user/list_user/id={{session.userid}}" onmouseover="mopen('useropen')" onmouseout="mclosetime()">{{ session['username'] }}</a>
+            <div id="useropen" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+	      <a href="/logout/">Try out</a>
+	    </div>
+	  </li>
 	{% endblock %}
-	</div>
+	</ul>
+	<div style="clear:both"></div>
       {% endblock %}
       </div>
       <div id="logo">

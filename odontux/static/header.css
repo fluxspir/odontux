@@ -6,18 +6,18 @@ left:0%;
 width:100% ;
 height:15% ;
 /*background-color:lightgrey;*/
-background-image: url("headerbg.png")
+background-image: url("headerbg.png");
 }
 
 #generalinfo
 {
-display=inline-block;
 position:fixed;
 top:0%;
 width:100% ;
-height:3% ;
-/*background-color:blue;*/
+height:5% ;
+background-color:blue;
 color:white;
+z-index:1;
 }
 
 #clock {
@@ -31,7 +31,7 @@ text-align:center;
 
 #pagetitle {
 display=inline-block;
-width:85%;
+width:70%;
 left:5%;
 position:fixed;
 color:black;
@@ -39,22 +39,38 @@ color:black;
 
 #user
 {
+margin:0%;
+padding:0%;
 display:inline-block;
 position:fixed;
 top:0%;
 right:0%;
-height:3%;
 font-size:100%;
 background-color:green;
+z-index:3;
 }
-.userhidden
+#user li
+{ margin:0% ; padding:0% ; list-style:none; float:left}
+#user li a
+{ display:block ; margin:0% ; padding:0% ; color:red;}
+#user li a:hover
+{background-color:blue;}
+
+#user div
 {
-visibility:"hidden";
+position:fixed ; 
+visibility:hidden;
+margin:0%;
+padding:0%;
+background:green;
 }
+#user div a
+{ display:inline-block; margin:0%; padding:0% ; width:auto ; position:relative; color:yellow;}
+#user div a:hover
+{ background-color:red; }
 
 /*
 overflow:hidden;
-z-index:3;
 transition: height 2s;
 -moz-transition: height 2s;
 -webkit-transition: height 2s;

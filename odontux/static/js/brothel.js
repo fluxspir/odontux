@@ -1,40 +1,45 @@
-function clock2() 
-{
-var time = new Date();
-var mins = time.getMinutes();
-var mins = 5
-var hours = time.getHours();
-/**/
-var l = [hours, mins];
-for (var i=0 ; i <2 ; i++) { 
-  if (0 <= l[i] && l[i] <10) { 
-    l[i] = "0" + l[i];
-  } 
-}
-/**//*
-if (0 <= mins && mins < 10) { mins = "0" + mins }
-if (0 <= hours && hours < 10) { hours = "0" + hours }*/
-var t = hours + ":" + mins ;
-document.getElementById("clock").innerHTML=t;
+/* Show time in general_info bar */
+function clock2() {
+  var time = new Date();
+  var mins = time.getMinutes();
+  var hours = time.getHours();
+  if (mins < 10) { mins = "0" + mins }
+  if (hours < 10) { hours = "0" + hours }
+  var t = hours + ":" + mins ;
+  document.getElementById("clock").innerHTML=t;
 }
 
-function clock()
-{
-var d=new Date();
-var t=d.toLocaleTimeString();
-document.getElementById("clock").innerHTML=t;
+function clock() {
+  var d=new Date();
+  var t=d.toLocaleTimeString();
+  document.getElementById("clock").innerHTML=t;
 }
 
-function usermenuover(obj, username)
-{
-document.getElementById("userhidden").style.visibility="visible";
-obj.style.fontSize = "120%" ;
-obj.style.backgroundColar = "green";
-}
+/* Menu déroulant du user */
+// function to open hidden layer
+var ddmenuitem = 0;
+var closetimer = 0;
+var timeout = 1000;
 
-function usermenuout(obj, username)
-{
-document.getElementById("userhidden").style.visibility="hidden";
-obj.style.fontSize = "100%";
-obj.style.backgroundColar = "green";
+function mopen(id) {
+  mcancelclosetime(); // cancel close timer
+  if (ddmenuitem) ddmenuitem.style.visibility="hidden"; // close old layer
+  // get new layer and show it
+  ddmenuitem = document.getElementById(id);
+  ddmenuitem.style.visibility="visible";
+}
+// Close showed layer
+function mclose() {
+  if (ddmenuitem) ddmenuitem.style.visibility = "hidden";
+}
+// go close timer
+function mclosetime() {
+  closetimer = window.setTimeout(mclose, timeout);
+}
+// cancel close timer
+function mcancelclosetime() {
+  if (closetimer) {
+    window.clearTimeout(closetimer);
+    closetimer = null;
+  }
 }

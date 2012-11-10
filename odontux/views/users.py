@@ -20,7 +20,7 @@ from wtforms import (Form, IntegerField, TextField, FormField, PasswordField,
                     validators)
 from odontux.views import forms
 
-
+# form fields list
 general_fields = [ "username", "password", "role", "title",
                     "lastname", "firstname", "qualifications",
                     "registration", "correspondence_name", "sex", "dob"]
@@ -29,6 +29,7 @@ info_fields = [ "status", "comments", "avatar_id", "display_order",
 address_fields = ["street", "building", "city","county", "country" ]
 phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
+# form choices list
 title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),
                 (_("Mlle"), _("Mlle")), (_("Dr"), _("Dr")) ]
 
@@ -143,37 +144,82 @@ def add_user():
         return redirect(url_for('list_users'))
     return render_template('/add_user.html/', form=form)
 
-@app.route('/user/update_user/id=<int:user_id>/', methods=['GET', 'POST'])
-def update_user(user_id):
+def _check_user_perm():
+    if session['role'] != ROLE_ADMIN \
+    and session['username'] != user.username:
+        return False
+    return True
+
+def _get_user(user_id):
     try:
         user = meta.session.query(users.OdontuxUser).filter\
-         (users.OdontuxUser.id == user_id).one()
+            (users.OdontuxUser.id == user_id).one()
+        return user
     except sqlalchemy.orm.exc.NoResultFound:
         return redirect(url_for('list_users'))
 
-    if session['role'] != ROLE_ADMIN \
-    and session['username'] != user.username:
+@app.route('/user/update_user/id=<int:user_id>/', methods=['GET', 'POST'])
+def update_user(user_id):
+    user = _get_user(user_id) 
+    if not _check_user_perm():
         return redirect(url_for('list_users'))
 
     form = OdontuxUserForm(request.form)
-
     if request.method == 'POST' and form.validate():
-        for f in fields:
+        for f in general_fields:
             setattr(user, f, getattr(form, f).data)
-        for f in addressfields:
-            if doctor.addresses:
-                setattr(doctor.addresses[-1], f, getattr(form, f).data)
-            else:                
-                doctor.addresses.append(administration.Address(
-                            **{f: getattr(form, f).data}
-                            ))
-        for (f,g) in phonefields:
-            if doctor.phones[-1]:
-                setattr(doctor.phones[-1], g, getattr(form, f).data)
-            else:
-                doctor.phones.append(administration.Phones(
-                            **{g: getattr(form, f).data}
-                            ))
+        for f in info_fields:
+            setattr(user, f, getattr(form, f).data
+        meta.session.commit()
+    
+    return render_template('/update_md.html', form=form, user=user)
+
+@app.route('/user/update_user_address/id=<int:user_id>', methods=['POST'])
+def update_user_address(user_id):
+    user = _get_user(user_id)
+    if not _check_user_perm():
+        return redirect(url_for('list_users'))
+    form = OdontuxUserForm(request.form)
+    if request.method == 'POST' and form.validate():
+    for f in addressfields:
+        if user.addresses:
+            setattr(user.addresses[-1], f, getattr(form, f).data)
+        else:                
+            user.addresses.append(users.OdontuxUser(
+                        **{f: getattr(form, f).data}
+                        ))
+
+@app.route('/user/add_user_address/id=<int:user_id>', methods=['POST'])
+def add_user_address(user_id):
+    user = _get_user(user_id)
+    if not _check_user_perm():
+        return redirect(url_for('list_users'))
+    form = OdontuxUserForm(request.form)
+    if request.method == 'POST' and form.validate():
+    for f in addressfields:
+        user.addresses.append(users.OdontuxUser(
+                    **{f: getattr(form, f).data}
+                    ))
+
+@app.route('/user/update_user_phone/id=<int:user_id>', method=['POST'])
+def update_user_phone(user_id):
+    user = _get_user(user_id)
+    if not _check_user_perm():
+        return redirect(url_for('list_users'))
+    for (f,g) in phonefields:
+        if user.phones[-1]:
+            setattr(user.phones[-1], g, getattr(form, f).data)
+        else:
+            user.phones.append(administration.Phones(
+                        **{g: getattr(form, f).data}
+                        ))
+@app.route('/user/add_user_phone/id=<int:user_id>', method=['POST'])
+def add_user_phone(user_id):
+    user = _get_user(user_id)
+    if not _check_user_perm():
+        return redirect(url_for('list_users'))
+
+
         for f in mailfields:
             if doctor.mails[-1]:
                 setattr(doctor.mails[-1], f, getattr(form, f).data)
@@ -181,6 +227,3 @@ def update_user(user_id):
                 doctor.mails.append(administration.Mail(
                             **{f: getattr(form, f).data}
                             ))
-        meta.session.commit()
-        return redirect(url_for('list_md'))
-    return render_template('/update_md.html', form=form, doctor=doctor)
