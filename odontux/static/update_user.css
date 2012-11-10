@@ -1,6 +1,6 @@
 #general {
 display:inline-block;
-position:relative;
+position:absolute;
 left:0%;
 width:34%;
 height:100%;
@@ -9,29 +9,32 @@ background-color:blue;
 
 #address {
 display:inline-block;
-position:relative;
+position:absolute;
 left:34%;
 width:33%;
 height:100%;
 background-color:white;
+visibility:visible;
 }
 
 #phone {
 display:inline-block;
-position:relative;
+position:absolute;
 left:67%;
 width:33%;
 top:0%;
 height:70%;
 background-color:yellow;
+visibility:visible;
 }
 
 #mail {
 display:inline-block;
-position:relative;
-left=67%;
+position:absolute;
+right:0%;
 width:33%;
 top:70%;
 height:30%;
 background-color:green;
+visibility:visible;
 }
