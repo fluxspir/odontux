@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+{% block css %}
+  <link rel="stylesheet" type="text/css" href="update_user.css">
+{% endblock %}
+{% block javascript_specific %}
+  <script type="text/javascript" src="js/update_user.js"></script>
+{% endblock %}
+{% block pagetitle %}
+Update user : {{ session.username }}
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<div id="general">lala</div>
+<div id="address">lolo</div>
+<div id="phone">oi</div>
+<div id="mail">estuan</div>
+<!--
+<form method="post" action="/user/update_user/id={{ user.id }}">
+  <dl>
+    {{ render_field(form.username, autofocus="autofocus") }}
+    {{ render_field(form.password) }}
+    {{ render_field(form.confirm) }}
+    {{ render_field(form.role) }}
+    {{ render_field(form.title) }}
+    {{ render_field(form.lastname) }}
+    {{ render_field(form.firstname) }}
+    {{ render_field(form.sex) }}
+    {{ render_field(form.dob) }}
+    {{ render_field(form.qualifications) }}
+    {{ render_field(form.registration) }}
+    {{ render_field(form.correspondence_name) }}
+    {{ render_field(form.status, default=True) }}
+    {{ render_field(form.comments) }}
+    {{ render_field(form.avatar_id) }}
+    {{ render_field(form.modified_by) }}
+      {{ render_field(form.phonename) }}
+      {{ render_field(form.phonenum) }}
+      {{ render_field(form.email) }}
+      {{ render_field(form.street) }}
+      {{ render_field(form.building) }}
+      {{ render_field(form.city) }}
+      {{ render_field(form.postal_code) }}
+      {{ render_field(form.county) }}
+      {{ render_field(form.country) }}
+  </dl>
+  <p><input type="submit" value="Add">
+</form>
+-->
+{% endblock %}
+
+<!---->

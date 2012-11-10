@@ -65,7 +65,7 @@ padding:0%;
 background:green;
 }
 #user div a
-{ display:inline-block; margin:0%; padding:0% ; width:auto ; position:relative; color:yellow;}
+{ display:inline-block; margin:0%; padding:0% ; width:100% ; position:relative; color:yellow;}
 #user div a:hover
 { background-color:red; }
 

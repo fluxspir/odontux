@@ -5,19 +5,21 @@
       {% block base %}
       	<base href="/static/">
       {% endblock %}
-      {% block meta %}
       	<meta name="description" content="Odontux odonweb">
       	<meta name="keywords" content="odontux odonweb">
       	<meta name="author" content="Franck LABADILLE">
       	<meta charset="UTF-8">
+      {% block meta %}
       {% endblock %}
-      {% block link %} 
       	<link rel="stylesheet" type="text/css" href="style.css">
       	<link rel="stylesheet" type="text/css" href="header.css">
       	<link rel="stylesheet" type="text/css" href="main.css">
       	<link rel="stylesheet" type="text/css" href="footer.css">
 	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+      {% block css %} 
+      {% endblock %}
 	<script type="text/javascript" src="js/brothel.js"></script>
+      {% block javascript_specific %}
       {% endblock %}
       	<title>{% block title %}Odontux{% endblock %}</title>
     {% endblock %}
