@@ -40,15 +40,6 @@
         {% block pagetitle %}
 	{% endblock %}
 	</div>
-	<ul id="user">
-	{% block user %}
-	  <li><a href="/user/list_user/id={{session.userid}}" onmouseover="mopen('useropen')" onmouseout="mclosetime()">{{ session['username'] }}</a>
-            <div id="useropen" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-	      <a href="/logout/">Try out</a>
-	    </div>
-	  </li>
-	{% endblock %}
-	</ul>
 	<div style="clear:both"></div>
       {% endblock %}
       </div>
@@ -84,13 +75,25 @@
         </div>
       {% endblock %}
       </nav>
+        <ul id="user">
+	{% block user %}
+	  <li><a href="/user/list_user/id={{session.userid}}" onmouseover="mopen('useropen')" onmouseout="mclosetime()">{{ session['username'] }}</a>
+            <div id="useropen" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+	      <a href="/logout/">Logout</a>
+	    </div>
+	  </li>
+	{% endblock %}
+	</ul>
+
     {% endblock %}
     </header>
     
-    <section class="main">
-    {% block main %}
-    {% endblock %}
-    </section>
+    <div id="main_container">
+      <section id="main">
+      {% block main %}
+      {% endblock %}
+      </section>
+    </div>
 
 
     <footer>

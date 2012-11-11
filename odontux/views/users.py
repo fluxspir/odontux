@@ -175,7 +175,9 @@ def update_user(user_id):
         for f in info_fields:
             setattr(user, f, getattr(form, f).data)
         meta.session.commit()
-    return render_template('/update_user.html', form=form, user=user)
+    return render_template('/update_user.html', form=form, user=user,
+                            role_admin=constants.ROLE_ADMIN, 
+                            role_dentist=constants.ROLE_DENTIST)
 
 @app.route('/user/update_user_address/id=<int:user_id>', methods=['POST'])
 def update_user_address(user_id):

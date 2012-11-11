@@ -17,7 +17,7 @@ function clock() {
 
 /* Menu déroulant du user */
 // function to open hidden layer
-var ddmenuitem = 0;
+var ddmenuitem = 0 ;
 var closetimer = 0;
 var timeout = 1000;
 

@@ -13,7 +13,7 @@ background-image: url("headerbg.png");
 {
 position:absolute;
 top:0%;
-width:100% ;
+width:95% ;
 height:20% ;
 background-color:inherit;
 color:white;
@@ -46,29 +46,32 @@ display:inline-block;
 position:absolute;
 top:0%;
 right:0%;
+width:5%;
 font-size:100%;
-background-color:green;
 z-index:30;
 }
-#user li
-{ margin:0% ; padding:0% ; list-style:none; float:left}
-#user li a
-{ display:block ; margin:0% ; padding:0% ; color:red;}
-#user li a:hover
-{background-color:blue;}
+#user li {
+margin:0% ;
+padding:0% ; 
+list-style:none; 
+float:left;
+}
+#user li a {
+display:block ; margin:0% ; padding:0% ;}
+#user li a:hover {
+font-size:130%;
+}
 
-#user div
-{
+#user div {
 position:absolute ; 
 visibility:hidden;
 margin:0%;
 padding:0%;
-background:green;
 }
-#user div a
-{ display:inline-block; margin:0%; padding:0% ; width:100% ; position:relative; color:yellow;}
-#user div a:hover
-{ background-color:red; }
+#user div a { 
+display:block; margin:0%; padding:0% ; width:auto ; position:relative;}
+#user div a:hover {
+}
 
 /*
 overflow:hidden;

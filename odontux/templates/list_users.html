@@ -24,8 +24,12 @@ List of odontux users
 	  {% endif %}
 	{% endfor %}
     </td>
-    <td>{{ user.lastname }}</td><td>{{ user.firstname }}</td><td>
-    <a href="/user/update_user/id={{ user.id }}">Update</a></td>
+    <td>{{ user.lastname }}</td>
+    <td>{{ user.firstname }}</td>
+    <td>
+      {% if session.role == role_admin or session.username == user.username %}
+        <a href="/user/update_user/id={{ user.id }}">Update</a>{% endif %}</td>
+
   </tr>
 </div>
 {% endfor %}

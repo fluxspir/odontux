@@ -10,42 +10,66 @@ Update user : {{ session.username }}
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
-<div id="general">lala</div>
-<div id="address">lolo</div>
-<div id="phone">oi</div>
-<div id="mail">estuan</div>
-<!--
-<form method="post" action="/user/update_user/id={{ user.id }}">
-  <dl>
-    {{ render_field(form.username, autofocus="autofocus") }}
-    {{ render_field(form.password) }}
-    {{ render_field(form.confirm) }}
-    {{ render_field(form.role) }}
-    {{ render_field(form.title) }}
-    {{ render_field(form.lastname) }}
-    {{ render_field(form.firstname) }}
-    {{ render_field(form.sex) }}
-    {{ render_field(form.dob) }}
-    {{ render_field(form.qualifications) }}
-    {{ render_field(form.registration) }}
-    {{ render_field(form.correspondence_name) }}
-    {{ render_field(form.status, default=True) }}
-    {{ render_field(form.comments) }}
-    {{ render_field(form.avatar_id) }}
-    {{ render_field(form.modified_by) }}
+<div id="general">
+  <form method="post" action='/user/update_user/id={{user.id}}'>
+    <dl>
+    {% if session.role == role_admin %}
+      {{ render_field(form.username, autofocus="autofocus", value=user.username) }}
+    {% endif %}
+    {{ render_field(form.title, value=user.title) }}
+    {{ render_field(form.lastname, value=user.lastname) }}
+    {{ render_field(form.firstname, value=user.firstname) }}
+    {{ render_field(form.sex, value=user.sex) }}
+    {{ render_field(form.dob, value=user.dob) }}
+    {{ render_field(form.qualifications, value=user.qualifications) }}
+    {{ render_field(form.correspondence_name, value=user.correspondence_name) }}
+    {{ render_field(form.avatar_id, value=user.avatar_id) }}
+    {% if session.role == role_dentist or session.role == role_admin %}
+      {{ render_field(form.registration, value=user.registration) }}
+    {% endif %}
+    {% if session.role == role_admin %}
+      {{ render_field(form.status, value=user.status) }}
+      {{ render_field(form.role, value=user.role) }}
+      {{ render_field(form.comments, value=user.comments) }}
+      {{ render_field(form.modified_by, value=user.modified_by) }}
+    {% endif %}
+   </dl>
+  </form>
+</div>
+<div id="phone">
+  <form method="post">
+    <dl>
       {{ render_field(form.phonename) }}
       {{ render_field(form.phonenum) }}
-      {{ render_field(form.email) }}
+    </dl>
+  </form>
+</div>
+<div id="address">
+  <form method="post">
+    <dl>
       {{ render_field(form.street) }}
       {{ render_field(form.building) }}
       {{ render_field(form.city) }}
       {{ render_field(form.postal_code) }}
       {{ render_field(form.county) }}
       {{ render_field(form.country) }}
-  </dl>
-  <p><input type="submit" value="Add">
-</form>
--->
+    </dl>
+  </form>
+</div>
+<div id="mail">
+  <form method="post">
+    <dl>
+      {{ render_field(form.email) }}
+    </dl>
+  </form>
+</div>
+<div id="password_container">
+  <form method="post">
+    <dl>
+      {{ render_field(form.password) }}
+      {{ render_field(form.confirm) }}
+    </dl>  
+  </form>
+</div>
 {% endblock %}
 
-<!---->
