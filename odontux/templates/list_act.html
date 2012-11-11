@@ -16,7 +16,9 @@ List of acts
       <th>Alias</th>
       <th>Name</th>
       <th>Color</th>
-      <th>Modify</th>
+      {% if session.role == role_admin or session.role == role_dentist %}
+        <th>Modify</th>
+      {% endif %}
     </tr>
   {% for gesture in gestures %}
     <tr>
@@ -25,7 +27,9 @@ List of acts
         <td style="background-color:{{specialty.color}};">{{ specialty.name }}</td>
       {% endif %}
       <td>{{ gesture.code }}</td><td>{{ gesture.alias }}</td><td>{{ gesture.name }}</td><td style="background-color:{{ gesture.color }};"></td>
-      <td><a href="/act/update_acttype={{ gesture.id }}/">Update</a>
+      {% if session.role == role_admin or session.role == role_dentist %}
+        <td><a href="/act/update_acttype={{ gesture.id }}/">Update</a>
+      {% endif %}
     </tr>
   {% endfor %}
   </table>

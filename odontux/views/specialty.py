@@ -12,6 +12,7 @@ from odontux.odonweb import app
 from gettext import gettext as _
 
 from odontux.views.log import index
+from odontux import constants
 
 from wtforms import Form, TextField, validators
 from odontux.views.forms import ColorField
@@ -28,7 +29,9 @@ class SpecialtyForm(Form):
 @app.route('/specialties/')
 def list_specialty():
     specialties = meta.session.query(act.Specialty).all()
-    return render_template('list_specialty.html', specialties=specialties)
+    return render_template('list_specialty.html', specialties=specialties,
+                            role_admin=constants.ROLE_ADMIN,
+                            role_dentist=constants.ROLE_DENTIST)
 
 
 @app.route('/specialty/add/', methods=['GET', 'POST'])

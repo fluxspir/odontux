@@ -12,6 +12,8 @@ from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
 from gettext import gettext as _
 
+from odontux import constants
+
 from odontux.views.log import index
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
@@ -45,7 +47,9 @@ def list_acttype():
             pass
 
     query = meta.session.query(act.ActType).all()
-    return render_template('list_act.html', gestures=query)
+    return render_template('list_act.html', gestures=query, 
+                            role_admin=constants.ROLE_ADMIN,
+                            role_dentist=constants.ROLE_DENTIST)
 
 @app.route('/act/add/', methods=['GET', 'POST'])
 @app.route('/add/act/', methods=['GET', 'POST'])

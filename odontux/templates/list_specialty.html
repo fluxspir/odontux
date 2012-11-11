@@ -10,10 +10,15 @@ List of specialties
     <th>ID</th>
     <th>Name</th>
     <th>Color</th>
-    <th>Modify</th>
+    {% if session.role == role_admin or session.role == role_dentist %}
+      <th>Modify</th>
+    {% endif %}
 {% for specialty in specialties %}
   <tr>
-    <td>{{ specialty.id }}</td><td>{{ specialty.name }}</td><td style="background-color:{{ specialty.color }};"></td><td><a href="/act/update_specialty/id={{ specialty.id }}">Update</a></td>
+    <td>{{ specialty.id }}</td><td>{{ specialty.name }}</td><td style="background-color:{{ specialty.color }};"></td>
+    {% if session.role == role_admin or session.role == role_dentist %}
+      <td><a href="/act/update_specialty/id={{ specialty.id }}">Update</a></td>
+    {% endif %}
   </tr>
 </div>
 {% endfor %}
