@@ -5,7 +5,11 @@
 # Licence BSD
 #
 
+from gettext import gettext as _
 from wtforms import widgets, Field
+from wtforms import (Form, IntegerField, TextField, PasswordField,
+                    SelectField, BooleanField, TextAreaField,
+                    validators)
 
 def upper_field(value):
     if value:
@@ -61,3 +65,36 @@ class DateField(Field):
     def _value(self):
         if self.data:
             return self.data
+            
+
+
+
+class PhoneForm(Form):
+    phonename = TextField('phonename', validators=[validators.Optional()])
+    phonenum = TelField('phonenum', [validators.Optional()])
+
+class AddressForm(Form):
+    address_id = TextField('address_id')
+    street = TextField('street', validators=[validators.Optional(),
+                                 validators.Length(max=50, message=_("""Number
+                                 and street must be less than 50 characters 
+                                 please"""))])
+    building = TextField('building', validators=[validators.Optional(), 
+                                     validators.Length(max=50)])
+    city = TextField('city', validators=[validators.Optional(),
+                             validators.Length(max=25,
+                             message=_("City's name"))], 
+                             filters=[title_field])
+    postal_code = IntegerField('postal_code', [validators.Optional()])
+    county = TextField('county', validators=[validators.Optional(), 
+                                  validators.Length(max=15)], 
+                                 filters=[title_field])
+    country = TextField('country', validators=[validators.Optional(),
+                                   validators.Length(max=15)],
+                                   filters=[title_field])
+
+class MailForm(Form):
+    email = EmailField('email', validators=[validators.Optional(),
+                                      validators.Email()],
+                                      filters=[lower_field])
+

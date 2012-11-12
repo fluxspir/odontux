@@ -16,7 +16,7 @@ from odontux.views.log import index
 from wtforms import Form, IntegerField, TextField, FormField, validators
 from odontux.views.forms import EmailField, TelField, DateField
 
-class MedecineDoctorForm(Form):
+class MedecineDoctorGeneralInfoForm(Form):
     lastname = TextField('lastname', [validators.Required(),
                          validators.Length(min=1, max=30,
                          message=_("Need to provide MD's lastname"))])
