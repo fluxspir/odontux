@@ -262,10 +262,11 @@ def del_user_phone(user_id):
     phone_id = int(request.form["phone_id"])
     if request.method == 'POST' and form.validate():
         try:
-            phone = meta.session.query(administration.Phone).filter(and_(
+            phone = meta.session.query(administration.Phone).filter(or_(
+                                                                    and_(
                         administration.Phone.name == form.phonename.data,
                         administration.Phone.number == form.phonenum.data
-                        )or_(
+                        ),
                         administration.Phone.id == phone_id
                         )).one()
             meta.session.delete(phone)
