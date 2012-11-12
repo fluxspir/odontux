@@ -7,7 +7,7 @@
 
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from odontux.models import meta, users, administration
 from odontux.odonweb import app
 from gettext import gettext as _
@@ -265,13 +265,14 @@ def del_user_phone(user_id):
             phone = meta.session.query(administration.Phone).filter(and_(
                         administration.Phone.name == form.phonename.data,
                         administration.Phone.number == form.phonenum.data
+                        )or_(
+                        administration.Phone.id == phone_id
                         )).one()
-            phone.delete()
+            meta.session.delete(phone)
             meta.session.commit()
             return redirect(url_for("update_user", user_id=user_id))
         except:
-            pass
-    return redirect(url_for("list_users"))
+            raise Exception("phone delete problem")
 
 @app.route('/user/update_user_mail/id=<int:user_id>/', methods=['POST'])
 def update_user_mail(user_id):
