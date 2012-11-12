@@ -63,7 +63,7 @@
           {{ render_table_field(phone_form.phonename, value=phone.name) }}
           {{ render_table_field(phone_form.phonenum, value=phone.number) }}
           <td><input type="submit" value="Update" /></td>
-          <td><input type="submit" action="/user/delete_user_phone/id={{user.id}}/" /></td>
+          <td><input type="submit" action="/user/delete_user_phone/id={{user.id}}/" value="Delete" /></td>
         </form>
       </tr>
       {% endfor %}
