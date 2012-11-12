@@ -61,8 +61,9 @@
           <td class="hidden"><input type="text" name="phone_id" value={{loop.index0}} /></td>
           {{ render_table_field(form.phonename, value=phone.name) }}
           {{ render_table_field(form.phonenum, value=phone.number) }}
-          <td><input type="submit" value="Update" />
+          <td><input type="submit" value="Update" /></td>
         </form>
+      </tr>
       {% endfor %}
       <tr>
         <form method="post" action="/user/add_user_phone/id={{user.id}}/">
@@ -75,30 +76,76 @@
     </table>
   </div>
   <div id="address">
-    <form method="post">
-      <dl>
-        {{ render_field(form.street, value=user.addresses[-1].street) }}
-        {{ render_field(form.building, value=user.addresses[-1].building) }}
-        {{ render_field(form.city, value=user.addresses[-1].city) }}
-        {{ render_field(form.postal_code, value=user.addresses[-1].postal_code) }}
-        {{ render_field(form.county, value=user.addresses[-1].county) }}
-        {{ render_field(form.country, value=user.addresses[-1].country) }}
-      </dl>
-    </form>
+    <table>
+      <tr>
+        <th class="hidden">id</th>
+        <th>street</th>
+        <th>building</th>
+        <th>city</th>
+        <th>postal_code</th>
+        <th>county</th>
+        <th>country</th>
+      </tr>
+      {% for address in user.addresses %}
+      <tr>
+        <form method="post" action="/user/update_user_address/id={{user.id}}/">
+          <td class="hidden"><input type="text" name="address_id" value={{loop.index0}} /></td>
+          {{ render_table_field(form.street, value=address.street) }}
+          {{ render_table_field(form.building, value=address.building) }}
+          {{ render_table_field(form.city, value=address.city) }}
+          {{ render_table_field(form.postal_code, value=address.postal_code) }}
+          {{ render_table_field(form.county, value=address.county) }}
+          {{ render_table_field(form.country, value=address.country) }}
+          <td><input type=submit value="Update" /></td>
+        </form>
+      </tr>
+      {% endfor %}
+      <tr>
+        <form method=post action="/user/add_user_address/id={{user.id}}/">
+          <td class="hidden"></td>
+          {{ render_table_field(form.street) }}
+          {{ render_table_field(form.building) }}
+          {{ render_table_field(form.city) }}
+          {{ render_table_field(form.postal_code) }}
+          {{ render_table_field(form.county) }}
+          {{ render_table_field(form.country) }}
+          <td><input type=submit value="Add new address" /></td>
+        </form>
+      </tr>
+    </table>
   </div>
   <div id="mail">
-    <form method="post">
-      <dl>
-        {{ render_field(form.email) }}
-      </dl>
-    </form>
+    <table>
+      <tr>
+        <th class="hidden">id</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+      {% for mail in user.mails %}
+      <tr>
+        <form method="post" action="/user/update_user_mail/id={{user.id}}/">
+          <td class="hidden"><input type="text" name="mail_id" value={{loop.index0}} /></td>
+          {{ render_table_field(form.email, value=mail.email) }}
+          <td><input type=submit value="Update" /></td>
+        </form>
+      </tr>
+      {%endfor%}
+      <tr>
+        <form method=post action="/user/add_user_mail/id={{user.id}}/">
+          <td class="hidden"></td>
+          {{ render_table_field(form.email) }}
+          <td><input type=submit value="Add new email" /></td>
+        </form>
+      </tr>
+    </table>
   </div>
   <div id="password_container">
-    <form method="post">
+    <form method="post" action="/user/update_user_password/id={{user.id}}/">
       <dl>
         {{ render_field(form.password) }}
         {{ render_field(form.confirm) }}
-      </dl>  
+      </dl>
+      <input type="submit" value="Change password" />
     </form>
   </div>
 </div>

@@ -248,23 +248,20 @@ def update_user(user_id):
                             role_admin=constants.ROLE_ADMIN, 
                             role_dentist=constants.ROLE_DENTIST)
 
-@app.route('/user/update_user_address/id=<int:user_id>', methods=['POST'])
+@app.route('/user/update_user_address/id=<int:user_id>/', methods=['POST'])
 def update_user_address(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
     form = OdontuxUserAddressForm(request.form)
+    address_id = int(request.form["address_id"])
     if request.method == 'POST' and form.validate():
         for f in address_fields:
-            if user.addresses:
-                setattr(user.addresses[-1], f, getattr(form, f).data)
-            else:                
-                user.addresses.append(users.OdontuxUser(
-                            **{f: getattr(form, f).data}
-                            ))
+            setattr(user.addresses[address_id], f, getattr(form, f).data)
         meta.session.commit()
-
-@app.route('/user/add_user_address/id=<int:user_id>', methods=['POST'])
+        return redirect(url_for("update_user", user_id=user_id))
+        
+@app.route('/user/add_user_address/id=<int:user_id>/', methods=['POST'])
 def add_user_address(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
@@ -276,22 +273,6 @@ def add_user_address(user_id):
                         **{f: getattr(form, f).data}
                         ))
         meta.session.commit()
-
-#@app.route('/user/update_user_phone/id=<int:user_id>', methods=['POST'])
-#def update_user_phone(user_id):
-#    user = _get_user(user_id)
-#    if not _check_user_perm(user):
-#        return redirect(url_for('list_users'))
-#    form = OdontuxUserPhoneForm(request.form)
-#    if request.method == 'POST' and form.validate():
-#        for (f,g) in phone_fields:
-#            if user.phones[-1]:
-#                setattr(user.phones[-1], g, getattr(form, f).data)
-#            else:
-#                user.phones.append(administration.Phones(
-#                            **{g: getattr(form, f).data}
-#                            ))
-#        meta.session.commit()
 
 @app.route('/user/update_user_phone/id=<int:user_id>/', methods=['POST'])
 def update_user_phone(user_id):
@@ -321,23 +302,20 @@ def add_user_phone(user_id):
         meta.session.commit()
         return redirect(url_for("update_user", user_id=user_id))
 
-@app.route('/user/update_user_mail/id=<int:user_id>', methods=['POST'])
+@app.route('/user/update_user_mail/id=<int:user_id>/', methods=['POST'])
 def update_user_mail(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
     form = OdontuxUserMailForm(request.form)
+    mail_id = int(request.form["mail_id"])
     if request.method == 'POST' and form.validate():
         for f in mail_fields:
-            if user.mails[-1]:
-                setattr(user.mails[-1], f, getattr(form, f).data)
-            else:
-                user.mails.append(administration.Mail(
-                            **{f: getattr(form, f).data}
-                            ))
+            setattr(user.mails[mail_id], f, getattr(form, f).data)
         meta.session.commit()
+        return redirect(url_for("update_user", user_id=user_id))
 
-@app.route('/user/add_user_mail/id=<int:user_id>', methods=['POST'])
+@app.route('/user/add_user_mail/id=<int:user_id>/', methods=['POST'])
 def add_user_mail(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
@@ -349,8 +327,9 @@ def add_user_mail(user_id):
                         **{f: getattr(form, f).data}
                         ))
         meta.session.commit()
+        return redirect(url_for("update_user", user_id=user_id))
 
-@app.route('/user/update_user_password/id=<int:user_id>', methods=['POST'])
+@app.route('/user/update_user_password/id=<int:user_id>/', methods=['POST'])
 def update_user_password(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
@@ -360,3 +339,4 @@ def update_user_password(user_id):
         for f in password_fields:
             setattr(user, f, getattr(form, f).data)
         meta.session.commit()
+        return redirect(url_for("update_user", user_id=user_id))
