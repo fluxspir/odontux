@@ -1,43 +1,136 @@
 {% extends 'layout.html' %}
+{% block css %}
+  <link rel="stylesheet" type="text/css" href="update_user.css">
+{% endblock %}
+{% block javascript_specific %}
+  <script type="text/javascript" src="js/update_user.js"></script>
+{% endblock %}
 {% block pagetitle %}
 Update of medecine doctor
 {% endblock %}
 {% block main %}
-{% from "_formhelpers.html" import render_field %}
-<form method="post" action="/md/update_md/id={{ doctor.id }}/">
-  <dl>
-    {{ render_field(form.lastname, value=doctor.lastname) }}
-    {{ render_field(form.firstname, value=doctor.firstname) }}
-    {% if doctor.phones %}
-      {{ render_field(form.phonename, value=doctor.phones[-1].phonename) }}
-      {{ render_field(form.phonenum, value=doctor.phones[-1].phonenum) }}
-    {% else %}
-      {{ render_field(form.phonename) }}
-      {{ render_field(form.phonenum) }}
-    {% endif %}
-    {% if doctor.mails %}
-      {{ render_field(form.email, value=doctor.mails[-1].email) }}
-    {% else %}
-      {{ render_field(form.email) }}
-    {% endif %}
-    {% if doctor.addresses %}
-      {{ render_field(form.street, value=doctor.addresses[-1].street) }}
-      {{ render_field(form.building, value=doctor.addresses[-1].building) }}
-      {{ render_field(form.city, value=doctor.addresses[-1].city) }}
-      {{ render_field(form.postal_code, value=doctor.addresses[-1].postal_code) }}
-      {{ render_field(form.county, value=doctor.addresses[-1].county) }}
-      {{ render_field(form.country, value=doctor.addresses[-1].country) }}
-    {% else %}
-      {{ render_field(form.street) }}
-      {{ render_field(form.building) }}
-      {{ render_field(form.city) }}
-      {{ render_field(form.postal_code) }}
-      {{ render_field(form.county) }}
-      {{ render_field(form.country) }}
-    {% endif %}
-  </dl>
-  <p><input type="submit" value="Update">
-</form>
-{% endblock %}
+  {% from "_formhelpers.html" import render_field %}
+  {% from "_formhelpers.html" import render_table_field %}
+  {% from "_formhelpers.html" import render_table_hidden_field %}
 
-<!---->
+  {% if session.role == role_dentist or session.role == role_nurse or session.role == role_assistant %}
+  <nav id="update_choices">
+    <ul>
+      <li onclick='display_form("gen_info")'>General information</li>
+      <li onclick='display_form("address")'>Address</li>
+      <li onclick='display_form("phone")'>Phone</li>
+      <li onclick='display_form("mail")'>Mail</li>
+    </ul>
+  </nav>
+  <div id="update_md">
+    <div id="gen_info">
+      <form method="post" action="/md/update_md/id={{ doctor.id }}/">
+        <dl>
+          {{ render_field(gen_info_form.lastname, value=doctor.lastname) }}
+          {{ render_field(gen_info_form.firstname, value=doctor.firstname) }}
+          <input type="submit" value="Update" />
+        </dl>
+      </form>
+    </div>
+    <div id="phone">
+      <table>
+        <tr>
+          <th class="hidden">index</th>
+          <th>name</th>
+          <th>number</th>
+          <th>action</th>
+        </tr>
+      {% for phone in doctor.phones %}
+        <tr>
+          <form method="post" action="/md/update_md_phone/id={{doctor.id}}/">
+            <td class="hidden"><input type="text" name="phone_index" value={{loop.index0}} /></td>
+            {{ render_table_field(phone_form.phonename, value=phone.name) }}
+            {{ render_table_field(phone_form.phonenum, value=phone.number) }}
+            <td><input type="submit" value="Update" /></td>
+          </form>
+          <form class="hidden" action="/md/delete_md_phone/id={{doctor.id}}/">
+            <td class="hidden"><input type="text" name="phone_id" value={{phone.id}} /></td>
+            {{ render_table_hidden_field(phone_form.phonename, value=phone.name) }}
+            {{ render_table_hidden_field(phone_form.phonenum, value=phone.number) }}
+            <td><input type="submit" value="Delete" /></td>
+          </form>
+        </tr>
+      {% endfor %}
+        <tr>
+          <form method="post" action="/md/add_md_phone/id={{doctor.id}}/">
+            <td class="hidden"></td>
+            {{ render_table_field(phone_form.phonename) }}
+            {{ render_table_field(phone_form.phonenum) }}
+            <td><input type="submit" value="Add" /></td>
+          </form>
+        </tr>
+      </table>
+    </div>
+    <div id="address">
+      <table>
+        <tr>
+          <th class="hidden">index</th>
+          <th>Street</th>
+          <th>Building</th>
+          <th>City</th>
+          <th>Postal Code</th>
+          <th>County</th>
+          <th>Country</th>
+          <th>Action</th>
+        </tr>
+        {% for address in doctor.addresses %}
+        <tr>
+          <form method="post" action="/md/update_md_address/id={{doctor.id}}/">
+            <td class="hidden"><input type="text" name="address_index" value={{loop.index0}} /></td>
+            {{ render_table_field(address_form.street, value=address.street) }}
+            {{ render_table_field(address_form.building, value=address.building) }}
+            {{ render_table_field(address_form.city, value=address.city) }}
+            {{ render_table_field(address_form.postal_code, value=address.postal_code) }}
+            {{ render_table_field(address_form.county, value=address.county) }}
+            {{ render_table_field(address_form.country, value=address.country) }}
+            <td><input type="submit" value="Update" /></td>
+          </form>
+        </tr>
+        {% endfor %}
+        <tr>
+          <form method="post" action="/md/add_md_address/id={{doctor.id}}/">
+            <td class="hidden"></td>
+            {{ render_table_field(address_form.street) }}
+            {{ render_table_field(address_form.building) }}
+            {{ render_table_field(address_form.city) }}
+            {{ render_table_field(address_form.postal_code) }}
+            {{ render_table_field(address_form.county) }}
+            {{ render_table_field(address_form.country) }}
+            <td><input type="submit" value="Add new address" /></td>
+          </form>
+        </tr>
+      </table>
+    </div>
+    <div id="mail">
+      <table>
+        <tr>
+          <th class="hidden">index</th>
+          <th>Email</th>
+          <th>Action</th>
+        </tr>
+        {% for mail in doctor.mails %}
+        <tr>
+          <form method="post" action="/md/update_md_mail/id={{doctor.id}}/">
+            <td class="hidden"><input type="text" name="mail_index" value={{loop.index0}} /></td>
+            {{ render_table_field(mail_form.email, value=mail.email) }}
+            <td><input type="submit" value="Update" /></td>
+          </form>
+        </tr>
+        {% endfor %}
+        <tr>
+          <form method="post" action="/md/add_md_mail/id={{doctor.id}}/">
+            <td class="hidden"></td>
+            {{ render_table_field(mail_form.email) }}
+            <td><input type="submit" value="Add new mail" /></td>
+          </form>
+        </tr>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}

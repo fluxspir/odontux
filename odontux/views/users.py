@@ -27,9 +27,6 @@ general_fields = [ "username", "role", "title", "lastname", "firstname",
                    "sex", "dob"]
 info_fields = [ "status", "comments", "avatar_id", "display_order",
                 "modified_by", "time_stamp" ]
-address_fields = ["street", "building", "city","county", "country" ]
-phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
-mail_fields = [ "email" ]
 password_fields = [ "password" ]
 # form choices list
 title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),
@@ -95,10 +92,13 @@ def add_user():
     if session['role'] != constants.ROLE_ADMIN:
         return redirect(url_for("index"))
 
-    form = OdontuxUserForm(request.form)
+    gen_info_form = OdontuxUserGeneralInfoForm(request.form)
+    address_form = forms.AddressForm(request.form)
+    phone_form = forms.PhoneForm(request.form)
+    mail_form = forms.MailForm(request.form)
+    password_form = OdontuxUserPasswordForm(request.form)
     if request.method == 'POST' and form.validate():
         values = {}
-
         for f in general_fields:
             values[f] = getattr(form, f).data
         for f in info_fields:
@@ -106,23 +106,26 @@ def add_user():
 
         new_odontuxuser = users.OdontuxUser(**values)
         meta.session.add(new_odontuxuser)
+        
+        address_args = {f: getattr(form, f).data for f in forms.address_fields}
+        new_odontuxuser.addresses.append(administration.Address(
+                                         **address_args))
 
-        for f in address_fields:
-            new_odontuxuser.addresses.append(administration.Address(
-                    **{f: getattr(form, f).data}
-                    ))
-        for (f,g) in phone_fields:
-            new_odontuxuser.phones.append(administration.Phone(
-                    **{g: getattr(form, f).data}
-                    ))
-        for f in mail_fields:
-            new_odontuxuser.mails.append(administration.Mail(
-                    **{f: getattr(form, f).data}
-                    ))
+        phone_args = {g: getattr(form, f).data for f,g in forms.phone_fields}
+        new_odontuxuser.phones.append(administration.Phone(**phone_args))
+
+        mail_args = {f: getattr(form, f).data for f in forms.mail_fields}
+        new_odontuxuser.mails.append(administration.Mail(**mail_args))
 
         meta.session.commit()
         return redirect(url_for('list_users'))
-    return render_template('/add_user.html/', form=form)
+
+    return render_template('/add_user.html/', 
+                           gen_info_form=gen_info_form,
+                           address_form=address_form,
+                           phone_form=phone_form,
+                           mail_form=mail_form,
+                           password_form=password_form)
 
 # verify the user is allowed to update
 def _check_user_perm(user):
@@ -157,6 +160,7 @@ def update_user(user_id):
         for f in info_fields:
             setattr(user, f, getattr(form, f).data)
         meta.session.commit()
+        return redirect(url_for('update_user', user_id=user_id))
 
     # When loading the whole update page, we use the form containing all fields
     gen_info_form = OdontuxUserGeneralInfoForm(request.form)
@@ -179,10 +183,10 @@ def update_user_address(user_id):
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
     form = forms.AddressForm(request.form)
-    address_id = int(request.form["address_id"])
+    address_index = int(request.form["address_index"])
     if request.method == 'POST' and form.validate():
-        for f in address_fields:
-            setattr(user.addresses[address_id], f, getattr(form, f).data)
+        for f in forms.address_fields:
+            setattr(user.addresses[address_index], f, getattr(form, f).data)
         meta.session.commit()
         return redirect(url_for("update_user", user_id=user_id))
         
@@ -193,9 +197,10 @@ def add_user_address(user_id):
         return redirect(url_for('list_users'))
     form = forms.AddressForm(request.form)
     if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in phone_fields}
+        args = {f: getattr(form, f).data for f in forms.address_fields}
         user.addresses.append(users.OdontuxUser(**(args)))
         meta.session.commit()
+        return redirect(url_for("update_user", user_id=user_id))
 
 @app.route('/user/update_user_phone/id=<int:user_id>/', methods=['POST'])
 def update_user_phone(user_id):
@@ -203,10 +208,10 @@ def update_user_phone(user_id):
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
     form = forms.PhoneForm(request.form)
-    phone_id = int(request.form["phone_id"])
+    phone_index = int(request.form["phone_index"])
     if request.method == 'POST' and form.validate():
-        for (f,g) in phone_fields:
-            setattr(user.phones[phone_id], g, getattr(form, f).data)
+        for (f,g) in forms.phone_fields:
+            setattr(user.phones[phone_index], g, getattr(form, f).data)
         meta.session.commit()
         return redirect(url_for("update_user", user_id=user_id))
     
@@ -218,7 +223,7 @@ def add_user_phone(user_id):
         return redirect(url_for('list_users'))
     form = forms.PhoneForm(request.form)
     if request.method == 'POST' and form.validate():
-        args = { g: getattr(form, f).data for f, g in phone_fields }
+        args = { g: getattr(form, f).data for f, g in forms.phone_fields }
         user.phones.append(administration.Phone(**args))
         meta.session.commit()
         return redirect(url_for("update_user", user_id=user_id))
@@ -254,10 +259,10 @@ def update_user_mail(user_id):
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
     form = forms.MailForm(request.form)
-    mail_id = int(request.form["mail_id"])
+    mail_index = int(request.form["mail_index"])
     if request.method == 'POST' and form.validate():
-        for f in mail_fields:
-            setattr(user.mails[mail_id], f, getattr(form, f).data)
+        for f in forms.mail_fields:
+            setattr(user.mails[mail_index], f, getattr(form, f).data)
         meta.session.commit()
         return redirect(url_for("update_user", user_id=user_id))
 
@@ -268,7 +273,7 @@ def add_user_mail(user_id):
         return redirect(url_for('list_users'))
     form = forms.MailForm(request.form)
     if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in mail_fields }
+        args = {f: getattr(form, f).data for f in forms.mail_fields }
         user.mails.append(administration.Mail(**(args)))
         meta.session.commit()
         return redirect(url_for("update_user", user_id=user_id))

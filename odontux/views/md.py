@@ -5,120 +5,172 @@
 # Licence BSD
 #
 
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, session
 import sqlalchemy
 from odontux.models import meta, md, administration
 from odontux.odonweb import app
 from gettext import gettext as _
 
 from odontux.views.log import index
+from odontux import constants
 
 from wtforms import Form, IntegerField, TextField, FormField, validators
-from odontux.views.forms import EmailField, TelField, DateField
+from odontux.views import forms
 
 class MedecineDoctorGeneralInfoForm(Form):
     lastname = TextField('lastname', [validators.Required(),
                          validators.Length(min=1, max=30,
                          message=_("Need to provide MD's lastname"))])
     firstname = TextField('firstname', [validators.Length(max=30)])
-    phonename = TextField('phonename', [validators.Length(max=15)])
-    phonenum = TelField('phonenum')
     address_id = TextField('address_id')
-    street = TextField('street', [validators.Length(max=50, message=_("""Number
-    and street must be less than 50 characters please"""))])
-    building = TextField('building', [validators.Length(max=50)])
-    city = TextField('city', [validators.Length(max=25, message=_("City's name"
-    ))])
-    postal_code = IntegerField('postal_code')
-    county = TextField('county', [validators.Length(max=15)])
-    country = TextField('country', [validators.Length(max=15)])
-    email = EmailField('email', [validators.Email()])
-    update_date = DateField("update_date")
+    update_date = forms.DateField("update_date")
 
 @app.route('/medecine_doctor/')
 @app.route('/md/')
 def list_md():
     doctors = meta.session.query(md.MedecineDoctor).all()
-    return render_template('list_md.html', doctors=doctors)
+    return render_template('list_md.html', doctors=doctors,
+                           role_dentist=constants.ROLE_DENTIST,
+                           role_nurse=constants.ROLE_NURSE,
+                           role_assistant=constants.ROLE_ASSISTANT)
 
 @app.route('/add/md/', methods=['GET', 'POST'])
 @app.route('/md/add/', methods=['GET', 'POST'])
 def add_md():
-    form = MedecineDoctorForm(request.form)
+    if (session['role'] != constants.ROLE_DENTIST
+    and session['role'] != constants.ROLE_NURSE
+    and session['role'] != constants.ROLE_ASSISTANT):
+        return redirect(url_for('list_md'))
+
+    gen_info_form = MedecineDoctorGeneralInfoForm(request.form)
+    address_form = forms.AddressForm(request.form)
+    phone_form = forms.PhoneForm(request.form)
+    mail_form = forms.MailForm(request.form)
+    
     if request.method == 'POST' and form.validate():
         values = {}
         values['lastname'] = form.lastname.data
-        if form.firstname.data:
-            values['firstname'] = form.firstname.data
+        values['firstname'] = form.firstname.data
         
         new_medecine_doctor = md.MedecineDoctor(**values)
         meta.session.add(new_medecine_doctor)
-
-        new_medecine_doctor.addresses.append(administration.Address(
-                            street = form.street.data,
-                            building = form.building.data,
-                            city = form.city.data,
-                            county = form.county.data,
-                            country = form.country.data
-                            ))
         
-        if form.phonenum.data:
-            if not form.phonename.data:
-                form.phonename.data = _("default")
-            new_medecine_doctor.phones.append(administration.Phone(
-                        name = form.phonename.data,
-                        number = form.phonenum.data
-                        ))
-        if form.email.data:
-            new_medecine_doctor.mails.append(administration.Mail(
-                        email = form.email.data
-                        ))
+        address_args = {f: getattr(form, f).data for f in forms.address_fields}
+        new_medecine_doctor.addresses.append(administration.Address(
+                                             **address_args))
+
+        phone_args = {g: getattr(form, f).data for f,g in forms.phone_fields}
+        new_medecine_doctor.phones.append(administration.Phone(**phone_args))
+
+        mail_args = {f: getattr(form, f).data for f in forms.mail_fields}
+        new_medecine_doctor.mails.append(administration.Mail(**mail_args))
+                        
         meta.session.commit()
-    return render_template("/add_md.html", form=form)
+        return redirect(url_for('list_md'))
 
+    return render_template("/add_md.html", 
+                           gen_info_form=gen_info_form,
+                           address_form=address_form,
+                           phone_form=phone_form,
+                           mail_form=mail_form)
 
-@app.route('/md/update_md/id=<int:md_id>/', methods=['GET', 'POST'])
-def update_md(md_id):
+def _get_doctor(md_id):
     try:
         doctor = meta.session.query(md.MedecineDoctor).filter\
-         (md.MedecineDoctor.id == md_id).one()
+                 (md.MedecineDoctor.id == md_id).one()
+        return doctor
     except sqlalchemy.orm.exc.NoResultFound:
         return redirect(url_for('list_md'))
 
-    form = MedecineDoctorForm(request.form)
+@app.route('/md/update_md/id=<int:md_id>/', methods=['GET', 'POST'])
+def update_md(md_id):
+    doctor = _get_doctor(md_id)
+    if (session['role'] != constants.ROLE_DENTIST
+    and session['role'] != constants.ROLE_NURSE
+    and session['role'] != constants.ROLE_ASSISTANT):
+        return redirect(url_for('list_md'))
 
-    if request.method == 'POST' and form.validate():
-        fields = [ "lastname", "firstname" ]
-        addressfields = ["street", "building", "city","county", "country",\
-                        "update_date" ]
-        phonefields = [ ("phonename", "name"), ("phonenum", "number") ]
-        mailfields = [ "email" ]
+    gen_info_form = MedecineDoctorGeneralInfoForm(request.form)
+    address_form = forms.AddressForm(request.form)
+    phone_form = forms.PhoneForm(request.form)
+    mail_form = forms.MailForm(request.form)
+    
+    if request.method == 'POST' and gen_info_form.validate():
+        gen_info_fields = [ "lastname", "firstname" ]
         for f in fields:
             setattr(doctor, f, getattr(form, f).data)
-        for f in addressfields:
-            try:
-                if doctor.addresses[-1]:
-                    setattr(doctor.addresses[-1], f, getattr(form, f).data)
-            except IndexError:
-                doctor.addresses.append(administration.Address(
-                            **{f: getattr(form, f).data}
-                            ))
-        for (f,g) in phonefields:
-            try:
-                if doctor.phones[-1]:
-                    setattr(doctor.phones[-1], g, getattr(form, f).data)
-            except IndexError:
-                doctor.phones.append(administration.Phones(
-                            **{g: getattr(form, f).data}
-                            ))
-        for f in mailfields:
-            try:
-                if doctor.mails[-1]:
-                    setattr(doctor.mails[-1], f, getattr(form, f).data)
-            except IndexError:
-                doctor.mails.append(administration.Mail(
-                            **{f: getattr(form, f).data}
-                            ))
         meta.session.commit()
-        return redirect(url_for('list_md'))
-    return render_template('/update_md.html', form=form, doctor=doctor)
+        return redirect(url_for('update_md', md_id=md_id))
+
+    # Page for updating md :
+    return render_template('/update_md.html', doctor=doctor,
+                            gen_info_form=gen_info_form,
+                            address_form=address_form,
+                            phone_form=phone_form,
+                            mail_form=mail_form,
+                            role_dentist=constants.ROLE_DENTIST,
+                            role_nurse=constants.ROLE_NURSE,
+                            role_assistant=constants.ROLE_ASSISTANT)
+
+@app.route('/md/update_md_address/id=<int:md_id>/', methods=['POST'])
+def update_address_md(md_id):
+    doctor = _get_doctor(md_id)
+    form = forms.AddressForm(request.form)
+    address_index = int(request.form['address_index'])
+    if request.method == 'POST' and form.validate():
+        for f in forms.address_fields:
+            setattr(doctor.addresses[address_index], f, getattr(form, f).data)
+        meta.session.commit()
+        return redirect(url_for('update_md', md_id=md_id))
+
+@app.route('/md/add_md_address/id=<int:md_id>/', methods=['POST'])
+def add_address_md(md_id):
+    doctor = _get_doctor(md_id)
+    form = forms.AddressForm(request.form)
+    if request.method == 'POST' and form.validate():
+        args = {f: getattr(form, f).data for f in forms.address_fields}
+        doctor.addresses.append(administration.Address(**args))
+        meta.session.commit()
+        return redirect(url_for("update_md", md_id=md_id))
+
+@app.route('/md/update_md_phone/id=<int:md_id>/', methods=['POST'])
+def update_phone_md(md_id):
+    doctor = _get_doctor(md_id)
+    form = forms.PhoneForm(request.form)
+    phone_index = int(request.form['phone_index'])
+    if request.method == 'POST' and form.validate():
+        for (f,g) in forms.phone_fields:
+            setattr(doctor.phones[phone_index], g, getattr(form, f).data)
+        meta.session.commit()
+        return redirect(url_for("update_md", md_id=md_id))
+
+@app.route('/md/add_md_phone/id=<int:md_id>/', methods=['POST'])
+def add_phone_md(md_id):
+    doctor = _get_doctor(md_id)
+    form = forms.PhoneForm(request.form)
+    if request.method == 'POST' and form.validate():
+        args = {g: getattr(form, f).data for f,g in forms.phone_fields}
+        doctor.phones.append(administration.Phone(**args))
+        meta.session.commit()
+        return redirect(url_for("update_md", md_id=md_id))
+
+@app.route('/md/update_md_mail/id=<int:md_id>/', methods=['POST'])
+def update_mail_md(md_id):
+    doctor = _get_doctor(md_id)
+    form = forms.MailForm(request.form)
+    mail_index = int(request.form["mail_index"])
+    if request.method == 'POST' and form.validate():
+        for f in forms.mail_fields:
+            setattr(doctor.mails[mail_index], f, getattr(form, f).data)
+        meta.session.commit()
+        return redirect(url_for("update_md", md_id=md_id))
+
+@app.route('/md/add_md_mail/id=<int:md_id>/', methods=['POST'])
+def add_mail_md(md_id):
+    doctor = _get_doctor(md_id)
+    form = forms.MailForm(request.form)
+    if request.method == 'POST' and form.validate():
+        args = {f: getattr(form, f).data for f in forms.mail_fields}
+        doctor.mails.append(administration.Mail(**args))
+        meta.session.commit()
+        return redirect(url_for("update_md", md_id=md_id))

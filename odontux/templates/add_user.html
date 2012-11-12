@@ -6,31 +6,31 @@ Add a new user
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="/user/add/">
   <dl>
-    {{ render_field(form.username, autofocus="autofocus") }}
-    {{ render_field(form.password) }}
-    {{ render_field(form.confirm) }}
-    {{ render_field(form.role) }}
-    {{ render_field(form.title) }}
-    {{ render_field(form.lastname) }}
-    {{ render_field(form.firstname) }}
-    {{ render_field(form.sex) }}
-    {{ render_field(form.dob) }}
-    {{ render_field(form.qualifications) }}
-    {{ render_field(form.registration) }}
-    {{ render_field(form.correspondence_name) }}
-    {{ render_field(form.status, default=True) }}
-    {{ render_field(form.comments) }}
-    {{ render_field(form.avatar_id) }}
-    {{ render_field(form.modified_by) }}
-      {{ render_field(form.phonename) }}
-      {{ render_field(form.phonenum) }}
-      {{ render_field(form.email) }}
-      {{ render_field(form.street) }}
-      {{ render_field(form.building) }}
-      {{ render_field(form.city) }}
-      {{ render_field(form.postal_code) }}
-      {{ render_field(form.county) }}
-      {{ render_field(form.country) }}
+    {{ render_field(gen_info_form.username, autofocus="autofocus") }}
+    {{ render_field(password_form.password) }}
+    {{ render_field(password_form.confirm) }}
+    {{ render_field(gen_info_form.role) }}
+    {{ render_field(gen_info_form.title) }}
+    {{ render_field(gen_info_form.lastname) }}
+    {{ render_field(gen_info_form.firstname) }}
+    {{ render_field(gen_info_form.sex) }}
+    {{ render_field(gen_info_form.dob) }}
+    {{ render_field(gen_info_form.qualifications) }}
+    {{ render_field(gen_info_form.registration) }}
+    {{ render_field(gen_info_form.correspondence_name) }}
+    {{ render_field(gen_info_form.status, default=True) }}
+    {{ render_field(gen_info_form.comments) }}
+    {{ render_field(gen_info_form.avatar_id) }}
+    {{ render_field(gen_info_form.modified_by) }}
+      {{ render_field(phone_form.phonename) }}
+      {{ render_field(phone_form.phonenum) }}
+      {{ render_field(mail_form.email) }}
+      {{ render_field(address_form.street) }}
+      {{ render_field(address_form.building) }}
+      {{ render_field(address_form.city) }}
+      {{ render_field(address_form.postal_code) }}
+      {{ render_field(address_form.county) }}
+      {{ render_field(address_form.country) }}
   </dl>
   <p><input type="submit" value="Add">
 </form>

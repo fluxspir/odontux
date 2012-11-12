@@ -52,7 +52,7 @@
   <div id="phone">
     <table>
       <tr>
-        <th class="hidden">id</th>
+        <th class="hidden">index</th>
         <th>name</th>
         <th>number</th>
         <th>action</th>
@@ -60,7 +60,7 @@
       {% for phone in user.phones %}
       <tr>
         <form method="post" action="/user/update_user_phone/id={{user.id}}/">
-          <td class="hidden"><input type="text" name="phone_id" value={{loop.index0}} /></td>
+          <td class="hidden"><input type="text" name="phone_index" value={{loop.index0}} /></td>
           {{ render_table_field(phone_form.phonename, value=phone.name) }}
           {{ render_table_field(phone_form.phonenum, value=phone.number) }}
           <td><input type="submit" value="Update" /></td>
@@ -78,7 +78,7 @@
           <td class="hidden"></td>
           {{ render_table_field(phone_form.phonename) }}
           {{ render_table_field(phone_form.phonenum) }}
-          <td><input type="submit" value="Add new phone" />
+          <td><input type="submit" value="Add new phone" /></td>
         </form>
       </tr>
     </table>
@@ -93,11 +93,12 @@
         <th>postal_code</th>
         <th>county</th>
         <th>country</th>
+        <th></th>
       </tr>
       {% for address in user.addresses %}
       <tr>
         <form method="post" action="/user/update_user_address/id={{user.id}}/">
-          <td class="hidden"><input type="text" name="address_id" value={{loop.index0}} /></td>
+          <td class="hidden"><input type="text" name="address_index" value={{loop.index0}} /></td>
           {{ render_table_field(address_form.street, value=address.street) }}
           {{ render_table_field(address_form.building, value=address.building) }}
           {{ render_table_field(address_form.city, value=address.city) }}
@@ -132,7 +133,7 @@
       {% for mail in user.mails %}
       <tr>
         <form method="post" action="/user/update_user_mail/id={{user.id}}/">
-          <td class="hidden"><input type="text" name="mail_id" value={{loop.index0}} /></td>
+          <td class="hidden"><input type="text" name="mail_index" value={{loop.index0}} /></td>
           {{ render_table_field(mail_form.email, value=mail.email) }}
           <td><input type=submit value="Update" /></td>
         </form>

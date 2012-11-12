@@ -11,6 +11,11 @@ from wtforms import (Form, IntegerField, TextField, PasswordField,
                     SelectField, BooleanField, TextAreaField,
                     validators)
 
+address_fields = ["street", "building", "city","county", "country" ]
+phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
+mail_fields = [ "email" ]
+
+
 def upper_field(value):
     if value:
         return value.upper()
