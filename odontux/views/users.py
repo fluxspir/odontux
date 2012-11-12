@@ -60,8 +60,7 @@ class OdontuxUserForm(Form):
     dob = forms.DateField('Date of Birth')
     status = BooleanField('status')
     comments = TextAreaField('comments')
-    phonename = TextField('phonename', validators=[validators.Optional(),
-                                        validators.Length(max=15)])
+    phonename = TextField('phonename', validators=[validators.Optional()])
     phonenum = forms.TelField('phonenum', [validators.Optional()])
     address_id = TextField('address_id')
     street = TextField('street', validators=[validators.Optional(),
@@ -122,8 +121,7 @@ class OdontuxUserPasswordForm(Form):
     confirm = PasswordField('Repeat Password')
 
 class OdontuxUserPhoneForm(Form):
-    phonename = TextField('phonename', validators=[validators.Optional(),
-                                        validators.Length(max=15)])
+    phonename = TextField('phonename', validators=[validators.Optional()])
     phonenum = forms.TelField('phonenum', [validators.Optional()])
 
 class OdontuxUserAddressForm(Form):
@@ -295,10 +293,10 @@ def add_user_phone(user_id):
         return redirect(url_for('list_users'))
     form = OdontuxUserPhoneForm(request.form)
     if request.method == 'POST' and form.validate():
+        args = {}
         for (f,g) in phone_fields:
-            user.phones.append(administration.Phone(
-                    **{g: getattr(form, f).data}
-                            ))
+            args[g] = getattr(form, f).data
+        user.phones.append(administration.Phone(**args))
         meta.session.commit()
         return redirect(url_for("update_user", user_id=user_id))
 
