@@ -18,7 +18,7 @@
 	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
       {% block css %} 
       {% endblock %}
-	<script type="text/javascript" src="js/brothel.js"></script>
+      <script type="text/javascript" src="js/brothel.js"></script>
       {% block javascript_specific %}
       {% endblock %}
       	<title>{% block title %}Odontux{% endblock %}</title>
@@ -31,16 +31,16 @@
     {% block header %}
       <div id="generalinfo">
       {% block generalinfo %}
-      	<div id="clock">
+        <time>
           <script>
             var myVar = setInterval(function(){clock2()}, 5000)
           </script>
-	</div>
+	      </time>
         <div id="pagetitle">
         {% block pagetitle %}
-	{% endblock %}
-	</div>
-	<div style="clear:both"></div>
+      	{% endblock %}
+	      </div>
+	      <div style="clear:both"></div>
       {% endblock %}
       </div>
       <div id="logo">
@@ -55,36 +55,35 @@
       <nav>
       {% block nav %}
         <a href="/patient">Patients</a>
-	<a href="/act">Acts</a>
-	<a href="/specialty">Specialties</a>
-	<a href="/medecine_doctor">MD</a>
-	<a href="/user">Users</a>
+      	<a href="/act">Acts</a>
+      	<a href="/specialty">Specialties</a>
+      	<a href="/medecine_doctor">MD</a>
+      	<a href="/user">Users</a>
         <div id="search">
         {% block search %}
           <form action="/search/" method="post" autocomplete="on">
-	    <input type="search" name="keywords" placeholder="Quick Search" />
-	    <select name="database" id="dbtable">
-	      <option value="patient">Patient</option>
-	      <option value="act">Act</option>
-	      <option value="odontuxuser">User</option>
-	      <option value="doctor">Doctor</option>
- 	    </select>
-	    <input type="submit" value="Find" />
-	  </form>
+	          <input type="search" name="keywords" placeholder="Quick Search" />
+	          <select name="database" id="dbtable">
+	            <option value="patient">Patient</option>
+	            <option value="act">Act</option>
+	            <option value="odontuxuser">User</option>
+	            <option value="doctor">Doctor</option>
+ 	          </select>
+	          <input type="submit" value="Find" />
+	        </form>
         {% endblock %}
         </div>
       {% endblock %}
       </nav>
-        <ul id="user">
-	{% block user %}
-	  <li><a href="/user/list_user/id={{session.userid}}" onmouseover="mopen('useropen')" onmouseout="mclosetime()">{{ session['username'] }}</a>
-            <div id="useropen" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-	      <a href="/logout/">Logout</a>
-	    </div>
-	  </li>
-	{% endblock %}
-	</ul>
-
+      <ul id="user">
+      {% block user %}
+	      <li><a href="/user/list_user/id={{session.userid}}" onmouseover="mopen('useropen')" onmouseout="mclosetime()">{{ session['username'] }}</a>
+          <div id="useropen" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+	          <a href="/logout/">Logout</a>
+	        </div>
+	      </li>
+	    {% endblock %}
+	    </ul>
     {% endblock %}
     </header>
     

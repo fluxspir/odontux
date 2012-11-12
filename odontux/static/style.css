@@ -24,3 +24,6 @@ a:hover {color:blue ;}
 a:active {color:red ; text-decoration:none ;}
 
 .center {text-align:center;}
+
+nav ul {list-style-type:none;}
+nav li {display:inline;} 

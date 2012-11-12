@@ -6,13 +6,13 @@ function clock2() {
   if (mins < 10) { mins = "0" + mins }
   if (hours < 10) { hours = "0" + hours }
   var t = hours + ":" + mins ;
-  document.getElementById("clock").innerHTML=t;
+  document.getElementsByTagName("time")[0].innerHTML=t;
 }
 
 function clock() {
   var d=new Date();
   var t=d.toLocaleTimeString();
-  document.getElementById("clock").innerHTML=t;
+  document.getElementsByTagName("time")[0].innerHTML=t;
 }
 
 /* Menu déroulant du user */

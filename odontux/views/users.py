@@ -21,14 +21,15 @@ from wtforms import (Form, IntegerField, TextField, FormField, PasswordField,
 from odontux.views import forms
 
 # form fields list
-general_fields = [ "username", "password", "role", "title",
-                    "lastname", "firstname", "qualifications",
-                    "registration", "correspondence_name", "sex", "dob"]
+general_fields = [ "username", "role", "title", "lastname", "firstname", 
+                   "qualifications", "registration", "correspondence_name", 
+                   "sex", "dob"]
 info_fields = [ "status", "comments", "avatar_id", "display_order",
                 "modified_by", "time_stamp" ]
 address_fields = ["street", "building", "city","county", "country" ]
 phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
+password_fields = [ "password" ]
 # form choices list
 title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),
                 (_("Mlle"), _("Mlle")), (_("Dr"), _("Dr")) ]
@@ -88,6 +89,69 @@ class OdontuxUserForm(Form):
     modified_by = IntegerField('modified_by', [validators.Optional()])
     time_stamp = forms.DateField("time_stamp")
 
+class OdontuxUserGeneralInfoForm(Form):
+    username = TextField('username', [validators.Required(),
+                         validators.Length(min=1, max=20)],
+                         filters=[forms.lower_field])
+    role = SelectField('role', choices=constants.ROLES_LIST, coerce=int)
+    title = SelectField('title', choices=title_list)
+    lastname = TextField('lastname', [validators.Required(),
+                            validators.Length(min=1, max=30,
+                            message=_("Need to provide MD's lastname"))],
+                            filters=[forms.upper_field])
+    firstname = TextField('firstname', [validators.Length(max=30)],
+                            filters=[forms.title_field])
+    qualifications = TextField('qualifications', filters=[forms.title_field])
+    registration = TextField('registration')
+    correspondence_name = TextField('correspondence_name', 
+                                    filters=[forms.upper_field])
+    sex = BooleanField('Male')
+    dob = forms.DateField('Date of Birth')
+    status = BooleanField('status')
+    comments = TextAreaField('comments')
+    avatar_id = IntegerField('avatar_id', [validators.Optional()])
+    display_order = IntegerField('display_order', [validators.Optional()])
+    modified_by = IntegerField('modified_by', [validators.Optional()])
+
+
+class OdontuxUserPasswordForm(Form):
+    password = PasswordField('password', [validators.Required(),
+                        validators.Length(min=4), 
+                        validators.EqualTo('confirm', message="Password must\
+                        match")])
+    confirm = PasswordField('Repeat Password')
+
+class OdontuxUserPhoneForm(Form):
+    phonename = TextField('phonename', validators=[validators.Optional(),
+                                        validators.Length(max=15)])
+    phonenum = forms.TelField('phonenum', [validators.Optional()])
+
+class OdontuxUserAddressForm(Form):
+    address_id = TextField('address_id')
+    street = TextField('street', validators=[validators.Optional(),
+                                 validators.Length(max=50, message=_("""Number
+                                 and street must be less than 50 characters 
+                                 please"""))])
+    building = TextField('building', validators=[validators.Optional(), 
+                                     validators.Length(max=50)])
+    city = TextField('city', validators=[validators.Optional(),
+                             validators.Length(max=25,
+                             message=_("City's name"))], 
+                             filters=[forms.title_field])
+    postal_code = IntegerField('postal_code', [validators.Optional()])
+    county = TextField('county', validators=[validators.Optional(), 
+                                  validators.Length(max=15)], 
+                                 filters=[forms.title_field])
+    country = TextField('country', validators=[validators.Optional(),
+                                   validators.Length(max=15)],
+                                   filters=[forms.title_field])
+
+class odontuxUserMailForm(Form):
+    email = forms.EmailField('email', validators=[validators.Optional(),
+                                      validators.Email()],
+                                      filters=[forms.lower_field])
+
+    time_stamp = forms.DateField("time_stamp")
 
 @app.route('/odontux_user/')
 @app.route('/user/')
@@ -168,13 +232,18 @@ def update_user(user_id):
     user = _get_user(user_id) 
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
-    form = OdontuxUserForm(request.form)
+
+    # For updating info of user, we're dealing with the form 
     if request.method == 'POST' and form.validate():
+        form = OdontuxUserGeneralInfoForm(request.form)
         for f in general_fields:
             setattr(user, f, getattr(form, f).data)
         for f in info_fields:
             setattr(user, f, getattr(form, f).data)
         meta.session.commit()
+
+    # When loading the whole update page, we use the form containing all fields
+    form = OdontuxUserForm(request.form)
     return render_template('/update_user.html', form=form, user=user,
                             role_admin=constants.ROLE_ADMIN, 
                             role_dentist=constants.ROLE_DENTIST)
@@ -184,7 +253,7 @@ def update_user_address(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
-    form = OdontuxUserForm(request.form)
+    form = OdontuxUserAddressForm(request.form)
     if request.method == 'POST' and form.validate():
         for f in address_fields:
             if user.addresses:
@@ -200,7 +269,7 @@ def add_user_address(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
-    form = OdontuxUserForm(request.form)
+    form = OdontuxUserAddressForm(request.form)
     if request.method == 'POST' and form.validate():
         for f in address_fields:
             user.addresses.append(users.OdontuxUser(
@@ -208,41 +277,56 @@ def add_user_address(user_id):
                         ))
         meta.session.commit()
 
-@app.route('/user/update_user_phone/id=<int:user_id>', methods=['POST'])
+#@app.route('/user/update_user_phone/id=<int:user_id>', methods=['POST'])
+#def update_user_phone(user_id):
+#    user = _get_user(user_id)
+#    if not _check_user_perm(user):
+#        return redirect(url_for('list_users'))
+#    form = OdontuxUserPhoneForm(request.form)
+#    if request.method == 'POST' and form.validate():
+#        for (f,g) in phone_fields:
+#            if user.phones[-1]:
+#                setattr(user.phones[-1], g, getattr(form, f).data)
+#            else:
+#                user.phones.append(administration.Phones(
+#                            **{g: getattr(form, f).data}
+#                            ))
+#        meta.session.commit()
+
+@app.route('/user/update_user_phone/id=<int:user_id>/', methods=['POST'])
 def update_user_phone(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
-    form = OdontuxUserForm(request.form)
+    form = OdontuxUserPhoneForm(request.form)
+    phone_id = int(request.form["phone_id"])
     if request.method == 'POST' and form.validate():
         for (f,g) in phone_fields:
-            if user.phones[-1]:
-                setattr(user.phones[-1], g, getattr(form, f).data)
-            else:
-                user.phones.append(administration.Phones(
-                            **{g: getattr(form, f).data}
-                            ))
+            setattr(user.phones[phone_id], g, getattr(form, f).data)
         meta.session.commit()
+        return redirect(url_for("update_user", user_id=user_id))
+    
 
-@app.route('/user/add_user_phone/id=<int:user_id>', methods=['POST'])
+@app.route('/user/add_user_phone/id=<int:user_id>/', methods=['POST'])
 def add_user_phone(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
-    form = OdontuxUserForm(request.form)
+    form = OdontuxUserPhoneForm(request.form)
     if request.method == 'POST' and form.validate():
         for (f,g) in phone_fields:
-            user.phones.append(administration.Phones(
-                            **{g: getattr(form, f).data}
+            user.phones.append(administration.Phone(
+                    **{g: getattr(form, f).data}
                             ))
         meta.session.commit()
+        return redirect(url_for("update_user", user_id=user_id))
 
 @app.route('/user/update_user_mail/id=<int:user_id>', methods=['POST'])
 def update_user_mail(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
-    form = OdontuxUserForm(request.form)
+    form = OdontuxUserMailForm(request.form)
     if request.method == 'POST' and form.validate():
         for f in mail_fields:
             if user.mails[-1]:
@@ -258,10 +342,21 @@ def add_user_mail(user_id):
     user = _get_user(user_id)
     if not _check_user_perm(user):
         return redirect(url_for('list_users'))
-    form = OdontuxUserForm(request.form)
+    form = OdontuxUserMailForm(request.form)
     if request.method == 'POST' and form.validate():
         for f in mail_fields:
             user.mails.append(administration.Mail(
                         **{f: getattr(form, f).data}
                         ))
+        meta.session.commit()
+
+@app.route('/user/update_user_password/id=<int:user_id>', methods=['POST'])
+def update_user_password(user_id):
+    user = _get_user(user_id)
+    if not _check_user_perm(user):
+        return redirect(url_for('list_users'))
+    form = OdontuxUserPasswordForm(request.form)
+    if request.method == 'POST' and form.validate():
+        for f in password_fields:
+            setattr(user, f, getattr(form, f).data)
         meta.session.commit()

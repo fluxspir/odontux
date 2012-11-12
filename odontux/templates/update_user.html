@@ -6,70 +6,101 @@
   <script type="text/javascript" src="js/update_user.js"></script>
 {% endblock %}
 {% block pagetitle %}
-Update user : {{ session.username }}
+  Update user : {{ session.username }}
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
-<div id="general">
-  <form method="post" action='/user/update_user/id={{user.id}}'>
-    <dl>
-    {% if session.role == role_admin %}
-      {{ render_field(form.username, autofocus="autofocus", value=user.username) }}
-    {% endif %}
-    {{ render_field(form.title, value=user.title) }}
-    {{ render_field(form.lastname, value=user.lastname) }}
-    {{ render_field(form.firstname, value=user.firstname) }}
-    {{ render_field(form.sex, value=user.sex) }}
-    {{ render_field(form.dob, value=user.dob) }}
-    {{ render_field(form.qualifications, value=user.qualifications) }}
-    {{ render_field(form.correspondence_name, value=user.correspondence_name) }}
-    {{ render_field(form.avatar_id, value=user.avatar_id) }}
-    {% if session.role == role_dentist or session.role == role_admin %}
-      {{ render_field(form.registration, value=user.registration) }}
-    {% endif %}
-    {% if session.role == role_admin %}
-      {{ render_field(form.status, value=user.status) }}
-      {{ render_field(form.role, value=user.role) }}
-      {{ render_field(form.comments, value=user.comments) }}
-      {{ render_field(form.modified_by, value=user.modified_by) }}
-    {% endif %}
-   </dl>
-  </form>
-</div>
-<div id="phone">
-  <form method="post">
-    <dl>
-      {{ render_field(form.phonename) }}
-      {{ render_field(form.phonenum) }}
-    </dl>
-  </form>
-</div>
-<div id="address">
-  <form method="post">
-    <dl>
-      {{ render_field(form.street) }}
-      {{ render_field(form.building) }}
-      {{ render_field(form.city) }}
-      {{ render_field(form.postal_code) }}
-      {{ render_field(form.county) }}
-      {{ render_field(form.country) }}
-    </dl>
-  </form>
-</div>
-<div id="mail">
-  <form method="post">
-    <dl>
-      {{ render_field(form.email) }}
-    </dl>
-  </form>
-</div>
-<div id="password_container">
-  <form method="post">
-    <dl>
-      {{ render_field(form.password) }}
-      {{ render_field(form.confirm) }}
-    </dl>  
-  </form>
+{% from "_formhelpers.html" import render_table_field %}
+<nav id="update_choices">
+  <ul>
+    <li onclick='display_form("gen_info")'>general_infos</li>
+    <li onclick='display_form("address")'>address</li>
+    <li onclick='display_form("phone")'>phone</li>
+    <li onclick='display_form("mail")'>mail</li>
+    <li onclick='display_form("password_container")'>password</li>
+  </ul>
+</nav>
+<div id="update_user">
+  <div id="gen_info">
+    <form method="post" action='/user/update_user/id={{user.id}}'>
+      <dl>
+      {% if session.role == role_admin %}
+        {{ render_field(form.username, autofocus="autofocus", value=user.username) }}
+      {% endif %}
+      {{ render_field(form.title, value=user.title) }}
+      {{ render_field(form.lastname, value=user.lastname) }}
+      {{ render_field(form.firstname, value=user.firstname) }}
+      {{ render_field(form.sex, value=user.sex) }}
+      {{ render_field(form.dob, value=user.dob) }}
+      {{ render_field(form.qualifications, value=user.qualifications) }}
+      {{ render_field(form.correspondence_name, value=user.correspondence_name) }}
+      {{ render_field(form.avatar_id, value=user.avatar_id) }}
+      {% if session.role == role_dentist or session.role == role_admin %}
+        {{ render_field(form.registration, value=user.registration) }}
+      {% endif %}
+      {% if session.role == role_admin %}
+        {{ render_field(form.status, value=user.status) }}
+        {{ render_field(form.role, value=user.role) }}
+        {{ render_field(form.comments, value=user.comments) }}
+        {{ render_field(form.modified_by, value=user.modified_by) }}
+      {% endif %}
+     </dl>
+    </form>
+  </div>
+  <div id="phone">
+    <table>
+      <tr>
+        <th class="hidden">id</th>
+        <th>name</th>
+        <th>number</th>
+        <th>action</th>
+      </tr>
+      {% for phone in user.phones %}
+      <tr>
+        <form method="post" action="/user/update_user_phone/id={{user.id}}/">
+          <td class="hidden"><input type="text" name="phone_id" value={{loop.index0}} /></td>
+          {{ render_table_field(form.phonename, value=phone.name) }}
+          {{ render_table_field(form.phonenum, value=phone.number) }}
+          <td><input type="submit" value="Update" />
+        </form>
+      {% endfor %}
+      <tr>
+        <form method="post" action="/user/add_user_phone/id={{user.id}}/">
+          <td class="hidden"></td>
+          {{ render_table_field(form.phonename) }}
+          {{ render_table_field(form.phonenum) }}
+          <td><input type="submit" value="Add new phone" />
+        </form>
+      </tr>
+    </table>
+  </div>
+  <div id="address">
+    <form method="post">
+      <dl>
+        {{ render_field(form.street, value=user.addresses[-1].street) }}
+        {{ render_field(form.building, value=user.addresses[-1].building) }}
+        {{ render_field(form.city, value=user.addresses[-1].city) }}
+        {{ render_field(form.postal_code, value=user.addresses[-1].postal_code) }}
+        {{ render_field(form.county, value=user.addresses[-1].county) }}
+        {{ render_field(form.country, value=user.addresses[-1].country) }}
+      </dl>
+    </form>
+  </div>
+  <div id="mail">
+    <form method="post">
+      <dl>
+        {{ render_field(form.email) }}
+      </dl>
+    </form>
+  </div>
+  <div id="password_container">
+    <form method="post">
+      <dl>
+        {{ render_field(form.password) }}
+        {{ render_field(form.confirm) }}
+      </dl>  
+    </form>
+  </div>
 </div>
 {% endblock %}
 

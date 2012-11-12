@@ -20,7 +20,7 @@ color:white;
 z-index:1;
 }
 
-#clock {
+time {
 display:inline-block;
 width:5%;
 position:absolute;
@@ -114,7 +114,7 @@ z-index:2;
 /*background-color:green;*/
 }
 
-nav
+header nav
 {
 display=inline-block;
 position:absolute;
@@ -124,8 +124,7 @@ width:78% ;
 height:20%;
 /*background-color:yellow;*/
 }
-nav ul {list-style-type:none;}
-nav li {display:inline;} 
+
 
 #search
 {
