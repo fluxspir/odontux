@@ -259,6 +259,7 @@ def del_user_phone(user_id):
     if not _check_user_perm(user):
         return redirect(url_form('list_users'))
     form = OdontuxUserPhoneForm(request.form)
+    phone_id = int(request.form["phone_id"])
     if request.method == 'POST' and form.validate():
         try:
             phone = meta.session.query(administration.Phone).filter(and_(
@@ -270,6 +271,7 @@ def del_user_phone(user_id):
             return redirect(url_for("update_user", user_id=user_id))
         except:
             pass
+    return redirect(url_for("list_users"))
 
 @app.route('/user/update_user_mail/id=<int:user_id>/', methods=['POST'])
 def update_user_mail(user_id):

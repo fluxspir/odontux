@@ -11,6 +11,7 @@
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
 {% from "_formhelpers.html" import render_table_field %}
+{% from "_formhelpers.html" import render_table_hidden_field %}
 <nav id="update_choices">
   <ul>
     <li onclick='display_form("gen_info")'>general_infos</li>
@@ -64,7 +65,10 @@
           {{ render_table_field(phone_form.phonenum, value=phone.number) }}
           <td><input type="submit" value="Update" /></td>
         </form>
-        <form method="post" action="/user/delete_user_phone/id={{user.id}}/">
+        <form class="hidden" method="post" action="/user/delete_user_phone/id={{user.id}}/">
+          <td class="hidden"><input type="text" name="phone_id" value={{loop.index0}} /></td>
+          {{ render_table_hidden_field(phone_form.phonename, value=phone.name) }}
+          {{ render_table_hidden_field(phone_form.phonenum, value=phone.number) }}
           <td><input type="submit" value="Delete" /></td>
         </form>
       </tr>
