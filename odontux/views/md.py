@@ -74,17 +74,9 @@ def add_md():
                            phone_form=phone_form,
                            mail_form=mail_form)
 
-def _get_doctor(md_id):
-    try:
-        doctor = meta.session.query(md.MedecineDoctor).filter\
-                 (md.MedecineDoctor.id == md_id).one()
-        return doctor
-    except sqlalchemy.orm.exc.NoResultFound:
-        return redirect(url_for('list_md'))
-
 @app.route('/md/update_md/id=<int:md_id>/', methods=['GET', 'POST'])
 def update_md(md_id):
-    doctor = _get_doctor(md_id)
+    doctor = forms._get_body(md_id, "md")
     if (session['role'] != constants.ROLE_DENTIST
     and session['role'] != constants.ROLE_NURSE
     and session['role'] != constants.ROLE_ASSISTANT):
@@ -113,64 +105,43 @@ def update_md(md_id):
                             role_assistant=constants.ROLE_ASSISTANT)
 
 @app.route('/md/update_md_address/id=<int:md_id>/', methods=['POST'])
-def update_address_md(md_id):
-    doctor = _get_doctor(md_id)
-    form = forms.AddressForm(request.form)
-    address_index = int(request.form['address_index'])
-    if request.method == 'POST' and form.validate():
-        for f in forms.address_fields:
-            setattr(doctor.addresses[address_index], f, getattr(form, f).data)
-        meta.session.commit()
+def update_md_address(md_id):
+    if forms.update_body_address(md_id, "md"):
         return redirect(url_for('update_md', md_id=md_id))
+    return redirect(url_for('list_md'))
 
 @app.route('/md/add_md_address/id=<int:md_id>/', methods=['POST'])
-def add_address_md(md_id):
-    doctor = _get_doctor(md_id)
-    form = forms.AddressForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in forms.address_fields}
-        doctor.addresses.append(administration.Address(**args))
-        meta.session.commit()
-        return redirect(url_for("update_md", md_id=md_id))
+def add_md_address(md_id):
+    if forms.add_body_address(md_id, "md"):
+        return redirect(url_for('update_md', md_id=md_id))
+    return redirect(url_for('list_md'))
 
 @app.route('/md/update_md_phone/id=<int:md_id>/', methods=['POST'])
-def update_phone_md(md_id):
-    doctor = _get_doctor(md_id)
-    form = forms.PhoneForm(request.form)
-    phone_index = int(request.form['phone_index'])
-    if request.method == 'POST' and form.validate():
-        for (f,g) in forms.phone_fields:
-            setattr(doctor.phones[phone_index], g, getattr(form, f).data)
-        meta.session.commit()
-        return redirect(url_for("update_md", md_id=md_id))
+def update_md_phone(md_id):
+    if forms.update_body_phone(md_id, "md"):
+        return redirect(url_for('update_md', md_id=md_id))
+    return redirect(url_for('list_md'))
 
 @app.route('/md/add_md_phone/id=<int:md_id>/', methods=['POST'])
-def add_phone_md(md_id):
-    doctor = _get_doctor(md_id)
-    form = forms.PhoneForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {g: getattr(form, f).data for f,g in forms.phone_fields}
-        doctor.phones.append(administration.Phone(**args))
-        meta.session.commit()
-        return redirect(url_for("update_md", md_id=md_id))
+def add_md_phone(md_id):
+    if forms.add_body_phone(md_id, "md"):
+        return redirect(url_for('update_md', md_id=md_id))
+    return redirect(url_for('list_md'))
+
+@app.route('/md/del_md_phone/id=<int:md_id>/', methods=['POST'])
+def del_md_phone(md_id):
+    if forms.del_body_phone(md_id, "md"):
+        return redirect(url_for('update_md', md_id=md_id))
+    return redirect(url_for('list_md'))
 
 @app.route('/md/update_md_mail/id=<int:md_id>/', methods=['POST'])
-def update_mail_md(md_id):
-    doctor = _get_doctor(md_id)
-    form = forms.MailForm(request.form)
-    mail_index = int(request.form["mail_index"])
-    if request.method == 'POST' and form.validate():
-        for f in forms.mail_fields:
-            setattr(doctor.mails[mail_index], f, getattr(form, f).data)
-        meta.session.commit()
-        return redirect(url_for("update_md", md_id=md_id))
+def update_md_mail(md_id):
+    if forms.update_body_mail(md_id, "md"):
+        return redirect(url_for('update_md', md_id=md_id))
+    return redirect(url_for('list_md'))
 
 @app.route('/md/add_md_mail/id=<int:md_id>/', methods=['POST'])
-def add_mail_md(md_id):
-    doctor = _get_doctor(md_id)
-    form = forms.MailForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in forms.mail_fields}
-        doctor.mails.append(administration.Mail(**args))
-        meta.session.commit()
-        return redirect(url_for("update_md", md_id=md_id))
+def add_md_mail(md_id):
+    if forms.add_body_mail(md_id, "md"):
+        return redirect(url_for('update_md', md_id=md_id))
+    return redirect(url_for('list_md'))

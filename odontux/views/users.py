@@ -29,16 +29,13 @@ info_fields = [ "status", "comments", "avatar_id", "display_order",
                 "modified_by", "time_stamp" ]
 password_fields = [ "password" ]
 # form choices list
-title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),
-                (_("Mlle"), _("Mlle")), (_("Dr"), _("Dr")) ]
-
 
 class OdontuxUserGeneralInfoForm(Form):
     username = TextField('username', [validators.Required(),
                          validators.Length(min=1, max=20)],
                          filters=[forms.lower_field])
     role = SelectField('role', choices=constants.ROLES_LIST, coerce=int)
-    title = SelectField('title', choices=title_list)
+    title = SelectField('title', choices=forms.title_list)
     lastname = TextField('lastname', [validators.Required(),
                             validators.Length(min=1, max=30,
                             message=_("Need to provide MD's lastname"))],
@@ -127,29 +124,13 @@ def add_user():
                            mail_form=mail_form,
                            password_form=password_form)
 
-# verify the user is allowed to update
-def _check_user_perm(user):
-    if session['role'] != constants.ROLE_ADMIN \
-    and session['username'] != user.username:
-        return False
-    return True
-
-# Get user information in the database
-def _get_user(user_id):
-    try:
-        user = meta.session.query(users.OdontuxUser).filter\
-            (users.OdontuxUser.id == user_id).one()
-        return user
-    except sqlalchemy.orm.exc.NoResultFound:
-        return redirect(url_for('list_users'))
-
 
 # Function for printing the user's updating page, and getting 
 # general and information fields.
 @app.route('/user/update_user/id=<int:user_id>/', methods=['GET', 'POST'])
 def update_user(user_id):
-    user = _get_user(user_id) 
-    if not _check_user_perm(user):
+    user = forms._get_body(user_id, "user")
+    if not forms._check_body_perm(user, "user"):
         return redirect(url_for('list_users'))
 
     # For updating info of user, we're dealing with the form 
@@ -177,111 +158,10 @@ def update_user(user_id):
                             role_admin=constants.ROLE_ADMIN, 
                             role_dentist=constants.ROLE_DENTIST)
 
-@app.route('/user/update_user_address/id=<int:user_id>/', methods=['POST'])
-def update_user_address(user_id):
-    user = _get_user(user_id)
-    if not _check_user_perm(user):
-        return redirect(url_for('list_users'))
-    form = forms.AddressForm(request.form)
-    address_index = int(request.form["address_index"])
-    if request.method == 'POST' and form.validate():
-        for f in forms.address_fields:
-            setattr(user.addresses[address_index], f, getattr(form, f).data)
-        meta.session.commit()
-        return redirect(url_for("update_user", user_id=user_id))
-        
-@app.route('/user/add_user_address/id=<int:user_id>/', methods=['POST'])
-def add_user_address(user_id):
-    user = _get_user(user_id)
-    if not _check_user_perm(user):
-        return redirect(url_for('list_users'))
-    form = forms.AddressForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in forms.address_fields}
-        user.addresses.append(users.OdontuxUser(**(args)))
-        meta.session.commit()
-        return redirect(url_for("update_user", user_id=user_id))
-
-@app.route('/user/update_user_phone/id=<int:user_id>/', methods=['POST'])
-def update_user_phone(user_id):
-    user = _get_user(user_id)
-    if not _check_user_perm(user):
-        return redirect(url_for('list_users'))
-    form = forms.PhoneForm(request.form)
-    phone_index = int(request.form["phone_index"])
-    if request.method == 'POST' and form.validate():
-        for (f,g) in forms.phone_fields:
-            setattr(user.phones[phone_index], g, getattr(form, f).data)
-        meta.session.commit()
-        return redirect(url_for("update_user", user_id=user_id))
-    
-
-@app.route('/user/add_user_phone/id=<int:user_id>/', methods=['POST'])
-def add_user_phone(user_id):
-    user = _get_user(user_id)
-    if not _check_user_perm(user):
-        return redirect(url_for('list_users'))
-    form = forms.PhoneForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = { g: getattr(form, f).data for f, g in forms.phone_fields }
-        user.phones.append(administration.Phone(**args))
-        meta.session.commit()
-        return redirect(url_for("update_user", user_id=user_id))
-
-@app.route('/user/delete_user_phone/id=<int:user_id>/', methods=['POST'])
-def del_user_phone(user_id):
-    user = _get_user(user_id)
-    if not _check_user_perm(user):
-        return redirect(url_form('list_users'))
-    form = forms.PhoneForm(request.form)
-    phone_id = int(request.form["phone_id"])
-    if request.method == 'POST' and form.validate():
-        try:
-            phone = (
-                meta.session.query(administration.Phone)
-                    .filter(and_(
-                        and_(
-                            administration.Phone.name == form.phonename.data,
-                            administration.Phone.number == form.phonenum.data
-                        ),
-                        administration.Phone.id == phone_id)
-                    )
-                ).one()
-            meta.session.delete(phone)
-            meta.session.commit()
-            return redirect(url_for("update_user", user_id=user_id))
-        except:
-            raise Exception("phone delete problem")
-
-@app.route('/user/update_user_mail/id=<int:user_id>/', methods=['POST'])
-def update_user_mail(user_id):
-    user = _get_user(user_id)
-    if not _check_user_perm(user):
-        return redirect(url_for('list_users'))
-    form = forms.MailForm(request.form)
-    mail_index = int(request.form["mail_index"])
-    if request.method == 'POST' and form.validate():
-        for f in forms.mail_fields:
-            setattr(user.mails[mail_index], f, getattr(form, f).data)
-        meta.session.commit()
-        return redirect(url_for("update_user", user_id=user_id))
-
-@app.route('/user/add_user_mail/id=<int:user_id>/', methods=['POST'])
-def add_user_mail(user_id):
-    user = _get_user(user_id)
-    if not _check_user_perm(user):
-        return redirect(url_for('list_users'))
-    form = forms.MailForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in forms.mail_fields }
-        user.mails.append(administration.Mail(**(args)))
-        meta.session.commit()
-        return redirect(url_for("update_user", user_id=user_id))
-
 @app.route('/user/update_user_password/id=<int:user_id>/', methods=['POST'])
 def update_user_password(user_id):
-    user = _get_user(user_id)
-    if not _check_user_perm(user):
+    user = forms._get_body(user_id, body_type="user")
+    if not forms._check_user_perm(user, body_type="user"):
         return redirect(url_for('list_users'))
     form = OdontuxUserPasswordForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -289,3 +169,46 @@ def update_user_password(user_id):
             setattr(user, f, getattr(form, f).data)
         meta.session.commit()
         return redirect(url_for("update_user", user_id=user_id))
+
+@app.route('/user/update_user_address/id=<int:user_id>/', methods=['POST'])
+def update_user_address(user_id):
+    if forms.update_body_address(user_id, "user"):
+        return redirect(url_for("update_user", user_id=user_id))
+    return redirect(url_for('list_users'))
+        
+@app.route('/user/add_user_address/id=<int:user_id>/', methods=['POST'])
+def add_user_address(user_id):
+    if forms.add_body_address(user_id, "user"):
+        return redirect(url_for("update_user", user_id=user_id))
+    return redirect(url_for('list_users'))
+
+@app.route('/user/update_user_phone/id=<int:user_id>/', methods=['POST'])
+def update_user_phone(user_id):
+    if forms.update_body_phone(user_id, "user"):
+        return redirect(url_for("update_user", user_id=user_id))
+    return redirect(url_for('list_users'))
+    
+
+@app.route('/user/add_user_phone/id=<int:user_id>/', methods=['POST'])
+def add_user_phone(user_id):
+    if forms.add_body_phone(user_id, "user"):
+        return redirect(url_for("update_user", user_id=user_id))
+    return redirect(url_for('list_users'))
+
+@app.route('/user/delete_user_phone/id=<int:user_id>/', methods=['POST'])
+def del_user_phone(user_id):
+    if forms.del_body_phone(user_id, "user"):
+        return redirect(url_for("update_user", user_id=user_id))
+    return redirect(url_form('list_users'))
+
+@app.route('/user/update_user_mail/id=<int:user_id>/', methods=['POST'])
+def update_user_mail(user_id):
+    if forms.update_body_mail(user_id, "user"):
+        return redirect(url_for("update_user", user_id=user_id))
+    return redirect(url_for('list_users'))
+
+@app.route('/user/add_user_mail/id=<int:user_id>/', methods=['POST'])
+def add_user_mail(user_id):
+    if forms.add_body_mail(user_id, "user"):
+        return redirect(url_for("update_user", user_id=user_id))
+    return redirect(url_for('list_users'))
