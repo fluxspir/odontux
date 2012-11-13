@@ -6,7 +6,9 @@
 #
 
 from flask import session, render_template, request, redirect, url_for
-from wtforms import Form, IntegerField, SelectField, TextField, BooleanField
+from wtforms import (Form, 
+                     IntegerField, SelectField, TextField, BooleanField,
+                     validators)
 import sqlalchemy
 from odontux.models import meta, administration
 from odontux.secret import SECRET_KEY
@@ -17,6 +19,11 @@ from odontux import constants
 from odontux.views import forms
 from odontux.views.log import index
 
+gen_info_fields = [ "title", "lastname", "firstname", "qualifications", 
+                    "preferred_name", "correspondence_name", "sex", "dob", 
+                    "job", "inactive", "time_stamp" ]
+
+other_todo = [ "family_id" , "socialsecurity_id", "office_id", "dentist_id" ]
 
 class PatientGeneralInfoForm(Form):
     family_id = IntegerField(_('family_id'), [validators.Optional()])
@@ -74,3 +81,18 @@ def add_patient():
 
     # Information general
     gen_info_form = PatientGeneralInfoForm(request.form)
+    address_form = forms.AddressForm(request.form)
+    phone_form = forms.PhoneForm(request.form)
+    mail_form = forms.MailForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        value = {}
+        for f in gen_info_fields:
+            value[f] = getattr(form, f).data
+
+    
+    return render_template("/add/patient.html",
+                            gen_info_form=gen_info_form,
+                            address_form=address_form,
+                            phone_form=phone_form,
+                            mail_form=mail_form)

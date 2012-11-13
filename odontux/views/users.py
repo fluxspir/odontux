@@ -28,7 +28,6 @@ general_fields = [ "username", "role", "title", "lastname", "firstname",
 info_fields = [ "status", "comments", "avatar_id", "display_order",
                 "modified_by", "time_stamp" ]
 password_fields = [ "password" ]
-# form choices list
 
 class OdontuxUserGeneralInfoForm(Form):
     username = TextField('username', [validators.Required(),
