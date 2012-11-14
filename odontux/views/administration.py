@@ -61,16 +61,17 @@ class PatientGeneralInfoForm(Form):
                                message=_("Please specify office_id"))])
     dentist_id = IntegerField(_('Dentist_id'), [validators.Required(
                                 message=_("Please specify dentist_id"))])
-    payer = BooleanField(_('Is payer'))
+    payer = BooleanField(_('is payer'))
     SSN = TextField(_('Social Security Number'))
     cmu = BooleanField(_('CMU(fr)'))
     insurance = TextField(_('Insurance'))
     time_stamp = forms.DateField(_("Time_stamp"))
 
+
 @app.route('/patient/')
 def allpatients():
     patients = meta.session.query(administration.Patient).all()
-    return render_template('search.html', patients=patients)
+    return render_template('list_patients.html', patients=patients)
 
 @app.route('/patient/<int:patient_id>/')
 def patient(patient_id):
@@ -86,6 +87,7 @@ def patient(patient_id):
                                patient=patient, age=age, birthday=birthday)
 
 @app.route('/patient/add/', methods=['GET', 'POST'])
+@app.route('/add/patient/', methods=['GET', 'POST'])
 def add_patient():
     """ Adding a new patient in database
     """
@@ -188,7 +190,7 @@ def add_patient():
         meta.session.commit()
         return redirect(url_for('patient', patient_id=new_patient.id))
 
-    return render_template("/add/patient.html",
+    return render_template("/add_patient.html",
                             gen_info_form=gen_info_form,
                             address_form=address_form,
                             phone_form=phone_form,

@@ -1,0 +1,134 @@
+{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_simple_field %}
+{% from "_formhelpers.html" import render_table_field %}
+{% from "_formhelpers.html" import render_table_hidden_field %}
+
+
+
+{% macro add_phone_form_fields(phone_form) %}
+  {{ render_simple_field(phone_form.phonename) }}
+  {{ render_simple_field(phone_form.phonenum) }}
+{% endmacro %}
+
+{% macro add_address_form_fields(address_form) %}
+  {{ render_simple_field(address_form.street) }}
+  {{ render_simple_field(address_form.building) }}
+  {{ render_simple_field(address_form.city) }}
+  {{ render_simple_field(address_form.postal_code) }}
+  {{ render_simple_field(address_form.county) }}
+  {{ render_simple_field(address_form.country) }}
+{% endmacro %}
+
+{% macro add_mail_form_fields(mail_form) %}
+  {{ render_simple_field(mail_form.email) }}
+{% endmacro %}
+
+
+
+{% macro update_phone_form(phone_form, body, url_update, url_delete, url_add) %}
+  <div id="phone">
+    <table>
+      <tr>
+        <th class="hidden">index</th>
+        <th>name</th>
+        <th>number</th>
+        <th>action</th>
+      </tr>
+      {% for phone in body.phones %}
+      <tr>
+        <form method="post" action="{{ url_update }}/id={{ body.id }}/">
+          <td class="hidden"><input type="text" name="phone_index" value="{{ loop.index0 }}" /></td>
+          {{ render_table_field(phone_form.phonename, value=phone.name) }}
+          {{ render_table_field(phone_form.phonenum, value=phone.number) }}
+          <td><input type="submit" value="Update" /></td>
+        </form>
+        <form class="hidden" method="post" action="{{ url_delete }}/id={{ body.id }}/">
+          <td class="hidden"><input type="text" name="phone_id" value="{{ phone.id }}" /></td>
+          {{ render_table_hidden_field(phone_form.phonename, value=phone.name) }}
+          {{ render_table_hidden_field(phone_form.phonenum, value=phone.number) }}
+          <td><input type="submit" value="Delete" /></td>
+        </form>
+      </tr>
+      {% endfor %}
+      <tr>
+        <form method="post" action="{{ url_add }}/id={{ body.id }}/">
+          <td class="hidden"></td>
+          {{ render_field(phone_form.phonename) }}
+          {{ render_field(phone_form.phonenum) }}
+          <td><input type="submit" value="Add new phone" /></td>
+        </form>
+      </tr>
+    </table>
+  </div>
+{% endmacro %}
+
+{% macro update_address_form(address_form, body, url_update, url_add) %}
+  <div id="address">
+    <table>
+      <tr>
+        <th class="hidden">id</th>
+        <th>street</th>
+        <th>building</th>
+        <th>city</th>
+        <th>postal_code</th>
+        <th>county</th>
+        <th>country</th>
+        <th></th>
+      </tr>
+      {% for address in body.addresses %}
+      <tr>
+        <form method="post" action="{{ url_update }}/id={{ body.id }}/">
+          <td class="hidden"><input type="text" name="address_index" value="{{ loop.index0 }}" /></td>
+          {{ render_table_field(address_form.street, value=address.street) }}
+          {{ render_table_field(address_form.building, value=address.building) }}
+          {{ render_table_field(address_form.city, value=address.city) }}
+          {{ render_table_field(address_form.postal_code, value=address.postal_code) }}
+          {{ render_table_field(address_form.county, value=address.county) }}
+          {{ render_table_field(address_form.country, value=address.country) }}
+          <td><input type=submit value="Update" /></td>
+        </form>
+      </tr>
+      {% endfor %}
+      <tr>
+        <form method=post action="{{ url_add }}/id={{ body.id }}/">
+          <td class="hidden"></td>
+          {{ render_table_field(address_form.street) }}
+          {{ render_table_field(address_form.building) }}
+          {{ render_table_field(address_form.city) }}
+          {{ render_table_field(address_form.postal_code) }}
+          {{ render_table_field(address_form.county) }}
+          {{ render_table_field(address_form.country) }}
+          <td><input type=submit value="Add new address" /></td>
+        </form>
+      </tr>
+    </table>
+  </div>
+{% endmacro %}
+
+{% macro update_mail_form(mail_form, body, url_update, url_add) %}
+  <div id="mail">
+    <table>
+      <tr>
+        <th class="hidden">id</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+      {% for mail in body.mails %}
+      <tr>
+        <form method="post" action="{{ url_update }}/id={{ body.id }}/">
+          <td class="hidden"><input type="text" name="mail_index" value="{{ loop.index0 }}" /></td>
+          {{ render_table_field(mail_form.email, value=mail.email) }}
+          <td><input type=submit value="Update" /></td>
+        </form>
+      </tr>
+      {%endfor%}
+      <tr>
+        <form method=post action="{{ url_add }}/id={{ body.id }}/">
+          <td class="hidden"></td>
+          {{ render_table_field(mail_form.email) }}
+          <td><input type=submit value="Add new email" /></td>
+        </form>
+      </tr>
+    </table>
+  </div>
+{% endmacro %}

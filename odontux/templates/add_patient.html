@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+{% block pagetitle %}
+Add a new patient
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_simple_field %}
+{% from "_contactformhelper.html" import add_address_form_fields %}
+{% from "_contactformhelper.html" import add_phone_form_fields %}
+{% from "_contactformhelper.html" import add_mail_form_fields %}
+
+<form method="post" action="/add/patient/">
+  <dl>
+    {{ render_simple_field(gen_info_form.title, autofocus="autofocus") }}
+    {{ render_simple_field(gen_info_form.lastname) }}
+    {{ render_simple_field(gen_info_form.firstname) }}
+    {{ render_simple_field(gen_info_form.sex) }}
+    {{ render_simple_field(gen_info_form.dob) }}
+    {{ render_simple_field(gen_info_form.job) }}
+    {{ render_simple_field(gen_info_form.qualifications) }}
+    {{ render_simple_field(gen_info_form.preferred_name) }}
+    {{ render_simple_field(gen_info_form.correspondence_name) }}
+    {{ render_simple_field(gen_info_form.inactive, default=False) }}
+    {{ render_simple_field(gen_info_form.socialsecurity_id) }}
+    {{ render_simple_field(gen_info_form.payer) }}
+    {{ render_simple_field(gen_info_form.SSN) }}
+    {{ render_simple_field(gen_info_form.cmu) }}
+    {{ render_simple_field(gen_info_form.insurance) }}
+    {{ render_simple_field(gen_info_form.office_id) }}
+    {{ render_simple_field(gen_info_form.dentist_id) }}
+    {{ render_simple_field(gen_info_form.family_id) }}
+    {{ add_address_form_fields(address_form) }}
+    {{ add_phone_form_fields(phone_form) }}
+    {{ add_mail_form_fields(mail_form) }}
+  </dl>
+  <p><input type="submit" value="Add new patient">
+</form>
+{% endblock %}
+
+<!---->

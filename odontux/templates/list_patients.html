@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block main %}
+{% if session.role != 4 %}
+  <a href="/add/patient/">Add new patient</a>
+{% endif %}
+  <div id="searchresult">
+  {% block searchresult %}
+    {% for patient in patients %}
+      <a href="/patient/{{patient.id}}">{{ patient.lastname }} {{ patient.firstname }}</a><br />
+    {% endfor %}
+  {% endblock %}
+  </div>
+{% endblock %}

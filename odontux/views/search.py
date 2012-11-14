@@ -26,8 +26,8 @@ def find():
                 administration.Patient.firstname.ilike(keyword),
                 administration.Patient.preferred_name.ilike(keyword),
                 administration.Patient.correspondence_name.ilike(keyword)
-                ))
-        return render_template('search_patient.html', patients=query.all())
+                )).order_by(administration.Patient.lastname)
+        return render_template('list_patients.html', patients=query.all())
     
     if request.form["database"] == "act":
         query = meta.session.query(act.ActType)

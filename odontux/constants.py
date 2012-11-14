@@ -20,8 +20,6 @@ ROLES = { ROLE_DENTIST: _("dentist"),
           ROLE_SECRETARY: _("secretary"),
           ROLE_ADMIN: _("admin"),
         }
-
-#ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
-ROLES_LIST = ROLES.items()
+ROLES_LIST = ROLES.items()  #ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
 
 KID_AGE = 13
