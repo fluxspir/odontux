@@ -22,4 +22,8 @@ ROLES = { ROLE_DENTIST: _("dentist"),
 #ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
 ROLES_LIST = ROLES.items()
 
+locale = "fr"
+socialsecuritylocale = "SocialSecurity" + locale.title()
+SocialSecurityLocale = getattr("administration", socialsecuritylocale)
+
 KID_AGE = 13

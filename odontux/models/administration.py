@@ -30,11 +30,11 @@ today = datetime.date.today()
 class Address(Base):
     __tablename__ = 'address'
     id = Column(Integer, primary_key=True)
-    street = Column(String, default="")
-    building = Column(String, default="")
-    city = Column(String, default="")
-    postal_code = Column(String, default="")
-    county = Column(String, default="")
+    street = Column(String)
+    building = Column(String)
+    city = Column(String)
+    postal_code = Column(String)
+    county = Column(String)
     country = Column(String, default="France")
     update_date = Column(Date, default=today)
 
@@ -42,15 +42,15 @@ class Address(Base):
 class Mail(Base):
     __tablename__ = 'mail'
     id = Column(Integer, primary_key=True)
-    email = Column(String, default="none@none.com")
+    email = Column(String)
     update_date = Column(Date, default=today)
 
 
 class Phone(Base):
     __tablename__ = 'phone'
     id = Column(Integer, primary_key=True)
-    name = Column(String, default="")
-    number = Column(String, default="")
+    name = Column(String)
+    number = Column(String)
     update_date = Column(Date, default=today)
 
 
@@ -60,7 +60,7 @@ class SocialSecurityFr(Base):
     number = Column(String, unique=True)
     beneficiaries = relationship("Patient", backref="socialsecurity")
     cmu = Column(Boolean, default=False)
-    insurance = Column(String, default="")
+    insurance = Column(String)
 
 
 class Family(Base):

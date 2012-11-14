@@ -18,12 +18,16 @@ from gettext import gettext as _
 from odontux import constants
 from odontux.views import forms
 from odontux.views.log import index
+from odontux.models import meta, administration
+
 
 gen_info_fields = [ "title", "lastname", "firstname", "qualifications", 
                     "preferred_name", "correspondence_name", "sex", "dob", 
-                    "job", "inactive", "time_stamp" ]
+                    "job", "inactive", "time_stamp", 
+                    "socialsecurity_id", "office_id", "dentist_id" ]
 
-other_todo = [ "family_id" , "socialsecurity_id", "office_id", "dentist_id" ]
+family_fields = [ "family_id" ]
+SSN_fields = [ ("SSN", "number"), ("cmu", "cmu"), ("insurance", "insurance") ]
 
 class PatientGeneralInfoForm(Form):
     family_id = IntegerField(_('family_id'), [validators.Optional()])
@@ -53,6 +57,10 @@ class PatientGeneralInfoForm(Form):
                                message=_("Please specify office_id"))])
     dentist_id = IntegerField(_('Dentist_id'), [validators.Required(
                                 message=_("Please specify dentist_id"))])
+    payer = BooleanField(_('Is payer'))
+    SSN = TextField(_('Social Security Number'))
+    cmu = BooleanField(_('CMU(fr)'))
+    insurance = TextField(_('Insurance'))
     time_stamp = forms.DateField(_("Time_stamp"))
 
 @app.route('/patient/')
@@ -75,20 +83,107 @@ def patient(patient_id):
 
 @app.route('/patient/add/', methods=['GET', 'POST'])
 def add_patient():
+    """ Adding a new patient in database
+        ...
+    """
     # the administrator don't have the right/use to create patient
+    # this task should be reserve to other roles, which are
+    # Secretary (when the patient first call/come, she may create a file
+    # Assisant/Nurse to help the dentist
+    # The dentist himself
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for("allpatients"))
 
-    # Information general
+    # Forms used for adding a new patient : 
+    # one is patient's specific :
     gen_info_form = PatientGeneralInfoForm(request.form)
+    # three are used for odontux_users and medecine doctors, too
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        value = {}
-        for f in gen_info_fields:
-            value[f] = getattr(form, f).data
+
+        # Stick general information about new patient in database
+        {f: getattr(form, f).data for f in gen_info_fields}
+        new_patient = administration.Patient(**values)
+        meta.session.add(new_patient)
+        meta.session.commit()
+
+        # A family is define in odontux mostly by the fact that
+        # they live together. 
+        for f in family_fields:
+            # If patient in a family that is already in database, just tell 
+            # which family he's in.
+            if getattr(form, f).data:
+                value[f] = getattr(form, f).data
+            else:
+                # Create new family and put the new patient in it.
+                new_family = administration.Family()
+                meta.session.add(new_family)
+                meta.session.commit()
+                new_patient.family_id = new_family.id
+                meta.session.commit()
+                # Give the patient, member of family an address 
+                address_args = {f: getattr(form, f).data 
+                                for f in forms.address_fields}
+                new_patient.family.addresses.append(administration.Address(
+                                                    **address_args))
+        meta.session.commit()
+
+        # Now, we'll see if patient will pay for himself and for his family ;
+        # if not, it must be someone from his family who'll pay.
+        if form.payer.data:
+            # Mark the patient as a payer
+            new_payer = administration.Payer(**{"patient_id": new_patient.id,})
+            meta.session.add(new_payer)
+            meta.session.commit()
+            # precise that in his family, he pays.
+            new_patient.family.payers.append(new_payer)
+            meta.session.commit()
+
+        # Phone number, in order to contact him.
+        phone_args = {g: getattr(form, f).data for f,g in forms.phone_fields}
+        new_patient.phones.append(administration.Phone(**phone_args))
+        meta.session.commit()
+
+        # Mail
+        mail_args = {f: getattr(form, f).data for f in forms.mail_fields}
+        new_patient.mails.append(administration.Mail(**mail_args))
+        meta.session.commit()
+
+        ##################################
+        # The Social Security Number : SSN
+        # ################################
+        if form.SSN.data:
+            # Verify if number already in database, for example children who
+            # are under parent's social security.
+            try:
+                SSN_id = meta.session.query(constants.SocialSecurityLocale)\
+                    .filter(constants.SocialSecurityLocale.number\
+                            == form.SSN.data).one().id
+
+            # If the number is new to database :
+            except sqlalchemy.orm.exc.NoResultFound:
+                SSN_args = {g: getattr(form, f).data for f,g in SSN_fields}
+                new_SSN = constants.SocialSecurityLocale(**SSN_args)
+                meta.session.add(new_SSN)
+                meta.session.commit()
+                SSN_id = new_SSN.id
+
+        else:
+            # If there weren't any SSNumber given, try anyway to add "cmu"
+            # and insurance hypothetic values into database
+            SSN_args = {g: getattr(form, f).data for f,g in SSN_fields}
+            new_SSN = constants.SocialSecurityLocale(**SSN_args)
+            meta.session.add(new_SSN)
+            meta.session.commit()
+            SSN_id = new_SSN.id
+
+        # Tell Patient class the SSN he is related to.
+        new_patient.socialsecurity_id = SSN_id
+        meta.session.commit()
+
 
     
     return render_template("/add/patient.html",
