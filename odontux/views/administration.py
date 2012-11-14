@@ -34,9 +34,6 @@ SSN_fields = [ ("SSN", "number"), ("cmu", "cmu"), ("insurance", "insurance") ]
 
 
 class PatientGeneralInfoForm(Form):
-    family_id = IntegerField(_('family_id'), [validators.Optional()])
-    socialsecurity_id = IntegerField(_('socialsecurity_id'), 
-                                     [validators.Optional()])
     title = SelectField(_('title'), choices=forms.title_list)
     lastname = TextField(_('lastname'), [validators.Required(
                           message=_("Lastname required")),
@@ -46,8 +43,6 @@ class PatientGeneralInfoForm(Form):
     firstname = TextField(_('firstname'), [validators.Length(max=30, 
                            message=_("firstname too long"))],
                            filters=[forms.title_field])
-    qualifications = TextField(_('qualifications'), 
-                                filters=[forms.title_field])
     preferred_name = TextField(_('preferred_name'), [validators.Length(max=30,
                                 message=_("preferred name too long"))])
     correspondence_name = TextField(_('correspondence_name'),
@@ -57,11 +52,18 @@ class PatientGeneralInfoForm(Form):
     dob = forms.DateField(_('Date of Birth'))
     job = TextField(_('Job'))
     inactive = BooleanField(_('Inactive'))
+    qualifications = TextField(_('qualifications'), 
+                                filters=[forms.title_field])
+    family_id = IntegerField(_('family_id'), [validators.Optional()])
+    socialsecurity_id = IntegerField(_('socialsecurity_id'), 
+                                     [validators.Optional()])
     office_id = IntegerField(_('Office_id'), [validators.Required(
                                message=_("Please specify office_id"))])
     dentist_id = IntegerField(_('Dentist_id'), [validators.Required(
                                 message=_("Please specify dentist_id"))])
     payer = BooleanField(_('is payer'))
+
+class SocialSecurityForm(Form):
     SSN = TextField(_('Social Security Number'))
     cmu = BooleanField(_('CMU(fr)'))
     insurance = TextField(_('Insurance'))
@@ -100,12 +102,18 @@ def add_patient():
         return redirect(url_for("allpatients"))
 
     # Forms used for adding a new patient : 
-    # one is patient's specific :
+    # two are patient's specific :
     gen_info_form = PatientGeneralInfoForm(request.form)
+    SSN_form = SocialSecurityForm(request.form)
     # three are used for odontux_users and medecine doctors, too
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
+
+    d_list = [ gen_info_form, SSN_form, address_form, phone_form, mail_form ]
+    form = {}
+    for d in d_list:
+        form.update(d)
 
     if request.method == 'POST' and form.validate():
 
