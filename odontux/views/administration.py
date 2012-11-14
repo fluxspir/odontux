@@ -20,14 +20,18 @@ from odontux.views import forms
 from odontux.views.log import index
 from odontux.models import meta, administration
 
+# variable to call in database the right table, which should be locale related.
+socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
+SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
+# Fields too use in treatment of forms
 gen_info_fields = [ "title", "lastname", "firstname", "qualifications", 
                     "preferred_name", "correspondence_name", "sex", "dob", 
                     "job", "inactive", "time_stamp", 
                     "socialsecurity_id", "office_id", "dentist_id" ]
-
 family_fields = [ "family_id" ]
 SSN_fields = [ ("SSN", "number"), ("cmu", "cmu"), ("insurance", "insurance") ]
+
 
 class PatientGeneralInfoForm(Form):
     family_id = IntegerField(_('family_id'), [validators.Optional()])
@@ -84,7 +88,6 @@ def patient(patient_id):
 @app.route('/patient/add/', methods=['GET', 'POST'])
 def add_patient():
     """ Adding a new patient in database
-        ...
     """
     # the administrator don't have the right/use to create patient
     # this task should be reserve to other roles, which are
@@ -159,14 +162,14 @@ def add_patient():
             # Verify if number already in database, for example children who
             # are under parent's social security.
             try:
-                SSN_id = meta.session.query(constants.SocialSecurityLocale)\
-                    .filter(constants.SocialSecurityLocale.number\
+                SSN_id = meta.session.query(SocialSecurityLocale)\
+                    .filter(SocialSecurityLocale.number\
                             == form.SSN.data).one().id
 
             # If the number is new to database :
             except sqlalchemy.orm.exc.NoResultFound:
                 SSN_args = {g: getattr(form, f).data for f,g in SSN_fields}
-                new_SSN = constants.SocialSecurityLocale(**SSN_args)
+                new_SSN = SocialSecurityLocale(**SSN_args)
                 meta.session.add(new_SSN)
                 meta.session.commit()
                 SSN_id = new_SSN.id
@@ -175,7 +178,7 @@ def add_patient():
             # If there weren't any SSNumber given, try anyway to add "cmu"
             # and insurance hypothetic values into database
             SSN_args = {g: getattr(form, f).data for f,g in SSN_fields}
-            new_SSN = constants.SocialSecurityLocale(**SSN_args)
+            new_SSN = SocialSecurityLocale(**SSN_args)
             meta.session.add(new_SSN)
             meta.session.commit()
             SSN_id = new_SSN.id
@@ -183,9 +186,8 @@ def add_patient():
         # Tell Patient class the SSN he is related to.
         new_patient.socialsecurity_id = SSN_id
         meta.session.commit()
+        return redirect(url_for('patient', patient_id=new_patient.id))
 
-
-    
     return render_template("/add/patient.html",
                             gen_info_form=gen_info_form,
                             address_form=address_form,
