@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+{% block css %}
+  <link rel="stylesheet" type="text/css" href="update_user.css">
+{% endblock %}
+{% block javascript_specific %}
+  <script type="text/javascript" src="js/update_user.js"></script>
+{% endblock %}
+{% block pagetitle %}
+  Update patient : {{ patient.lastname }} {{ patient.firstname }}
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_table_field %}
+{% from "_formhelpers.html" import render_table_hidden_field %}
+{% from "_contactformhelper.html" import update_phone_form %}
+{% from "_contactformhelper.html" import update_address_form %}
+{% from "_contactformhelper.html" import update_mail_form %}
+<nav id="update_choices">
+  <ul>
+    <li onclick='display_form("gen_info")'>general_infos</li>
+    <li onclick='display_form("address")'>address</li>
+    <li onclick='display_form("phone")'>phone</li>
+    <li onclick='display_form("mail")'>mail</li>
+    <li onclick='display_form("SSN")'>social security</li>
+  </ul>
+</nav>
+{% if session.role != 4 %}
+<div id="update_user">
+  <div id="gen_info">
+    <form method="post" action='/patient/update_patient/id={{ body.id }}/'>
+      <dl>
+        {{ render_field(gen_info_form.lastname, value=body.lastname) }}
+        {{ render_field(gen_info_form.firstname, value=body.firstname) }}
+        {{ render_field(gen_info_form.sex, value=body.sex) }}
+        {{ render_field(gen_info_form.dob, value=body.dob) }}
+        {{ render_field(gen_info_form.job, value=body.job) }}
+        {{ render_field(gen_info_form.qualifications, value=body.qualifications) }}
+        {{ render_field(gen_info_form.preferred_name, value=body.preferred_name) }}
+        {{ render_field(gen_info_form.correspondence_name, value=body.correspondance_name) }}
+        {{ render_field(gen_info_form.inactive, value=body.inactive) }}
+        <input type=submit value="Update" />
+      </dl>
+    </form>
+  </div>
+
+  {% update_phone_form(phone_form, body, "/patient/update_patient_phone", "/patient/delete_patient_phone", "/patient/add_patient_phone") %}
+<!-- Add a trick for body.family_id or update_address_form -->
+  {% update_address_form(address_form, body, "/patient/update_patient_address", "/patient/add_patient_address") %}
+  {% update_mail_form(mail_form, body, "/patient/update_patient_mail", "/patient/add_patient_mail") %}
+
+<!-- Add a trick for body.socialsecurity_id  or the next div -->
+  <div id="SSN">
+    <form method="post" action="/patient/update_patient_SSN/id={{body.id}}/">
+      <dl>
+        {{ render_field(gen_info_form.socialsecurity_id) }}
+        {{ render_field(gen_info_form.payer) }}
+        {{ render_field(gen_info_form.SSN) }}
+        {{ render_field(gen_info_form.cmu) }}
+        {{ render_field(gen_info_form.insurance) }}
+      </dl>
+      <input type="submit" value="Update SSN" />
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

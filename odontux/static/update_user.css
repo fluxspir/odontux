@@ -27,6 +27,11 @@ display:inline-block;
 position:absolute;
 }
 
+#SSN {
+display:inline-block;
+position:absolute;
+}
+
 .hidden {
 display:none;
 }
