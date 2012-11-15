@@ -168,7 +168,11 @@ def update_body_address(body_id, body_type):
     address_index = int(request.form["address_index"])
     if request.method == 'POST' and form.validate():
         for f in address_fields:
-            setattr(body.addresses[address_index], f, getattr(form, f).data)
+            if body_type == "patient":
+                setattr(body.family.addresses[address_index], 
+                        f, getattr(form, f).data)
+            else:
+                setattr(body.addresses[address_index], f, getattr(form, f).data)
         meta.session.commit()
         return True
         
@@ -179,7 +183,10 @@ def add_body_address(body_id, body_type):
     form = AddressForm(request.form)
     if request.method == 'POST' and form.validate():
         args = {f: getattr(form, f).data for f in address_fields}
-        body.addresses.append(administration.Address(**args))
+        if body_type == "patient":
+            body.family.addresses.append(administration.Address(**args))
+        else:
+            body.addresses.append(administration.Address(**args))
         meta.session.commit()
         return True 
 

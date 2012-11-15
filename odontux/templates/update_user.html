@@ -12,6 +12,10 @@
 {% from "_formhelpers.html" import render_field %}
 {% from "_formhelpers.html" import render_table_field %}
 {% from "_formhelpers.html" import render_table_hidden_field %}
+{% from "_contactformhelper.html" import update_phone_form %}
+{% from "_contactformhelper.html" import update_address_form %}
+{% from "_contactformhelper.html" import update_mail_form %}
+
 <nav id="update_choices">
   <ul>
     <li onclick='display_form("gen_info")'>general_infos</li>
@@ -49,105 +53,12 @@
      </dl>
     </form>
   </div>
-  <div id="phone">
-    <table>
-      <tr>
-        <th class="hidden">index</th>
-        <th>name</th>
-        <th>number</th>
-        <th>action</th>
-      </tr>
-      {% for phone in user.phones %}
-      <tr>
-        <form method="post" action="/user/update_user_phone/id={{user.id}}/">
-          <td class="hidden"><input type="text" name="phone_index" value={{loop.index0}} /></td>
-          {{ render_table_field(phone_form.phonename, value=phone.name) }}
-          {{ render_table_field(phone_form.phonenum, value=phone.number) }}
-          <td><input type="submit" value="Update" /></td>
-        </form>
-        <form class="hidden" method="post" action="/user/delete_user_phone/id={{user.id}}/">
-          <td class="hidden"><input type="text" name="phone_id" value={{phone.id}} /></td>
-          {{ render_table_hidden_field(phone_form.phonename, value=phone.name) }}
-          {{ render_table_hidden_field(phone_form.phonenum, value=phone.number) }}
-          <td><input type="submit" value="Delete" /></td>
-        </form>
-      </tr>
-      {% endfor %}
-      <tr>
-        <form method="post" action="/user/add_user_phone/id={{user.id}}/">
-          <td class="hidden"></td>
-          {{ render_table_field(phone_form.phonename) }}
-          {{ render_table_field(phone_form.phonenum) }}
-          <td><input type="submit" value="Add new phone" /></td>
-        </form>
-      </tr>
-    </table>
-  </div>
-  <div id="address">
-    <table>
-      <tr>
-        <th class="hidden">id</th>
-        <th>street</th>
-        <th>building</th>
-        <th>city</th>
-        <th>postal_code</th>
-        <th>county</th>
-        <th>country</th>
-        <th></th>
-      </tr>
-      {% for address in user.addresses %}
-      <tr>
-        <form method="post" action="/user/update_user_address/id={{user.id}}/">
-          <td class="hidden"><input type="text" name="address_index" value={{loop.index0}} /></td>
-          {{ render_table_field(address_form.street, value=address.street) }}
-          {{ render_table_field(address_form.building, value=address.building) }}
-          {{ render_table_field(address_form.city, value=address.city) }}
-          {{ render_table_field(address_form.postal_code, value=address.postal_code) }}
-          {{ render_table_field(address_form.county, value=address.county) }}
-          {{ render_table_field(address_form.country, value=address.country) }}
-          <td><input type=submit value="Update" /></td>
-        </form>
-      </tr>
-      {% endfor %}
-      <tr>
-        <form method=post action="/user/add_user_address/id={{user.id}}/">
-          <td class="hidden"></td>
-          {{ render_table_field(address_form.street) }}
-          {{ render_table_field(address_form.building) }}
-          {{ render_table_field(address_form.city) }}
-          {{ render_table_field(address_form.postal_code) }}
-          {{ render_table_field(address_form.county) }}
-          {{ render_table_field(address_form.country) }}
-          <td><input type=submit value="Add new address" /></td>
-        </form>
-      </tr>
-    </table>
-  </div>
-  <div id="mail">
-    <table>
-      <tr>
-        <th class="hidden">id</th>
-        <th>Email</th>
-        <th>Action</th>
-      </tr>
-      {% for mail in user.mails %}
-      <tr>
-        <form method="post" action="/user/update_user_mail/id={{user.id}}/">
-          <td class="hidden"><input type="text" name="mail_index" value={{loop.index0}} /></td>
-          {{ render_table_field(mail_form.email, value=mail.email) }}
-          <td><input type=submit value="Update" /></td>
-        </form>
-      </tr>
-      {%endfor%}
-      <tr>
-        <form method=post action="/user/add_user_mail/id={{user.id}}/">
-          <td class="hidden"></td>
-          {{ render_table_field(mail_form.email) }}
-          <td><input type=submit value="Add new email" /></td>
-        </form>
-      </tr>
-    </table>
-  </div>
+  
+  {{ update_phone_form(phone_form, body=user, "/user/update_user_phone", "/user/delete_user_phone", "/user/add_patient_phone") }}
+<!-- Add a trick for body.family_id or update_address_form -->
+  {{ update_address_form(address_form, user, user.addresses, "/user/update_user_address", "/patient/add_user_address") }}
+  {{ update_mail_form(mail_form, user, "/user/update_user_mail", "/user/add_user_mail") }}
+  
   <div id="password_container">
     <form method="post" action="/user/update_user_password/id={{user.id}}/">
       <dl>

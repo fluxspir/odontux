@@ -66,7 +66,7 @@ class PatientGeneralInfoForm(Form):
 
 class SocialSecurityForm(Form):
     SSN = TextField(_('Social Security Number'))
-    cmu = BooleanField(_('CMU(fr)'))
+    cmu = BooleanField(_('CMU fr'))
     insurance = TextField(_('Insurance'))
 
 

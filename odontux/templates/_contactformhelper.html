@@ -53,8 +53,8 @@
       <tr>
         <form method="post" action="{{ url_add }}/id={{ body.id }}/">
           <td class="hidden"></td>
-          {{ render_field(phone_form.phonename) }}
-          {{ render_field(phone_form.phonenum) }}
+          {{ render_table_field(phone_form.phonename) }}
+          {{ render_table_field(phone_form.phonenum) }}
           <td><input type="submit" value="Add new phone" /></td>
         </form>
       </tr>
@@ -62,7 +62,7 @@
   </div>
 {% endmacro %}
 
-{% macro update_address_form(address_form, body, url_update, url_add) %}
+{% macro update_address_form(address_form, body, body_addresses, url_update, url_add) %}
   <div id="address">
     <table>
       <tr>
@@ -75,11 +75,7 @@
         <th>country</th>
         <th></th>
       </tr>
-      {% if body_type == "patient" %}
-        {% for address in body.famity.addresses %}
-      {% else %}
-        {% for address in body.addresses %}
-      {% endif %}
+        {% for address in body_addresses %}
       <tr>
         <form method="post" action="{{ url_update }}/id={{ body.id }}/">
           <td class="hidden"><input type="text" name="address_index" value="{{ loop.index0 }}" /></td>

@@ -203,16 +203,22 @@ class UpdateMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
             doc.lastname = options.lastname.decode("utf_8").upper()
         if options.firstname:
             doc.firstname = options.firstname.decode("utf8").title()
-#        if options.city:
-#            doc.city = options.city.decode("utf_8").title()
-#        if options.address:
-#            doc.address = options.address.decode("utf_8").title()
-#        if options.phone:
-#            doc.phone = options.phone.decode("utf_8")
-#        if options.mail:
-#            doc.mail = options.mail.decode("utf_8").lower()
+        if options.street:
+            doc.addresses[-1].street = options.street.decode("utf_8").title()
+        if options.building:
+            doc.addresses[-1].building = options.building.decode("utf_8").title()
+        if options.city:
+            doc.addresses[-1].city = options.city.decode("utf_8").title()
+        if options.postal_code:
+            doc.addresses[-1].postal_code = options.postal_code.decode("utf_8").title()
+        if options.county:
+            doc.addresses[-1].county = options.county.decode("utf_8").title()
+        if options.country:
+            doc.addresses[-1].country = options.country.decode("utf_8").title()
+        if options.phone:
+            doc.phone = options.phone.decode("utf_8")
+        if options.mail:
+            doc.mail = options.mail.decode("utf_8").lower()
 
         meta.session.commit()
-
-
 

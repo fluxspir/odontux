@@ -45,7 +45,7 @@
 
   {{ update_phone_form(phone_form, body, "/patient/update_patient_phone", "/patient/delete_patient_phone", "/patient/add_patient_phone") }}
 <!-- Add a trick for body.family_id or update_address_form -->
-  {{ update_address_form(address_form, body, "/patient/update_patient_address", "/patient/add_patient_address") }}
+  {{ update_address_form(address_form, body, body.family.addresses, "/patient/update_patient_address", "/patient/add_patient_address") }}
   {{ update_mail_form(mail_form, body, "/patient/update_patient_mail", "/patient/add_patient_mail") }}
 
 <!-- Add a trick for body.socialsecurity_id  or the next div -->
