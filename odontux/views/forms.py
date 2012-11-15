@@ -131,7 +131,7 @@ def _check_body_perm(body, body_type):
         if session['role'] == constants.ROLE_ADMIN:
             return False
     elif body_type == 'patient':
-        if session['role'] != constants.ROLE_ADMIN:
+        if session['role'] == constants.ROLE_ADMIN:
             return False
     else:
         raise Exception(_("Unknown body type"))

@@ -93,24 +93,31 @@ def add_user():
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
     password_form = OdontuxUserPasswordForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if (request.method == 'POST' and gen_info_form.validate()
+        and address_form.validate() and phone_form.validate()
+        and mail_form.validate and password_form.validate()
+       ):
         values = {}
         for f in general_fields:
-            values[f] = getattr(form, f).data
+            values[f] = getattr(gen_info_form, f).data
         for f in info_fields:
-            values[f] = getattr(form, f).data
+            values[f] = getattr(gen_info_form, f).data
+        for f in password_fields:
+            values[f] = getattr(password_form, f).data
 
         new_odontuxuser = users.OdontuxUser(**values)
         meta.session.add(new_odontuxuser)
         
-        address_args = {f: getattr(form, f).data for f in forms.address_fields}
+        address_args = {f: getattr(address_form, f).data 
+                        for f in forms.address_fields}
         new_odontuxuser.addresses.append(administration.Address(
                                          **address_args))
 
-        phone_args = {g: getattr(form, f).data for f,g in forms.phone_fields}
+        phone_args = {g: getattr(phone_form, f).data 
+                      for f,g in forms.phone_fields}
         new_odontuxuser.phones.append(administration.Phone(**phone_args))
 
-        mail_args = {f: getattr(form, f).data for f in forms.mail_fields}
+        mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
         new_odontuxuser.mails.append(administration.Mail(**mail_args))
 
         meta.session.commit()

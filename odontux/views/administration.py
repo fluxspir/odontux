@@ -206,3 +206,81 @@ def add_patient():
                             address_form=address_form,
                             phone_form=phone_form,
                             mail_form=mail_form)
+
+@app.route('/patient/update_patient/id=<int:patient_id>/',
+            methods=[ 'GET', 'POST'])
+def update_patient(patient_id):
+    patient = forms._get_body(patient_id, "patient")
+    if not forms._check_body_perm(patient, "patient"):
+        raise Exception()
+        return redirect(url_for('patient', patient_id=patient_id))
+    
+    # only need form for *patient_gen_info* update here. See below for others.
+    gen_info_form = PatientGeneralInfoForm(request.form)
+    if request.method == 'POST' and gen_info_form.validate():
+        for f in general_info_fields:
+            setattr(patient, f, getattr(gen_info_form, f).data)
+        meta.session.commit()
+        return redirect(url_for('update_patient', patient_id=patient_id))
+
+    # Loading whole page, we're injecting all forms
+    gen_info_form = PatientGeneralInfoForm(request.form)
+    SSN_form = SocialSecurityForm(request.form)
+    address_form = forms.AddressForm(request.form)
+    phone_form = forms.PhoneForm(request.form)
+    mail_form = forms.MailForm(request.form)
+    return render_template('/update_patient.html', body=patient,
+                            gen_info_form=gen_info_form,
+                            SSN_form=SSN_form,
+                            address_form=address_form,
+                            phone_form=phone_form,
+                            mail_form=mail_form,
+                            role_admin=constants.ROLE_ADMIN)
+
+@app.route('/patient/update_patient_address/id=<int:patient_id>/', 
+            methods=['POST'])
+def update_patient_address(patient_id):
+    if forms.update_body_address(patient_id, "patient"):
+        return redirect(url_for("update_patient", patient_id=patient_id))
+    return redirect(url_for('list_patients'))
+        
+@app.route('/patient/add_patient_address/id=<int:patient_id>/', 
+            methods=['POST'])
+def add_patient_address(patient_id):
+    if forms.add_body_address(patient_id, "patient"):
+        return redirect(url_for("update_patient", patient_id=patient_id))
+    return redirect(url_for('list_patients'))
+
+@app.route('/patient/update_patient_phone/id=<int:patient_id>/', 
+            methods=['POST'])
+def update_patient_phone(patient_id):
+    if forms.update_body_phone(patient_id, "patient"):
+        return redirect(url_for("update_patient", patient_id=patient_id))
+    return redirect(url_for('list_patients'))
+    
+@app.route('/patient/add_patient_phone/id=<int:patient_id>/', methods=['POST'])
+def add_patient_phone(patient_id):
+    if forms.add_body_phone(patient_id, "patient"):
+        return redirect(url_for("update_patient", patient_id=patient_id))
+    return redirect(url_for('list_patients'))
+
+@app.route('/patient/delete_patient_phone/id=<int:patient_id>/', 
+            methods=['POST'])
+def del_patient_phone(patient_id):
+    if forms.del_body_phone(patient_id, "patient"):
+        return redirect(url_for("update_patient", patient_id=patient_id))
+    return redirect(url_form('list_patients'))
+
+@app.route('/patient/update_patient_mail/id=<int:patient_id>/', 
+            methods=['POST'])
+def update_patient_mail(patient_id):
+    if forms.update_body_mail(patient_id, "patient"):
+        return redirect(url_for("update_patient", patient_id=patient_id))
+    return redirect(url_for('list_patients'))
+
+@app.route('/patient/add_patient_mail/id=<int:patient_id>/', 
+            methods=['POST'])
+def add_patient_mail(patient_id):
+    if forms.add_body_mail(patient_id, "patient"):
+        return redirect(url_for("update_patient", patient_id=patient_id))
+    return redirect(url_for('list_patients'))

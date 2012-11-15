@@ -75,7 +75,11 @@
         <th>country</th>
         <th></th>
       </tr>
-      {% for address in body.addresses %}
+      {% if body_type == "patient" %}
+        {% for address in body.famity.addresses %}
+      {% else %}
+        {% for address in body.addresses %}
+      {% endif %}
       <tr>
         <form method="post" action="{{ url_update }}/id={{ body.id }}/">
           <td class="hidden"><input type="text" name="address_index" value="{{ loop.index0 }}" /></td>
