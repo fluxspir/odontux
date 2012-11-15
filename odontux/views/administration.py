@@ -27,8 +27,8 @@ SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 # Fields too use in treatment of forms
 gen_info_fields = [ "title", "lastname", "firstname", "qualifications", 
                     "preferred_name", "correspondence_name", "sex", "dob", 
-                    "job", "inactive", "time_stamp", 
-                    "socialsecurity_id", "office_id", "dentist_id" ]
+                    "job", "inactive", "time_stamp", "socialsecurity_id",
+                    "office_id", "dentist_id" ]
 family_fields = [ "family_id" ]
 SSN_fields = [ ("SSN", "number"), ("cmu", "cmu"), ("insurance", "insurance") ]
 
@@ -55,19 +55,19 @@ class PatientGeneralInfoForm(Form):
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
     family_id = IntegerField(_('family_id'), [validators.Optional()])
-    socialsecurity_id = IntegerField(_('socialsecurity_id'), 
-                                     [validators.Optional()])
     office_id = IntegerField(_('Office_id'), [validators.Required(
                                message=_("Please specify office_id"))])
     dentist_id = IntegerField(_('Dentist_id'), [validators.Required(
                                 message=_("Please specify dentist_id"))])
+    socialsecurity_id = IntegerField(_('socialsecurity_id'), 
+                                     [validators.Optional()])
     payer = BooleanField(_('is payer'))
+    time_stamp = forms.DateField(_("Time_stamp"))
 
 class SocialSecurityForm(Form):
     SSN = TextField(_('Social Security Number'))
     cmu = BooleanField(_('CMU(fr)'))
     insurance = TextField(_('Insurance'))
-    time_stamp = forms.DateField(_("Time_stamp"))
 
 
 @app.route('/patient/')
@@ -110,15 +110,12 @@ def add_patient():
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
 
-    d_list = [ gen_info_form, SSN_form, address_form, phone_form, mail_form ]
-    form = {}
-    for d in d_list:
-        form.update(d)
-
-    if request.method == 'POST' and form.validate():
+    if (request.method == 'POST' and gen_info_form.validate()
+        and SSN_form.validate() and address_form.validate()
+        and phone_form.validate() and mail_form.validate() ):
 
         # Stick general information about new patient in database
-        {f: getattr(form, f).data for f in gen_info_fields}
+        values = {f: getattr(gen_info_form, f).data for f in gen_info_fields}
         new_patient = administration.Patient(**values)
         meta.session.add(new_patient)
         meta.session.commit()
@@ -128,8 +125,8 @@ def add_patient():
         for f in family_fields:
             # If patient in a family that is already in database, just tell 
             # which family he's in.
-            if getattr(form, f).data:
-                value[f] = getattr(form, f).data
+            if getattr(gen_info_form, f).data:
+                value[f] = getattr(gen_info_form, f).data
             else:
                 # Create new family and put the new patient in it.
                 new_family = administration.Family()
@@ -138,7 +135,7 @@ def add_patient():
                 new_patient.family_id = new_family.id
                 meta.session.commit()
                 # Give the patient, member of family an address 
-                address_args = {f: getattr(form, f).data 
+                address_args = {f: getattr(address_form, f).data 
                                 for f in forms.address_fields}
                 new_patient.family.addresses.append(administration.Address(
                                                     **address_args))
@@ -146,9 +143,9 @@ def add_patient():
 
         # Now, we'll see if patient will pay for himself and for his family ;
         # if not, it must be someone from his family who'll pay.
-        if form.payer.data:
+        if gen_info_form.payer.data:
             # Mark the patient as a payer
-            new_payer = administration.Payer(**{"patient_id": new_patient.id,})
+            new_payer = administration.Payer(**{"patient_id": new_patient.id})
             meta.session.add(new_payer)
             meta.session.commit()
             # precise that in his family, he pays.
@@ -156,38 +153,43 @@ def add_patient():
             meta.session.commit()
 
         # Phone number, in order to contact him.
-        phone_args = {g: getattr(form, f).data for f,g in forms.phone_fields}
+        phone_args = {g: getattr(phone_form, f).data
+                      for f,g in forms.phone_fields}
         new_patient.phones.append(administration.Phone(**phone_args))
         meta.session.commit()
 
         # Mail
-        mail_args = {f: getattr(form, f).data for f in forms.mail_fields}
+        mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
         new_patient.mails.append(administration.Mail(**mail_args))
         meta.session.commit()
 
         ##################################
         # The Social Security Number : SSN
-        # ################################
-        if form.SSN.data:
+        ##################################
+        # The social security info may have been entered via the 
+        # socialsecurity_id, encountered in gen_info_form, and which
+        # is used usually while insering children of already known patients
+        # in database.
+        if SSN_form.SSN.data:
             # Verify if number already in database, for example children who
             # are under parent's social security.
             try:
                 SSN_id = meta.session.query(SocialSecurityLocale)\
                     .filter(SocialSecurityLocale.number\
-                            == form.SSN.data).one().id
+                            == SSN_form.SSN.data).one().id
 
             # If the number is new to database :
             except sqlalchemy.orm.exc.NoResultFound:
-                SSN_args = {g: getattr(form, f).data for f,g in SSN_fields}
+                SSN_args = {g: getattr(SSN_form, f).data for f,g in SSN_fields}
                 new_SSN = SocialSecurityLocale(**SSN_args)
                 meta.session.add(new_SSN)
                 meta.session.commit()
                 SSN_id = new_SSN.id
-
+        
         else:
             # If there weren't any SSNumber given, try anyway to add "cmu"
             # and insurance hypothetic values into database
-            SSN_args = {g: getattr(form, f).data for f,g in SSN_fields}
+            SSN_args = {g: getattr(SSN_form, f).data for f,g in SSN_fields}
             new_SSN = SocialSecurityLocale(**SSN_args)
             meta.session.add(new_SSN)
             meta.session.commit()
@@ -200,6 +202,7 @@ def add_patient():
 
     return render_template("/add_patient.html",
                             gen_info_form=gen_info_form,
+                            SSN_form=SSN_form,
                             address_form=address_form,
                             phone_form=phone_form,
                             mail_form=mail_form)
