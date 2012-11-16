@@ -88,6 +88,20 @@ def add_ngap():
         meta.session.commit()
         return redirect(url_for('show_ngap'))
 
+@app.route('/cotation/delete_ngap/id=<int:ngap_id>', methods=['POST'])
+def delete_ngap(ngap_id):
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('show_ngap'))
+    if request.method == 'POST':
+        try:
+            ngap = meta.session.query(cotation.NgapKeyFr)\
+                    .filter(cotation.NgapKeyFr.id == ngap_id).one()
+            meta.session.delete(ngap)
+            meta.session.commit()
+            return redirect(url_for('show_ngap'))
+        except:
+            raise Exception(_("Ngap deleting problem"))
+
 @app.route('/cotation/update_cmu/id=<int:cmu_id>', methods=['POST'])
 def update_cmu(cmu_id):
     if not session['role'] == constants.ROLE_DENTIST:
@@ -115,19 +129,33 @@ def add_cmu():
         meta.session.commit()
         return redirect(url_for('show_ngap'))
 
+@app.route('/cotation/delete_cmu/id=<int:cmu_id>', methods=['POST'])
+def delete_cmu(cmu_id):
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('show_ngap'))
+    if request.method == 'POST':
+        try:
+            cmu = meta.session.query(cotation.CmuKeyFr)\
+                    .filter(cotation.CmuKeyFr.id == cmu_id).one()
+            meta.session.delete(cmu)
+            meta.session.commit()
+            return redirect(url_for('show_ngap'))
+        except:
+            raise Exception(_("CMU deleting problem"))
+
 @app.route('/cotation/update_majoration/id=<int:majoration_id>', 
             methods=['POST'])
 def update_majoration(majoration_id):
     if not session['role'] == constants.ROLE_DENTIST:
         return redirect(url_for('show_ngap'))
 
-    ngap = meta.session.query(cotation.MajorationFr)\
+    majoration = meta.session.query(cotation.MajorationFr)\
             .filter(cotation.MajorationFr.id == majoration_id).one()
     form = MajorationFrForm(request.form)
 
     if request.method == 'POST' and form.validate():
         for f in majorationfr_fields:
-            setattr(ngap, f, getattr(form, f).data)
+            setattr(majoration, f, getattr(form, f).data)
         meta.session.commit()
         return redirect(url_for('show_ngap'))
 
@@ -142,3 +170,18 @@ def add_majoration():
         meta.session.add(new_majorationfr)
         meta.session.commit()
         return redirect(url_for('show_ngap'))
+
+@app.route('/cotation/delete_majoration/id=<int:majoration_id>', 
+            methods=['POST'])
+def delete_majoration(majoration_id):
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('show_ngap'))
+    if request.method == 'POST':
+        try:
+            majoration = meta.session.query(cotation.MajorationFr)\
+                    .filter(cotation.MajorationFr.id == majoration_id).one()
+            meta.session.delete(majoration)
+            meta.session.commit()
+            return redirect(url_for('show_ngap'))
+        except:
+            raise Exception(_("Majoration deleting problem"))

@@ -6,6 +6,7 @@
   France NGAP resume
 {% endblock %}
 {% from "_formhelpers.html" import render_table_field %}
+{% from "_formhelpers.html" import render_table_hidden_field %}
 {% block main %}
   <div id="ngap">
     <table border=1>
@@ -27,6 +28,11 @@
             <td><input type="submit" value="Update" /></td>
           {% endif %}
         </form>
+        {% if session.role == role_dentist %}
+          <form class="hidden" method="post" action="/cotation/delete_ngap/id={{ngap.id}}">
+            <td><input type="submit" value="Delete" /></td>
+          </form>
+        {% endif %}
       </tr>
       {% endfor %}
       {% if session.role == role_dentist %}
@@ -59,6 +65,11 @@
               <td><input type="submit" value="Update" /></td>
             {% endif %}
           </form>
+          {%if session.role == role_dentist %}
+            <form class="hidden" method="post" action="/cotation/delete_cmu/id={{cmu.id}}">
+              <td><input type="submit" value="Delete" /></td>
+            </form>
+          {% endif %}
         </tr>
       {% endfor %}
       {% if session.role == role_dentist %}
@@ -88,6 +99,11 @@
               <td><input type="submit" value="Update" /></td>
             {% endif %}
           </form>
+          {% if session.role == role_dentist %}
+            <form class="hidden" method="post" action="/cotation/delete_majoration/id={{majoration.id}}">
+              <td><input type="submit" value="Delete" /></td>
+            </form>
+          {% endif %}
         </tr>
       {% endfor %}
       {% if session.role == role_dentist %}

@@ -222,16 +222,18 @@ def delete_body_phone(body_id, body_type):
     phone_id = int(request.form["phone_id"])
     if request.method == 'POST' and form.validate():
         try:
-            phone = (
-                meta.session.query(administration.Phone)
-                    .filter(and_(
-                        and_(
-                            administration.Phone.name == form.phonename.data,
-                            administration.Phone.number == form.phonenum.data
-                        ),
-                        administration.Phone.id == phone_id)
-                    )
-                ).one()
+#            phone = (
+#                meta.session.query(administration.Phone)
+#                    .filter(and_(
+#                        and_(
+#                            administration.Phone.name == form.phonename.data,
+#                            administration.Phone.number == form.phonenum.data
+#                        ),
+#                        administration.Phone.id == phone_id)
+#                    )
+#                ).one()
+            phone = meta.session.query(administration.Phone)\
+                    .filter(administration.Phone.id == phone_id).one()
             meta.session.delete(phone)
             meta.session.commit()
             return True
