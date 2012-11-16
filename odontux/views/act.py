@@ -24,7 +24,8 @@ from odontux.views.forms import ColorField
 class ActTypeForm(Form):
     # Create the list of specialties that exist
     specialty_choices = meta.session.query(act.Specialty).all()
-    choice_list = [ (choice.id, choice.name) for choice in specialty_choices ]
+    choice_list = [ (str(choice.id), choice.name) 
+                    for choice in specialty_choices ]
     # Begin Form
     specialty_id = SelectField('specialty_id', choices=choice_list)
     cotationfr_id = TextField('cotationfr_id')
@@ -78,6 +79,8 @@ def add_acttype():
 def update_acttype(acttype_id):
     acttype = meta.session.query(act.ActType).filter\
               (act.ActType.id == acttype_id).one()
+    specialty = meta.session.query(act.Specialty)\
+                .filter(act.Specialty.id == acttype.specialty_id).one()
     if not acttype:
         return redirect(url_for('list_acttype'))
     form = ActTypeForm(request.form)
@@ -93,4 +96,8 @@ def update_acttype(acttype_id):
         acttype.color = form.color.data
         meta.session.commit()
         return redirect(url_for('list_acttype'))
-    return render_template('/update_act.html', form=form, acttype=acttype)
+    return render_template('/update_act.html', 
+                            form=form, 
+                            acttype=acttype, 
+                            specialty=specialty
+                            )

@@ -6,7 +6,7 @@ Update of acts
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="/act/update_acttype={{ acttype.id }}/">
   <dl>
-    {{ render_field(form.specialty_id, value=acttype.specialty_id) }}
+    {{ render_field(form.specialty_id, value=specialty.name) }}
     {{ render_field(form.cotationfr_id, value=acttype.cotationfr_id) }}
     {{ render_field(form.code, value=acttype.code) }}
     {{ render_field(form.alias, placeholder=acttype.alias) }}

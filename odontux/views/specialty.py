@@ -27,8 +27,12 @@ class SpecialtyForm(Form):
 
 @app.route('/specialty/')
 @app.route('/specialties/')
-def list_specialty():
-    specialties = meta.session.query(act.Specialty).all()
+def list_specialty(ordering=[]):
+    if not ordering:
+        ordering = [act.Specialty.id]
+    for order in ordering:
+        query = meta.session.query(act.Specialty).order_by(order)
+    specialties = query.all()
     return render_template('list_specialty.html', specialties=specialties,
                             role_admin=constants.ROLE_ADMIN,
                             role_dentist=constants.ROLE_DENTIST)

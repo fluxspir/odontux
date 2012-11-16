@@ -188,13 +188,18 @@ def add_user_address(user_id):
         return redirect(url_for("update_user", user_id=user_id))
     return redirect(url_for('list_users'))
 
+@app.route('/user/delete_user_address/id=<int:user_id>/', methods=['POST'])
+def delete_user_address(user_id):
+    if forms.delete_body_address(user_id, "user"):
+        return redirect(url_for("update_user", user_id=user_id))
+    return redirect(url_for('list_users'))
+
 @app.route('/user/update_user_phone/id=<int:user_id>/', methods=['POST'])
 def update_user_phone(user_id):
     if forms.update_body_phone(user_id, "user"):
         return redirect(url_for("update_user", user_id=user_id))
     return redirect(url_for('list_users'))
     
-
 @app.route('/user/add_user_phone/id=<int:user_id>/', methods=['POST'])
 def add_user_phone(user_id):
     if forms.add_body_phone(user_id, "user"):
@@ -216,5 +221,11 @@ def update_user_mail(user_id):
 @app.route('/user/add_user_mail/id=<int:user_id>/', methods=['POST'])
 def add_user_mail(user_id):
     if forms.add_body_mail(user_id, "user"):
+        return redirect(url_for("update_user", user_id=user_id))
+    return redirect(url_for('list_users'))
+
+@app.route('/user/delete_user_mail/id=<int:user_id>/', methods=['POST'])
+def delete_user_mail(user_id):
+    if forms.delete_body_mail(user_id, "user"):
         return redirect(url_for("update_user", user_id=user_id))
     return redirect(url_for('list_users'))

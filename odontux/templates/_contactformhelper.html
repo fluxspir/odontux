@@ -44,8 +44,6 @@
         </form>
         <form class="hidden" method="post" action="{{ url_delete }}/id={{ body.id }}/">
           <td class="hidden"><input type="text" name="phone_id" value="{{ phone.id }}" /></td>
-          {{ render_table_hidden_field(phone_form.phonename, value=phone.name) }}
-          {{ render_table_hidden_field(phone_form.phonenum, value=phone.number) }}
           <td><input type="submit" value="Delete" /></td>
         </form>
       </tr>
@@ -62,7 +60,7 @@
   </div>
 {% endmacro %}
 
-{% macro update_address_form(address_form, body, body_addresses, url_update, url_add) %}
+{% macro update_address_form(address_form, body, body_addresses, url_update, url_delete, url_add) %}
   <div id="address">
     <table>
       <tr>
@@ -87,6 +85,11 @@
           {{ render_table_field(address_form.country, value=address.country) }}
           <td><input type=submit value="Update" /></td>
         </form>
+        {{ address.id }}
+        <form class="hidden" method="post" action="{{ url_delete }}/id={{ body.id }}/">
+          <td class="hidden"><input type="text" name="address_id" value="{{address.id}}" /></td>
+          <td><input type="submit" value="Delete" /></td>
+        </form>
       </tr>
       {% endfor %}
       <tr>
@@ -105,7 +108,7 @@
   </div>
 {% endmacro %}
 
-{% macro update_mail_form(mail_form, body, url_update, url_add) %}
+{% macro update_mail_form(mail_form, body, url_update, url_delete, url_add) %}
   <div id="mail">
     <table>
       <tr>
@@ -119,6 +122,10 @@
           <td class="hidden"><input type="text" name="mail_index" value="{{ loop.index0 }}" /></td>
           {{ render_table_field(mail_form.email, value=mail.email) }}
           <td><input type=submit value="Update" /></td>
+        </form>
+        <form class="hidden" method="post" action="{{ url_delete }}/id={{ body.id }}/">
+          <td class="hidden"><input type="text" name="mail_id" value="{{ mail.id }}" /></td>
+          <td><input type="submit" value="Delete" /></td>
         </form>
       </tr>
       {%endfor%}

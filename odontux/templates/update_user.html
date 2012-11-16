@@ -54,10 +54,10 @@
     </form>
   </div>
   
-  {{ update_phone_form(phone_form, body=user, "/user/update_user_phone", "/user/delete_user_phone", "/user/add_patient_phone") }}
+  {{ update_phone_form(phone_form, user, "/user/update_user_phone", "/user/delete_user_phone", "/user/add_user_phone") }}
 <!-- Add a trick for body.family_id or update_address_form -->
-  {{ update_address_form(address_form, user, user.addresses, "/user/update_user_address", "/patient/add_user_address") }}
-  {{ update_mail_form(mail_form, user, "/user/update_user_mail", "/user/add_user_mail") }}
+  {{ update_address_form(address_form, user, user.addresses, "/user/update_user_address", "/user/delete_user_address", "/patient/add_user_address") }}
+  {{ update_mail_form(mail_form, user, "/user/update_user_mail", "/user/delete_user_mail", "/user/add_user_mail") }}
   
   <div id="password_container">
     <form method="post" action="/user/update_user_password/id={{user.id}}/">

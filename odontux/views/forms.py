@@ -188,7 +188,20 @@ def add_body_address(body_id, body_type):
         else:
             body.addresses.append(administration.Address(**args))
         meta.session.commit()
-        return True 
+        return True
+
+def delete_body_address(body_id, body_type):
+    body = _get_body(body_id, body_type)
+    if not _check_body_perm(body, body_type):
+        return False
+    form = AddressForm(request.form)
+    address_id = int(request.form['address_id'])
+    if request.method == 'POST' and form.validate():
+        address = meta.session.query(administration.Address)\
+                .filter(administration.Address.id == address_id).one()
+        meta.session.delete(address)
+        meta.session.commit()
+        return True
 
 def update_body_phone(body_id, body_type):
     body = _get_body(body_id, body_type)
@@ -260,5 +273,18 @@ def add_body_mail(body_id, body_type):
     if request.method == 'POST' and form.validate():
         args = {f: getattr(form, f).data for f in mail_fields }
         body.mails.append(administration.Mail(**(args)))
+        meta.session.commit()
+        return True
+
+def delete_body_mail(body_id, body_type):
+    body = _get_body(body_id, body_type)
+    if not _check_body_perm(body, body_type):
+        return False
+    form = MailForm(request.form)
+    mail_id = int(request.form['mail_id'])
+    if request.method == 'POST' and form.validate():
+        mail = meta.session.query(administration.Mail)\
+                .filter(administration.Mail.id == mail_id).one()
+        meta.session.delete(mail)
         meta.session.commit()
         return True
