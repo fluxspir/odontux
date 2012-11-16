@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from flask import session, render_template, request
+from flask import session, render_template, request, redirect, url_for
 from gettext import gettext as _
 from wtforms import Form, TextField, validators
 
@@ -37,6 +37,10 @@ class MajorationFrForm(Form):
     price = TextField('price', [validators.Required(
                         message=_("Give the price of the majoration"))])
 
+ngapkeyfr_fields = [ "name", "key", "unit_price" ]
+cmukeyfr_fields = [ "key", "name" ]
+majorationfr_fields = [ "name", "price" ]
+
 @app.route('/cotation/show_ngap/')
 def show_ngap():
     query_ngap = meta.session.query(cotation.NgapKeyFr)\
@@ -56,21 +60,85 @@ def show_ngap():
                             majoration_form=majoration_form,
                             role_dentist=constants.ROLE_DENTIST)
 
-@app.route('/cotation/update_ngap/id=<int:ngap_id>')
+
+@app.route('/cotation/update_ngap/id=<int:ngap_id>', methods=['POST'])
 def update_ngap(ngap_id):
-    pass
-@app.route('/cotation/add_ngap')
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('show_ngap'))
+
+    ngap = meta.session.query(cotation.NgapKeyFr)\
+            .filter(cotation.NgapKeyFr.id == ngap_id).one()
+    form = NgapKeyFrForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        for f in ngapkeyfr_fields:
+            setattr(ngap, f, getattr(form, f).data)
+        meta.session.commit()
+        return redirect(url_for('show_ngap'))
+
+@app.route('/cotation/add_ngap', methods=['POST'])
 def add_ngap():
-    pass
-@app.route('/cotation/update_cmu/id=<int:cmu_id>')
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('show_ngap'))
+    form = NgapKeyFrForm(request.form)
+    if request.method == 'POST' and form.validate():
+        args = {f: getattr(form, f).data for f in ngapkeyfr_fields}
+        new_ngapkeyfr = cotation.NgapKeyFr(**args)
+        meta.session.add(new_ngapkeyfr)
+        meta.session.commit()
+        return redirect(url_for('show_ngap'))
+
+@app.route('/cotation/update_cmu/id=<int:cmu_id>', methods=['POST'])
 def update_cmu(cmu_id):
-    pass
-@app.route('/cotation/add_cmu')
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('show_ngap'))
+
+    cmu = meta.session.query(cotation.CmuKeyFr)\
+            .filter(cotation.CmuKeyFr.id == cmu_id).one()
+    form = CmuKeyFrForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        for f in cmukeyfr_fields:
+            setattr(cmu, f, getattr(form, f).data)
+        meta.session.commit()
+        return redirect(url_for('show_ngap'))
+
+@app.route('/cotation/add_cmu', methods=['POST'])
 def add_cmu():
-    pass
-@app.route('/cotation/update_majoration/id=<int:majoration_id>')
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('show_ngap'))
+    form = CmuKeyFrForm(request.form)
+    if request.method == 'POST' and form.validate():
+        args = {f: getattr(form, f).data for f in cmukeyfr_fields}
+        new_cmukeyfr = cotation.CmuKeyFr(**args)
+        meta.session.add(new_cmukeyfr)
+        meta.session.commit()
+        return redirect(url_for('show_ngap'))
+
+@app.route('/cotation/update_majoration/id=<int:majoration_id>', 
+            methods=['POST'])
 def update_majoration(majoration_id):
-    pass
-@app.route('/cotation/add_majoration')
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('show_ngap'))
+
+    ngap = meta.session.query(cotation.MajorationFr)\
+            .filter(cotation.MajorationFr.id == majoration_id).one()
+    form = MajorationFrForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        for f in majorationfr_fields:
+            setattr(ngap, f, getattr(form, f).data)
+        meta.session.commit()
+        return redirect(url_for('show_ngap'))
+
+@app.route('/cotation/add_majoration', methods=['POST'])
 def add_majoration():
-    pass
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('show_ngap'))
+    form = MajorationFrForm(request.form)
+    if request.method == 'POST' and form.validate():
+        args = {f: getattr(form, f).data for f in majorationfr_fields}
+        new_majorationfr = cotation.MajorationFr(**args)
+        meta.session.add(new_majorationfr)
+        meta.session.commit()
+        return redirect(url_for('show_ngap'))
