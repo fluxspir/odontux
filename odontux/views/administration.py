@@ -72,7 +72,8 @@ class SocialSecurityForm(Form):
 
 @app.route('/patient/')
 def allpatients():
-    patients = meta.session.query(administration.Patient).all()
+    patients = meta.session.query(administration.Patient)\
+               .order_by(administration.Patient.lastname).all()
     return render_template('list_patients.html', patients=patients)
 
 @app.route('/patient/<int:patient_id>/')
@@ -266,8 +267,8 @@ def add_patient_phone(patient_id):
 
 @app.route('/patient/delete_patient_phone/id=<int:patient_id>/', 
             methods=['POST'])
-def del_patient_phone(patient_id):
-    if forms.del_body_phone(patient_id, "patient"):
+def delete_patient_phone(patient_id):
+    if forms.delete_body_phone(patient_id, "patient"):
         return redirect(url_for("update_patient", patient_id=patient_id))
     return redirect(url_form('list_patients'))
 

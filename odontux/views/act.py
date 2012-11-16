@@ -34,19 +34,24 @@ class ActTypeForm(Form):
     color = ColorField('color')
 
 @app.route('/act/')
-def list_acttype():
+def list_acttype(ordering=[]):
+    query = ""
     if request.form and request.form['specialty']:
         try:
             specialty = meta.session.query(act.Specialty)\
                 .filter(act.Specialty.id == request.form['specialty'].one())
             query = meta.session.query(act.ActType)\
-                .filter(act.ActType.specialty_id == specialty.id).all()
-            return render_template('list_act.html', gestures=query, 
-                                specialty=specialty)
+                .filter(act.ActType.specialty_id == specialty.id)
         except sqlalchemy.orm.exc.NoResultFound:
             pass
+    if not query:
+        query = meta.session.query(act.ActType)
 
-    query = meta.session.query(act.ActType).all()
+    if not ordering:
+        ordering = [ act.ActType.specialty_id, act.ActType.alias ]
+    for o in ordering:
+        query = query.order_by(o)
+    query = query.all()
     return render_template('list_act.html', gestures=query, 
                             role_admin=constants.ROLE_ADMIN,
                             role_dentist=constants.ROLE_DENTIST)

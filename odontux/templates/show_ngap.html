@@ -1,0 +1,104 @@
+{% extends 'layout.html' %}
+{% block css %}
+  <link rel="stylesheet" type="text/css" href="cotation.css">
+{% endblock %}
+{% block pagetitle %}
+  France NGAP resume
+{% endblock %}
+{% from "_formhelpers.html" import render_table_field %}
+{% block main %}
+  <div id="ngap">
+    <table border=1>
+      <tr>
+        <th>Key</th>
+        <th>Name</th>
+        <th>Unit Price</th>
+        {% if session.role == role_dentist %}
+          <th>Modify</th>
+        {% endif %}
+      </tr>
+      {% for ngap in query_ngap %}
+      <tr>
+        <form method="post" action="/cotation/update_ngap/id={{ngap.id}}">
+          {{ render_table_field(ngap_form.key, value=ngap.key) }}
+          {{ render_table_field(ngap_form.name, value=ngap.name) }}
+          {{ render_table_field(ngap_form.unit_price, value=ngap.unit_price) }}
+          {% if session.role == role_dentist %}
+            <td><input type="submit" value="Update" /></td>
+          {% endif %}
+        </form>
+      </tr>
+      {% endfor %}
+      {% if session.role == role_dentist %}
+      <tr>
+        <form method="post" action="/cotation/add_ngap">
+          {{ render_table_field(ngap_form.key) }}
+          {{ render_table_field(ngap_form.name) }}
+          {{ render_table_field(ngap_form.unit_price) }}
+          <td><input type="submit" value="Add" /></td>
+        </form>
+      </tr>
+      {% endif %}
+    </table>
+  </div>
+  <div id="cmu">
+    <table border=1>
+      <tr>
+        <th>Key</th>
+        <th>Name</th>
+        {% if session.role == role_dentist %}
+          <th>Modify</th>
+        {% endif %}
+      </tr>
+      {% for cmu in query_cmu %}
+        <tr>
+          <form method="post" action="/cotation/update_cmu/id={{cmu.id}}">
+            {{ render_table_field(cmu_form.key, value=cmu.key) }}
+            {{ render_table_field(cmu_form.name, value=cmu.name) }}
+            {% if session.role == role_dentist %}
+              <td><input type="submit" value="Update" /></td>
+            {% endif %}
+          </form>
+        </tr>
+      {% endfor %}
+      {% if session.role == role_dentist %}
+      <tr>
+        <form method="post" action="/cotation/add_cmu">
+          {{ render_table_field(cmu_form.key) }}
+          {{ render_table_field(cmu_form.name) }}
+          <td><input type="submit" value="Add" /></td>
+        </form>
+      </tr>
+      {% endif %}
+    </table>
+  </div>
+  <div id="majoration">
+    <table border=1>
+      <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Modify</th>
+      </tr>
+      {% for majoration in query_majoration %}
+        <tr>
+          <form method="post" action="/cotation/update_majoration/id={{majoration.id}}">
+            {{ render_table_field(majoration_form.name, value=majoration.name) }}
+            {{ render_table_field(majoration_form.price, value=majoration.price) }}
+            {% if session.role == role_dentist %}
+              <td><input type="submit" value="Update" /></td>
+            {% endif %}
+          </form>
+        </tr>
+      {% endfor %}
+      {% if session.role == role_dentist %}
+      <tr>
+        <form method="post" action="/cotation/add_majoration">
+          {{ render_table_field(majoration_form.name) }}
+          {{ render_table_field(majoration_form.price) }}
+          <td><input type="submit" value="Add" /></td>
+        </form>
+      </tr>
+      {% endif %}
+    </table>
+  </div>
+{% endblock %}

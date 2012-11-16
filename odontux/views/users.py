@@ -202,8 +202,8 @@ def add_user_phone(user_id):
     return redirect(url_for('list_users'))
 
 @app.route('/user/delete_user_phone/id=<int:user_id>/', methods=['POST'])
-def del_user_phone(user_id):
-    if forms.del_body_phone(user_id, "user"):
+def delete_user_phone(user_id):
+    if forms.delete_body_phone(user_id, "user"):
         return redirect(url_for("update_user", user_id=user_id))
     return redirect(url_form('list_users'))
 

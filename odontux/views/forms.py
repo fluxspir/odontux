@@ -214,7 +214,7 @@ def add_body_phone(body_id, body_type):
         meta.session.commit()
         return True
 
-def del_body_phone(body_id, body_type):
+def delete_body_phone(body_id, body_type):
     body = _get_body(body_id, body_type)
     if not _check_body_perm(body, body_type):
         return False

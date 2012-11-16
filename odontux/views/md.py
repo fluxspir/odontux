@@ -128,9 +128,9 @@ def add_md_phone(md_id):
         return redirect(url_for('update_md', md_id=md_id))
     return redirect(url_for('list_md'))
 
-@app.route('/md/del_md_phone/id=<int:md_id>/', methods=['POST'])
-def del_md_phone(md_id):
-    if forms.del_body_phone(md_id, "md"):
+@app.route('/md/delete_md_phone/id=<int:md_id>/', methods=['POST'])
+def delete_md_phone(md_id):
+    if forms.delete_body_phone(md_id, "md"):
         return redirect(url_for('update_md', md_id=md_id))
     return redirect(url_for('list_md'))
 

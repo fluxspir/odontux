@@ -1,0 +1,27 @@
+#ngap, #cmu, #majoration {
+display:inline-block;
+position:absolute;
+margin:0%;
+padding:0%;
+}
+
+#ngap {
+left:0%;
+width:45%;
+}
+
+#cmu {
+left:55% ;
+top:0% ;
+width:45% ;
+height:45% ;
+}
+
+#majoration {
+top:55%;
+left:55%;
+}
+
+.hidden {
+display:none;
+}
