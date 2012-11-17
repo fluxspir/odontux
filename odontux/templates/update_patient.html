@@ -29,6 +29,7 @@
   <div id="gen_info">
     <form method="post" action='/patient/update_patient/id={{ body.id }}/'>
       <dl>
+        {{ render_field(gen_info_form.title, value=body.title) }}
         {{ render_field(gen_info_form.lastname, value=body.lastname) }}
         {{ render_field(gen_info_form.firstname, value=body.firstname) }}
         {{ render_field(gen_info_form.sex, value=body.sex) }}

@@ -85,7 +85,6 @@
           {{ render_table_field(address_form.country, value=address.country) }}
           <td><input type=submit value="Update" /></td>
         </form>
-        {{ address.id }}
         <form class="hidden" method="post" action="{{ url_delete }}/id={{ body.id }}/">
           <td class="hidden"><input type="text" name="address_id" value="{{address.id}}" /></td>
           <td><input type="submit" value="Delete" /></td>

@@ -101,7 +101,7 @@ class AddressForm(Form):
                              validators.Length(max=25,
                              message=_("City's name"))], 
                              filters=[title_field])
-    postal_code = IntegerField('postal_code', [validators.Optional()])
+    postal_code = TextField('postal_code')
     county = TextField('county', validators=[validators.Optional(), 
                                   validators.Length(max=15)], 
                                  filters=[title_field])
@@ -169,10 +169,11 @@ def update_body_address(body_id, body_type):
     if request.method == 'POST' and form.validate():
         for f in address_fields:
             if body_type == "patient":
-                setattr(body.family.addresses[address_index], 
-                        f, getattr(form, f).data)
+                setattr(body.family.addresses[address_index], f, 
+                        getattr(form, f).data)
             else:
-                setattr(body.addresses[address_index], f, getattr(form, f).data)
+                setattr(body.addresses[address_index], f, 
+                        getattr(form, f).data)
         meta.session.commit()
         return True
         

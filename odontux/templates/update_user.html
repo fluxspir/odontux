@@ -25,6 +25,7 @@
     <li onclick='display_form("password_container")'>password</li>
   </ul>
 </nav>
+{{ form_to_display }}
 <div id="update_user">
   <div id="gen_info">
     <form method="post" action='/user/update_user/id={{user.id}}/'>
@@ -34,8 +35,12 @@
       {% endif %}
       {{ render_field(gen_info_form.title, value=user.title) }}
       {{ render_field(gen_info_form.lastname, value=user.lastname) }}
-      {{ render_field(gen_info_form.firstname, value=user.firstname) }}
-      {{ render_field(gen_info_form.sex, value=user.sex) }}
+      {{ render_field(gen_info_form.firstname, value=user.firstname, width="100%") }}
+      {% if user.sex == True %}
+        {{ render_field(gen_info_form.sex, value=user.sex, checked="checked") }}
+      {% else %}
+        {{ render_field(gen_info_form.sex ) }}
+      {% endif %}
       {{ render_field(gen_info_form.dob, value=user.dob) }}
       {{ render_field(gen_info_form.qualifications, value=user.qualifications) }}
       {{ render_field(gen_info_form.correspondence_name, value=user.correspondence_name) }}
@@ -53,12 +58,12 @@
      </dl>
     </form>
   </div>
-  
+
   {{ update_phone_form(phone_form, user, "/user/update_user_phone", "/user/delete_user_phone", "/user/add_user_phone") }}
 <!-- Add a trick for body.family_id or update_address_form -->
-  {{ update_address_form(address_form, user, user.addresses, "/user/update_user_address", "/user/delete_user_address", "/patient/add_user_address") }}
+  {{ update_address_form(address_form, user, user.addresses, "/user/update_user_address", "/user/delete_user_address", "/user/add_user_address") }}
   {{ update_mail_form(mail_form, user, "/user/update_user_mail", "/user/delete_user_mail", "/user/add_user_mail") }}
-  
+
   <div id="password_container">
     <form method="post" action="/user/update_user_password/id={{user.id}}/">
       <dl>
@@ -69,5 +74,10 @@
     </form>
   </div>
 </div>
+{% if form_to_display %}
+<script> 
+   display_form("{{ form_to_display }}") ;
+</script>
+{% endif %}
 {% endblock %}
 

@@ -88,7 +88,9 @@
       <tr>
         <th>Name</th>
         <th>Price</th>
-        <th>Modify</th>
+        {% if session.role == role_dentist %}
+          <th>Modify</th>
+        {% endif %}
       </tr>
       {% for majoration in query_majoration %}
         <tr>
