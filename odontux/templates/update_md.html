@@ -1,9 +1,9 @@
 {% extends 'layout.html' %}
 {% block css %}
-  <link rel="stylesheet" type="text/css" href="update_user.css">
+  <link rel="stylesheet" type="text/css" href="/static/update_user.css">
 {% endblock %}
 {% block javascript_specific %}
-  <script type="text/javascript" src="js/update_user.js"></script>
+  <script type="text/javascript" src="/static/js/update_user.js"></script>
 {% endblock %}
 {% block pagetitle %}
 Update of medecine doctor
@@ -26,7 +26,7 @@ Update of medecine doctor
   </nav>
   <div id="update_md">
     <div id="gen_info">
-      <form method="post" action="/md/update_md/id={{ doctor.id }}/">
+      <form method="post" action={{ url_for('update_md', body_id=doctor.id, form_to_display='gen_info') }}>
         <dl>
           {{ render_field(gen_info_form.lastname, value=doctor.lastname) }}
           {{ render_field(gen_info_form.firstname, value=doctor.firstname) }}
@@ -35,10 +35,10 @@ Update of medecine doctor
       </form>
     </div>
 
-  {{ update_phone_form(phone_form, doctor, "/md/update_md_phone", "/md/delete_md_phone", "/md/add_md_phone") }}
+  {{ update_phone_form(phone_form, doctor, "update_md_phone", "delete_md_phone", "add_md_phone") }}
 <!-- Add a trick for body.family_id or update_address_form -->
-  {{ update_address_form(address_form, doctor, doctor.addresses, "/md/update_md_address", "/md/add_md_address") }}
-  {{ update_mail_form(mail_form, doctor, "/md/update_md_mail", "/patient/add_md_mail") }}
+  {{ update_address_form(address_form, doctor, doctor.addresses, "update_md_address", "delete_md_address", "add_md_address") }}
+  {{ update_mail_form(mail_form, doctor, "update_md_mail", "delete_md_mail", "add_md_mail") }}
 
   </div>
   {% endif %}

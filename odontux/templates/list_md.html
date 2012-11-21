@@ -16,7 +16,7 @@ List of medecine doctors
 {% for doc in doctors %}
   <tr>
     <td>{{ doc.id }}</td><td>{{ doc.lastname }}</td><td>{{ doc.firstname }}</td><td>
-    <a href="/md/update_md/id={{ doc.id }}">Update</a></td>
+    <a href={{ url_for('update_md', body_id=doc.id, form_to_display='gen_info') }}>Update</a></td>
   </tr>
 </div>
 {% endfor %}

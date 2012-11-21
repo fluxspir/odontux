@@ -1,9 +1,9 @@
 {% extends 'layout.html' %}
 {% block css %}
-  <link rel="stylesheet" type="text/css" href="update_user.css">
+  <link rel="stylesheet" type="text/css" href="/static/update_user.css">
 {% endblock %}
 {% block javascript_specific %}
-  <script type="text/javascript" src="js/update_user.js"></script>
+  <script type="text/javascript" src="/static/js/update_user.js"></script>
 {% endblock %}
 {% block pagetitle %}
   Update user : {{ session.username }}
@@ -25,10 +25,9 @@
     <li onclick='display_form("password_container")'>password</li>
   </ul>
 </nav>
-{{ form_to_display }}
 <div id="update_user">
   <div id="gen_info">
-    <form method="post" action='/user/update_user/id={{user.id}}/'>
+    <form method="post" action={{ url_for('update_user', body_id=user.id, form_to_display="gen_info") }}>
       <dl>
       {% if session.role == role_admin %}
         {{ render_field(gen_info_form.username, autofocus="autofocus", value=user.username) }}
@@ -37,7 +36,7 @@
       {{ render_field(gen_info_form.lastname, value=user.lastname) }}
       {{ render_field(gen_info_form.firstname, value=user.firstname, width="100%") }}
       {% if user.sex == True %}
-        {{ render_field(gen_info_form.sex, value=user.sex, checked="checked") }}
+        {{ render_field(gen_info_form.sex, checked="checked") }}
       {% else %}
         {{ render_field(gen_info_form.sex ) }}
       {% endif %}
@@ -59,13 +58,13 @@
     </form>
   </div>
 
-  {{ update_phone_form(phone_form, user, "/user/update_user_phone", "/user/delete_user_phone", "/user/add_user_phone") }}
+  {{ update_phone_form(phone_form, user, "update_user_phone", "delete_user_phone", "add_user_phone") }}
 <!-- Add a trick for body.family_id or update_address_form -->
-  {{ update_address_form(address_form, user, user.addresses, "/user/update_user_address", "/user/delete_user_address", "/user/add_user_address") }}
-  {{ update_mail_form(mail_form, user, "/user/update_user_mail", "/user/delete_user_mail", "/user/add_user_mail") }}
+  {{ update_address_form(address_form, user, user.addresses, "update_user_address", "delete_user_address", "add_user_address") }}
+  {{ update_mail_form(mail_form, user, "update_user_mail", "delete_user_mail", "add_user_mail") }}
 
   <div id="password_container">
-    <form method="post" action="/user/update_user_password/id={{user.id}}/">
+    <form method="post" action={{ url_for('update_user_password', body_id=user.id, form_to_display='password_container') }}>
       <dl>
         {{ render_field(password_form.password) }}
         {{ render_field(password_form.confirm) }}
@@ -75,9 +74,9 @@
   </div>
 </div>
 {% if form_to_display %}
-<script> 
-   display_form("{{ form_to_display }}") ;
-</script>
+  <script> 
+    display_form({{ form_to_display }}) ;
+  </script>
 {% endif %}
 {% endblock %}
 

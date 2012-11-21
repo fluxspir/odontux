@@ -24,10 +24,10 @@ from odontux.views.forms import ColorField
 class ActTypeForm(Form):
     # Create the list of specialties that exist
     specialty_choices = meta.session.query(act.Specialty).all()
-    choice_list = [ (str(choice.id), choice.name) 
+    choice_list = [ (choice.id, choice.name) 
                     for choice in specialty_choices ]
     # Begin Form
-    specialty_id = SelectField('specialty_id', choices=choice_list)
+    specialty_id = SelectField('specialty', choices=choice_list, coerce=int)
     cotationfr_id = TextField('cotationfr_id')
     code = TextField('code')
     alias = TextAreaField('alias')
@@ -36,17 +36,14 @@ class ActTypeForm(Form):
 
 @app.route('/act/')
 def list_acttype(ordering=[]):
-    query = ""
+    query = meta.session.query(act.ActType)
     if request.form and request.form['specialty']:
         try:
             specialty = meta.session.query(act.Specialty)\
                 .filter(act.Specialty.id == request.form['specialty'].one())
-            query = meta.session.query(act.ActType)\
-                .filter(act.ActType.specialty_id == specialty.id)
+            query = query.filter(act.ActType.specialty_id == specialty.id)
         except sqlalchemy.orm.exc.NoResultFound:
             pass
-    if not query:
-        query = meta.session.query(act.ActType)
 
     if not ordering:
         ordering = [ act.ActType.specialty_id, act.ActType.alias ]

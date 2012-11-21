@@ -6,7 +6,8 @@
   <div id="searchresult">
   {% block searchresult %}
     {% for patient in patients %}
-      <a href="/patient/{{patient.id}}">{{ patient.lastname }} {{ patient.firstname }}</a><a href="/patient/update_patient/id={{patient.id}}">Update</a><br />
+      <a href={{ url_for('list_patients', body_id=patient.id) }}>{{ patient.lastname }} {{ patient.firstname }}</a> 
+      <a href={{ url_for('update_patient', body_id=patient.id, form_to_display='gen_info') }}>Update</a><br />
     {% endfor %}
   {% endblock %}
   </div>

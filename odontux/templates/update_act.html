@@ -4,20 +4,15 @@ Update of acts
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
+{{specialty.id}}{{specialty.name}}
 <form method="post" action="/act/update_acttype={{ acttype.id }}/">
   <dl>
-    {{ render_field(form.specialty_id, value=specialty.name) }}
+    {{ render_field(form.specialty_id) }}
     {{ render_field(form.cotationfr_id, value=acttype.cotationfr_id) }}
     {{ render_field(form.code, value=acttype.code) }}
     {{ render_field(form.alias, placeholder=acttype.alias) }}
     {{ render_field(form.name, placeholder=acttype.name) }}
     {{ render_field(form.color, value=acttype.color) }}
-<!--    <dt>
-      Color :
-      <dd>
-      	<input type="color" name={{ form.color }} value="{{ acttype.color }}" />
-      </dd>
-    </dt>  -->
   </dl>
   <p><input type="submit" value="Update">
 </form>

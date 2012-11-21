@@ -3,7 +3,7 @@
   <head>
     {% block head %}
       {% block base %}
-      	<base href="/static/">
+      	<!--base href="/static/"-->
       {% endblock %}
       	<meta name="description" content="Odontux odonweb">
       	<meta name="keywords" content="odontux odonweb">
@@ -11,14 +11,14 @@
       	<meta charset="UTF-8">
       {% block meta %}
       {% endblock %}
-      	<link rel="stylesheet" type="text/css" href="style.css">
-      	<link rel="stylesheet" type="text/css" href="header.css">
-      	<link rel="stylesheet" type="text/css" href="main.css">
-      	<link rel="stylesheet" type="text/css" href="footer.css">
+      	<link rel="stylesheet" type="text/css" href="/static/style.css">
+      	<link rel="stylesheet" type="text/css" href="/static/header.css">
+      	<link rel="stylesheet" type="text/css" href="/static/main.css">
+      	<link rel="stylesheet" type="text/css" href="/static/footer.css">
 	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
       {% block css %} 
       {% endblock %}
-      <script type="text/javascript" src="js/brothel.js"></script>
+      <script type="text/javascript" src="/static/js/brothel.js"></script>
       {% block javascript_specific %}
       {% endblock %}
       	<title>{% block title %}Odontux{% endblock %}</title>

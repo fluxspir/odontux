@@ -74,9 +74,10 @@ def add_md():
                            phone_form=phone_form,
                            mail_form=mail_form)
 
-@app.route('/md/update_md/id=<int:md_id>/', methods=['GET', 'POST'])
-def update_md(md_id):
-    doctor = forms._get_body(md_id, "md")
+@app.route('/md/update_md?<int:body_id>\
+            &?form_to_display=<form_to_display>/', methods=['GET', 'POST'])
+def update_md(body_id, form_to_display):
+    doctor = forms._get_body(body_id, "md")
     if (session['role'] != constants.ROLE_DENTIST
     and session['role'] != constants.ROLE_NURSE
     and session['role'] != constants.ROLE_ASSISTANT):
@@ -92,7 +93,8 @@ def update_md(md_id):
         for f in fields:
             setattr(doctor, f, getattr(form, f).data)
         meta.session.commit()
-        return redirect(url_for('update_md', md_id=md_id))
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="gen_info"))
 
     # Page for updating md :
     return render_template('/update_md.html', doctor=doctor,
@@ -104,44 +106,75 @@ def update_md(md_id):
                             role_nurse=constants.ROLE_NURSE,
                             role_assistant=constants.ROLE_ASSISTANT)
 
-@app.route('/md/update_md_address/id=<int:md_id>/', methods=['POST'])
-def update_md_address(md_id):
-    if forms.update_body_address(md_id, "md"):
-        return redirect(url_for('update_md', md_id=md_id))
+@app.route('/md/update_md_address?id=<int:body_id>\
+            &?form_to_display=<form_to_display>/', methods=['POST'])
+def update_md_address(body_id, form_to_display):
+    if forms.update_body_address(body_id, "md"):
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="address"))
     return redirect(url_for('list_md'))
 
-@app.route('/md/add_md_address/id=<int:md_id>/', methods=['POST'])
-def add_md_address(md_id):
-    if forms.add_body_address(md_id, "md"):
-        return redirect(url_for('update_md', md_id=md_id))
+@app.route('/md/add_md_address?id=<int:body_id>\
+            &?form_to_display=<form_to_display>/', methods=['POST'])
+def add_md_address(body_id, form_to_display):
+    if forms.add_body_address(body_id, "md"):
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="address"))
     return redirect(url_for('list_md'))
 
-@app.route('/md/update_md_phone/id=<int:md_id>/', methods=['POST'])
-def update_md_phone(md_id):
-    if forms.update_body_phone(md_id, "md"):
-        return redirect(url_for('update_md', md_id=md_id))
+@app.route('/md/delete_md_address?id=<int:body_id>\
+            &?form_to_display=<form_to_display>/', methods=['POST'])
+def delete_md_address(body_id, form_to_display):
+    if forms.delete_body_address(body_id, "md"):
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="address"))
     return redirect(url_for('list_md'))
 
-@app.route('/md/add_md_phone/id=<int:md_id>/', methods=['POST'])
-def add_md_phone(md_id):
-    if forms.add_body_phone(md_id, "md"):
-        return redirect(url_for('update_md', md_id=md_id))
+@app.route('/md/update_md_phone?id=<int:body_id>\
+            &?form_to_display=<form_to_display>/', methods=['POST'])
+def update_md_phone(body_id, form_to_display):
+    if forms.update_body_phone(body_id, "md"):
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="phone"))
     return redirect(url_for('list_md'))
 
-@app.route('/md/delete_md_phone/id=<int:md_id>/', methods=['POST'])
-def delete_md_phone(md_id):
-    if forms.delete_body_phone(md_id, "md"):
-        return redirect(url_for('update_md', md_id=md_id))
+@app.route('/md/add_md_phone?id=<int:body_id>\
+            &?form_to_display=<form_to_display>/', methods=['POST'])
+def add_md_phone(body_id, form_to_display):
+    if forms.add_body_phone(body_id, "md"):
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="phone"))
     return redirect(url_for('list_md'))
 
-@app.route('/md/update_md_mail/id=<int:md_id>/', methods=['POST'])
-def update_md_mail(md_id):
-    if forms.update_body_mail(md_id, "md"):
-        return redirect(url_for('update_md', md_id=md_id))
+@app.route('/md/delete_md_phone?id=<int:body_id>\
+            &?form_to_display=<form_to_display>/', methods=['POST'])
+def delete_md_phone(body_id, form_to_display):
+    if forms.delete_body_phone(body_id, "md"):
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="phone"))
     return redirect(url_for('list_md'))
 
-@app.route('/md/add_md_mail/id=<int:md_id>/', methods=['POST'])
-def add_md_mail(md_id):
-    if forms.add_body_mail(md_id, "md"):
-        return redirect(url_for('update_md', md_id=md_id))
+@app.route('/md/update_md_mail?id=<int:body_id>/', methods=['POST'])
+def update_md_mail(body_id, form_to_display):
+    if forms.update_body_mail(body_id, "md"):
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="mail"))
     return redirect(url_for('list_md'))
+
+@app.route('/md/add_md_mail?id=<int:body_id>\
+            &?form_to_display=<form_to_display>/', methods=['POST'])
+def add_md_mail(body_id, form_to_display):
+    if forms.add_body_mail(body_id, "md"):
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="mail"))
+    return redirect(url_for('list_md'))
+
+@app.route('/md/delete_md_mail?id=<int:body_id>\
+            &?form_to_display=<form_to_display>/', methods=['POST'])
+def delete_md_mail(body_id, form_to_display):
+    if forms.delete_body_mail(body_id, "md"):
+        return redirect(url_for('update_md', body_id=body_id,
+                                form_to_display="mail"))
+    return redirect(url_for('list_md'))
+
+

@@ -9,7 +9,7 @@ from actions import (add_generic, update_generic, list_generic)
 from log import (index, login, logout)
 from administration import (
                  allpatients,
-                 patient,
+                 list_patients,
                  add_patient,
                  update_patient,
                  update_patient_address, add_patient_address,

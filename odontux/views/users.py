@@ -133,9 +133,11 @@ def add_user():
 
 # Function for printing the user's updating page, and getting 
 # general and information fields.
-@app.route('/user/update_user/id=<int:user_id>/', methods=['GET', 'POST'])
-def update_user(user_id, form_to_display=""):
-    user = forms._get_body(user_id, "user")
+#@app.route('/user/update_user/id=<int:user_id>/', methods=['GET', 'POST'])
+@app.route('/user/update_user?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['GET', 'POST'])
+def update_user(body_id, form_to_display):
+    user = forms._get_body(body_id, "user")
     if not forms._check_body_perm(user, "user"):
         return redirect(url_for('list_users'))
 
@@ -148,7 +150,7 @@ def update_user(user_id, form_to_display=""):
             setattr(user, f, getattr(gen_info_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_user', 
-                                 user_id=user_id, 
+                                 body_id=body_id, 
                                  form_to_display="gen_info"))
 
     # When loading the whole update page, we use the form containing all fields
@@ -168,9 +170,10 @@ def update_user(user_id, form_to_display=""):
                             role_admin=constants.ROLE_ADMIN, 
                             role_dentist=constants.ROLE_DENTIST)
 
-@app.route('/user/update_user_password/id=<int:user_id>/', methods=['POST'])
-def update_user_password(user_id):
-    user = forms._get_body(user_id, "user")
+@app.route('/user/update_user_password?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def update_user_password(body_id, form_to_display):
+    user = forms._get_body(body_id, "user")
     if not forms._check_body_perm(user, "user"):
         return redirect(url_for('list_users'))
     password_form = OdontuxUserPasswordForm(request.form)
@@ -179,69 +182,78 @@ def update_user_password(user_id):
             setattr(user, f, getattr(password_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_user', 
-                                 user_id=user_id,
+                                 body_id=body_id,
                                  form_to_display="gen_info"))
 
-@app.route('/user/update_user_address/id=<int:user_id>/', methods=['POST'])
-def update_user_address(user_id):
-    if forms.update_body_address(user_id, "user"):
+@app.route('/user/update_user_address?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def update_user_address(body_id, form_to_display):
+    if forms.update_body_address(body_id, "user"):
         return redirect(url_for("update_user", 
-                                 user_id=user_id,
+                                 body_id=body_id,
                                  form_to_display="address"))
     return redirect(url_for('list_users'))
         
-@app.route('/user/add_user_address/id=<int:user_id>/', methods=['POST'])
-def add_user_address(user_id):
-    if forms.add_body_address(user_id, "user"):
-        return redirect(url_for("update_user", user_id=user_id, 
+@app.route('/user/add_user_address?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def add_user_address(body_id, form_to_display):
+    if forms.add_body_address(body_id, "user"):
+        return redirect(url_for("update_user", body_id=body_id, 
                                  form_to_display="address"))
     return redirect(url_for('list_users'))
 
-@app.route('/user/delete_user_address/id=<int:user_id>/', methods=['POST'])
-def delete_user_address(user_id):
-    if forms.delete_body_address(user_id, "user"):
-        return redirect(url_for("update_user", user_id=user_id,
+@app.route('/user/delete_user_address?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def delete_user_address(body_id, form_to_display):
+    if forms.delete_body_address(body_id, "user"):
+        return redirect(url_for("update_user", body_id=body_id,
                                  form_to_display="address"))
     return redirect(url_for('list_users'))
 
-@app.route('/user/update_user_phone/id=<int:user_id>/', methods=['POST'])
-def update_user_phone(user_id):
-    if forms.update_body_phone(user_id, "user"):
-        return redirect(url_for("update_user", user_id=user_id,
+@app.route('/user/update_user_phone?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def update_user_phone(body_id, form_to_display):
+    if forms.update_body_phone(body_id, "user"):
+        return redirect(url_for("update_user", body_id=body_id,
                                  form_to_display="phone"))
     return redirect(url_for('list_users'))
     
-@app.route('/user/add_user_phone/id=<int:user_id>/', methods=['POST'])
-def add_user_phone(user_id):
-    if forms.add_body_phone(user_id, "user"):
-        return redirect(url_for("update_user", user_id=user_id,
+@app.route('/user/add_user_phone?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def add_user_phone(body_id, form_to_display):
+    if forms.add_body_phone(body_id, "user"):
+        return redirect(url_for("update_user", body_id=body_id,
                                  form_to_display="phone"))
     return redirect(url_for('list_users'))
 
-@app.route('/user/delete_user_phone/id=<int:user_id>/', methods=['POST'])
-def delete_user_phone(user_id):
-    if forms.delete_body_phone(user_id, "user"):
-        return redirect(url_for("update_user", user_id=user_id,
+@app.route('/user/delete_user_phone?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def delete_user_phone(body_id, form_to_display):
+    if forms.delete_body_phone(body_id, "user"):
+        return redirect(url_for("update_user", body_id=body_id,
                                  form_to_display="phone"))
     return redirect(url_form('list_users'))
 
-@app.route('/user/update_user_mail/id=<int:user_id>/', methods=['POST'])
-def update_user_mail(user_id):
-    if forms.update_body_mail(user_id, "user"):
-        return redirect(url_for("update_user", user_id=user_id,
+@app.route('/user/update_user_mail?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def update_user_mail(body_id, form_to_display):
+    if forms.update_body_mail(body_id, "user"):
+        return redirect(url_for("update_user", body_id=body_id,
                                  form_to_display="mail"))
     return redirect(url_for('list_users'))
 
-@app.route('/user/add_user_mail/id=<int:user_id>/', methods=['POST'])
-def add_user_mail(user_id):
-    if forms.add_body_mail(user_id, "user"):
-        return redirect(url_for("update_user", user_id=user_id,
+@app.route('/user/add_user_mail?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def add_user_mail(body_id, form_to_display):
+    if forms.add_body_mail(body_id, "user"):
+        return redirect(url_for("update_user", body_id=body_id,
                                  form_to_display="mail"))
     return redirect(url_for('list_users'))
 
-@app.route('/user/delete_user_mail/id=<int:user_id>/', methods=['POST'])
-def delete_user_mail(user_id):
-    if forms.delete_body_mail(user_id, "user"):
-        return redirect(url_for("update_user", user_id=user_id,
+@app.route('/user/delete_user_mail?id=<int:body_id>&\
+            ?form_to_display=<form_to_display>/', methods=['POST'])
+def delete_user_mail(body_id, form_to_display):
+    if forms.delete_body_mail(body_id, "user"):
+        return redirect(url_for("update_user", body_id=body_id,
                                  form_to_display="mail"))
     return redirect(url_for('list_users'))

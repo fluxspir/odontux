@@ -19,17 +19,18 @@ List of odontux users
   <tr>
     <td>{{ user.id }}</td><td>{{user.username}}</td>
     <td>{% for r in roles %}
-    	  {% if r[0] == user.role|int %}
-	    {{ r[1] }}
-	  {% endif %}
-	{% endfor %}
+    	    {% if r[0] == user.role|int %}
+	          {{ r[1] }}
+	        {% endif %}
+	      {% endfor %}
     </td>
     <td>{{ user.lastname }}</td>
     <td>{{ user.firstname }}</td>
     <td>
       {% if session.role == role_admin or session.username == user.username %}
-        <a href="/user/update_user/id={{ user.id }}">Update</a>{% endif %}</td>
-
+        <a href="{{ url_for('update_user', body_id=user.id ,form_to_display='gen_info') }}">Update</a>
+      {% endif %}
+    </td>
   </tr>
 </div>
 {% endfor %}

@@ -36,20 +36,20 @@
       </tr>
       {% for phone in body.phones %}
       <tr>
-        <form method="post" action="{{ url_update }}/id={{ body.id }}/">
+        <form method="post" action={{ url_for(url_update, body_id=body.id, form_to_display='phone') }}>
           <td class="hidden"><input type="text" name="phone_index" value="{{ loop.index0 }}" /></td>
           {{ render_table_field(phone_form.phonename, value=phone.name) }}
           {{ render_table_field(phone_form.phonenum, value=phone.number) }}
           <td><input type="submit" value="Update" /></td>
         </form>
-        <form class="hidden" method="post" action="{{ url_delete }}/id={{ body.id }}/">
-          <td class="hidden"><input type="text" name="phone_id" value="{{ phone.id }}" /></td>
+        <form class="hidden" method="post" action={{ url_for(url_delete, body_id=body.id, form_to_display='phone') }}>
+          <input type="hidden" name="phone_id" value="{{ phone.id }}" />
           <td><input type="submit" value="Delete" /></td>
         </form>
       </tr>
       {% endfor %}
       <tr>
-        <form method="post" action="{{ url_add }}/id={{ body.id }}/">
+        <form method="post" action={{ url_for(url_add, body_id=body.id, form_to_display='phone') }}>
           <td class="hidden"></td>
           {{ render_table_field(phone_form.phonename) }}
           {{ render_table_field(phone_form.phonenum) }}
@@ -75,7 +75,7 @@
       </tr>
         {% for address in body_addresses %}
       <tr>
-        <form method="post" action="{{ url_update }}/id={{ body.id }}/">
+        <form method="post" action={{ url_for(url_update, body_id=body.id, form_to_display='address') }}>
           <td class="hidden"><input type="text" name="address_index" value="{{ loop.index0 }}" /></td>
           {{ render_table_field(address_form.street, value=address.street) }}
           {{ render_table_field(address_form.building, value=address.building) }}
@@ -85,14 +85,14 @@
           {{ render_table_field(address_form.country, value=address.country) }}
           <td><input type=submit value="Update" /></td>
         </form>
-        <form class="hidden" method="post" action="{{ url_delete }}/id={{ body.id }}/">
-          <td class="hidden"><input type="text" name="address_id" value="{{address.id}}" /></td>
+        <form class="hidden" method="post" action={{ url_for(url_delete, body_id=body.id, form_to_display='address') }}>
+          <input type="hidden" name="address_id" value="{{address.id}}" />
           <td><input type="submit" value="Delete" /></td>
         </form>
       </tr>
       {% endfor %}
       <tr>
-        <form method=post action="{{ url_add }}/id={{ body.id }}/">
+        <form method=post action={{ url_for(url_add, body_id=body.id, form_to_display='address') }}>
           <td class="hidden"></td>
           {{ render_table_field(address_form.street) }}
           {{ render_table_field(address_form.building) }}
@@ -117,19 +117,19 @@
       </tr>
       {% for mail in body.mails %}
       <tr>
-        <form method="post" action="{{ url_update }}/id={{ body.id }}/">
+        <form method="post" action={{ url_for(url_update, body_id=body.id, form_to_display='mail') }}>
           <td class="hidden"><input type="text" name="mail_index" value="{{ loop.index0 }}" /></td>
           {{ render_table_field(mail_form.email, value=mail.email) }}
           <td><input type=submit value="Update" /></td>
         </form>
-        <form class="hidden" method="post" action="{{ url_delete }}/id={{ body.id }}/">
-          <td class="hidden"><input type="text" name="mail_id" value="{{ mail.id }}" /></td>
-          <td><input type="submit" value="Delete" /></td>
+        <form class="hidden" method="post" action={{ url_for(url_delete, body_id=body.id, form_to_display='mail') }}>
+          <input type="hidden" name="mail_id" value="{{ mail.id }}" />
+          <td><input type="submit" value="Delete" /></td
         </form>
       </tr>
       {%endfor%}
       <tr>
-        <form method=post action="{{ url_add }}/id={{ body.id }}/">
+        <form method=post action={{ url_for(url_add, body_id=body.id, form_to_display='mail') }}>
           <td class="hidden"></td>
           {{ render_table_field(mail_form.email) }}
           <td><input type=submit value="Add new email" /></td>
