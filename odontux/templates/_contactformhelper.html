@@ -36,7 +36,7 @@
       </tr>
       {% for phone in body.phones %}
       <tr>
-        <form method="post" action={{ url_for(url_update, body_id=body.id, form_to_display='phone') }}>
+        <form method="post" action="{{ url_for(url_update, body_id=body.id, form_to_display='phone') }}">
           <td class="hidden"><input type="text" name="phone_index" value="{{ loop.index0 }}" /></td>
           {{ render_table_field(phone_form.phonename, value=phone.name) }}
           {{ render_table_field(phone_form.phonenum, value=phone.number) }}

@@ -10,7 +10,6 @@ from wtforms import (Form,
                      IntegerField, SelectField, TextField, BooleanField,
                      validators)
 import sqlalchemy
-from odontux.models import meta, administration
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
 from gettext import gettext as _
@@ -208,8 +207,8 @@ def add_patient():
                             phone_form=phone_form,
                             mail_form=mail_form)
 
-@app.route('/patient/update_patient?id=<int:body_id>\
-            &?form_to_display=<form_to_display>/',
+@app.route('/patient/update_patient?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/',
             methods=[ 'GET', 'POST'])
 def update_patient(body_id, form_to_display):
     patient = forms._get_body(body_id, "patient")
@@ -239,8 +238,8 @@ def update_patient(body_id, form_to_display):
                             mail_form=mail_form,
                             role_admin=constants.ROLE_ADMIN)
 
-@app.route('/patient/update_patient_SSN?id=<int:body_id>\
-            &?form_to_display=<form_to_display>', methods=['POST'])
+@app.route('/patient/update_patient_SSN?id=<int:body_id>'
+           '&form_to_display=<form_to_display>', methods=['POST'])
 def update_patient_SSN(body_id, form_to_display):
     patient = forms._get_body(body_id, "patient")
     if not forms._check_body_perm(patient, "patient"):
@@ -284,72 +283,72 @@ def update_patient_SSN(body_id, form_to_display):
         return redirect(url_for('update_patient', body_id=body_id,
                                 form_to_display="SSN"))
 
-@app.route('/patient/update_patient_address?id=<int:body_id>\
-            &?form_to_display=<form_to_display>/', methods=['POST'])
+@app.route('/patient/update_patient_address?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_patient_address(body_id, form_to_display):
     if forms.update_body_address(body_id, "patient"):
         return redirect(url_for("update_patient", body_id=body_id,
                                 form_to_display="address"))
     return redirect(url_for('list_patients'))
         
-@app.route('/patient/add_patient_address?id=<int:body_id>\
-            &?form_to_display=<form_to_display>/', methods=['POST'])
+@app.route('/patient/add_patient_address?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/', methods=['POST'])
 def add_patient_address(body_id, form_to_display):
     if forms.add_body_address(body_id, "patient"):
         return redirect(url_for("update_patient", body_id=body_id,
                                 form_to_display="address"))
     return redirect(url_for('list_patients'))
 
-@app.route('/patient/delete_patient_address?id=<int:body_id>\
-            &?form_to_display=<form_to_display>/', methods=['POST'])
+@app.route('/patient/delete_patient_address?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/', methods=['POST'])
 def delete_patient_address(body_id, form_to_display):
     if forms.delete_body_address(body_id, "patient"):
         return redirect(url_for("update_patient", body_id=body_id,
                                 form_to_display="address"))
     return redirect(url_form('list_patients'))
 
-@app.route('/patient/update_patient_phone?id=<int:body_id>\
-            &?form_to_display=<form_to_display>/', methods=['POST'])
+@app.route('/patient/update_patient_phone?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_patient_phone(body_id, form_to_display):
     if forms.update_body_phone(body_id, "patient"):
         return redirect(url_for("update_patient", body_id=body_id,
                                 form_to_display="phone"))
     return redirect(url_for('list_patients'))
     
-@app.route('/patient/add_patient_phone?id=<int:body_id>\
-            ?form_to_display=<form_to_display>/', methods=['POST'])
+@app.route('/patient/add_patient_phone?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/', methods=['POST'])
 def add_patient_phone(body_id, form_to_display):
     if forms.add_body_phone(body_id, "patient"):
         return redirect(url_for("update_patient", body_id=body_id,
                                 form_to_display="phone"))
     return redirect(url_for('list_patients'))
 
-@app.route('/patient/delete_patient_phone?id=<int:body_id>\
-            &?form_to_display=<form_to_display>/', methods=['POST'])
+@app.route('/patient/delete_patient_phone?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/', methods=['POST'])
 def delete_patient_phone(body_id, form_to_display):
     if forms.delete_body_phone(body_id, "patient"):
         return redirect(url_for("update_patient", body_id=body_id,
                                 form_to_display="phone"))
     return redirect(url_form('list_patients'))
 
-@app.route('/patient/update_patient_mail?id=<int:body_id>\
-            &?form_to_display=<form_to_display>/', methods=['POST'])
+@app.route('/patient/update_patient_mail?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_patient_mail(body_id, form_to_display):
     if forms.update_body_mail(body_id, "patient"):
         return redirect(url_for("update_patient", body_id=body_id,
                                 form_to_display="mail"))
     return redirect(url_for('list_patients'))
 
-@app.route('/patient/add_patient_mail?id=<int:body_id>\
-            &?form_to_display=<form_to_display>/', methods=['POST'])
+@app.route('/patient/add_patient_mail?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/', methods=['POST'])
 def add_patient_mail(body_id, form_to_display):
     if forms.add_body_mail(body_id, "patient"):
         return redirect(url_for("update_patient", body_id=body_id,
                                 form_to_display="mail"))
     return redirect(url_for('list_patients'))
 
-@app.route('/patient/delete_patient_mail?id=<int:body_id>\
-            &?form_to_display=<form_to_display>/', methods=['POST'])
+@app.route('/patient/delete_patient_mail?id=<int:body_id>'
+           '&form_to_display=<form_to_display>/', methods=['POST'])
 def delete_patient_mail(body_id, form_to_display):
     if forms.delete_body_mail(body_id, "patient"):
         return redirect(url_for("update_patient", body_id=body_id,
