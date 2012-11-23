@@ -1,7 +1,5 @@
 {% extends "patient_base.html" %}
-{% block css %}
   <link rel="stylesheet" type="text/css" href="/static/anamnesis.css">
-{% endblock %}
 {% block main %}
   <div id="medical_history">
     <table border=1>
@@ -20,6 +18,9 @@
       {% block medical_history %}
         {% for medhist in medical_history %}
           <tr>
+            <td class="hidden"></td>
+            <td class="hidden"></td>
+            <td class="hidden"></td>
             <td>{{ medhist.icd10 }}</td>
             <td>{{ medhist.disease }}</td>
             <td>{{ medhist.disorder }}</td>

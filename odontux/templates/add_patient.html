@@ -1,7 +1,4 @@
-{% extends 'layout.html' %}
-{% block pagetitle %}
-Add a new patient
-{% endblock %}
+{% extends 'patient_base.html' %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
 {% from "_formhelpers.html" import render_simple_field %}
@@ -25,7 +22,7 @@ Add a new patient
     {{ render_simple_field(gen_info_form.payer) }}
     {{ render_simple_field(gen_info_form.office_id) }}
     {{ render_simple_field(gen_info_form.dentist_id) }}
-    {{ render_simple_field(SSN_form.socialsecurity_id) }}
+    {{ render_simple_field(gen_info_form.socialsecurity_id) }}
     {{ render_simple_field(SSN_form.SSN) }}
     {{ render_simple_field(SSN_form.cmu) }}
     {{ render_simple_field(SSN_form.insurance) }}

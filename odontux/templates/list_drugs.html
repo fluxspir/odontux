@@ -1,0 +1,28 @@
+{% extends "patient_base.html" %}
+  {% block main %}
+    <table border=1>
+      <caption>Drug list</caption>
+      <tr>
+        <th class="hidden">Id</th>
+        <th>Alias</th>
+        <th>Molecule</th>
+        <th>Packaging</th>
+        <th>Posologia</th>
+        <th>Day supply</th>
+        <th>Comments</th>
+      </tr>
+      {% block drug_prescribed %}
+        {% for drug in drugs %}
+          <tr>
+            <td class="hidden">{{ drug.id }}</td>
+            <td>{{ drug.alias }}</td>
+            <td>{{ drug.molecule }}</td>
+            <td>{{ drug.packaging }}</td>
+            <td>{{ drug.posologia }}</td>
+            <td>{{ drug.dayssupply }}</td>
+            <td>{{ drug.comments }}</td>
+          </tr>
+        {% endfor %}
+      {% endblock %}
+    </table>
+  {% endblock %}

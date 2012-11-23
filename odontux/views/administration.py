@@ -97,7 +97,9 @@ def add_patient():
     # The dentist himself
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for("allpatients"))
-
+    
+    if session['patient']:
+        session['patient'] = None
     # Forms used for adding a new patient : 
     # two are patient's specific :
     gen_info_form = PatientGeneralInfoForm(request.form)

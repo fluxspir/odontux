@@ -83,7 +83,17 @@ class DateField(Field):
     def _value(self):
         if self.data:
             return self.data
-            
+
+class TimeInput(widgets.TextInput):
+    input_type = "time"
+
+class TimeField(Field):
+    widget = TimeInput()
+    def _value(self):
+        if self.data:
+            return self.data
+
+
 # Generic Forms
 class PhoneForm(Form):
     phonename = TextField('phonename', validators=[validators.Optional()])

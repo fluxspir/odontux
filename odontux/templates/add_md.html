@@ -1,7 +1,4 @@
-{% extends 'layout.html' %}
-{% block pagetitle %}
-Add a new medecine doctor
-{% endblock %}
+{% extends 'patient_base.html' %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="/md/add/">

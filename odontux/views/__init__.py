@@ -40,5 +40,17 @@ from cotation import (
                      show_ngap 
                      )
 from anamnesis import (
-                    list_anamnesis
+                    list_anamnesis,
+                    update_medical_history, delete_medical_history, 
+                    add_medical_history,
+                    update_past_surgery, delete_past_surgery,
+                    add_past_surgery,
+                    update_allergies, delete_allergies, add_allergies
+                    )
+from medication import (
+                    list_drugs,
+                    update_drug, delete_drug, add_drug,
+                    )
+from schedule import (
+                    agenda,
                     )

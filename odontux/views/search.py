@@ -8,7 +8,7 @@
 from flask import render_template, request
 import sqlalchemy
 from sqlalchemy import or_
-from odontux.models import meta, act, administration, users
+from odontux.models import meta, act, administration, md, users, medication
 from odontux.odonweb import app
 from gettext import gettext as _
 
@@ -51,6 +51,26 @@ def find():
                 users.OdontuxUser.role.ilike(keyword)
                 ))
         return render_template('list_users.html', users=query.all())
+
+    if request.form["database"] == "doctor":
+        query = meta.session.query(md.MedecineDoctor)
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query = query.filter(or_(
+                md.MedecineDoctor.lastname.ilike(keyword),
+                md.MedecineDoctor.firstname.ilike(keyword),
+                ))
+        return render_template('list_md.html', doctors=query.all())
+
+    if request.form["database"] == "drug":
+        query = meta.session.query(medication.DrugPrescribed)
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query = query.filter(or_(
+                medication.DrugPrescribed.alias.ilike(keyword),
+                medication.DrugPrescribed.molecule.ilike(keyword)
+                ))
+        return render_template('list_drugs.html', drugs=query.all())
 
 @app.route('/search/user')
 def find_user():

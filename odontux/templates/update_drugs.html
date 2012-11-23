@@ -1,0 +1,35 @@
+{% from "_formhelpers.html" import render_table_field %}
+{% from "_formhelpers.html" import render_table_hidden_field %}
+{% extends "list_drugs.html" %}
+  {% block drug_prescribed %}
+    {% for drug in drugs %}
+      <tr>
+        <form method="post" action="{{ url_for('update_drug') }}">
+          {{ render_table_hidden_field(drug_form.drug_id, value=drug.id) }}
+          {{ render_table_field(drug_form.alias, value=drug.alias) }}
+          {{ render_table_field(drug_form.molecule, value=drug.molecule) }}
+          {{ render_table_field(drug_form.packaging, value=drug.packaging) }}
+          {{ render_table_field(drug_form.posologia, value=drug.posologia) }}
+          {{ render_table_field(drug_form.dayssupply, value=drug.dayssupply) }}
+          {{ render_table_field(drug_form.comments, value=drug.comments) }}
+          <td><input type="submit" value="Update" /></td>
+        </form>
+        <form method="post" action="{{ url_for('delete_drug') }}">
+          {{ render_table_hidden_field(drug_form.drug_id, value=drug.id) }}
+          <td><input type="submit" value="Delete" /></td>
+        </form>
+      </tr>
+    {% endfor %}
+    <tr>
+      <form method="post" action="{{ url_for('add_drug') }}">
+        {{ render_table_hidden_field(drug_form.drug_id) }}
+        {{ render_table_field(drug_form.alias) }}
+        {{ render_table_field(drug_form.molecule) }}
+        {{ render_table_field(drug_form.packaging) }}
+        {{ render_table_field(drug_form.posologia) }}
+        {{ render_table_field(drug_form.dayssupply) }}
+        {{ render_table_field(drug_form.comments) }}
+        <td><input type="submit" value="Add" /></td>
+      </form>
+    </tr>
+  {% endblock %}

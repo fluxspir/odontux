@@ -1,0 +1,52 @@
+#patient_navigation {
+position:absolute;
+margin:0%;
+padding:0%;
+display:block;
+list-style-type:none;
+}
+
+#patient_navigation li {
+display:inline;
+}
+
+.options_nav {
+margin:0%;
+padding:0%;
+display:block;
+position:absolute;
+font-size:100%;
+}
+
+.options_nav li {
+margin:2%;
+padding:2%;
+display:block;
+}
+
+.options_nav li a {
+margin:0%;
+padding:0%;
+display:block;
+}
+
+.options_nav li a:hover {
+font-size:130%;
+}
+
+.options_nav div {
+position:absolute;
+visibility:hidden;
+margin:0%;
+padding:0%;
+}
+
+.options_nav div a {
+margin:0%;
+padding:0%;
+width:auto;
+position:relative;
+}
+
+.options_nav div a:hover {}
+
