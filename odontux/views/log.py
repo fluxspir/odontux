@@ -32,7 +32,7 @@ def login():
                    .one()
             if request.form['password'] == user.password:
                 session['username'] = user.username
-                session['userid'] = user.id
+                session['user_id'] = user.id
                 session['role'] = int(user.role)
                 session['ROLES'] = constants.ROLES_LIST 
                 session['email'] = user.mails[0]

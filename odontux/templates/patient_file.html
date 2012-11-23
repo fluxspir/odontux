@@ -1,9 +1,4 @@
-{% extends "layout.html" %}
-{% block mainsummary %}
-  {% block patient %}
-    {{ patient['lastname'] }} {{ patient['firstname'] }} {{ age }}
-  {% endblock %}
-{% endblock %}
+{% extends "patient_base.html" %}
 {% block main %}
   <div id="dental_schema">
   {% block dental_schema %}

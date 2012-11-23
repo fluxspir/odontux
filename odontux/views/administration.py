@@ -76,17 +76,14 @@ def allpatients():
     return render_template('list_patients.html', patients=patients)
 
 @app.route('/patient/<int:body_id>/')
-def list_patients(body_id):
+def enter_patient_file(body_id):
     patient = meta.session.query(administration.Patient)\
-              .filter(administration.Patient.id == patient_id)\
+              .filter(administration.Patient.id == body_id)\
               .one()
 
     if patient:
-        session['patient_id'] = body_id
-        age = patient.age()
-        birthday = patient.is_birthday()
-        return render_template('patient_file.html', session=session,
-                               patient=patient, age=age, birthday=birthday)
+        session['patient'] = patient
+        return render_template('patient_file.html', session=session)
 
 @app.route('/patient/add/', methods=['GET', 'POST'])
 @app.route('/add/patient/', methods=['GET', 'POST'])

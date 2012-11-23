@@ -1,0 +1,105 @@
+{% from "_formhelpers.html" import render_table_field %}
+{% from "_formhelpers.html" import render_table_hidden_field %}
+{% extends "patient_anamnesis.html" %}
+  {% block medical_history %}
+    {% for medhist in medical_history %}
+      <tr>
+        <form method="post" action="{{ url_for('update_medical_history') }}">
+          {{ render_table_hidden_field(gen_info_form.patient_id, value=medhist.patient_id) }}
+          {{ render_table_hidden_field(gen_info_form.dentist_id, value=medhist.dentist_id) }}
+          {{ render_table_hidden_field(med_form.mh_id, value=medhist.id) }}
+          {{ render_table_field(med_form.icd10, value=medhist.idc10) }}
+          {{ render_table_field(med_form.disease, value=medhist.disease) }}
+          {{ render_table_field(med_form.disorder, value=medhist.disorder) }}
+          {{ render_table_field(med_form.habitus, value=medhist.habitus) }}
+          {{ render_table_field(med_form.treatment, value=medhist.treatment) }}
+          {{ render_table_field(gen_info_form.time_stamp, value=medhist.time_stamp) }}
+          <td><input type="submit" value="Update" /></td>
+        </form>
+        <form method="post" action="{{ url_for('delete_medical_history') }}">
+          {{ render_table_hidden_field(med_form.mh_id, value=medhist.id) }}
+          <td><input type="submit" value="Delete" /></td>
+        </form>
+      </tr>
+    {% endfor %}
+    <tr>
+      <form method="post" action="{{ url_for('add_medical_history') }}">
+        {{ render_table_hidden_field(gen_info_form.patient_id, value=session['patient'].id) }}
+        {{ render_table_hidden_field(gen_info_form.dentist_id, value=session['user_id']) }}
+        {{ render_table_hidden_field(med_form.mh_id) }}
+        {{ render_table_field(med_form.icd10) }}
+        {{ render_table_field(med_form.disease) }}
+        {{ render_table_field(med_form.disorder) }}
+        {{ render_table_field(med_form.habitus) }}
+        {{ render_table_field(med_form.treatment) }}
+        {{ render_table_field(gen_info_form.time_stamp) }}
+        <td><input type="submit" value="Add" /></td>
+      </form>
+    </tr>
+  {% endblock %}
+  {% block past_surgeries %}
+    {% for surgery in past_surgeries %}
+      <tr>
+        <form method="post" action="{{ url_for('update_past_surgery') }}">
+          {{ render_table_hidden_field(gen_info_form.patient_id, value=surgery.patient_id) }}
+          {{ render_table_hidden_field(gen_info_form.dentist_id, value=surgery.dentist_id) }}
+          {{ render_table_hidden_field(surg_form.surg_id, value=surgery.id) }}
+          {{ render_table_field(surg_form.surgery_type, value=surgery.surgery_type) }}
+          {{ render_table_field(surg_form.problem, value=surgery.problem) }}
+          {{ render_table_field(surg_form.complication, value=surgery.complication) }}
+          {{ render_table_field(gen_info_form.time_stamp, value=surgery.time_stamp) }}
+          <td><input type="submit" value="Update" /></td>
+        </form>
+        <form method="post" action="{{ url_for('delete_past_surgery') }}">
+          {{ render_table_hidden_field(surg_form.surg_id, value=surgery.id) }}
+          <td><input type="submit" value="Delete" /></td>
+        </form>
+      </tr>
+    {% endfor %}
+    <tr>
+      <form method="post" action="{{ url_for('add_past_surgery') }}">
+        {{ render_table_hidden_field(gen_info_form.patient_id, value=session['patient'].id) }}
+        {{ render_table_hidden_field(gen_info_form.dentist_id, value=session['user_id']) }}
+        {{ render_table_field(surg_form.surgery_type) }}
+        {{ render_table_field(surg_form.problem) }}
+        {{ render_table_field(surg_form.complication) }}
+        {{ render_table_field(gen_info_form.time_stamp) }}
+        <td><input type="submit" value="Add" /></td>
+      </form>
+    </tr>
+  {% endblock %}
+  {% block allergies %}
+    {% for allergy in allergies %}
+      <tr>
+        <form method="post" action="{{ url_for('update_allergies') }}">
+          {{ render_table_hidden_field(gen_info_form.patient_id, value=allergy.patient_id) }}
+          {{ render_table_hidden_field(gen_info_form.dentist_id, value=allergy.dentist_id) }}
+          {{ render_table_hidden_field(allergies_form.al_id, value=allergy.id) }}
+          {{ render_table_field(allergies_form.drug, value=allergy.drug) }}
+          {{ render_table_field(allergies_form.metal, value=allergy.metal) }}
+          {{ render_table_field(allergies_form.food, value=allergy.food) }}
+          {{ render_table_field(allergies_form.other, value=allergy.other) }}
+          {{ render_table_field(allergies_form.reaction, value=allergy.reaction) }}
+          {{ render_table_field(gen_info_form.time_stamp, value=allergy.time_stamp) }}
+          <td><input type="submit" value="Update" /></td>
+        </form>
+        <form method="post" action="{{ url_for('delete_allergies') }}">
+          {{ render_table_hidden_field(allergies_form.al_id, value=allergy.id) }}
+          <td><input type="submit" value="Delete" /></td>
+        </form>
+      </tr>
+    {% endfor %}
+    <tr>
+      <form method="post" action="{{ url_for('add_allergies') }}">
+        {{ render_table_hidden_field(gen_info_form.patient_id, value=session['patient'].id) }}
+        {{ render_table_hidden_field(gen_info_form.dentist_id, value=session['user_id']) }}
+        {{ render_table_field(allergies_form.drug) }}
+        {{ render_table_field(allergies_form.metal) }}
+        {{ render_table_field(allergies_form.food) }}
+        {{ render_table_field(allergies_form.other) }}
+        {{ render_table_field(allergies_form.reaction) }}
+        {{ render_table_field(gen_info_form.time_stamp) }}
+        <td><input type="submit" value="Add" /></td>
+      </form>
+    </tr>
+  {% endblock %}

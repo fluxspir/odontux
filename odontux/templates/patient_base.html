@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+    {{ session.patient['lastname'] }} {{ session.patient['firstname'] }} {{ session.patient.age() }}
+{% endblock %}
+{% block mainsummary %}
+  {% block patient_navigation %}
+    <ul id="patient_navigation">
+      <li><a href={{ url_for("list_anamnesis") }} onmouseover="mopen('anamnesis_open')" onmouseout="mclosetime()">anamnesis</a>
+        <div id="anamnesis_open" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+          <a href={{ url_for("update_anamnesis") }}>Modify</a>
+        </div>
+      </li>
+    </ul>
+  {% endblock %}
+{% endblock %}

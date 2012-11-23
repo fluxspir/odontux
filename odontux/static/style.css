@@ -25,5 +25,7 @@ a:active {color:red ; text-decoration:none ;}
 
 .center {text-align:center;}
 
+.hidden {display:none;}
+
 nav ul {list-style-type:none;}
 nav li {display:inline;} 
