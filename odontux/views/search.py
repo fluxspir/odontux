@@ -11,6 +11,7 @@ from sqlalchemy import or_
 from odontux.models import meta, act, administration, md, users, medication
 from odontux.odonweb import app
 from gettext import gettext as _
+from odontux import constants
 
 @app.route('/search/', methods=['GET', 'POST'])
 def find():
@@ -27,7 +28,8 @@ def find():
                 administration.Patient.preferred_name.ilike(keyword),
                 administration.Patient.correspondence_name.ilike(keyword)
                 )).order_by(administration.Patient.lastname)
-        return render_template('list_patients.html', patients=query.all())
+        return render_template('list_patients.html', patients=query.all(),
+                                role_admin=constants.ROLE_ADMIN)
     
     if request.form["database"] == "act":
         query = meta.session.query(act.ActType)

@@ -15,9 +15,16 @@ from odontux import constants
 
 from gettext import gettext as _
 
+def _quit_patient_file():
+    try:
+        if session['patient']:
+            session.pop('patient', None)
+    except KeyError:
+        pass
 
 @app.route('/')
 def index():
+    _quit_patient_file()
     if 'username' in session:
         return render_template('index.html')
     return redirect(url_for('login'))
@@ -25,6 +32,7 @@ def index():
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
+    _quit_patient_file()
     if request.method == 'POST':
         try:
             user = meta.session.query(users.OdontuxUser).filter\
@@ -45,6 +53,7 @@ def login():
 
 @app.route('/logout/')
 def logout():
+    _quit_patient_file()
     session.pop('username', None)
     return redirect(url_for('index'))
 

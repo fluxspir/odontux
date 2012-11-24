@@ -1,0 +1,33 @@
+{% extends "header.html" %}
+
+{% block css %}
+  <link rel="stylesheet" type="text/css" href="/static/patient.css">
+{% endblock %}
+
+{% block mainsummary %}
+  {% block patient_navigation %}
+    {% if session.patient %}
+        <ul id="patient_navigation">
+          <li><a href={{ url_for("list_anamnesis") }} onmouseover="mopen('anamnesis_open')" onmouseout="mclosetime()">anamnesis</a>
+            <ul class="options_nav">
+              <li>
+                <div id="anamnesis_open" class="options_nav" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                  <a href={{ url_for("update_anamnesis") }}>Modify</a>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li><a href={{ url_for("list_drugs") }} onmouseover="mopen('medication_open')" onmouseout="mclosetime()">medication</a>
+            <ul class="options_nav">
+              <li>
+                <div id="medication_open" class="options_nav" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
+                  <a href={{ url_for("update_drug") }}>Modify</a>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li><a href={{ url_for('index') }}>Exit Patient</a></li>
+        </ul>
+    {% endif %}
+  {% endblock %}
+{% endblock %}

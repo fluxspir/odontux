@@ -22,7 +22,7 @@ PASSWORD = "password"
 """))
     sys.exit(1)
 
-DEBUG = True
+DEBUG = False
 
 app = Flask(__name__)
 app.config.from_object(__name__)

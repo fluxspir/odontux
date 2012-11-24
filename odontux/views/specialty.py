@@ -5,7 +5,7 @@
 # licence BSD
 #
 
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, session
 import sqlalchemy
 from odontux.models import meta, act
 from odontux.odonweb import app
@@ -22,7 +22,6 @@ class SpecialtyForm(Form):
                      validators.Length(min=1, max=20, 
                      message=_("Must be less than 20 characters"))])
     color = ColorField('color')
-
 
 
 @app.route('/specialty/')

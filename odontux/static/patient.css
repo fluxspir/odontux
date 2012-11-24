@@ -7,7 +7,7 @@ list-style-type:none;
 }
 
 #patient_navigation li {
-display:inline;
+display:inline-block;
 }
 
 .options_nav {

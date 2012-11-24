@@ -1,0 +1,20 @@
+{% extends "summary_agenda.html" %}
+{% block main %}
+  <table border=1>
+    <caption>{{ appointments[0][1].agenda.starttime.date() }}</caption>
+    <tr>
+      <th>Time</th>
+      <th>Duration</th>
+      <th>Name</th>
+      <th>Reason</th>
+    </tr>
+  {% for patient,appointment in appointments %}
+    <tr>
+      <td>{{ appointment.agenda.starttime.time() }}</td>
+      <td>{{ appointment.agenda.endtime - appointment.agenda.starttime }}</td>
+      <td>{{ patient.lastname }} {{ patient.firstname }}</td>
+      <td>{{ appointment.reason }}</td>
+    </tr>
+  {% endfor %}
+  </table>
+{% endblock %}

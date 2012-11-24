@@ -73,7 +73,8 @@ class SocialSecurityForm(Form):
 def allpatients():
     patients = meta.session.query(administration.Patient)\
                .order_by(administration.Patient.lastname).all()
-    return render_template('list_patients.html', patients=patients)
+    return render_template('list_patients.html', patients=patients,
+                            role_admin=constants.ROLE_ADMIN)
 
 @app.route('/patient/<int:body_id>/')
 def enter_patient_file(body_id):

@@ -61,6 +61,7 @@
         <a href="/cotation/show_ngap/">Ngap</a>
       	<a href="/medecine_doctor">MD</a>
       	<a href="/user">Users</a>
+        <a href="{{ url_for('agenda') }}">Agenda</a>
         <div id="search">
         {% block search %}
           <form action="/search/" method="post" autocomplete="on">

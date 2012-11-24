@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block pagetitle %}
+  {% if session.patient %}
+    <a href="{{url_for('enter_patient_file', body_id=session.patient.id)}}">{{ session.patient['lastname'] }} {{ session.patient['firstname'] }}</a>, {{ session.patient.age() }} years old
+  {% else %}
+    Not in patient file
+  {% endif %}
+{% endblock %}

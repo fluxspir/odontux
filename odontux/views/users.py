@@ -62,9 +62,18 @@ class OdontuxUserPasswordForm(Form):
     confirm = PasswordField('Repeat Password')
 
 
+def _quit_patient_file():
+    try:
+        if session['patient']:
+            session.pop('patient', None)
+    except KeyError:
+        pass
+
+
 @app.route('/odontux_user/')
 @app.route('/user/')
 def list_users():
+    _quit_patient_file()
     # when we only want user with role "request.form['role']
     if request.form and request.form['role']:
         try:
@@ -85,6 +94,7 @@ def list_users():
 @app.route('/add/user/', methods=['GET', 'POST'])
 @app.route('/user/add/', methods=['GET', 'POST'])
 def add_user():
+    _quit_patient_file()
     if session['role'] != constants.ROLE_ADMIN:
         return redirect(url_for("index"))
 
@@ -137,6 +147,7 @@ def add_user():
 @app.route('/user/update_user?id=<int:body_id>&'
             'form_to_display=<form_to_display>/', methods=['GET', 'POST'])
 def update_user(body_id, form_to_display):
+    _quit_patient_file()
     user = forms._get_body(body_id, "user")
     if not forms._check_body_perm(user, "user"):
         return redirect(url_for('list_users'))
