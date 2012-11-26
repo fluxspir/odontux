@@ -130,7 +130,7 @@ def list_appointments():
         if not session['patient']:
             pass
     except KeyError:
-        return redirection(url_for('index'))
+        return redirect(url_for('index'))
 
     # TODO
     # TODO
@@ -142,6 +142,15 @@ def list_appointments():
     # pagetitle looks ok, the "main block" looks ok, but 
     # everything in the "main_summary" looks blocked back in the last 
     # "enter_patient_file()"
+    #
+    # J'ai pourtant fait de façon à ce que 
+    # views.patient.enter_patient_appointment()
+    # soit pareil (plus complet, mais la base pareille) à
+    # views.administration.enter_patient_file()
+    # et quand je "print" vite fait, je vois que mon 
+    # session['patient'] et session['appointment' sont bien ce que j'attends
+    # ce qui me trouble d'autant plus sur le non-fonctionnement.
+    #
     appointments = meta.session.query(schedule.Appointment)\
         .filter(schedule.Appointment.patient_id ==
                 session['patient'].id).all()

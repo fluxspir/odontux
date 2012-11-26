@@ -4,7 +4,6 @@
 {% extends "list_patient_appointments.html" %}
 
   {% block appointment_row %}
-{{ session['patient'].lastname }}  {{ session.appointment.id }}
     {{ appointment_table_rows(session, session.appointment) }}
   {% endblock %}
 <br />
