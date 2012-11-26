@@ -20,8 +20,6 @@ from odontux.views.forms import DateField, TimeField
 from odontux.views.log import index
 
 
-import pdb
-
 class AppointmentForm(Form):
     patient_id = HiddenField('patient_id')
     dentist_id = HiddenField('dentist_id')
@@ -57,6 +55,8 @@ def display_day(dateday):
     """ """
     dateday = datetime.datetime.strptime(dateday.encode("utf_8"),
                                          '%Y-%m-%d').date()
+    nextday = dateday + datetime.timedelta(days=1)
+    prevday = dateday - datetime.timedelta(days=1)
 
     meetings = meta.session.query(schedule.Agenda).filter(or_(
                         cast(schedule.Agenda.starttime, Date) == (dateday),
@@ -71,5 +71,18 @@ def display_day(dateday):
                     administration.Patient.id == appointment.patient_id
                     ).one()
         appointments.append((patient, appointment))
+    # dateday is return to create links to previous and next day
     return render_template('agenda_day.html', appointments=appointments,
-                            dateday=dateday)
+                            dateday=dateday, nextday=nextday, prevday=prevday)
+
+
+@app.route('/agenda/add', methods=['GET', 'POST'])
+def add_appointment():
+    if session['role'] == constants.ROLE_ADMIN:
+        return redirect(url_for('index'))
+    
+    agenda_form = AgendaForm(request.form)
+    appointment_form = AppointmentForm(request.form)
+    if (request.method == 'POST' and agenda_form.validate()
+        and appointment_form.validate() ):
+            pass

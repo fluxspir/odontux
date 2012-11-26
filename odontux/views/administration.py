@@ -15,7 +15,7 @@ from odontux.odonweb import app
 from gettext import gettext as _
 
 from odontux import constants
-from odontux.views import forms
+from odontux.views import forms, controls
 from odontux.views.log import index
 from odontux.models import meta, administration
 
@@ -83,8 +83,10 @@ def enter_patient_file(body_id):
               .one()
 
     if patient:
+        controls.quit_patient_file()
+        controls.quit_appointment()
         session['patient'] = patient
-        return render_template('patient_file.html', session=session)
+        return render_template('patient_file.html')
 
 @app.route('/patient/add/', methods=['GET', 'POST'])
 @app.route('/add/patient/', methods=['GET', 'POST'])
@@ -98,9 +100,8 @@ def add_patient():
     # The dentist himself
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for("allpatients"))
-    
-    if session['patient']:
-        session['patient'] = None
+   
+    controls.quit_patient_file()
     # Forms used for adding a new patient : 
     # two are patient's specific :
     gen_info_form = PatientGeneralInfoForm(request.form)

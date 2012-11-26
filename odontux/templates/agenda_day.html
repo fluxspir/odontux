@@ -1,20 +1,44 @@
+{% macro date_choice() %}
+        <a href="{{ url_for('display_day', dateday=prevday ) }}">Previous Day</a>
+        <form class="inline" method="post" action="{{ url_for('agenda_date') }}">
+          <input type="date" name="day" value="{{ dateday }}" />
+          <input type="submit" value="Go" />
+        </form>
+        <a href="{{ url_for('display_day', dateday=nextday ) }}">Next Day</a>
+{% endmacro %}
 {% extends "summary_agenda.html" %}
 {% block main %}
-  <table border=1>
-    <caption>{{ appointments[0][1].agenda.starttime.date() }}</caption>
-    <tr>
-      <th>Time</th>
-      <th>Duration</th>
-      <th>Name</th>
-      <th>Reason</th>
-    </tr>
-  {% for patient,appointment in appointments %}
-    <tr>
-      <td>{{ appointment.agenda.starttime.time() }}</td>
-      <td>{{ appointment.agenda.endtime - appointment.agenda.starttime }}</td>
-      <td>{{ patient.lastname }} {{ patient.firstname }}</td>
-      <td>{{ appointment.reason }}</td>
-    </tr>
-  {% endfor %}
-  </table>
+  {% if appointments %}
+    <table border=1>
+      <caption>
+      {{ date_choice() }}
+      </caption>
+      <tr>
+        <th></th>
+        <th>Time</th>
+        <th>Duration</th>
+        <th>Name</th>
+        <th>Reason</th>
+        <th></th>
+      </tr>
+    {% for patient,appointment in appointments %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ appointment.agenda.starttime.time() }}</td>
+        <td>{{ appointment.agenda.endtime - appointment.agenda.starttime }}</td>
+        <td>{{ patient.lastname }} {{ patient.firstname }}</td>
+        <td>{{ appointment.reason }}</td>
+        <td>
+          <form method="post" action="{{ url_for('enter_patient_appointment') }}">
+            <input type="hidden" name="patient_id" value={{ patient.id }} />
+            <input type="hidden" name="appointment_id" value={{ appointment.id }} />
+            <input type="submit" value="Go" />
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+  {% else %}
+    {{ date_choice() }}
+  {% endif %}
 {% endblock %}

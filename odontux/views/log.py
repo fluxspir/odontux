@@ -10,21 +10,16 @@ import sqlalchemy
 from odontux.models import meta, users
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
+from odontux.views import controls
 
 from odontux import constants
 
 from gettext import gettext as _
 
-def _quit_patient_file():
-    try:
-        if session['patient']:
-            session.pop('patient', None)
-    except KeyError:
-        pass
-
 @app.route('/')
 def index():
-    _quit_patient_file()
+    controls.quit_patient_file()
+    controls.quit_appointment()
     if 'username' in session:
         return render_template('index.html')
     return redirect(url_for('login'))
@@ -32,7 +27,8 @@ def index():
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
-    _quit_patient_file()
+    controls.quit_patient_file()
+    controls.quit_appointment()
     if request.method == 'POST':
         try:
             user = meta.session.query(users.OdontuxUser).filter\
@@ -42,7 +38,13 @@ def login():
                 session['username'] = user.username
                 session['user_id'] = user.id
                 session['role'] = int(user.role)
-                session['ROLES'] = constants.ROLES_LIST 
+                session['ROLES'] = constants.ROLES_LIST
+                session['ROLE_DENTIST'] = constants.ROLE_DENTIST
+                session['ROLE_NURSE'] = constants.ROLE_NURSE
+                session['ROLE_ASSISTANT'] = constants.ROLE_ASSISTANT
+                session['ROLE_SECRETARY'] = constants.ROLE_SECRETARY
+                session['ROLE_ADMIN'] = constants.ROLE_ADMIN
+
                 session['email'] = user.mails[0]
                 session['avatar_id'] = user.avatar_id
                 return redirect(url_for('index'))
@@ -53,7 +55,8 @@ def login():
 
 @app.route('/logout/')
 def logout():
-    _quit_patient_file()
+    controls.quit_patient_file()
+    controls.quit_appointment()
     session.pop('username', None)
     return redirect(url_for('index'))
 

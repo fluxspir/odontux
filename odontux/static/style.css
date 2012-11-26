@@ -27,5 +27,9 @@ a:active {color:red ; text-decoration:none ;}
 
 .hidden {display:none;}
 
+.left {float:left;}
+.right {float:right;}
+
+.inline {display:inline;}
 nav ul {list-style-type:none;}
 nav li {display:inline;} 

@@ -1,0 +1,19 @@
+{% from "_appointmenthelpers.html" import appointment_table_opening_tag, appointment_table_header, appointment_table_rows, appointment_table_closing_tag %}
+
+{% extends "summary_patient.html" %}
+
+{% block main %}
+  {% block appointments %}
+    {{ appointment_table_opening_tag("appointments") }}
+    {{ appointment_table_header(session) }}
+      {% block appointment_row %}
+        {% for appointment in appointments %}
+          {{ appointment_table_rows(session, appointment) }}
+        {% endfor %}
+      {% endblock %}
+    {{ appointment_table_closing_tag() }}
+  {% endblock %}
+
+  {% block appointment_acts %}
+  {% endblock %}
+{% endblock %}

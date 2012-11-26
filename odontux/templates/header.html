@@ -1,7 +1,26 @@
 {% extends "layout.html" %}
 {% block pagetitle %}
   {% if session.patient %}
-    <a href="{{url_for('enter_patient_file', body_id=session.patient.id)}}">{{ session.patient['lastname'] }} {{ session.patient['firstname'] }}</a>, {{ session.patient.age() }} years old
+    {% if session.appointment %}
+      <span class="left">
+        <form method="post" action="{{ url_for( 'enter_patient_appointment') }}">
+          <input type="hidden" name="appointment_id" value="{{ session.appointment.id -1 }}" />
+          <input type="submit" value="Previous RV" />
+        </form>
+      </span>
+    {% endif %}
+    <a href="{{url_for('enter_patient_file', body_id=session.patient.id)}}">{{ session.patient['lastname'] }} {{ session.patient['firstname'] }}</a>, {{ session.patient.age() }} years old, 
+    {% if session.appointment %}
+      <a href="{{ url_for('display_day', dateday=session.appointment.agenda.starttime.date()) }}">from {{ session.appointment.agenda.starttime.time() }} to {{ session.appointment.agenda.endtime.time() }} the {{ session.appointment.agenda.starttime.date() }}</a>
+      <span class="right">
+        <form method="post" action="{{ url_for( 'enter_patient_appointment') }}">
+          <input type="hidden" name="appointment_id" value="{{ session.appointment.id + 1 }}" />
+          <input type="submit" value="Next RV" />
+        </form>
+      </span>
+    {% else %}
+      Out of appointment
+    {% endif %}
   {% else %}
     Not in patient file
   {% endif %}

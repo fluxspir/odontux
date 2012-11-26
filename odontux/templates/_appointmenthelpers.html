@@ -1,0 +1,71 @@
+{% macro appointment_table_opening_tag(table_title) %}
+  <table border=1>
+    <caption>{{ table_title }}</caption>
+{% endmacro %}
+
+{% macro appointment_table_header(session) %}
+    <tr>
+      <th class="hidden">Id</th>
+      <th>Date</th>
+      <th>Time</th>
+      <th>Duration</th>
+      <th>Reason</th>
+      {% if session.role == session.ROLE_DENTIST %}
+        <th>Diagnostic</th>
+        <th>Treatment</th>
+        <th>Prognostic</th>
+        <th>Advise</th>
+        <th>Next appointment</th>
+        <th>Memo</th>
+      {% endif %}
+      <th>Ordonnance</th>
+      <th></th>
+    </tr>
+{% endmacro %}
+
+{% macro appointment_table_rows(session, appointment) %}
+      {% if appointment.emergency %}
+        <tr style="background-color:red">
+      {% else %}
+        <tr>
+      {% endif %}
+        <td class="hidden">{{ appointment.id }}</td>
+        <td>
+          <a href="{{ url_for('display_day', dateday=appointment.agenda.starttime.date() ) }}">{{ appointment.agenda.starttime.date() }}</a>
+        </td>
+        <td>{{ appointment.agenda.starttime.time() }}</td>
+        <td>{{ appointment.agenda.endtime - appointment.agenda.starttime }}</td>
+        <td>{{ appointment.reason }}</td>
+        {% if session.role == session.ROLE_DENTIST %}
+          <td>{{ appointment.diagnostic }}</td>
+          <td>{{ appointment.treatment }}</td>
+          <td>{{ appointment.prognostic }}</td>
+          <td>{{ appointment.advise }}</td>
+          <td>{{ appointment.next_appointment }}</td>
+          {% if appointment.memo %}
+            <td>
+              <ol>
+                {% for memo in appointment.memo %}
+                <li>
+                  {{ memo.memo }}
+                </li>
+                {% endfor %}
+              </ol>
+            </td>
+          {% else %}
+            <td></td>
+          {% endif %}
+        {% endif %}
+        <td>{% if appointment.ordonnance %}{{ appointment.ordonnance.id }}{% endif %}</td>
+        <td>
+          <form method="post" action="{{ url_for('enter_patient_appointment') }}">
+            <input type="hidden" name="appointment_id" value="{{ appointment.id }}" />
+            <input type="submit" value="Select" />
+          </form>
+        </td>
+      </tr>
+{% endmacro %}
+
+{% macro appointment_table_closing_tag() %}
+  </table>
+{% endmacro %}

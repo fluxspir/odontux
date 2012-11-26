@@ -52,5 +52,11 @@ from medication import (
                     update_drug, delete_drug, add_drug,
                     )
 from schedule import (
+                    agenda_date,
                     agenda,
+                    display_day,
+                    add_appointment,
+                    )
+from patient import (
+                    enter_patient_appointment,
                     )

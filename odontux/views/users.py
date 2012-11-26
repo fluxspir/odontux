@@ -69,11 +69,18 @@ def _quit_patient_file():
     except KeyError:
         pass
 
+def _quit_appointment():
+    try:
+        if session['appointment']:
+            session.pop('appointment', None)
+    except KeyError:
+        pass
 
 @app.route('/odontux_user/')
 @app.route('/user/')
 def list_users():
     _quit_patient_file()
+    _quit_appointment()
     # when we only want user with role "request.form['role']
     if request.form and request.form['role']:
         try:
@@ -95,6 +102,7 @@ def list_users():
 @app.route('/user/add/', methods=['GET', 'POST'])
 def add_user():
     _quit_patient_file()
+    _quit_appointment()
     if session['role'] != constants.ROLE_ADMIN:
         return redirect(url_for("index"))
 
@@ -148,6 +156,7 @@ def add_user():
             'form_to_display=<form_to_display>/', methods=['GET', 'POST'])
 def update_user(body_id, form_to_display):
     _quit_patient_file()
+    _quit_appointment()
     user = forms._get_body(body_id, "user")
     if not forms._check_body_perm(user, "user"):
         return redirect(url_for('list_users'))

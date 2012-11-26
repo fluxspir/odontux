@@ -40,6 +40,8 @@ class Appointment(Base):
                                        backref="appointment")
     ordonnance = relationship("Prescription", backref="appointment",
                               cascade="all, delete, delete-orphan")
+    memo = relationship("AppointmentMemo", backref="appointment",
+                         cascade="all, delete, delete-orphan")
 
 
 class Agenda(Base):

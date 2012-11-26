@@ -50,7 +50,7 @@ set_prompt () {
     elif [ $? == 1 ] ; then
         PS1="${Green}\u${White}@${BIYellow}${patient_id}${White}_${BICyan}`odontux get_patientprompt ${patient_id}`${White}-${UYellow}OUT${White}:${Purple}\w${Color_Off}$ "
     else
-        PS1="LAID"
+        PS1="HORRIBLE"
     fi
 }
 

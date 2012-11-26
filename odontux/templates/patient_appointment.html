@@ -1,0 +1,19 @@
+{% from "_appointmenthelpers.html" import appointment_table_rows %}
+{% from "_acthelpers.html" import act_table_opening_tag, act_table_header, act_table_rows, act_table_closing_tag %}
+
+{% extends "list_patient_appointments.html" %}
+
+  {% block appointment_row %}
+{{ session['patient'].lastname }}  {{ session.appointment.id }}
+    {{ appointment_table_rows(session, session.appointment) }}
+  {% endblock %}
+<br />
+  {% block appointment_acts %}
+    {{ act_table_opening_tag("acts done in this appointment") }}
+    {{ act_table_header(session) }}
+    {% for act in acts %}
+      {{ act_table_rows(session, act) }}
+    {% endfor %}
+    {{ act_table_closing_tag() }}
+
+  {% endblock %}

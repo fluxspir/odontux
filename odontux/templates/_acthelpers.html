@@ -1,0 +1,37 @@
+{% macro act_table_opening_tag(table_title) %}
+  <table border=1>
+    <caption>{{ table_title }}</caption>
+{% endmacro %}
+
+{% macro act_table_header(session) %}
+    <tr>
+      <th class="hidden">Id</th>
+      {% if session.role == session.ROLE_DENTIST %}
+        <th>Act</th>
+        <th>Tooth</th>
+        <th>Code</th>
+        <th>Price</th>
+        <th>Invoice ID</th>
+      {% endif %}
+      <th>Paid</th>
+      <th></th>
+    </tr>
+{% endmacro %}
+
+{% macro act_table_rows(session, act) %}
+      <tr>
+        <td class="hidden">{{ act.id }}</td>
+        {% if session.role == session.ROLE_DENTIST %}
+          <td>{{ act[1] }}</td>
+          <td>{{ act[2] }}</td>
+          <td>{{ act[0].code }}</td>
+          <td>{{ act[0].price }}</td>
+          <td>{{ act[0].invoice_id }}</td>
+        {% endif %}
+          <td>{{ act[0].paid }}</td>
+      </tr>
+{% endmacro %}
+
+{% macro act_table_closing_tag() %}
+  </table>
+{% endmacro %}
