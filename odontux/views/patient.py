@@ -44,7 +44,7 @@ def enter_patient_appointment():
         """ To have more human_readable data, when "id" won't speak a lot..."""
         acts = meta.session.query(act.AppointmentActReference)\
             .filter(act.AppointmentActReference.appointment_id ==
-                    session['appointment'].id).all()
+                    session['appointment_id']).all()
         appointment_acts = []
         for a in acts:
             if a.tooth_id:
@@ -64,8 +64,9 @@ def enter_patient_appointment():
 
     if request.method == 'POST':
         # First at all, we need to quit old patient, and old appointment.
-        controls.quit_patient_file()
-        controls.quit_appointment()
+        # controls.quit_patient_file()
+        # controls.quit_appointment()
+
         # We looking to find a couple patient_appointment by an 
         # appointment_id ( coming from a next_appointment or a
         # previous_appointment function )
@@ -77,45 +78,57 @@ def enter_patient_appointment():
             patient = meta.session.query(administration.Patient)\
                 .filter(administration.Patient.id == appointment.patient_id)\
                 .one()
-            session['patient'] = patient
-            session['appointment'] = appointment
         # Case probably rare, but if we want to go in last appointment of 
         # patient known.
         elif request.form['patient_id']:
-            session['patient'] = meta.session.query(administration.Patient)\
+            patient = meta.session.query(administration.Patient)\
                 .filter(administration.Patient.id ==
                         request.form['patient_id']).one()
-            session['appointment'] = meta.session.query(schedule.Appointment)\
+            appointment = meta.session.query(schedule.Appointment)\
                 .filter(schedule.Appointment.patient_id ==
-                        session['patient'].id).all()[-1]
+                        session['patient_id']).all()[-1]
 
         # Here, we shouldn't even see that kind of case, that could be dug up 
         # a little (entering the last appointment if a session['patient'] exist
         # or other cases scenarii... maybe.
         else:
             return redirect(url_for('enter_patient_file', 
-                                    session['patient'].id))
+                                    session['patient_id']))
+
+        # Stock information about patient and appointment in session
+        session['patient_id'] = patient.id
+        session['appointment_id'] = appointment.id
 
         # Verify if this patient is really the one who have this appointment
         # because if it isn't, things could get very nasty after...
         # This function should be frequently used.
         if not controls.is_patient_self_appointment():
-            session.pop('appointment', None)
+            session.pop('appointment_id', None)
             return redirect(url_for('enter_patient_file',
-                            session['patient'].id))
+                            body_id=session['patient_id']))
         
         appointment_acts = _get_appointment_acts()
-        return render_template("patient_appointment.html", 
+        return render_template("patient_appointment.html",
+                                patient=patient,
+                                appointment=appointment,
                                 acts=appointment_acts)
 
     # During the 'GET' method :
     if not controls.is_patient_self_appointment():
         session.pop('appointment', None)
         return redirect(url_for('enter_patient_file', 
-                        session['patient'].id))
+                        body_id=session['patient_id']))
     
     appointment_acts = _get_appointment_acts()
-    return render_template("patient_appointment.html", 
+    patient = meta.session.query(administration.Patient)\
+            .filter(administration.Patient.id == session['patient_id'])\
+            .one()
+    appointment = meta.session.query(schedule.Appointment)\
+            .filter(schedule.Appointment.id == session['appointment_id'])\
+            .one()
+    return render_template("patient_appointment.html",
+                            patient=patient,
+                            appointment=appointment,
                             acts=appointment_acts)
 
 @app.route('/patient/appointments/')
@@ -124,35 +137,22 @@ def list_appointments():
     # or if we aren't in a patient file.
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
-    # In the improbable (impossible) case that session['patient'] doesn't
-    # exists when list_appointments is triggered :
+    # In the improbable (impossible) case that session['patient_id'] doesn't
+    # exists when list_appointments is triggered, just flip back to index :
     try:
-        if not session['patient']:
+        if not session['patient_id']:
             pass
     except KeyError:
         return redirect(url_for('index'))
+    
+    # Get the patient in database, and the list of his appointments.
+    patient = meta.session.query(administration.Patient)\
+        .filter(administration.Patient.id ==
+                session['patient_id']).one()
 
-    # TODO
-    # TODO
-    # Get all the appointments corresponding to current patient session.
-    # Here, for the moment, we have a bug that make that only when a 
-    # session['patient'] is created by passing by 
-    # "views.administration.enter_patient_file()" works ; 
-    # entering with "views.patient.enter_patient_appointment()" make that the
-    # pagetitle looks ok, the "main block" looks ok, but 
-    # everything in the "main_summary" looks blocked back in the last 
-    # "enter_patient_file()"
-    #
-    # J'ai pourtant fait de façon à ce que 
-    # views.patient.enter_patient_appointment()
-    # soit pareil (plus complet, mais la base pareille) à
-    # views.administration.enter_patient_file()
-    # et quand je "print" vite fait, je vois que mon 
-    # session['patient'] et session['appointment' sont bien ce que j'attends
-    # ce qui me trouble d'autant plus sur le non-fonctionnement.
-    #
     appointments = meta.session.query(schedule.Appointment)\
         .filter(schedule.Appointment.patient_id ==
-                session['patient'].id).all()
+                session['patient_id']).all()
     return render_template("list_patient_appointments.html",
+                            patient=patient,
                             appointments=appointments)

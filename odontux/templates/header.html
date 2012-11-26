@@ -1,20 +1,20 @@
 {% extends "layout.html" %}
 {% block pagetitle %}
-  {% if session.patient %}
-    {% if session.appointment %}
+  {% if session.patient_id and patient %}
+    {% if appointment %}
       <span class="left">
         <form method="post" action="{{ url_for( 'enter_patient_appointment') }}">
-          <input type="hidden" name="appointment_id" value="{{ session.appointment.id -1 }}" />
+          <input type="hidden" name="appointment_id" value="{{ appointment.id -1 }}" />
           <input type="submit" value="Previous RV" />
         </form>
       </span>
     {% endif %}
-    <a href="{{url_for('enter_patient_file', body_id=session.patient.id)}}">{{ session.patient['lastname'] }} {{ session.patient['firstname'] }}</a>, {{ session.patient.age() }} years old, 
-    {% if session.appointment %}
-      <a href="{{ url_for('display_day', dateday=session.appointment.agenda.starttime.date()) }}">from {{ session.appointment.agenda.starttime.time() }} to {{ session.appointment.agenda.endtime.time() }} the {{ session.appointment.agenda.starttime.date() }}</a>
+    <a href="{{url_for('enter_patient_file', body_id=patient.id)}}">{{ patient['lastname'] }} {{ patient['firstname'] }}</a>, {{ patient.age() }} years old, 
+    {% if appointment %}
+      <a href="{{ url_for('display_day', dateday=appointment.agenda.starttime.date()) }}">from {{ appointment.agenda.starttime.time() }} to {{ appointment.agenda.endtime.time() }} the {{ appointment.agenda.starttime.date() }}</a>
       <span class="right">
         <form method="post" action="{{ url_for( 'enter_patient_appointment') }}">
-          <input type="hidden" name="appointment_id" value="{{ session.appointment.id + 1 }}" />
+          <input type="hidden" name="appointment_id" value="{{ appointment.id + 1 }}" />
           <input type="submit" value="Next RV" />
         </form>
       </span>

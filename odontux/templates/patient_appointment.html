@@ -4,7 +4,7 @@
 {% extends "list_patient_appointments.html" %}
 
   {% block appointment_row %}
-    {{ appointment_table_rows(session, session.appointment) }}
+    {{ appointment_table_rows(session, appointment) }}
   {% endblock %}
 <br />
   {% block appointment_acts %}

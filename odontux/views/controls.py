@@ -37,7 +37,7 @@ def is_patient_self_appointment():
     """
     # At first, look if we're in a patient file :
     try:
-        patient_id = session['patient'].id
+        patient_id = session['patient_id']
     except:
         print(_("Must be in patient file ; please feel in the session "
                 "variable"))
@@ -45,7 +45,7 @@ def is_patient_self_appointment():
 
     # Then, verify we're in an appointment, too :
     try:
-        appointment_id = session['appointment'].id
+        appointment_id = session['appointment_id']
     except:
         print(_("Must be in an appointment for that kind of action"))
         return False

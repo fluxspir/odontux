@@ -55,7 +55,7 @@
       </div>
       <nav>
       {% block nav %}
-        <a href="/patient">Patients</a>
+        <a href="{{ url_for('allpatients') }}">Patients</a>
       	<a href="/act">Acts</a>
       	<a href="/specialty">Specialties</a>
         <a href="/cotation/show_ngap/">Ngap</a>

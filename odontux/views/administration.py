@@ -69,7 +69,7 @@ class SocialSecurityForm(Form):
     insurance = TextField(_('Insurance'))
 
 
-@app.route('/patient/')
+@app.route('/patients/')
 def allpatients():
     patients = meta.session.query(administration.Patient)\
                .order_by(administration.Patient.lastname).all()
@@ -83,10 +83,8 @@ def enter_patient_file(body_id):
               .one()
 
     if patient:
-        controls.quit_patient_file()
-        controls.quit_appointment()
-        session['patient'] = patient
-        return render_template('patient_file.html')
+        session['patient_id'] = patient.id
+        return render_template('patient_file.html', patient=patient)
 
 @app.route('/patient/add/', methods=['GET', 'POST'])
 @app.route('/add/patient/', methods=['GET', 'POST'])
