@@ -19,6 +19,8 @@ from odontux.views import forms, controls
 from odontux.views.log import index
 from odontux.models import meta, administration
 
+import pdb
+
 # variable to call in database the right table, which should be locale related.
 socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
 SocialSecurityLocale = getattr(administration, socialsecuritylocale)
@@ -53,12 +55,12 @@ class PatientGeneralInfoForm(Form):
     inactive = BooleanField(_('Inactive'))
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
-    family_id = IntegerField(_('family_id'), [validators.Optional()])
-    office_id = IntegerField(_('Office_id'), [validators.Required(
+    family_id = TextField(_('family_id'))
+    office_id = TextField(_('Office_id'), [validators.Required(
                                message=_("Please specify office_id"))])
-    dentist_id = IntegerField(_('Dentist_id'), [validators.Required(
+    dentist_id = TextField(_('Dentist_id'), [validators.Required(
                                 message=_("Please specify dentist_id"))])
-    socialsecurity_id = IntegerField(_('socialsecurity_id'), 
+    socialsecurity_id = TextField(_('socialsecurity_id'), 
                                      [validators.Optional()])
     payer = BooleanField(_('is payer'))
     time_stamp = forms.DateField(_("Time_stamp"))
@@ -78,9 +80,7 @@ def allpatients():
 
 @app.route('/patient/<int:body_id>/')
 def enter_patient_file(body_id):
-    patient = meta.session.query(administration.Patient)\
-              .filter(administration.Patient.id == body_id)\
-              .one()
+    patient = controls.get_patient(body_id)
 
     if patient:
         session['patient_id'] = patient.id
@@ -213,11 +213,10 @@ def update_patient(body_id, form_to_display):
     patient = forms._get_body(body_id, "patient")
     if not forms._check_body_perm(patient, "patient"):
         return redirect(url_for('list_patients', body_id=body_id))
-    
     # only need form for *patient_gen_info* update here. See below for others.
     gen_info_form = PatientGeneralInfoForm(request.form)
-    if request.method == 'POST' and gen_info_form.validate():
-        for f in general_info_fields:
+    if request.method == 'POST' and  gen_info_form.validate():
+        for f in gen_info_fields:
             setattr(patient, f, getattr(gen_info_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_patient', body_id=body_id,
@@ -229,7 +228,11 @@ def update_patient(body_id, form_to_display):
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
+    # need to return patient both as "patient" AND "body" :
+    # as "patient" for the header pagetitle,
+    # as "body" for the updating form.
     return render_template('/update_patient.html', body=patient,
+                            patient=patient,
                             gen_info_form=gen_info_form,
                             SSN_form=SSN_form,
                             address_form=address_form,

@@ -9,9 +9,8 @@
   Update user : {{ session.username }}
 {% endblock %}
 {% block main %}
-{% from "_formhelpers.html" import render_field %}
-{% from "_formhelpers.html" import render_table_field %}
-{% from "_formhelpers.html" import render_table_hidden_field %}
+{% from "_formhelpers.html" import render_field, render_hidden_field %}
+{% from "_formhelpers.html" import render_table_field, render_table_hidden_field %}
 {% from "_contactformhelper.html" import update_phone_form %}
 {% from "_contactformhelper.html" import update_address_form %}
 {% from "_contactformhelper.html" import update_mail_form %}
@@ -29,11 +28,11 @@
   <div id="gen_info">
     <form method="post" action={{ url_for('update_user', body_id=user.id, form_to_display="gen_info") }}>
       <dl>
-      {% if session.role == role_admin %}
-        {{ render_field(gen_info_form.username, autofocus="autofocus", value=user.username) }}
+      {% if session.role == session.ROLE_ADMIN %}
+        {{ render_field(gen_info_admin_form.username, value=user.username) }}
       {% endif %}
       {{ render_field(gen_info_form.title, value=user.title) }}
-      {{ render_field(gen_info_form.lastname, value=user.lastname) }}
+      {{ render_field(gen_info_form.lastname, autofocus="autofocus", value=user.lastname) }}
       {{ render_field(gen_info_form.firstname, value=user.firstname, width="100%") }}
       {% if user.sex == True %}
         {{ render_field(gen_info_form.sex, checked="checked") }}
@@ -43,15 +42,16 @@
       {{ render_field(gen_info_form.dob, value=user.dob) }}
       {{ render_field(gen_info_form.qualifications, value=user.qualifications) }}
       {{ render_field(gen_info_form.correspondence_name, value=user.correspondence_name) }}
-      {{ render_field(gen_info_form.avatar_id, value=user.avatar_id) }}
-      {% if session.role == role_dentist or session.role == role_admin %}
+      {{ render_field(gen_info_form.avatar_id, value=user.avatar_id|int) }}
+      {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
         {{ render_field(gen_info_form.registration, value=user.registration) }}
       {% endif %}
-      {% if session.role == role_admin %}
-        {{ render_field(gen_info_form.status, value=user.status) }}
-        {{ render_field(gen_info_form.role, value=user.role) }}
-        {{ render_field(gen_info_form.comments, value=user.comments) }}
-        {{ render_field(gen_info_form.modified_by, value=user.modified_by) }}
+
+      {% if session.role == session.ROLE_ADMIN %}
+        {{ render_field(gen_info_admin_form.status, value=user.status) }}
+        {{ render_field(gen_info_admin_form.role, value=user.role) }}
+        {{ render_field(gen_info_admin_form.comments, value=user.comments) }}
+        {{ render_field(gen_info_admin_form.modified_by, value=user.modified_by) }}
       {% endif %}
       <input type=submit value="Update" />
      </dl>

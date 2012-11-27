@@ -15,7 +15,7 @@ from odontux.views.log import index
 from odontux.views.forms import DateField
 from odontux.models import meta, anamnesis
 from odontux.odonweb import app
-from odontux.views import forms
+from odontux.views import forms, controls
 from gettext import gettext as _
 
 from odontux import constants
@@ -88,23 +88,30 @@ def list_anamnesis():
     and session['role'] != constants.ROLE_ASSISTANT):
         return redirect(url_for('index'))
 
+    patient = controls.get_patient(session['patient_id'])
     medical_history, past_surgeries, allergies = \
-        _get_patient_anamnesis(session['patient'].id)
+        _get_patient_anamnesis(patient.id)
     return render_template("patient_anamnesis.html",
+                            patient=patient,
                             medical_history=medical_history,
                             past_surgeries=past_surgeries,
                             allergies=allergies)
 
 @app.route('/patient/modify_anamnesis/', methods=['GET', 'POST'])
 def update_anamnesis(): 
-    if (not session['patient'].id 
-    and not session['patient'].dentist_id == session['user_id'] ):
+    if not session['patient_id']:
+        return redirect(url_for('list_patients'))
+   
+    # Get the patient, and verify if the user is his dentist.
+    patient = controls.get_patient(session['patient_id'])
+    if not patient.dentist_id == session['user_id']:
         return redirect(url_for('list_patients'))
 
     (med_form, surg_form, allergies_form, gen_info_form) = _get_forms()
     (medical_history, past_surgeries, allergies) =\
-        _get_patient_anamnesis(session['patient'].id)
+        _get_patient_anamnesis(patient.id)
     return render_template("update_anamnesis.html",
+                            patient=patient,
                             medical_history=medical_history,
                             med_form=med_form,
                             past_surgeries=past_surgeries,
@@ -117,7 +124,8 @@ def update_anamnesis():
 @app.route('/patient/update_medical_history/', methods=['POST'])
 def update_medical_history():
     """ """
-    if session['patient'].dentist_id != session['user_id']:
+    patient = controls.get_patient(session['patient_id'])
+    if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
     gen_info_form = GeneralInfoForm(request.form)
@@ -135,12 +143,13 @@ def update_medical_history():
         setattr(medic_hist, "time_stamp",
                 getattr(gen_info_form, "time_stamp").data)
         meta.session.commit()
-        return redirect(url_for('update_anamnesis'))
+        return redirect(url_for('update_anamnesis', patient=patient))
 
 @app.route('/patient/delete_medical_history/', methods=['POST'])
 def delete_medical_history():
     """ """
-    if session['patient'].dentist_id != session['user_id']:
+    patient = controls.get_patient(session['patient_id'])
+    if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
     
     med_form = MedicalHistoryForm(request.form)
@@ -150,12 +159,13 @@ def delete_medical_history():
             .one()
         meta.session.delete(medic_hist)
         meta.session.commit()
-        return redirect(url_for('update_anamnesis'))
+        return redirect(url_for('update_anamnesis', patient=patient))
 
 @app.route('/patient/add_medical_history/', methods=['POST'])
 def add_medical_history():
     """ """
-    if session['patient'].dentist_id != session['user_id']:
+    patient = controls.get_patient(session['patient_id'])
+    if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
     gen_info_form = GeneralInfoForm(request.form)
@@ -180,12 +190,13 @@ def add_medical_history():
         new_med_hist = anamnesis.MedicalHistory(**args)
         meta.session.add(new_med_hist)
         meta.session.commit()
-        return redirect(url_for('update_anamnesis'))
+        return redirect(url_for('update_anamnesis', patient=patient))
 
 @app.route('/patient/update_past_surgery/', methods=['POST'])
 def update_past_surgery():
     """ """
-    if session['patient'].dentist_id != session['user_id']:
+    patient = controls.get_patient(session['patient_id'])
+    if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
     gen_info_form = GeneralInfoForm(request.form)
@@ -203,12 +214,13 @@ def update_past_surgery():
         setattr(past_surgery, "time_stamp",
                 getattr(gen_info_form, "time_stamp").data)
         meta.session.commit()
-        return redirect(url_for('update_anamnesis'))
+        return redirect(url_for('update_anamnesis', patient=patient))
 
 @app.route('/patient/delete_past_surgery/', methods=['POST'])
 def delete_past_surgery():
     """ """
-    if session['patient'].dentist_id != session['user_id']:
+    patient = controls.get_patient(session['patient_id'])
+    if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
     
     surg_form = PastSurgeriesForm(request.form)
@@ -218,12 +230,13 @@ def delete_past_surgery():
             .one()
         meta.session.delete(past_surgery)
         meta.session.commit()
-        return redirect(url_for('update_anamnesis'))
+        return redirect(url_for('update_anamnesis', patient=patient))
 
 @app.route('/patient/add_past_surgery/', methods=['POST'])
 def add_past_surgery():
     """ """
-    if session['patient'].dentist_id != session['user_id']:
+    patient = controls.get_patient(session['patient_id'])
+    if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
     gen_info_form = GeneralInfoForm(request.form)
@@ -246,12 +259,13 @@ def add_past_surgery():
         new_past_surgery = anamnesis.PastSurgeries(**args)
         meta.session.add(new_past_surgery)
         meta.session.commit()
-        return redirect(url_for('update_anamnesis'))
+        return redirect(url_for('update_anamnesis', patient=patient))
 
 @app.route('/patient/update_allergies/', methods=['POST'])
 def update_allergies():
     """ """
-    if session['patient'].dentist_id != session['user_id']:
+    patient = controls.get_patient(session['patient_id'])
+    if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
     gen_info_form = GeneralInfoForm(request.form)
@@ -269,12 +283,13 @@ def update_allergies():
         setattr(allergy, "time_stamp",
                 getattr(gen_info_form, "time_stamp").data)
         meta.session.commit()
-        return redirect(url_for('update_anamnesis'))
+        return redirect(url_for('update_anamnesis'), patient=patient)
 
 @app.route('/patient/delete_allergies/', methods=['POST'])
 def delete_allergies():
     """ """
-    if session['patient'].dentist_id != session['user_id']:
+    patient = controls.get_patient(session['patient_id'])
+    if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
     
     allergies_form = AllergiesForm(request.form)
@@ -284,12 +299,13 @@ def delete_allergies():
             .one()
         meta.session.delete(allergy)
         meta.session.commit()
-        return redirect(url_for('update_anamnesis'))
+        return redirect(url_for('update_anamnesis', patient=patient))
 
 @app.route('/patient/add_allergies/', methods=['POST'])
 def add_allergies():
     """ """
-    if session['patient'].dentist_id != session['user_id']:
+    patient = controls.get_patient(session['patient_id'])
+    if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
     gen_info_form = GeneralInfoForm(request.form)
@@ -312,6 +328,4 @@ def add_allergies():
         new_allergy = anamnesis.Allergies(**args)
         meta.session.add(new_allergy)
         meta.session.commit()
-        return redirect(url_for('update_anamnesis'))
-
-
+        return redirect(url_for('update_anamnesis', patient=patient))

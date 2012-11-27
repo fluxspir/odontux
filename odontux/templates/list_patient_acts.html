@@ -1,14 +1,11 @@
-{% from "_appointmenthelpers.html" import appointment_table_rows %}
 {% from "_acthelpers.html" import act_table_opening_tag, act_table_header, act_table_rows, act_table_closing_tag %}
 
-{% extends "list_patient_appointments.html" %}
+{% extends "summary_patient.html" %}
 
-  {% block appointment_row %}
-    {{ appointment_table_rows(session, appointment) }}
-  {% endblock %}
-<br />
-  {% block appointment_acts %}
-    {{ act_table_opening_tag("acts done in this appointment") }}
+{% block main %}
+  {% block list_acts %}
+
+    {{ act_table_opening_tag("list of acts made to patient") }}
     {{ act_table_header(session) }}
     {% for gesture, tooth, appointment, act_info, specialty in acts %}
       {{ act_table_rows(session, gesture, tooth, appointment, act_info, specialty) }}
@@ -16,3 +13,4 @@
     {{ act_table_closing_tag() }}
 
   {% endblock %}
+{% endblock %}

@@ -9,7 +9,7 @@ from flask import session, redirect, url_for, request, render_template
 from wtforms import Form, HiddenField, TextField, TextAreaField, validators
 
 from odontux import constants
-from odontux.views import forms
+from odontux.views import forms, controls
 from odontux.models import meta, medication
 from odontux.odonweb import app
 from odontux.views.log import index
@@ -59,13 +59,22 @@ def list_drugs():
         or session['role'] == constants.ROLE_ADMIN):
         return redirect(url_for('index'))
     drugs = meta.session.query(medication.DrugPrescribed).all()
-    return render_template('list_drugs.html', drugs=drugs)
+    if session['patient_id']:
+        patient = controls.get_patient(session['patient_id'])
+    else:
+        patient = ""
+    return render_template('list_drugs.html', drugs=drugs, patient=patient)
 
 @app.route('/drugs/update/', methods=['GET', 'POST'])
 def update_drug():
     # Only a dentist should be allowed to update drugs.
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('list_drugs'))
+
+    if session['patient_id']:
+        patient = controls.get_patient(session['patient_id'])
+    else:
+        patient=""
 
     drug_fields = _get_drug_prescribed_fields()
     drug_form = DrugPrescribedForm(request.form)
@@ -77,10 +86,11 @@ def update_drug():
         for f in drug_fields:
             setattr(drug, f, getattr(drug_form, f).data)
         meta.session.commit()
-        return redirect(url_for('update_drug'))
+        return redirect(url_for('update_drug', patient=patient))
 
     drugs = meta.session.query(medication.DrugPrescribed).all()
-    return render_template('update_drugs.html', 
+    return render_template('update_drugs.html',
+                            patient=patient,
                             drugs=drugs,
                             drug_form=drug_form
                            )
@@ -90,18 +100,28 @@ def delete_drug():
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('list_drugs'))
 
+    if session['patient_id']:
+        patient = controls.get_patient(session['patient_id'])
+    else:
+        patient = ""
+
     drug_form = DrugPrescribedForm(request.form)
     drug = meta.session.query(medication.DrugPrescribed)\
         .filter(medication.DrugPrescribed.id == drug_form.drug_id.data)\
         .one()
     meta.session.delete(drug)
     meta.session.commit()
-    return redirect(url_for('update_drug'))
+    return redirect(url_for('update_drug', patient=patient))
 
 @app.route('/drugs/add/', methods=['POST'])
 def add_drug():
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('list_drugs'))
+
+    if session['patient_id']:
+        patient = controls.get_patient(session['patient_id'])
+    else:
+        patient = ""
 
     drug_fields = _get_drug_prescribed_fields()
     drug_form = DrugPrescribedForm(request.form)
@@ -112,13 +132,14 @@ def add_drug():
     new_drug = medication.DrugPrescribed(**args)
     meta.session.add(new_drug)
     meta.session.commit()
-    return redirect(url_for('update_drug'))
+    return redirect(url_for('update_drug', patient=patient))
 
 @app.route('/patient/make_prescription/', methods=['GET', 'POST'])
 def make_prescription():
-    if (not session['patient'] 
+    if (not session['patient_id'] 
         or not session['role'] == constants.ROLE_DENTIST
        ):
         #or not session['appointment']
         return redirect(url_for('list_drugs'))
-    pass
+    pass 
+    #TODO

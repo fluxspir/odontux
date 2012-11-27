@@ -1,12 +1,9 @@
 {% extends 'summary_patient.html' %}
-{% block css %}
+{% block css_sum %}
   <link rel="stylesheet" type="text/css" href="/static/update_user.css">
 {% endblock %}
 {% block javascript_specific %}
   <script type="text/javascript" src="/static/js/update_user.js"></script>
-{% endblock %}
-{% block pagetitle %}
-  Update body : {{ body.lastname }} {{ body.firstname }}
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
@@ -24,7 +21,7 @@
     <li onclick='display_form("SSN")'>social security</li>
   </ul>
 </nav>
-{% if session.role != 4 %}
+{% if session.role != session.ROLE_ADMIN %}
 <div id="update_patient">
   <div id="gen_info">
     <form method="post" action={{ url_for('update_patient', body_id=body.id, form_to_display='gen_info') }}>
@@ -43,6 +40,15 @@
         {{ render_field(gen_info_form.preferred_name, value=body.preferred_name) }}
         {{ render_field(gen_info_form.correspondence_name, value=body.correspondance_name) }}
         {{ render_field(gen_info_form.inactive, value=body.inactive) }}
+        {{ render_field(gen_info_form.family_id, value=body.family_id) }}
+        {{ render_field(gen_info_form.office_id, value=body.office_id) }}
+        {{ render_field(gen_info_form.dentist_id, value=body.dentist_id) }}
+        {{ render_field(gen_info_form.socialsecurity_id, value=body.socialsecurity_id) }}
+        {% if body.payer %}
+          {{ render_field(gen_info_form.payer, checked="checked") }}
+        {% else %}
+          {{ render_field(gen_info_form.payer) }}
+        {% endif %}
         <input type=submit value="Update" />
       </dl>
     </form>

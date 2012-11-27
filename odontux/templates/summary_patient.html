@@ -2,6 +2,8 @@
 
 {% block css %}
   <link rel="stylesheet" type="text/css" href="/static/patient.css">
+  {% block css_sum %}
+  {% endblock %}
 {% endblock %}
 
 {% block mainsummary %}
@@ -10,6 +12,12 @@
         <ul id="patient_navigation">
           <li>
             <a href={{ url_for("list_appointments") }}>Appointments</a>
+          </li>
+          <li>
+            <a href="{{ url_for("list_acts") }}">Acts</a>
+          </li>
+          <li>
+            <a href="{{ url_for("update_patient", body_id=session.patient_id, form_to_display="gen_info") }}">Administrativ</a>
           </li>
           <li>
             <a href={{ url_for("list_anamnesis") }} onmouseover="mopen('anamnesis_open')" onmouseout="mclosetime()">Anamnesis</a>

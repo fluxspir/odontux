@@ -40,25 +40,6 @@ def enter_patient_appointment():
     and may be paid or not.
     """
 
-    def _get_appointment_acts():
-        """ To have more human_readable data, when "id" won't speak a lot..."""
-        acts = meta.session.query(act.AppointmentActReference)\
-            .filter(act.AppointmentActReference.appointment_id ==
-                    session['appointment_id']).all()
-        appointment_acts = []
-        for a in acts:
-            if a.tooth_id:
-                tooth_name = meta.session.query(teeth.Tooth)\
-                    .filter(teeth.Tooth.id == a.tooth_id)\
-                    .one().name
-            else:
-                tooth_name = ""
-            act_alias = meta.session.query(act.ActType)\
-                .filter(act.ActType.id == a.act_id)\
-                .one().alias
-            appointment_acts.append((a, act_alias, tooth_name))
-        return appointment_acts
-        
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('index'))
 
@@ -75,15 +56,12 @@ def enter_patient_appointment():
             appointment = meta.session.query(schedule.Appointment)\
                 .filter(schedule.Appointment.id == 
                         request.form['appointment_id']).one()
-            patient = meta.session.query(administration.Patient)\
-                .filter(administration.Patient.id == appointment.patient_id)\
-                .one()
+            patient = controls.get_patient(appointment.patient_id)
+
         # Case probably rare, but if we want to go in last appointment of 
         # patient known.
         elif request.form['patient_id']:
-            patient = meta.session.query(administration.Patient)\
-                .filter(administration.Patient.id ==
-                        request.form['patient_id']).one()
+            patient = controls.get_patient(request.form['patient_id'])
             appointment = meta.session.query(schedule.Appointment)\
                 .filter(schedule.Appointment.patient_id ==
                         session['patient_id']).all()[-1]
@@ -107,11 +85,13 @@ def enter_patient_appointment():
             return redirect(url_for('enter_patient_file',
                             body_id=session['patient_id']))
         
-        appointment_acts = _get_appointment_acts()
+        acts = controls.get_patient_acts(patient.id, appointment.id,
+                    [ act.AppointmentActReference.tooth_id ]
+                    )
         return render_template("patient_appointment.html",
                                 patient=patient,
                                 appointment=appointment,
-                                acts=appointment_acts)
+                                acts=acts)
 
     # During the 'GET' method :
     if not controls.is_patient_self_appointment():
@@ -119,17 +99,17 @@ def enter_patient_appointment():
         return redirect(url_for('enter_patient_file', 
                         body_id=session['patient_id']))
     
-    appointment_acts = _get_appointment_acts()
-    patient = meta.session.query(administration.Patient)\
-            .filter(administration.Patient.id == session['patient_id'])\
-            .one()
+    patient = controls.get_patient(session['patient_id'])
     appointment = meta.session.query(schedule.Appointment)\
             .filter(schedule.Appointment.id == session['appointment_id'])\
             .one()
+    acts = controls.get_patient_acts(patient.id, appointment.id,
+                    [ act.AppointmentActReference.tooth_id ]
+                    )
     return render_template("patient_appointment.html",
                             patient=patient,
                             appointment=appointment,
-                            acts=appointment_acts)
+                            acts=acts)
 
 @app.route('/patient/appointments/')
 def list_appointments():
@@ -139,20 +119,39 @@ def list_appointments():
         return redirect(url_for('index'))
     # In the improbable (impossible) case that session['patient_id'] doesn't
     # exists when list_appointments is triggered, just flip back to index :
-    try:
-        if not session['patient_id']:
-            pass
-    except KeyError:
+    if not controls.in_patient_file():
         return redirect(url_for('index'))
     
     # Get the patient in database, and the list of his appointments.
-    patient = meta.session.query(administration.Patient)\
-        .filter(administration.Patient.id ==
-                session['patient_id']).one()
+    patient = controls.get_patient(session['patient_id'])
 
     appointments = meta.session.query(schedule.Appointment)\
-        .filter(schedule.Appointment.patient_id ==
-                session['patient_id']).all()
+        .filter(schedule.Appointment.patient_id == patient.id).all()
+
     return render_template("list_patient_appointments.html",
                             patient=patient,
                             appointments=appointments)
+
+@app.route('/patient/acts/')
+def list_acts():
+    """
+    Sends to template a list of tuples :
+    ( gesture, tooth, act_info, act_specialty )
+    """
+    # Everybody but admin should enter this function ; however,
+    # what is displayed should depends on whom is looking.
+    # This will be taken care of in the html_template, by jinja.
+    if session['role'] == constants.ROLE_ADMIN:
+        return redirect(url_for('index'))
+
+    if not controls.in_patient_file():
+        return redirect(url_for('index'))
+
+    patient = controls.get_patient(session['patient_id'])
+
+    acts = controls.get_patient_acts(patient.id, None,
+            [ act.AppointmentActReference.appointment_id, ]
+            )
+    return render_template("list_patient_acts.html",
+                            patient=patient,
+                            acts=acts)

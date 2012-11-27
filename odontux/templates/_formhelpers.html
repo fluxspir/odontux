@@ -22,6 +22,19 @@
   </dd>
 {% endmacro %}
 
+{% macro render_hidden_field(field) %}
+  <dt class="hidden">{{ field.label }}
+  <dd class="hidden">{{ field(**kwargs)|safe }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </dd>
+{% endmacro %}
+
 {% macro render_table_field(field) %}
   <td>{{ field(**kwargs)|safe }}
   {% if field.errors %}

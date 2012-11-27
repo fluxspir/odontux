@@ -24,7 +24,7 @@
     {% endfor %}
     <tr>
       <form method="post" action="{{ url_for('add_medical_history') }}">
-        {{ render_table_hidden_field(gen_info_form.patient_id, value=session['patient'].id) }}
+        {{ render_table_hidden_field(gen_info_form.patient_id, value=patient.id) }}
         {{ render_table_hidden_field(gen_info_form.dentist_id, value=session['user_id']) }}
         {{ render_table_hidden_field(med_form.mh_id) }}
         {{ render_table_field(med_form.icd10) }}
@@ -58,7 +58,7 @@
     {% endfor %}
     <tr>
       <form method="post" action="{{ url_for('add_past_surgery') }}">
-        {{ render_table_hidden_field(gen_info_form.patient_id, value=session['patient'].id) }}
+        {{ render_table_hidden_field(gen_info_form.patient_id, value=patient.id) }}
         {{ render_table_hidden_field(gen_info_form.dentist_id, value=session['user_id']) }}
         {{ render_table_field(surg_form.surgery_type) }}
         {{ render_table_field(surg_form.problem) }}
@@ -91,7 +91,7 @@
     {% endfor %}
     <tr>
       <form method="post" action="{{ url_for('add_allergies') }}">
-        {{ render_table_hidden_field(gen_info_form.patient_id, value=session['patient'].id) }}
+        {{ render_table_hidden_field(gen_info_form.patient_id, value=patient.id) }}
         {{ render_table_hidden_field(gen_info_form.dentist_id, value=session['user_id']) }}
         {{ render_table_field(allergies_form.drug) }}
         {{ render_table_field(allergies_form.metal) }}

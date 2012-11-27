@@ -8,79 +8,70 @@
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
 from sqlalchemy import and_, or_
-from odontux.models import meta, users, administration
-from odontux.odonweb import app
 from gettext import gettext as _
-
-from odontux import constants
-
-from odontux.views.log import index
-
 from wtforms import (Form, IntegerField, TextField, PasswordField,
                     SelectField, BooleanField, TextAreaField,
                     validators)
-from odontux.views import forms
+
+from odontux import constants
+from odontux.models import meta, users, administration
+from odontux.odonweb import app
+from odontux.views import forms, controls
+from odontux.views.log import index
+
+import pdb
 
 # form fields list
-general_fields = [ "username", "role", "title", "lastname", "firstname", 
+gen_info_fields = [ "title", "lastname", "firstname", 
                    "qualifications", "registration", "correspondence_name", 
-                   "sex", "dob"]
-info_fields = [ "status", "comments", "avatar_id", "display_order",
-                "modified_by", "time_stamp" ]
+                   "sex", "dob", "avatar_id"]
+gen_info_admin_fields = [ "username", "role" , "status", "comments", 
+                          "modified_by", "time_stamp" ]
 password_fields = [ "password" ]
 
 class OdontuxUserGeneralInfoForm(Form):
-    username = TextField('username', [validators.Required(),
-                         validators.Length(min=1, max=20)],
-                         filters=[forms.lower_field])
-    role = SelectField('role', choices=constants.ROLES_LIST, coerce=int)
-    title = SelectField('title', choices=forms.title_list)
-    lastname = TextField('lastname', [validators.Required(),
+    title = SelectField(_('title'), choices=forms.title_list)
+    lastname = TextField(_('lastname'), [validators.Required(),
                             validators.Length(min=1, max=30,
                             message=_("Need to provide MD's lastname"))],
                             filters=[forms.upper_field])
-    firstname = TextField('firstname', [validators.Length(max=30)],
-                            filters=[forms.title_field])
-    qualifications = TextField('qualifications', filters=[forms.title_field])
-    registration = TextField('registration')
-    correspondence_name = TextField('correspondence_name', 
+    firstname = TextField(_('firstname'), [validators.Length(max=30, 
+                                        message=_("firstname too long"))],
+                                        filters=[forms.title_field])
+    qualifications = TextField(_('qualifications'), 
+                                filters=[forms.title_field])
+    registration = TextField(_('registration'))
+    correspondence_name = TextField(_('correspondence_name'), 
                                     filters=[forms.upper_field])
-    sex = BooleanField('Male')
-    dob = forms.DateField('Date of Birth')
-    status = BooleanField('status')
-    comments = TextAreaField('comments')
-    avatar_id = IntegerField('avatar_id')
-    display_order = IntegerField('display_order')
-    modified_by = IntegerField('modified_by')
-    time_stamp = forms.DateField("time_stamp")
+    sex = BooleanField(_('Male'))
+    dob = forms.DateField(_('Date of Birth'))
+    avatar_id = TextField(_('avatar_id'))
+    display_order = TextField(_('display_order'))
+
+class OdontuxUserGeneralInfoAdminForm(Form):
+    """ Contains Fields that only admin is allowed to modify."""
+    username = TextField(_('username'), [validators.Required(),
+                                    validators.Length(min=1, max=20)],
+                                     filters=[forms.lower_field])
+    role = SelectField(_('role'), choices=constants.ROLES_LIST, coerce=int)
+    status = BooleanField(_('status'))
+    comments = TextAreaField(_('comments'))
+    modified_by = TextField(_('modified_by'))
+    time_stamp = forms.DateField(_("time_stamp"))
 
 class OdontuxUserPasswordForm(Form):
-    password = PasswordField('password', [validators.Required(),
+    password = PasswordField(_('password'), [validators.Required(),
                         validators.Length(min=4), 
                         validators.EqualTo('confirm', message="Password must\
                         match")])
-    confirm = PasswordField('Repeat Password')
+    confirm = PasswordField(_('Repeat Password'))
 
-
-def _quit_patient_file():
-    try:
-        if session['patient']:
-            session.pop('patient', None)
-    except KeyError:
-        pass
-
-def _quit_appointment():
-    try:
-        if session['appointment']:
-            session.pop('appointment', None)
-    except KeyError:
-        pass
 
 @app.route('/odontux_user/')
 @app.route('/user/')
 def list_users():
-    _quit_patient_file()
-    _quit_appointment()
+    controls.quit_patient_file()
+    controls.quit_appointment()
     # when we only want user with role "request.form['role']
     if request.form and request.form['role']:
         try:
@@ -101,8 +92,8 @@ def list_users():
 @app.route('/add/user/', methods=['GET', 'POST'])
 @app.route('/user/add/', methods=['GET', 'POST'])
 def add_user():
-    _quit_patient_file()
-    _quit_appointment()
+    controls.quit_patient_file()
+    controls.quit_appointment()
     if session['role'] != constants.ROLE_ADMIN:
         return redirect(url_for("index"))
 
@@ -155,19 +146,24 @@ def add_user():
 @app.route('/user/update_user?id=<int:body_id>&'
             'form_to_display=<form_to_display>/', methods=['GET', 'POST'])
 def update_user(body_id, form_to_display):
-    _quit_patient_file()
-    _quit_appointment()
+    controls.quit_patient_file()
+    controls.quit_appointment()
+
     user = forms._get_body(body_id, "user")
     if not forms._check_body_perm(user, "user"):
         return redirect(url_for('list_users'))
 
     # For updating info of user, we're dealing with the form 
     gen_info_form = OdontuxUserGeneralInfoForm(request.form)
+    if session['role'] == constants.ROLE_ADMIN:
+        gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
     if request.method == 'POST' and gen_info_form.validate():
-        for f in general_fields:
+        for f in gen_info_fields:
             setattr(user, f, getattr(gen_info_form, f).data)
-        for f in info_fields:
-            setattr(user, f, getattr(gen_info_form, f).data)
+        if (session['role'] == constants.ROLE_ADMIN
+            and gen_info_admin_form.validate() ):
+            for f in gen_info_admin_fields:
+                setattr(user, f, getattr(gen_info_admin_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_user', 
                                  body_id=body_id, 
@@ -175,6 +171,7 @@ def update_user(body_id, form_to_display):
 
     # When loading the whole update page, we use the form containing all fields
     gen_info_form = OdontuxUserGeneralInfoForm(request.form)
+    gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
@@ -183,6 +180,7 @@ def update_user(body_id, form_to_display):
                             user=user,
                             form_to_display=form_to_display,
                             gen_info_form=gen_info_form,
+                            gen_info_admin_form=gen_info_admin_form,
                             address_form=address_form,
                             phone_form=phone_form,
                             mail_form=mail_form,
