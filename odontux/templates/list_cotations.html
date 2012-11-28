@@ -1,0 +1,41 @@
+{% extends "header.html" %}
+
+{% block main %}
+  <table border=1>
+    <caption>Cotation table</caption>
+    <tr>
+      <th class="hidden">Id</th>
+      <th>Name</th>
+      <th>Key</th>
+      <th>Cmu_key</th>
+      <th>Adult mult</th>
+      <th>Kid mult</th>
+      <th>cmu_num</th>
+      <th>kid_cmu_num</th>
+      <th>exceeding</th>
+      <th>kid_exceed</th>
+      <th>cmu_exceed</th>
+      <th>cmu_kid_exceed</th>
+    </tr>
+    {% for gestures, cotat, ngap, cmu in cotat_list %}
+      <tr>
+        <td class="hidden">{{ cotat.id }}</td>
+        <td>
+          {% for gesture, specialty in gestures %}
+            <span style="background-color:{{specialty.color}};">{{ gesture.alias }}</span><br />
+          {% endfor %}
+        </td>
+        <td>{{ ngap.key }}</td>
+        <td>{{ cmu.key }}</td>
+        <td>{{ cotat.adult_multiplicator }}</td>
+        <td>{{ cotat.kid_multiplicator }}</td>
+        <td>{{ cotat.adult_cmu_num }}</td>
+        <td>{{ cotat.kid_cmu_num }}</td>
+        <td>{{ cotat.exceeding_adult_normal }}</td>
+        <td>{{ cotat.exceeding_kid_normal }}</td>
+        <td>{{ cotat.exceeding_adult_cmu }}</td>
+        <td>{{ cotat.exceeding_kid_cmu }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

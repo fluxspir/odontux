@@ -4,7 +4,8 @@
 # v0.4
 # Licence BSD
 
-from specialty import AddSpecialtyCommand, ListSpecialtyCommand
+from specialty import ( AddSpecialtyCommand, ListSpecialtyCommand, 
+                        UpdateSpecialtyCommand )
 from users import (AddOdontuxUserCommand, AddDentalOfficeCommand,
                    UserMovingInCommand, UpdateUserCommand)
 from md import (AddMedecineDoctorCommand, ListMedecineDoctorCommand,

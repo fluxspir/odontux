@@ -28,19 +28,55 @@ class SpecialtyForm(Form):
                      message=_("Must be less than 20 characters"))])
     color = ColorField('color')
 
+class ActTypeForm(Form):
+    # Create the list of specialties that exist
+    specialty_choices = meta.session.query(act.Specialty).all()
+    specialty_choice_list = [ (choice.id, choice.name) 
+                    for choice in specialty_choices ]
+    # Create the cotation list
+    cotationfr_choices = meta.session.query(CotationLocale)\
+        .order_by(CotationLocale.key_id)\
+        .order_by(CotationLocale.adult_multiplicator)\
+        .all()
+    cotats = []
+    for cotat_choice in cotationfr_choices:
+        ngap = meta.session.query(cotation.NgapKeyFr)\
+            .filter(cotation.NgapKeyFr.id == cotat_choice.key_id)\
+            .one()
+        cotats.append( (cotat_choice, ngap ) )
+    cotationfr_choice_list = [ 
+                                (cotat.id,
+            ngap.key + str(cotat.adult_multiplicator) + " " + 
+            str(cotat.get_price(cotat.adult_multiplicator, 
+                                cotat.exceeding_adult_normal))
+                                ) for cotat, ngap in cotats 
+                             ]
+    # Begin Form
+    specialty_id = SelectField('specialty', choices=specialty_choice_list, 
+                                            coerce=int)
+    cotationfr_id = SelectField('cotationfr_id', 
+                                choices=cotationfr_choice_list,
+                                coerce=int)
+    code = TextField('code')
+    alias = TextAreaField('alias')
+    name = TextAreaField('name')
+    color = ColorField('color')
+
+
+####
+# Specialties
+####
 
 @app.route('/specialty/')
 @app.route('/specialties/')
 def list_specialty(ordering=[]):
+    query = meta.session.query(act.Specialty)
     if not ordering:
         ordering = [act.Specialty.id]
     for order in ordering:
-        query = meta.session.query(act.Specialty).order_by(order)
+        query = query.order_by(order)
     specialties = query.all()
-    return render_template('list_specialty.html', specialties=specialties,
-                            role_admin=constants.ROLE_ADMIN,
-                            role_dentist=constants.ROLE_DENTIST)
-
+    return render_template('list_specialty.html', specialties=specialties)
 
 @app.route('/specialty/add/', methods=['GET', 'POST'])
 def add_specialty():
@@ -54,7 +90,6 @@ def add_specialty():
         meta.session.commit()
         return redirect(url_for('list_specialty'))
     return render_template('add_specialty.html', form=form)
-
 
 @app.route('/act/update_specialty/id=<int:specialty_id>/', 
             methods=['GET', 'POST'])
@@ -75,22 +110,21 @@ def update_specialty(specialty_id):
     return render_template('update_specialty.html', form=form, 
                             specialty=specialty)
 
-class ActTypeForm(Form):
-    # Create the list of specialties that exist
-    specialty_choices = meta.session.query(act.Specialty).all()
-    choice_list = [ (choice.id, choice.name) 
-                    for choice in specialty_choices ]
-    # Begin Form
-    specialty_id = SelectField('specialty', choices=choice_list, coerce=int)
-    cotationfr_id = TextField('cotationfr_id')
-    code = TextField('code')
-    alias = TextAreaField('alias')
-    name = TextAreaField('name')
-    color = ColorField('color')
+
+#####
+# Acts
+#####
 
 @app.route('/acttype?keywords=<keywords>&ordering=<ordering>')
 def list_acttype(keywords="", ordering=""):
-    """ The target is too display dentist's gesture, describing it, its value..
+    """ The target is too display dentist's gesture, describing it, its values.
+    Looking in ActType table, we may decide to print only 
+        acts from one specialty
+        then filter by keyword
+        ordering the printing
+    
+    The result will be a list of tuples :
+     ( gesture, specialty, cotat, ngap )
     """
     keywords = keywords.split()
     ordering = ordering.split()
@@ -186,6 +220,8 @@ def update_acttype(acttype_id):
 
     acttype_form = ActTypeForm(request.form)
     specialty_form = SpecialtyForm(request.form)
+    cotat_form = getattr(CotationLocale, Form)(request.form)
+    #TODO
     
     if request.method == 'POST' and form.validate():
         acttype.specialty_id = form.specialty_id.data

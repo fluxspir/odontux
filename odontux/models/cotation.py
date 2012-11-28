@@ -45,7 +45,7 @@ class CotationFr(Base):
     id = Column(Integer, primary_key=True)
     acts = relationship("ActType", backref="cotation")
     key_id = Column(Integer, ForeignKey(NgapKeyFr.id), nullable=False)
-    key_cmu_id = Column(Integer, ForeignKey(CmuKeyFr.id), default=None)
+    key_cmu_id = Column(Integer, ForeignKey(CmuKeyFr.id), default="")
     adult_multiplicator = Column(Integer, default=0)
     kid_multiplicator = Column(Integer, default=0)
     adult_cmu_num = Column(Integer, default=0)

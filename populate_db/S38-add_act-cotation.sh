@@ -130,38 +130,38 @@ odontux add_acttype -n "Dépose de prothèses conjointes métalliques, pour TTT 
 cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 28 --exceeding_kid_normal 28 --exceeding_adult_cmu 0)
 odontux add_acttype -n "Rescellement des travaux de prothèse conjointe, par élément" -a "rescellement, chaque element" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 1 -m 30 --adult_cmu_num 6 --exceeding_adult_cmu 128.5)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 1 à 3 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 1 à 3 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 1 à 3 dents" -a "PAP resine haut 1 a 3" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 1 à 3 dents" -a "PAP resine bas 1 a 3" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 35 --keycmu 1 --adult_cmu_num 7 --exceeding_adult_cmu 273.75)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 4 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 4 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 4 dents" -a "PAP resine haut 4" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 4 dents" -a "PAP resine bas 4" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 40 --keycmu 1 --adult_cmu_num 8 --exceeding_adult_cmu 263.00)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 5 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 5 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 5 dents" -a "PAP resine haut 5" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 5 dents" -a "PAP resine bas 5" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 45 --keycmu 1 --adult_cmu_num 9 --exceeding_adult_cmu 252.25)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 6 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 6 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 6 dents" -a "PAP resine haut 6" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 6 dents" -a "PAP resine bas 6" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 50 --keycmu 1 --adult_cmu_num 10 --exceeding_adult_normal 742.5 --exceeding_adult_cmu 326.50)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 7 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 7 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 7 dents" -a "PAP resine haut 7" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 7 dents" -a "PAP resine bas 7" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 55 --keycmu 1 --adult_cmu_num 11 --exceeding_adult_cmu 315.75)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 8 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 8 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 8 dents" -a "PAP resine haut 8" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 8 dents" -a "PAP resine bas 8" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 60 --keycmu 1 --adult_cmu_num 12 --exceeding_adult_cmu 305.00)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 9 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 9 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 9 dents" -a "PAP resine haut 9" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 9 dents" -a "PAP resine bas 9" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 65 --keycmu 1 --adult_cmu_num 13 --exceeding_adult_cmu 294.25)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 10 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 10 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 10 dents" -a "PAP resine haut 10" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 10 dents" -a "PAP resine bas 10" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 70 --keycmu 1 --adult_cmu_num 14 --exceeding_adult_cmu 366.50)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 11 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 11 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 11 dents" -a "PAP resine haut 11" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 11 dents" -a "PAP resine bas 11" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 75 --keycmu 1 --adult_cmu_num 15 --exceeding_adult_cmu 355.75)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 12 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 12 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 12 dents" -a "PAP resine haut 12" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 12 dents" -a "PAP resine bas 12" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 80 --keycmu 1 --adult_cmu_num 16 --exceeding_adult_cmu 345.00)
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 13 dents" -a "PAP resine" -s 6 --cotation $cotid
-odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 13 dents" -a "PAP resine" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine maxillaire, de 13 dents" -a "PAP resine haut 13" -s 6 --cotation $cotid
+odontux add_acttype -n "Prothèse amovible partielle adjointe résine mandibulaire, de 13 dents" -a "PAP resine bas 13" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 85 --keycmu 1 --adult_cmu_num 17 --exceeding_adult_normal 1342.25 --exceeding_adult_cmu 473.25)
 odontux add_acttype -n "Prothèse amovible totale maxillaire résine" -a "PAT maxillaire resine" -s 6 --cotation $cotid
 odontux add_acttype -n "Prothèse amovible totale mandibulaire résine" -a "PAT mandibulaire resine" -s 6 --cotation $cotid

@@ -36,6 +36,11 @@ def find():
                         keywords=request.form["keywords"].encode("utf_8"),
                         ordering=" "))
 
+    if request.form['database'] == "cotation":
+        return redirect(url_for('list_cotations', 
+                        keywords=request.form['keywords'].encode("utf_8"),
+                        ordering=" "))
+
     if request.form["database"] == "odontuxuser":
         keywords = request.form["keywords"].encode("utf_8").split()
         query = meta.session.query(users.OdontuxUser)

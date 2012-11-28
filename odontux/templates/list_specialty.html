@@ -1,7 +1,4 @@
 {% extends 'header.html' %}
-{% block pagetitle %}
-List of specialties
-{% endblock %}
 {% block main %}
 <div id="list_acttype">
 <a href="/specialty/add">Add specialty</a><br />
@@ -10,13 +7,13 @@ List of specialties
     <th>ID</th>
     <th>Name</th>
     <th>Color</th>
-    {% if session.role == role_admin or session.role == role_dentist %}
+    {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
       <th>Modify</th>
     {% endif %}
 {% for specialty in specialties %}
   <tr>
     <td>{{ specialty.id }}</td><td>{{ specialty.name }}</td><td style="background-color:{{ specialty.color }};"></td>
-    {% if session.role == role_admin or session.role == role_dentist %}
+    {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
       <td><a href="/act/update_specialty/id={{ specialty.id }}">Update</a></td>
     {% endif %}
   </tr>
