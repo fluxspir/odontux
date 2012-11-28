@@ -44,8 +44,6 @@ def login():
                 session['ROLE_ASSISTANT'] = constants.ROLE_ASSISTANT
                 session['ROLE_SECRETARY'] = constants.ROLE_SECRETARY
                 session['ROLE_ADMIN'] = constants.ROLE_ADMIN
-
-                session['email'] = user.mails[0]
                 session['avatar_id'] = user.avatar_id
                 return redirect(url_for('index'))
             return redirect(url_for('logout'))

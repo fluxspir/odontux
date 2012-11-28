@@ -1,45 +1,36 @@
-{% extends 'header.html' %}
-{% block css %}
-  <link rel="stylesheet" type="text/css" href="/static/update_user.css">
-{% endblock %}
-{% block javascript_specific %}
-  <script type="text/javascript" src="/static/js/update_user.js"></script>
-{% endblock %}
-{% block pagetitle %}
-Update of medecine doctor
-{% endblock %}
+{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_table_field %}
+{% from "_formhelpers.html" import render_table_hidden_field %}
+{% from "_contactformhelper.html" import update_phone_form %}
+{% from "_contactformhelper.html" import update_address_form %}
+{% from "_contactformhelper.html" import update_mail_form %}
+
+{% extends 'update.html' %}
 {% block main %}
-  {% from "_formhelpers.html" import render_field %}
-  {% from "_formhelpers.html" import render_table_field %}
-  {% from "_formhelpers.html" import render_table_hidden_field %}
-  {% from "_contactformhelper.html" import update_phone_form %}
-  {% from "_contactformhelper.html" import update_address_form %}
-  {% from "_contactformhelper.html" import update_mail_form %}
   {% if session.role == role_dentist or session.role == role_nurse or session.role == role_assistant %}
-  <nav id="update_choices">
-    <ul>
-      <li onclick='display_form("gen_info")'>General information</li>
-      <li onclick='display_form("address")'>Address</li>
-      <li onclick='display_form("phone")'>Phone</li>
-      <li onclick='display_form("mail")'>Mail</li>
-    </ul>
-  </nav>
-  <div id="update_md">
-    <div id="gen_info">
-      <form method="post" action={{ url_for('update_md', body_id=doctor.id, form_to_display='gen_info') }}>
-        <dl>
-          {{ render_field(gen_info_form.lastname, value=doctor.lastname) }}
-          {{ render_field(gen_info_form.firstname, value=doctor.firstname) }}
-          <input type="submit" value="Update" />
-        </dl>
-      </form>
+    <nav id="update_choices">
+      <ul>
+        <li onclick='display_form("gen_info")'>General information</li>
+        <li onclick='display_form("address")'>Address</li>
+        <li onclick='display_form("phone")'>Phone</li>
+        <li onclick='display_form("mail")'>Mail</li>
+      </ul>
+    </nav>
+    <div id="update_md">
+      <div id="gen_info">
+        <form method="post" action={{ url_for('update_md', body_id=doctor.id, form_to_display='gen_info') }}>
+          <dl>
+            {{ render_field(gen_info_form.lastname, value=doctor.lastname) }}
+            {{ render_field(gen_info_form.firstname, value=doctor.firstname) }}
+            <input type="submit" value="Update" />
+          </dl>
+        </form>
+      </div>
+
+      {{ update_phone_form(phone_form, doctor, "update_md_phone", "delete_md_phone", "add_md_phone") }}
+      {{ update_address_form(address_form, doctor, doctor.addresses, "update_md_address", "delete_md_address", "add_md_address") }}
+      {{ update_mail_form(mail_form, doctor, "update_md_mail", "delete_md_mail", "add_md_mail") }}
+
     </div>
-
-  {{ update_phone_form(phone_form, doctor, "update_md_phone", "delete_md_phone", "add_md_phone") }}
-<!-- Add a trick for body.family_id or update_address_form -->
-  {{ update_address_form(address_form, doctor, doctor.addresses, "update_md_address", "delete_md_address", "add_md_address") }}
-  {{ update_mail_form(mail_form, doctor, "update_md_mail", "delete_md_mail", "add_md_mail") }}
-
-  </div>
   {% endif %}
 {% endblock %}

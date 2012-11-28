@@ -1,20 +1,11 @@
-{% extends 'header.html' %}
-{% block css %}
-  <link rel="stylesheet" type="text/css" href="/static/update_user.css">
-{% endblock %}
-{% block javascript_specific %}
-  <script type="text/javascript" src="/static/js/update_user.js"></script>
-{% endblock %}
-{% block pagetitle %}
-  Update user : {{ session.username }}
-{% endblock %}
-{% block main %}
 {% from "_formhelpers.html" import render_field, render_hidden_field %}
 {% from "_formhelpers.html" import render_table_field, render_table_hidden_field %}
 {% from "_contactformhelper.html" import update_phone_form %}
 {% from "_contactformhelper.html" import update_address_form %}
 {% from "_contactformhelper.html" import update_mail_form %}
 
+{% extends 'update.html' %}
+{% block main %}
 <nav id="update_choices">
   <ul>
     <li onclick='display_form("gen_info")'>general_infos</li>
@@ -59,7 +50,6 @@
   </div>
 
   {{ update_phone_form(phone_form, user, "update_user_phone", "delete_user_phone", "add_user_phone") }}
-<!-- Add a trick for body.family_id or update_address_form -->
   {{ update_address_form(address_form, user, user.addresses, "update_user_address", "delete_user_address", "add_user_address") }}
   {{ update_mail_form(mail_form, user, "update_user_mail", "delete_user_mail", "add_user_mail") }}
 
@@ -79,4 +69,3 @@
   </script>
 {% endif %}
 {% endblock %}
-

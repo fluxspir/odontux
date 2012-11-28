@@ -27,8 +27,8 @@ class PaymentType(Base):
     """
     __tablename__ = 'payment_type'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    alias = Column(String)
+    name = Column(String, default="")
+    alias = Column(String, default="")
 
 
 class Payment(Base):
@@ -46,7 +46,7 @@ class Payment(Base):
     mean_id = Column(Integer, ForeignKey(PaymentType.id), nullable=False)
     amount = Column(Numeric, nullable=False)
     advance = Column(Boolean, default=False, nullable=False)
-    comments = Column(String)
+    comments = Column(String, default="")
     cashin_date = Column(Date, default=today)
     acts = relationship("AppointmentActReference",
                           secondary=payment_act_table,

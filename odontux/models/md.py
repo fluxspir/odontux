@@ -21,7 +21,7 @@ class MedecineDoctor(Base):
     __tablename__ = 'medecine_doctor'
     id = Column(Integer, primary_key=True)
     lastname = Column(String, nullable=False)
-    firstname = Column(String)
+    firstname = Column(String, default="")
     addresses = relationship("Address", secondary=\
                 medecine_doctor_address_table, backref="medecine_doctor")
     phones = relationship("Phone", secondary=medecine_doctor_phone_table,

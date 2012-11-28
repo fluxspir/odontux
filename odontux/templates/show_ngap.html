@@ -2,14 +2,12 @@
 {% block css %}
   <link rel="stylesheet" type="text/css" href="cotation.css">
 {% endblock %}
-{% block pagetitle %}
-  France NGAP resume
-{% endblock %}
 {% from "_formhelpers.html" import render_table_field %}
 {% from "_formhelpers.html" import render_table_hidden_field %}
 {% block main %}
   <div id="ngap">
     <table border=1>
+      <caption>French NGAP</caption>
       <tr>
         <th>Key</th>
         <th>Name</th>
@@ -49,6 +47,7 @@
   </div>
   <div id="cmu">
     <table border=1>
+      <caption>French CMU</caption>
       <tr>
         <th>Key</th>
         <th>Name</th>
@@ -85,6 +84,7 @@
   </div>
   <div id="majoration">
     <table border=1>
+      <caption>French majorations</caption>
       <tr>
         <th>Name</th>
         <th>Price</th>

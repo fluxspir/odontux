@@ -14,7 +14,7 @@ from cotation import (AddNgapKeyFrCommand, AddCmuKeyFrCommand,
                       ListNgapKeyFrCommand, ListCmuKeyFrCommand,
                       ListCotationFrCommand, UpdateCotationFrCommand)
 from administration import (AddPatientCommand, ListPatientCommand,
-                            UpdatePatientCommand)
+                            UpdatePatientCommand, AddPatientPhoneCommand)
 from act import (AddActTypeCommand, AddAdministrativeActCommand,
                  ListActTypeCommand, ListPatientActCommand)
 from anamnesis import (AddMedicalHistoryCommand, AddPastSurgeriesCommand,

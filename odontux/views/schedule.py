@@ -19,6 +19,8 @@ from odontux.models import meta, schedule, administration
 from odontux.views.forms import DateField, TimeField
 from odontux.views.log import index
 
+now = datetime.datetime.now()
+today = datetime.date.today()
 
 class AppointmentForm(Form):
     patient_id = HiddenField('patient_id')
@@ -48,7 +50,7 @@ def agenda_date():
 
 @app.route('/agenda/')
 def agenda():
-    return render_template('summary_agenda.html')
+    return render_template('summary_agenda.html', today=today)
 
 @app.route('/agenda/day?date=<dateday>')
 def display_day(dateday):

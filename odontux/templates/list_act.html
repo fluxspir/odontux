@@ -8,26 +8,27 @@ List of acts
   <a href="/add/act">Add new act</a>
   <table border=1>
     <tr>
-      <th>ID</th>
-      {% if specialty %}
-        <th>Specialty<th>
-      {% endif %}
+      <th>Specialty</th>
       <th>Code</th>
       <th>Alias</th>
       <th>Name</th>
       <th>Color</th>
-      {% if session.role == role_admin or session.role == role_dentist %}
+      <th>Cotation</th>
+      <th>Price</th>
+      {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
         <th>Modify</th>
       {% endif %}
     </tr>
-  {% for gesture in gestures %}
+  {% for gesture, specialty, cotat, ngap in gestures_list %}
     <tr>
-      <td>{{ gesture.id }}</td>
-      {% if specialty %}
-        <td style="background-color:{{specialty.color}};">{{ specialty.name }}</td>
-      {% endif %}
-      <td>{{ gesture.code }}</td><td>{{ gesture.alias }}</td><td>{{ gesture.name }}</td><td style="background-color:{{ gesture.color }};"></td>
-      {% if session.role == role_admin or session.role == role_dentist %}
+      <td style="background-color:{{specialty.color}};">{{ specialty.name }}</td>
+      <td>{{ gesture.code }}</td>
+      <td>{{ gesture.alias }}</td>
+      <td>{{ gesture.name }}</td>
+      <td style="background-color:{{ gesture.color }};"></td>
+      <td>{{ ngap.key }}{{ cotat.adult_multiplicator }}</td>
+      <td>{{ cotat.get_price(cotat.adult_multiplicator, cotat.exceeding_adult_normal, 0) }}</td>
+      {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
         <td><a href="/act/update_acttype={{ gesture.id }}/">Update</a>
       {% endif %}
     </tr>

@@ -164,9 +164,9 @@ class PatientParser(BaseCommand):
                         help="Patient's firstname",
                         dest="firstname")
 
-        parser.add_option("--qualification", action="store", type="string",
+        parser.add_option("--qualifications", action="store", type="string",
                         help="Qualification of the patient",
-                        dest="qualification")
+                        dest="qualifications")
 
         parser.add_option("--preferred_name", action="store", type="string",
                         help="Patient's preferred name",
@@ -294,8 +294,8 @@ class AddPatientCommand(BaseCommand, PatientParser):
         if options.firstname:
             self.values["firstname"] = options.firstname\
                                        .decode("utf_8").title()
-        if options.qualification:
-            self.values["qualification"] = options.qualification\
+        if options.qualifications:
+            self.values["qualifications"] = options.qualifications\
                                            .decode("utf_8").title()
         if options.preferred_name:
             self.values["preferred_name"] = options.preferred_name\
@@ -306,9 +306,9 @@ class AddPatientCommand(BaseCommand, PatientParser):
 
         # patient's caracteristics
         if options.sex is "1" or options.sex is "M" or options.sex is "m":
-            self.values["sex"] = True
+            self.values["sex"] = "m"
         else:
-            self.values["sex"] = False
+            self.values["sex"] = "f"
         if options.dob:
             self.values["dob"] = options.dob
         if options.job:
@@ -614,14 +614,11 @@ class ListPatientCommand(BaseCommand, PatientParser):
             for patient in query:
                 doc = self.querydoc.filter(md.MedecineDoctor.id ==
                                            patient.gen_doc_id).first()
-                if patient.sex:
-                    sex=_("M")
-                else:
-                    sex=_("F")
-
+                
                 print(_(u"{}. {} {} {}, {}\t{} ({} {})\t{} : {} {} {}\t{} {}"
                         .format(patient.id, patient.title, patient.lastname,
-                        patient.firstname, sex, patient.dob, patient.age(),
+                        patient.firstname, patient.sex, patient.dob, 
+                        patient.age(),
                         _("years old"), _("Medecine Doctor"), _("Dr"),
                         doc.lastname, doc.firstname, _("inactive"), 
                         patient.inactive)))
@@ -652,8 +649,8 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
         if options.firstname:
             patient.firstname = options.firstname\
                                        .decode("utf_8").title()
-        if options.qualification:
-            patient.qualification = options.qualification\
+        if options.qualifications:
+            patient.qualifications = options.qualifications\
                                            .decode("utf_8").title()
         if options.preferred_name:
             patient.preferred_name = options.preferred_name\
@@ -662,9 +659,9 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
             patient.correspondence_name = options.correspondence_name\
                                                  .decode("utf_8").upper()
         if options.sex is "1" or options.sex is "M" or options.sex is "m":
-            patient.sex = True
+            patient.sex = "m"
         else:
-            patient.sex = False
+            patient.sex = "f"
         if options.dob:
             patient.dob = options.dob
         if options.job:
@@ -691,8 +688,33 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
             customer = comptability.update_customer()
 
 
-class AddPatientPhoneCommand(BaseCommand):
-    pass
+class AddPatientPhoneCommand(BaseCommand, PatientParser):
+    """ """
+    command_name = "add_patientphone"
+
+    def __init__(self):
+        self.values = {}
+
+    def run(self, args):
+        (options, args) = self.parse_args(args, True)
+        if not options.phone_num:
+            sys.exit(_("to add a phone number, please specify phone num"))
+        if not options.patient_id:
+            if not os.getenv('patient_id'):
+                sys.exit(_("Please specify patient_id"))
+            patient_id = os.getenv("patient_id")
+        patient_id = options.patient_id
+
+        patient = meta.session.query(administration.Patient)\
+            .filter(administration.Patient.id == patient_id)\
+            .one()
+
+        self.values['number'] = options.phone_num
+        if options.phone_name:
+            self.values['name'] = options.phone_name
+
+        patient.phones.append(administration.Phone(**self.values))
+        meta.session.commit()
 
 class UpdatePatientPhoneCommand(BaseCommand):
     pass

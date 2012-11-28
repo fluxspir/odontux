@@ -1,0 +1,37 @@
+#update_user, #update_md, #update_patient, #update_dental_office {
+visibility:hidden;
+}
+
+#gen_info {
+display:inline-block;
+position:absolute;
+}
+
+#address {
+display:inline-block;
+position:absolute;
+}
+
+#phone {
+display:inline-block;
+position:absolute;
+}
+
+#mail {
+display:inline-block;
+position:absolute;
+}
+
+#password_container {
+display:inline-block;
+position:absolute;
+}
+
+#SSN {
+display:inline-block;
+position:absolute;
+}
+
+.hidden {
+display:none;
+}

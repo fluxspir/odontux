@@ -170,9 +170,9 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
             self.values["correspondence_name"] = \
             options.correspondence_name.decode("utf_8").upper()
         if options.sex is "1" or options.sex is "M" or options.sex is "m":
-            self.values["sex"] = True
+            self.values["sex"] = "m"
         else:
-            self.values["sex"] = False
+            self.values["sex"] = "f"
         if options.dob:
             self.values["dob"] = options.dob
         if options.inactive:
@@ -423,6 +423,9 @@ class DentalOfficeParser(BaseCommand):
                         help="Email address of the dentist.",
                         dest="email")
 
+        parser.add_option("--url", action="store", type="string",
+                        help="URL of the dental office",
+                        dest="url")
 
         parser.add_option("--address_id", action="store", type="string",
                         help="address id in DB from the person",
@@ -475,14 +478,16 @@ class AddDentalOfficeCommand(BaseCommand, DentalOfficeParser):
         if not options.lastname:
             sys.exit("a lastname must be provide to add a new medecine doctor")
 
-        self.values["dentist_lastname"] =\
+        self.values["owner_lastname"] =\
         options.lastname.decode("utf_8").upper()
         if options.office_name:
             self.values["office_name"] =\
             options.office_name.decode("utf_8").title()
         if options.firstname:
-            self.values["dentist_firstname"] =\
+            self.values["owner_firstname"] =\
             options.firstname.decode("utf_8").title()
+        if options.url:
+            self.values['url'] = options.url.decode("utf_8")
         if options.street:
             options.street = options.street.decode("utf_8")
         if options.building:

@@ -25,7 +25,7 @@ class DrugPrescribed(Base):
     packaging = Column(String, nullable=False)
     posologia = Column(String, nullable=False)
     dayssupply = Column(String, nullable=False)
-    comments = Column(String)
+    comments = Column(String, default="")
 
 
 class Prescription(Base):

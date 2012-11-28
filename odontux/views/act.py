@@ -7,19 +7,20 @@
 
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
-from odontux.models import meta, act
-from odontux.secret import SECRET_KEY
-from odontux.odonweb import app
+from sqlalchemy import or_, and_
 from gettext import gettext as _
 
+from odontux.odonweb import app
 from odontux import constants
-
+from odontux.models import meta, act, cotation
 from odontux.views.log import index
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      validators)
 from odontux.views.forms import ColorField
 
+cotationlocale = "Cotation" + constants.LOCALE.title()
+CotationLocale = getattr(cotation, cotationlocale)
 
 class ActTypeForm(Form):
     # Create the list of specialties that exist
@@ -34,9 +35,16 @@ class ActTypeForm(Form):
     name = TextAreaField('name')
     color = ColorField('color')
 
-@app.route('/act/')
-def list_acttype(ordering=[]):
+@app.route('/acttype?keywords=<keywords>&ordering=<ordering>')
+def list_acttype(keywords="", ordering=""):
+    """ The target is too display dentist's gesture, describing it, its value..
+    """
+    keywords = keywords.split()
+    ordering = ordering.split()
+    # Get the acts list, named as "gesture", because it is the gesture
+    # the dentist make in the patient mouth.
     query = meta.session.query(act.ActType)
+    # If we only need ones of a specialty : 
     if request.form and request.form['specialty']:
         try:
             specialty = meta.session.query(act.Specialty)\
@@ -44,19 +52,52 @@ def list_acttype(ordering=[]):
             query = query.filter(act.ActType.specialty_id == specialty.id)
         except sqlalchemy.orm.exc.NoResultFound:
             pass
-
+    # Filter by keywords
+    if keywords:
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query = query.filter(or_(
+                act.ActType.alias.ilike(keyword),
+                act.ActType.name.ilike(keyword),
+                act.ActType.code.ilike(keyword),
+                (and_(
+                    act.ActType.specialty_id == act.Specialty.id,
+                    act.Specialty.name.ilike(keyword)
+                    )
+                )
+            ))
+    # We want to order the result to find what we are looking for more easily
     if not ordering:
         ordering = [ act.ActType.specialty_id, act.ActType.alias ]
     for o in ordering:
         query = query.order_by(o)
-    query = query.all()
-    return render_template('list_act.html', gestures=query, 
-                            role_admin=constants.ROLE_ADMIN,
-                            role_dentist=constants.ROLE_DENTIST)
+    gestures = query.all()
+
+    gestures_list = []
+    # We now need to know what the "cotationfr_id" correspond to
+    # TODO : "cotation_locale_id" 
+    for gesture in gestures:
+        try:
+            specialty = meta.session.query(act.Specialty)\
+                .filter(act.Specialty.id == gesture.specialty_id)\
+                .one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            specialty = ""
+        cotat = meta.session.query(CotationLocale)\
+            .filter(CotationLocale.id == gesture.cotationfr_id)\
+            .one()
+        ngap = meta.session.query(cotation.NgapKeyFr)\
+            .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
+
+        gestures_list.append( (gesture, specialty, cotat, ngap) )
+    return render_template('list_act.html', 
+                            gestures_list=gestures_list)
 
 @app.route('/act/add/', methods=['GET', 'POST'])
 @app.route('/add/act/', methods=['GET', 'POST'])
 def add_acttype():
+    """ """
+    # TODO  BECAUSE DIFFICULT TO MAKE IT "PERFECT"
     form = ActTypeForm(request.form)
     if request.method == 'POST' and form.validate():
         values = {}

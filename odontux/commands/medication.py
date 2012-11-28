@@ -167,6 +167,8 @@ class MakePrescriptionCommand(BaseCommand, PrescriptionParser):
                         drug.dayssupply, drug.comments)))
 
             response = askuser(_("Choose a drug to add in the list\t"))
+            if not response:
+                continue
             self.values = {}
             self.values["drug_id"] = response
             self.values["prescription_id"] = new_prescription.id

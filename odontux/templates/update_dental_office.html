@@ -1,0 +1,43 @@
+{% from "_formhelpers.html" import render_field, render_hidden_field %}
+{% from "_formhelpers.html" import render_table_field, render_table_hidden_field %}
+{% from "_contactformhelper.html" import update_phone_form %}
+{% from "_contactformhelper.html" import update_address_form %}
+{% from "_contactformhelper.html" import update_mail_form %}
+
+{% extends "update.html" %}
+
+{% block main %}
+  <nav id="update_choices">
+    <ul>
+      <li onclick='display_form("gen_info")'>general_infos</li>
+      <li onclick='display_form("address")'>address</li>
+      <li onclick='display_form("phone")'>phone</li>
+      <li onclick='display_form("mail")'>mail</li>
+    </ul>
+  </nav>
+
+  <div id="update_dental_office">
+    <div id="gen_info">
+      <form method="post" action={{ url_for('update_dental_office', body_id=dental_office.id, form_to_display="gen_info") }}>
+        <dl>
+          {{ render_field(dental_office_form.office_name, value=dental_office.office_name) }}
+          {{ render_field(dental_office_form.owner_lastname, value=dental_office.owner_lastname) }}
+          {{ render_field(dental_office_form.owner_firstname, value=dental_office.owner_firstname) }}
+          {{ render_field(dental_office_form.url, value=dental_office.url) }}
+          <input type="submit" value="Update" />
+        </dl>
+      </form>
+    </div>
+
+    {{ update_phone_form(phone_form, dental_office, "update_dental_office_phone", "delete_dental_office_phone", "add_dental_office_phone") }}
+    {{ update_address_form(address_form, dental_office, dental_office.addresses, "update_dental_office_address", "delete_dental_office_address", "add_dental_office_address") }}
+    {{ update_mail_form(mail_form, dental_office, "update_dental_office_mail", "delete_dental_office_mail", "add_dental_office_mail") }}
+
+  </div>
+
+  {% if form_to_display %}
+    <script>
+      display_form({{ form_to_display }}) ;
+    </script>
+  {% endif %}
+{% endblock %}

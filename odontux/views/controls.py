@@ -137,8 +137,12 @@ def get_patient_acts(patient_id, appointment_id=None, ordering=[]):
 
         # And eventually, get the specialty for knowing in which area the 
         # patient is treated for.
-        specialty = meta.session.query(act.Specialty)\
-            .filter(act.Specialty.id == act_info.specialty_id).one()
+        try:
+            specialty = meta.session.query(act.Specialty)\
+                .filter(act.Specialty.id == act_info.specialty_id).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            specialty = ""
+        
 
         # Fill in the acts_list with a tuple
         acts.append( ( gesture, tooth, appointment, act_info, specialty) )

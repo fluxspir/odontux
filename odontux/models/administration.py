@@ -30,11 +30,11 @@ today = datetime.date.today()
 class Address(Base):
     __tablename__ = 'address'
     id = Column(Integer, primary_key=True)
-    street = Column(String)
-    building = Column(String)
-    city = Column(String)
-    postal_code = Column(String)
-    county = Column(String)
+    street = Column(String, default="")
+    building = Column(String, default="")
+    city = Column(String, default="")
+    postal_code = Column(String, default="")
+    county = Column(String, default="")
     country = Column(String, default="France")
     update_date = Column(Date, default=today)
 
@@ -42,25 +42,25 @@ class Address(Base):
 class Mail(Base):
     __tablename__ = 'mail'
     id = Column(Integer, primary_key=True)
-    email = Column(String)
+    email = Column(String, default="")
     update_date = Column(Date, default=today)
 
 
 class Phone(Base):
     __tablename__ = 'phone'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    number = Column(String)
+    name = Column(String, default="")
+    number = Column(String, default="")
     update_date = Column(Date, default=today)
 
 
 class SocialSecurityFr(Base):
     __tablename__ = 'social_security_fr'
     id = Column(Integer, primary_key=True)
-    number = Column(String, unique=True)
+    number = Column(String, default="")
     beneficiaries = relationship("Patient", backref="socialsecurity")
     cmu = Column(Boolean, default=False)
-    insurance = Column(String)
+    insurance = Column(String, default="")
 
 
 class Family(Base):
@@ -80,13 +80,13 @@ class Patient(Base):
     id = Column(Integer, primary_key=True)
     family_id = Column(Integer, ForeignKey(Family.id))
     socialsecurity_id = Column(Integer, ForeignKey(SocialSecurityLocale.id))
-    title = Column(String)
+    title = Column(String, default="Mr")
     lastname = Column(String, nullable=False)
-    firstname = Column(String)
-    qualifications = Column(String)
-    preferred_name = Column(String)
-    correspondence_name = Column(String)
-    sex = Column(Boolean, default=False)
+    firstname = Column(String, default="")
+    qualifications = Column(String, default="")
+    preferred_name = Column(String, default="")
+    correspondence_name = Column(String, default="")
+    sex = Column(String, default="f")
     dob = Column(Date, default="19700101")                  # date of birth
     job = Column(String, default="")
     phones = relationship("Phone", secondary=patient_phone_table,

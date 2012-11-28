@@ -20,7 +20,8 @@ from odontux.models import (meta,
                             users,
                             )
 
-address_fields = ["street", "building", "city","county", "country" ]
+address_fields = ["street", "building", "city", "postal_code", "county", 
+                  "country" ]
 phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
 title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),
@@ -135,6 +136,10 @@ def _check_body_perm(body, body_type):
         if session['role'] != constants.ROLE_ADMIN \
         and session['username'] != body.username:
             return False
+    # Only ADMIN may update dental_office infos        
+    elif body_type == 'dental_office':
+        if session['role'] != constants.ROLE_ADMIN:
+            return False
     # DENTISTS, NURSE, ASSISTANT, SECRETARIES can make update in 
     # administration patient's files.
     elif body_type == 'md':
@@ -163,6 +168,9 @@ def _get_body(body_id, body_type):
     elif body_type == 'patient':
         body = meta.session.query(administration.Patient).filter\
             (administration.Patient.id == body_id).one()
+    elif body_type == "dental_office":
+        body = meta.session.query(users.DentalOffice).filter\
+            (users.DentalOffice.id == body_id).one()
     else:
         raise Exception(_("please specify known body_type"))
     return body

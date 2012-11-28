@@ -90,8 +90,8 @@ def update_md(body_id, form_to_display):
     
     if request.method == 'POST' and gen_info_form.validate():
         gen_info_fields = [ "lastname", "firstname" ]
-        for f in fields:
-            setattr(doctor, f, getattr(form, f).data)
+        for f in gen_info_fields:
+            setattr(doctor, f, getattr(gen_info_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_md', body_id=body_id,
                                 form_to_display="gen_info"))

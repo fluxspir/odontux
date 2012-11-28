@@ -31,7 +31,7 @@ class ActType(Base):
     specialty_id = Column(Integer, ForeignKey(Specialty.id), default=None)
     cotationfr_id = Column(Integer, ForeignKey(CotationLocale.id))
     name = Column(String, nullable=False)
-    alias = Column(String)
+    alias = Column(String, default="")
     code = Column(String, unique=True)
     color = Column(String, default="#000000")
 
@@ -45,5 +45,5 @@ class AppointmentActReference(Base):
     tooth_id = Column(Integer, ForeignKey(teeth.Tooth.id))
     code = Column(String, nullable=False)
     price = Column(Numeric, nullable=False)
-    invoice_id = Column(String)
+    invoice_id = Column(String, default="")
     paid = Column(Boolean, default=False)

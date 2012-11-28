@@ -41,7 +41,7 @@ class Tooth(Base):
     id = Column(Integer, primary_key=True)
     mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id), nullable=False)
     name = Column(String, nullable=False)
-    state = Column(String, default=None)
+    state = Column(String, default="")
     surveillance = Column(Boolean, default=False)
 
 
@@ -68,16 +68,16 @@ class ToothEvent(Base):
     tooth_id = Column(Integer, ForeignKey(Tooth.id), nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
-    sane = Column(String)
-    place = Column(String)
-    mobility = Column(String)
-    fracture = Column(String)
-    absence = Column(String)
-    replaced = Column(String)
-    implant = Column(String)
-    comments = Column(String)
-    color = Column(String)
-    pic = Column(String)
+    sane = Column(String, default="")
+    place = Column(String, default="")
+    mobility = Column(String, default="")
+    fracture = Column(String, default="")
+    absence = Column(String, default="")
+    replaced = Column(String, default="")
+    implant = Column(String, default="")
+    comments = Column(String, default="")
+    color = Column(String, default="")
+    pic = Column(String, default="")
 
 
 class CrownEvent(Base):
@@ -109,14 +109,14 @@ class CrownEvent(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
     side = Column(String, nullable=False)
-    sealing = Column(String)
-    decay = Column(String)
-    obturation = Column(String)
-    crowned = Column(String)
-    bridge = Column(String)
-    comments = Column(String)
-    color = Column(String)
-    pic = Column(String)
+    sealing = Column(String, default="")
+    decay = Column(String, default="")
+    obturation = Column(String, default="")
+    crowned = Column(String, default="")
+    bridge = Column(String, default="")
+    comments = Column(String, default="")
+    color = Column(String, default="")
+    pic = Column(String, default="")
 
 
 class RootEvent(Base):
@@ -149,11 +149,11 @@ class RootEvent(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
     canal = Column(String, nullable=False)
-    infected = Column(String)
-    abscess = Column(String)
-    obturation = Column(String)
-    inlaycore = Column(String)
-    comments = Column(String)
-    color = Column(String)
-    pic = Column(String)
+    infected = Column(String, default="")
+    abscess = Column(String, default="")
+    obturation = Column(String, default="")
+    inlaycore = Column(String, default="")
+    comments = Column(String, default="")
+    color = Column(String, default="")
+    pic = Column(String, default="")
 

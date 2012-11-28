@@ -23,7 +23,7 @@ class Head(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                         nullable=False)
-    comments = Column(String)
+    comments = Column(String, default="")
     pic = Column(String)
 
 
@@ -32,8 +32,8 @@ class Neck(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                         nullable=False)
-    comments = Column(String)
-    pic = Column(String)
+    comments = Column(String, default="")
+    pic = Column(String, default="")
 
 
 class Mouth(Base):

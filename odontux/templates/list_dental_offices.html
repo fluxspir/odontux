@@ -1,0 +1,34 @@
+{% extends "header.html" %}
+
+{% block main %}
+  {% block dental_office %}
+    <table border=1>
+      <tr>
+        <th class="hidden">Id</th>
+        <th>Office Name</th>
+        <th>Owner Lastname</th>
+        <th>Owner Firstname</th>
+        {% if session.role == session.ROLE_ADMIN %}
+          <th></th>
+        {% endif %}
+      </tr>
+      {% for office in dental_offices %}
+        <tr>
+          <td class="hidden">{{ office.id }}</td>
+          {% if office.url %}
+            <td><a href="{{ office.url }}" target="_blank">{{ office.office_name }}</a></td>
+          {% else %}
+            <td>{{ office.office_name }}</td>
+          {% endif %}
+          <td>{{ office.owner_lastname }}</td>
+          <td>{{ office.owner_firstname }}</td>
+          {% if session.role == session.ROLE_ADMIN %}
+            <td>
+              <a href="{{ url_for('update_dental_office', body_id=office.id, form_to_display='gen_info') }}">Modify</a>
+            </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </table>
+  {% endblock %}
+{% endblock %}

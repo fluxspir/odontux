@@ -31,11 +31,11 @@ class Appointment(Base):
     emergency = Column(Boolean, default=False)
     reason = Column(String, default="dentist didn't precise the appointment's "
                                     "reason.", nullable=False)
-    diagnostic = Column(String)
-    treatment = Column(String)
-    prognostic = Column(String)
-    advise = Column(String)
-    next_appointment = Column(String)
+    diagnostic = Column(String, default="")
+    treatment = Column(String, default="")
+    prognostic = Column(String, default="")
+    advise = Column(String, default="")
+    next_appointment = Column(String, default="")
     administrative_acts = relationship("AppointmentActReference",
                                        backref="appointment")
     ordonnance = relationship("Prescription", backref="appointment",
@@ -59,5 +59,5 @@ class AppointmentMemo(Base):
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
     appointment_id = Column(Integer, ForeignKey(Appointment.id))
     time_stamp = Column(DateTime, default=now)
-    memo = Column(String)
+    memo = Column(String, default="")
 

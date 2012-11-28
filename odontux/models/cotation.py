@@ -18,7 +18,7 @@ from sqlalchemy.orm import relationship, backref
 class NgapKeyFr(Base):
     __tablename__ = 'ngap_key_fr'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String, default="")
     key = Column(String, nullable=False)
     unit_price = Column(Numeric, nullable=False)
 
@@ -29,7 +29,7 @@ class NgapKeyFr(Base):
 class CmuKeyFr(Base):
     __tablename__ = 'cmu_key_fr'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String, default="")
     key = Column(String, nullable=False)
 
 

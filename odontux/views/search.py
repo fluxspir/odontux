@@ -5,20 +5,20 @@
 # Licence BSD
 #
 
-from flask import render_template, request
+from flask import render_template, request, redirect, url_for
 import sqlalchemy
 from sqlalchemy import or_
 from odontux.models import meta, act, administration, md, users, medication
 from odontux.odonweb import app
 from gettext import gettext as _
 from odontux import constants
+from odontux.views.act import list_acttype
 
 @app.route('/search/', methods=['GET', 'POST'])
 def find():
     """ """
-    keywords = request.form["keywords"].encode("utf_8").split()
-
     if request.form["database"] == "patient":
+        keywords = request.form["keywords"].encode("utf_8").split()
         query = meta.session.query(administration.Patient)
         for keyword in keywords:
             keyword = '%{}%'.format(keyword)
@@ -32,17 +32,12 @@ def find():
                                 role_admin=constants.ROLE_ADMIN)
     
     if request.form["database"] == "act":
-        query = meta.session.query(act.ActType)
-        for keyword in keywords:
-            keyword = '%{}%'.format(keyword)
-            query = query.filter(or_(
-                act.ActType.alias.ilike(keyword),
-                act.ActType.name.ilike(keyword),
-                act.ActType.code.ilike(keyword)
-                ))
-        return render_template('list_act.html', gestures=query.all())
+        return redirect(url_for('list_acttype', 
+                        keywords=request.form["keywords"].encode("utf_8"),
+                        ordering=" "))
 
     if request.form["database"] == "odontuxuser":
+        keywords = request.form["keywords"].encode("utf_8").split()
         query = meta.session.query(users.OdontuxUser)
         for keyword in keywords:
             keyword = '%{}%'.format(keyword)
