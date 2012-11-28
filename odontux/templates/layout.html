@@ -57,11 +57,11 @@
       {% block nav %}
         <a href="{{ url_for('allpatients') }}">Patients</a>
         <a href="{{ url_for('agenda') }}">Agenda</a>
+      	<a href="{{ url_for('list_md') }}">MD</a>
       	<a href="{{ url_for('list_acttype', keywords=" ", ordering=" ") }}">Acts</a>
-      	<a href="/specialty">Specialties</a>
-        <a href="/cotation/show_ngap/">Ngap</a>
-      	<a href="/medecine_doctor">MD</a>
-      	<a href="/user">Users</a>
+      	<a href="{{ url_for('list_specialty') }}">Specialties</a>
+        <a href="{{ url_for('show_ngap') }}">Ngap</a>
+      	<a href="{{ url_for('list_users') }}">Users</a>
         <a href="{{ url_for('list_dental_offices') }}">Dental Offices</a>
         <div id="search">
         {% block search %}

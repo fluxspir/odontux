@@ -22,6 +22,59 @@ from odontux.views.forms import ColorField
 cotationlocale = "Cotation" + constants.LOCALE.title()
 CotationLocale = getattr(cotation, cotationlocale)
 
+class SpecialtyForm(Form):
+    name = TextField('name', [validators.Required(), 
+                     validators.Length(min=1, max=20, 
+                     message=_("Must be less than 20 characters"))])
+    color = ColorField('color')
+
+
+@app.route('/specialty/')
+@app.route('/specialties/')
+def list_specialty(ordering=[]):
+    if not ordering:
+        ordering = [act.Specialty.id]
+    for order in ordering:
+        query = meta.session.query(act.Specialty).order_by(order)
+    specialties = query.all()
+    return render_template('list_specialty.html', specialties=specialties,
+                            role_admin=constants.ROLE_ADMIN,
+                            role_dentist=constants.ROLE_DENTIST)
+
+
+@app.route('/specialty/add/', methods=['GET', 'POST'])
+def add_specialty():
+    form = SpecialtyForm(request.form)
+    if request.method == 'POST' and form.validate():
+        values = {}
+        values['name'] = form.name.data
+        values['color'] = form.color.data
+        new_specialty = act.Specialty(**values)
+        meta.session.add(new_specialty)
+        meta.session.commit()
+        return redirect(url_for('list_specialty'))
+    return render_template('add_specialty.html', form=form)
+
+
+@app.route('/act/update_specialty/id=<int:specialty_id>/', 
+            methods=['GET', 'POST'])
+def update_specialty(specialty_id):
+    try:
+        specialty = meta.session.query(act.Specialty).filter\
+              (act.Specialty.id == specialty_id).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+        return redirect(url_for('list_specialty'))
+
+    form = SpecialtyForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        specialty.name = form.name.data
+        specialty.color = form.color.data
+        meta.session.commit()
+        return redirect(url_for('list_specialty'))
+    return render_template('update_specialty.html', form=form, 
+                            specialty=specialty)
+
 class ActTypeForm(Form):
     # Create the list of specialties that exist
     specialty_choices = meta.session.query(act.Specialty).all()
@@ -117,12 +170,23 @@ def add_acttype():
 def update_acttype(acttype_id):
     acttype = meta.session.query(act.ActType).filter\
               (act.ActType.id == acttype_id).one()
-    specialty = meta.session.query(act.Specialty)\
-                .filter(act.Specialty.id == acttype.specialty_id).one()
     if not acttype:
         return redirect(url_for('list_acttype'))
-    form = ActTypeForm(request.form)
+    try:
+        specialty = meta.session.query(act.Specialty)\
+                .filter(act.Specialty.id == acttype.specialty_id).one()
+    except sqlalchemy.orm.exc.NoResultFound:
+        specialty=""
+    cotat = meta.session.query(CotationLocale)\
+                .filter(CotationLocale.id == acttype.cotationfr_id).one()
+    ngap = meta.session.query(cotation.NgapKeyFr)\
+                .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
 
+    gesture = (acttype, specialty, cotat, ngap)
+
+    acttype_form = ActTypeForm(request.form)
+    specialty_form = SpecialtyForm(request.form)
+    
     if request.method == 'POST' and form.validate():
         acttype.specialty_id = form.specialty_id.data
         acttype.cotationfr_id = form.cotationfr_id.data

@@ -607,7 +607,13 @@ class ListPatientCommand(BaseCommand, PatientParser):
         # print result
 
         if options.patient_id:
-            patient = query.one()
+            try:
+                patient = query.one()
+            # This except arrive when a patient has been put multiples times.
+            # it is something to remove, when a test for not insering several
+            # times the same patient will be implemented
+            except sqlalchemy.orm.exc.MultipleResultsFound:
+                patient = query.first()
             print(_(u"{}".format(patient.id)))
 
         else:

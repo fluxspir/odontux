@@ -1,10 +1,6 @@
 {% extends 'header.html' %}
-{% block pagetitle %}
-Update of acts
-{% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
-{{specialty.id}}{{specialty.name}}
 <form method="post" action="/act/update_acttype={{ acttype.id }}/">
   <dl>
     {{ render_field(form.specialty_id) }}

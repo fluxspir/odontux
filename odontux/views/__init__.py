@@ -18,8 +18,8 @@ from administration import (
                  update_patient_mail, add_patient_mail, delete_patient_mail,
                  )
 from search import find
-from act import (list_acttype, add_acttype, update_acttype)
-from specialty import (list_specialty, add_specialty, update_specialty)
+from act import (list_acttype, add_acttype, update_acttype,
+                 list_specialty, add_specialty, update_specialty)
 from md import (
                 list_md,
                 add_md,
