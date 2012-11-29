@@ -24,11 +24,7 @@
         {{ render_field(gen_info_form.title, value=body.title) }}
         {{ render_field(gen_info_form.lastname, value=body.lastname) }}
         {{ render_field(gen_info_form.firstname, value=body.firstname) }}
-        {% if body.sex == True %}
-          {{ render_field(gen_info_form.sex, checked="checked") }}
-        {% else %}
-          {{ render_field(gen_info_form.sex) }}
-        {% endif %}
+        {{ render_field(gen_info_form.sex, checked="checked") }}
         {{ render_field(gen_info_form.dob, value=body.dob) }}
         {{ render_field(gen_info_form.job, value=body.job) }}
         {{ render_field(gen_info_form.qualifications, value=body.qualifications) }}

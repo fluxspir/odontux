@@ -4,7 +4,7 @@
 <form method="post" action="/act/update_acttype={{ acttype.id }}/">
   <dl>
     {{ render_field(form.specialty_id) }}
-    {{ render_field(form.cotationfr_id, value=acttype.cotationfr_id) }}
+    {{ render_field(form.cotationfr_id, selected=acttype.cotationfr_id) }}
     {{ render_field(form.code, value=acttype.code) }}
     {{ render_field(form.alias, placeholder=acttype.alias) }}
     {{ render_field(form.name, placeholder=acttype.name) }}

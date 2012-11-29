@@ -7,8 +7,8 @@
 
 from flask import session, render_template, request, redirect, url_for
 from wtforms import (Form, 
-                     IntegerField, SelectField, TextField, BooleanField,
-                     validators)
+                     IntegerField, SelectField, TextField, BooleanField, 
+                     RadioField, validators)
 import sqlalchemy
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
@@ -35,7 +35,7 @@ SSN_fields = [ ("SSN", "number"), ("cmu", "cmu"), ("insurance", "insurance") ]
 
 
 class PatientGeneralInfoForm(Form):
-    title = SelectField(_('title'), choices=forms.title_list)
+    title = SelectField(_('title'))
     lastname = TextField(_('lastname'), [validators.Required(
                           message=_("Lastname required")),
                           validators.Length(min=1, max=30,
@@ -49,7 +49,7 @@ class PatientGeneralInfoForm(Form):
     correspondence_name = TextField(_('correspondence_name'),
                                     [validators.Length(max=30, message=\
                                     _("correspondence name too long"))])
-    sex = BooleanField(_('Male'))
+    sex = RadioField(_('Sex'), choices=[("m", _("Male")), ("f", _("Female"))])
     dob = forms.DateField(_('Date of Birth'))
     job = TextField(_('Job'))
     inactive = BooleanField(_('Inactive'))
@@ -210,11 +210,14 @@ def add_patient():
            '&form_to_display=<form_to_display>/',
             methods=[ 'GET', 'POST'])
 def update_patient(body_id, form_to_display):
+    """ """
     patient = forms._get_body(body_id, "patient")
     if not forms._check_body_perm(patient, "patient"):
         return redirect(url_for('list_patients', body_id=body_id))
+
     # only need form for *patient_gen_info* update here. See below for others.
     gen_info_form = PatientGeneralInfoForm(request.form)
+    gen_info_form.title.choices = [ ("Mr", "Mr"), ("Mme", "Mme") ]
     if request.method == 'POST' and  gen_info_form.validate():
         for f in gen_info_fields:
             setattr(patient, f, getattr(gen_info_form, f).data)

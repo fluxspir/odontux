@@ -13,6 +13,7 @@ from gettext import gettext as _
 from odontux.odonweb import app
 from odontux import constants
 from odontux.models import meta, act, cotation
+from odontux.views import cotation as views_cotation
 from odontux.views.log import index
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
@@ -220,7 +221,7 @@ def update_acttype(acttype_id):
 
     acttype_form = ActTypeForm(request.form)
     specialty_form = SpecialtyForm(request.form)
-    cotat_form = getattr(CotationLocale, Form)(request.form)
+    cotat_form = views_cotation.CotationFrForm(request.form)
     #TODO
     
     if request.method == 'POST' and form.validate():
