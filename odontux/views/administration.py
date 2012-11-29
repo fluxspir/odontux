@@ -217,8 +217,25 @@ def update_patient(body_id, form_to_display):
 
     # only need form for *patient_gen_info* update here. See below for others.
     gen_info_form = PatientGeneralInfoForm(request.form)
-    gen_info_form.title.choices = [ ("Mr", "Mr"), ("Mme", "Mme") ]
-    if request.method == 'POST' and  gen_info_form.validate():
+
+    # Fill in the defaults values :
+    # title : select_field ; maybe send it to the views.forms, to use it
+    # with users...
+    title_list = [ ( "Mr", _("Mr") ), ("Mme", _("Mme") ), ( "Mlle", _("Mlle")),
+                   ( "Dr", _("Dr") ), ( "Pr", _("Pr") ) ]
+    gen_info_form.title.choices = title_list
+    # sex
+    sex_list = [ ( "m", _("Male")), ("f", _("Female")) ]
+    gen_info_form.sex.choices = sex_list
+    # textfields
+    gen_info_textfields = [ "title", "lastname", "firstname", "qualifications",
+                    "preferred_name", "correspondence_name", "dob", "sex",
+                    "job", "inactive", "time_stamp", "socialsecurity_id",
+                    "office_id", "dentist_id" ]
+    for f in gen_info_textfields:
+        getattr(gen_info_form, f).data = getattr(patient, f)
+    
+    if request.method == 'POST' and gen_info_form.validate():
         for f in gen_info_fields:
             setattr(patient, f, getattr(gen_info_form, f).data)
         meta.session.commit()
@@ -226,7 +243,6 @@ def update_patient(body_id, form_to_display):
                                 form_to_display="gen_info"))
 
     # Loading whole page, we're injecting all forms
-    gen_info_form = PatientGeneralInfoForm(request.form)
     SSN_form = SocialSecurityForm(request.form)
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)

@@ -21,25 +21,21 @@
   <div id="gen_info">
     <form method="post" action={{ url_for('update_patient', body_id=body.id, form_to_display='gen_info') }}>
       <dl>
-        {{ render_field(gen_info_form.title, value=body.title) }}
-        {{ render_field(gen_info_form.lastname, value=body.lastname) }}
-        {{ render_field(gen_info_form.firstname, value=body.firstname) }}
-        {{ render_field(gen_info_form.sex, checked="checked") }}
-        {{ render_field(gen_info_form.dob, value=body.dob) }}
-        {{ render_field(gen_info_form.job, value=body.job) }}
-        {{ render_field(gen_info_form.qualifications, value=body.qualifications) }}
-        {{ render_field(gen_info_form.preferred_name, value=body.preferred_name) }}
-        {{ render_field(gen_info_form.correspondence_name, value=body.correspondance_name) }}
-        {{ render_field(gen_info_form.inactive, value=body.inactive) }}
-        {{ render_field(gen_info_form.family_id, value=body.family_id) }}
-        {{ render_field(gen_info_form.office_id, value=body.office_id) }}
-        {{ render_field(gen_info_form.dentist_id, value=body.dentist_id) }}
-        {{ render_field(gen_info_form.socialsecurity_id, value=body.socialsecurity_id) }}
-        {% if body.payer %}
-          {{ render_field(gen_info_form.payer, checked="checked") }}
-        {% else %}
-          {{ render_field(gen_info_form.payer) }}
-        {% endif %}
+        {{ render_field(gen_info_form.title) }}
+        {{ render_field(gen_info_form.lastname) }}
+        {{ render_field(gen_info_form.firstname) }}
+        {{ render_field(gen_info_form.sex) }}
+        {{ render_field(gen_info_form.dob) }}
+        {{ render_field(gen_info_form.job) }}
+        {{ render_field(gen_info_form.qualifications) }}
+        {{ render_field(gen_info_form.preferred_name) }}
+        {{ render_field(gen_info_form.correspondence_name) }}
+        {{ render_field(gen_info_form.inactive) }}
+        {{ render_field(gen_info_form.family_id) }}
+        {{ render_field(gen_info_form.office_id) }}
+        {{ render_field(gen_info_form.dentist_id) }}
+        {{ render_field(gen_info_form.socialsecurity_id) }}
+        {{ render_field(gen_info_form.payer) }}
         <input type=submit value="Update" />
       </dl>
     </form>
