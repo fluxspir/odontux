@@ -22,17 +22,16 @@ class MedecineDoctorGeneralInfoForm(Form):
                          validators.Length(min=1, max=30,
                          message=_("Need to provide MD's lastname"))])
     firstname = TextField('firstname', [validators.Length(max=30)])
-    address_id = TextField('address_id')
     update_date = forms.DateField("update_date")
+
+def get_gen_info_field_list():
+    return ['lastname', "firstname" ]
 
 @app.route('/medecine_doctor/')
 @app.route('/md/')
 def list_md():
     doctors = meta.session.query(md.MedecineDoctor).all()
-    return render_template('list_md.html', doctors=doctors,
-                           role_dentist=constants.ROLE_DENTIST,
-                           role_nurse=constants.ROLE_NURSE,
-                           role_assistant=constants.ROLE_ASSISTANT)
+    return render_template('list_md.html', doctors=doctors)
 
 @app.route('/add/md/', methods=['GET', 'POST'])
 @app.route('/md/add/', methods=['GET', 'POST'])
@@ -84,27 +83,25 @@ def update_md(body_id, form_to_display):
         return redirect(url_for('list_md'))
 
     gen_info_form = MedecineDoctorGeneralInfoForm(request.form)
-    address_form = forms.AddressForm(request.form)
-    phone_form = forms.PhoneForm(request.form)
-    mail_form = forms.MailForm(request.form)
-    
+   
     if request.method == 'POST' and gen_info_form.validate():
         gen_info_fields = [ "lastname", "firstname" ]
-        for f in gen_info_fields:
+        for f in get_gen_info_field_list():
             setattr(doctor, f, getattr(gen_info_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_md', body_id=body_id,
                                 form_to_display="gen_info"))
 
-    # Page for updating md :
+    for f in get_gen_info_field_list():
+        getattr(gen_info_form, f).data = getattr(doctor, f)
+    address_form = forms.AddressForm(request.form)
+    phone_form = forms.PhoneForm(request.form)
+    mail_form = forms.MailForm(request.form)
     return render_template('/update_md.html', doctor=doctor,
                             gen_info_form=gen_info_form,
                             address_form=address_form,
                             phone_form=phone_form,
-                            mail_form=mail_form,
-                            role_dentist=constants.ROLE_DENTIST,
-                            role_nurse=constants.ROLE_NURSE,
-                            role_assistant=constants.ROLE_ASSISTANT)
+                            mail_form=mail_form)
 
 @app.route('/md/update_md_address?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])

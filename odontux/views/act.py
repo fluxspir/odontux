@@ -30,11 +30,29 @@ class SpecialtyForm(Form):
     color = ColorField('color')
 
 class ActTypeForm(Form):
-    # Create the list of specialties that exist
-    specialty_choices = meta.session.query(act.Specialty).all()
-    specialty_choice_list = [ (choice.id, choice.name) 
-                    for choice in specialty_choices ]
-    # Create the cotation list
+    specialty_id = SelectField('specialty', coerce=int)
+    cotationfr_id = SelectField('cotationfr_id', coerce=int)
+    code = TextField('code')
+    alias = TextAreaField('alias')
+    name = TextAreaField('name')
+    color = ColorField('color')
+
+
+def get_specialty_field_list():
+    return [ "name", "color" ]
+
+def get_acttype_field_list():
+    return [ "specialty_id", "cotationfr_id", "code", "alias", 
+             "name", "color" ]
+
+
+def get_specialty_choice_list():
+    return [ (choice.id, choice.name) for choice in 
+                                    meta.session.query(act.Specialty).all() ]
+
+def get_cotationfr_choice_list():
+    """ returns [ ( "cotation_id", "SC12 price" ), ] """
+
     cotationfr_choices = meta.session.query(CotationLocale)\
         .order_by(CotationLocale.key_id)\
         .order_by(CotationLocale.adult_multiplicator)\
@@ -45,23 +63,12 @@ class ActTypeForm(Form):
             .filter(cotation.NgapKeyFr.id == cotat_choice.key_id)\
             .one()
         cotats.append( (cotat_choice, ngap ) )
-    cotationfr_choice_list = [ 
-                                (cotat.id,
-            ngap.key + str(cotat.adult_multiplicator) + " " + 
-            str(cotat.get_price(cotat.adult_multiplicator, 
-                                cotat.exceeding_adult_normal))
-                                ) for cotat, ngap in cotats 
-                             ]
-    # Begin Form
-    specialty_id = SelectField('specialty', choices=specialty_choice_list, 
-                                            coerce=int)
-    cotationfr_id = SelectField('cotationfr_id', 
-                                choices=cotationfr_choice_list,
-                                coerce=int)
-    code = TextField('code')
-    alias = TextAreaField('alias')
-    name = TextAreaField('name')
-    color = ColorField('color')
+
+    return [ (cotat.id, ngap.key + str(cotat.adult_multiplicator) + " " + 
+              str(cotat.get_price(cotat.adult_multiplicator, 
+                                  cotat.exceeding_adult_normal))
+             ) for cotat, ngap in cotats 
+           ]
 
 
 ####
@@ -83,10 +90,8 @@ def list_specialty(ordering=[]):
 def add_specialty():
     form = SpecialtyForm(request.form)
     if request.method == 'POST' and form.validate():
-        values = {}
-        values['name'] = form.name.data
-        values['color'] = form.color.data
-        new_specialty = act.Specialty(**values)
+        args = {f: getattr(form, f).data for f in get_specialty_field_list() }
+        new_specialty = act.Specialty(**args)
         meta.session.add(new_specialty)
         meta.session.commit()
         return redirect(url_for('list_specialty'))
@@ -108,6 +113,8 @@ def update_specialty(specialty_id):
         specialty.color = form.color.data
         meta.session.commit()
         return redirect(url_for('list_specialty'))
+    
+
     return render_template('update_specialty.html', form=form, 
                             specialty=specialty)
 
@@ -127,7 +134,7 @@ def list_acttype(keywords="", ordering=""):
     The result will be a list of tuples :
      ( gesture, specialty, cotat, ngap )
     """
-    keywords = keywords.split()
+    keywords = keywords.encode("utf_8").split()
     ordering = ordering.split()
     # Get the acts list, named as "gesture", because it is the gesture
     # the dentist make in the patient mouth.
@@ -217,26 +224,31 @@ def update_acttype(acttype_id):
     ngap = meta.session.query(cotation.NgapKeyFr)\
                 .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
 
-    gesture = (acttype, specialty, cotat, ngap)
 
     acttype_form = ActTypeForm(request.form)
-    specialty_form = SpecialtyForm(request.form)
-    cotat_form = views_cotation.CotationFrForm(request.form)
+    acttype_form.specialty_id.choices = get_specialty_choice_list()
+    acttype_form.cotationfr_id.choices = get_cotationfr_choice_list()
+    
     #TODO
     
-    if request.method == 'POST' and form.validate():
-        acttype.specialty_id = form.specialty_id.data
-        acttype.cotationfr_id = form.cotationfr_id.data
-        acttype.code = form.code.data
-        if form.alias.data:
-            acttype.alias = form.alias.data
-        if form.name.data:
-            acttype.name = form.name.data
-        acttype.color = form.color.data
+    if request.method == 'POST' and acttype_form.validate():
+        for f in get_acttype_field_list():
+            setattr(acttype, f, getattr(acttype_form, f).data)
+            #getattr(acttype, f) = getattr(acttype_form, f).data
         meta.session.commit()
-        return redirect(url_for('list_acttype'))
+        return redirect(url_for('list_acttype', 
+                                keywords=acttype_form.name.data, 
+                                ordering=" "))
+
+    # For the GET method
+    for f in get_acttype_field_list():
+        getattr(acttype_form, f).data = getattr(acttype, f)
+
+    specialty_form = SpecialtyForm(request.form)
+    cotat_form = views_cotation.CotationFrForm(request.form)
     return render_template('/update_act.html', 
-                            form=form, 
-                            acttype=acttype, 
-                            specialty=specialty
+                            acttype_form=acttype_form, 
+                            specialty_form=specialty_form,
+                            cotat_form=cotat_form,
+                            acttype=acttype
                             )

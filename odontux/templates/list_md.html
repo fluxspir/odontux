@@ -4,7 +4,7 @@ List of medecine doctors
 {% endblock %}
 {% block main %}
 <div id="list_acttype">
-{% if session.role == role_dentist or session.role == role_nurse or session.role == role_assistant %}
+{% if session.role == session.ROLE_DENTIST or session.role == session.ROLE_NURSE or session.role == session.ROLE_ASSISTANT %}
   <a href="/md/add/">Add new medecine doctor</a><br />
 {% endif %}
 <table border=1>

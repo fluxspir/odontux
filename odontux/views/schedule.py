@@ -44,6 +44,15 @@ class AgendaForm(Form):
     duration = TimeField(_('duration'))
     endtime = TimeField(_('endtime'))
 
+
+def get_appointment_field_list():
+    return [ "patient_id", "dentist_id", "emergency", "reason", "diagnostic", 
+             "treatment", "prognostic", "advise", "next_appointment" ]
+
+def get_agenda_field_list():
+    return [ "appointment_id", "day", "starttime", "duration", "endtime" ]
+
+
 @app.route('/agenda/date/', methods=['POST'])
 def agenda_date():
     return redirect(url_for('display_day', dateday=request.form["day"]))
@@ -54,7 +63,10 @@ def agenda():
 
 @app.route('/agenda/day?date=<dateday>')
 def display_day(dateday):
-    """ """
+    """ 
+    For viewing all appointments occured the day "dateday",
+    and create links for "previous_day" and "next_day"
+    """
     dateday = datetime.datetime.strptime(dateday.encode("utf_8"),
                                          '%Y-%m-%d').date()
     nextday = dateday + datetime.timedelta(days=1)

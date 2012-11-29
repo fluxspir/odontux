@@ -7,7 +7,7 @@
 
 {% extends 'update.html' %}
 {% block main %}
-  {% if session.role == role_dentist or session.role == role_nurse or session.role == role_assistant %}
+  {% if session.role == session.ROLE_DENTIST or session.role == session.ROLE_NURSE or session.role == session.ROLE_ASSISTANT %}
     <nav id="update_choices">
       <ul>
         <li onclick='display_form("gen_info")'>General information</li>
@@ -20,8 +20,8 @@
       <div id="gen_info">
         <form method="post" action={{ url_for('update_md', body_id=doctor.id, form_to_display='gen_info') }}>
           <dl>
-            {{ render_field(gen_info_form.lastname, value=doctor.lastname) }}
-            {{ render_field(gen_info_form.firstname, value=doctor.firstname) }}
+            {{ render_field(gen_info_form.lastname) }}
+            {{ render_field(gen_info_form.firstname) }}
             <input type="submit" value="Update" />
           </dl>
         </form>

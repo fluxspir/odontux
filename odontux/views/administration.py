@@ -19,19 +19,23 @@ from odontux.views import forms, controls
 from odontux.views.log import index
 from odontux.models import meta, administration
 
-import pdb
 
 # variable to call in database the right table, which should be locale related.
 socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
 SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 # Fields too use in treatment of forms
-gen_info_fields = [ "title", "lastname", "firstname", "qualifications", 
+def get_gen_info_field_list():
+    return [ "title", "lastname", "firstname", "qualifications", 
                     "preferred_name", "correspondence_name", "sex", "dob", 
                     "job", "inactive", "time_stamp", "socialsecurity_id",
                     "office_id", "dentist_id" ]
-family_fields = [ "family_id" ]
-SSN_fields = [ ("SSN", "number"), ("cmu", "cmu"), ("insurance", "insurance") ]
+
+def get_family_field_list():
+    return [ "family_id" ]
+
+def get_SSN_field_list():
+    return [ ("SSN", "number"), ("cmu", "cmu"), ("insurance", "insurance") ]
 
 
 class PatientGeneralInfoForm(Form):
@@ -103,6 +107,8 @@ def add_patient():
     # Forms used for adding a new patient : 
     # two are patient's specific :
     gen_info_form = PatientGeneralInfoForm(request.form)
+    gen_info_form.title.choices = forms.get_title_choice_list()
+
     SSN_form = SocialSecurityForm(request.form)
     # three are used for odontux_users and medecine doctors, too
     address_form = forms.AddressForm(request.form)
@@ -121,7 +127,7 @@ def add_patient():
 
         # A family is define in odontux mostly by the fact that
         # they live together. 
-        for f in family_fields:
+        for f in get_family_field_list():
             # If patient in a family that is already in database, just tell 
             # which family he's in.
             if getattr(gen_info_form, f).data:
@@ -179,7 +185,8 @@ def add_patient():
 
             # If the number is new to database :
             except sqlalchemy.orm.exc.NoResultFound:
-                SSN_args = {g: getattr(SSN_form, f).data for f,g in SSN_fields}
+                SSN_args = {g: getattr(SSN_form, f).data 
+                                    for f,g in get_SSN_field_list() }
                 new_SSN = SocialSecurityLocale(**SSN_args)
                 meta.session.add(new_SSN)
                 meta.session.commit()
@@ -188,7 +195,8 @@ def add_patient():
         else:
             # If there weren't any SSNumber given, try anyway to add "cmu"
             # and insurance hypothetic values into database
-            SSN_args = {g: getattr(SSN_form, f).data for f,g in SSN_fields}
+            SSN_args = {g: getattr(SSN_form, f).data 
+                                    for f,g in get_SSN_field_list() }
             new_SSN = SocialSecurityLocale(**SSN_args)
             meta.session.add(new_SSN)
             meta.session.commit()
@@ -215,34 +223,28 @@ def update_patient(body_id, form_to_display):
     if not forms._check_body_perm(patient, "patient"):
         return redirect(url_for('list_patients', body_id=body_id))
 
-    # only need form for *patient_gen_info* update here. See below for others.
+    # only need form for *patient_gen_info* update here.
+    # Others are only needed for the 'GET', see below.
     gen_info_form = PatientGeneralInfoForm(request.form)
-
-    # Fill in the defaults values :
-    # title : select_field ; maybe send it to the views.forms, to use it
-    # with users...
-    title_list = [ ( "Mr", _("Mr") ), ("Mme", _("Mme") ), ( "Mlle", _("Mlle")),
-                   ( "Dr", _("Dr") ), ( "Pr", _("Pr") ) ]
-    gen_info_form.title.choices = title_list
-    # sex
-    sex_list = [ ( "m", _("Male")), ("f", _("Female")) ]
-    gen_info_form.sex.choices = sex_list
-    # textfields
-    gen_info_textfields = [ "title", "lastname", "firstname", "qualifications",
-                    "preferred_name", "correspondence_name", "dob", "sex",
-                    "job", "inactive", "time_stamp", "socialsecurity_id",
-                    "office_id", "dentist_id" ]
-    for f in gen_info_textfields:
-        getattr(gen_info_form, f).data = getattr(patient, f)
+    gen_info_form.title.choices = forms.get_title_choice_list()
     
     if request.method == 'POST' and gen_info_form.validate():
-        for f in gen_info_fields:
+        for f in get_gen_info_field_list():
             setattr(patient, f, getattr(gen_info_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_patient', body_id=body_id,
                                 form_to_display="gen_info"))
 
-    # Loading whole page, we're injecting all forms
+    # When we 'GET' the page, we need all form, and fill in
+    # the gen_info and SSN_form from here
+    for f in get_gen_info_field_list():
+        getattr(gen_info_form, f).data = getattr(patient, f)
+    # payer
+    for payer in patient.family.payers:
+        if patient.id == payer.id:
+            gen_info_form.payer.data = True
+    gen_info_form.family_id.data = patient.family.id
+    
     SSN_form = SocialSecurityForm(request.form)
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
@@ -276,14 +278,15 @@ def update_patient_SSN(body_id, form_to_display):
                             == SSN_form.SSN.data).one()
                 # The SSN already exists, the patient will enter under this SSN
                 # and we are now going to update the cmu and insurance.
-                for f,g in SSN_fields:
+                for f,g in get_SSN_field_list():
                     setattr(SSN, g, getattr(SSN_form, f).data)
                 meta.session.commit()
                 SSN_id = SSN.id
 
             # If the number is new to database :
             except sqlalchemy.orm.exc.NoResultFound:
-                SSN_args = {g: getattr(SSN_form, f).data for f,g in SSN_fields}
+                SSN_args = {g: getattr(SSN_form, f).data 
+                                            for f,g in get_SSN_field_list() }
                 new_SSN = SocialSecurityLocale(**SSN_args)
                 meta.session.add(new_SSN)
                 meta.session.commit()
@@ -292,7 +295,8 @@ def update_patient_SSN(body_id, form_to_display):
         else:
             # If there weren't any SSNumber given, try anyway to add "cmu"
             # and insurance hypothetic values into database
-            SSN_args = {g: getattr(SSN_form, f).data for f,g in SSN_fields}
+            SSN_args = {g: getattr(SSN_form, f).data 
+                                            for f,g in get_SSN_field_list() }
             new_SSN = SocialSecurityLocale(**SSN_args)
             meta.session.add(new_SSN)
             meta.session.commit()

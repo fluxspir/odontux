@@ -3,12 +3,12 @@
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="/act/update_acttype={{ acttype.id }}/">
   <dl>
-    {{ render_field(form.specialty_id) }}
-    {{ render_field(form.cotationfr_id, selected=acttype.cotationfr_id) }}
-    {{ render_field(form.code, value=acttype.code) }}
-    {{ render_field(form.alias, placeholder=acttype.alias) }}
-    {{ render_field(form.name, placeholder=acttype.name) }}
-    {{ render_field(form.color, value=acttype.color) }}
+    {{ render_field(acttype_form.specialty_id) }}
+    {{ render_field(acttype_form.cotationfr_id) }}
+    {{ render_field(acttype_form.code) }}
+    {{ render_field(acttype_form.alias) }}
+    {{ render_field(acttype_form.name) }}
+    {{ render_field(acttype_form.color) }}
   </dl>
   <p><input type="submit" value="Update">
 </form>

@@ -19,22 +19,8 @@ from odontux.odonweb import app
 from odontux.views import forms, controls
 from odontux.views.log import index
 
-import pdb
-
-# form fields list
-
-gen_info_fields = [ "title", "lastname", "firstname", 
-                   "qualifications", "registration", "correspondence_name", 
-                   "sex", "dob", "avatar_id"]
-gen_info_admin_fields = [ "username", "role" , "status", "comments", 
-                          "modified_by", "time_stamp" ]
-password_fields = [ "password" ]
-
-dental_office_fields = [ "office_name", "owner_lastname", "owner_firstname", 
-                         "url"]
-
 class OdontuxUserGeneralInfoForm(Form):
-    title = SelectField(_('title'), choices=forms.title_list)
+    title = SelectField(_('title'))
     lastname = TextField(_('lastname'), [validators.Required(),
                             validators.Length(min=1, max=30,
                             message=_("Need to provide MD's lastname"))],
@@ -79,6 +65,22 @@ class DentalOfficeForm(Form):
     owner_firstname = TextField(_("owner_firstname"))
     url = TextField(_("url"))
 
+
+def get_gen_info_field_list():
+    return [ "title", "lastname", "firstname", "qualifications", 
+             "registration", "correspondence_name", "sex", "dob", "avatar_id" ]
+
+def get_gen_info_admin_field_list():
+    return [ "username", "role" , "status", "comments", "modified_by", 
+             "time_stamp" ]
+
+def get_password_field_list():
+    return [ "password" ]
+
+def get_dental_office_field_list():
+    return [ "office_name", "owner_lastname", "owner_firstname", "url"]
+
+
 @app.route('/odontux_user/')
 @app.route('/user/')
 def list_users():
@@ -115,6 +117,8 @@ def add_user():
         return redirect(url_for("index"))
 
     gen_info_form = OdontuxUserGeneralInfoForm(request.form)
+    gen_info_form.title.choices = forms.get_title_choice_list()
+
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
@@ -208,14 +212,17 @@ def update_user(body_id, form_to_display):
 
     # For updating info of user, we're dealing with the form 
     gen_info_form = OdontuxUserGeneralInfoForm(request.form)
+    gen_info_form.title.choices = forms.get_title_choice_list()
     if session['role'] == constants.ROLE_ADMIN:
         gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
+    else:
+        gen_info_admin_form = ""
     if request.method == 'POST' and gen_info_form.validate():
-        for f in gen_info_fields:
+        for f in get_gen_info_field_list():
             setattr(user, f, getattr(gen_info_form, f).data)
         if (session['role'] == constants.ROLE_ADMIN
             and gen_info_admin_form.validate() ):
-            for f in gen_info_admin_fields:
+            for f in get_gen_info_admin_field_list():
                 setattr(user, f, getattr(gen_info_admin_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_user', 
@@ -223,8 +230,7 @@ def update_user(body_id, form_to_display):
                                  form_to_display="gen_info"))
 
     # When loading the whole update page, we use the form containing all fields
-    gen_info_form = OdontuxUserGeneralInfoForm(request.form)
-    gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
+
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
@@ -253,7 +259,7 @@ def update_dental_office(body_id, form_to_display):
 
     dental_office_form = DentalOfficeForm(request.form)
     if request.method == 'POST' and dental_office_form.validate():
-        for f in dental_office_fields:
+        for f in get_dental_office_field_list:
             setattr(dental_office, f, getattr(dental_office_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_dental_office', 

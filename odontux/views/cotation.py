@@ -20,6 +20,7 @@ cotationlocale = "Cotation" + constants.LOCALE.title()
 CotationLocale = getattr(cotation, cotationlocale)
 
 class NgapKeyFrForm(Form):
+    ngapkeyfr_id = HiddenField(_("ID"))
     name = TextField(_('name'), [validators.Required(
                       message=_("Please give a name"))])
     key = TextField(_('key'), [validators.Required(
@@ -30,6 +31,7 @@ class NgapKeyFrForm(Form):
                             message=_("please write a unit_price"))])
 
 class CmuKeyFrForm(Form):
+    cmukeyfr_id = HiddenField(_("ID"))
     key = TextField(_('key'), [validators.Required(
                         message=_("Please enter a key")),
                         validators.Length(min=1, max=5,
@@ -38,26 +40,17 @@ class CmuKeyFrForm(Form):
                         message=_("Please name the use of key"))])
 
 class MajorationFrForm(Form):
+    majorationfr_id = HiddenField(_("ID"))
     name = TextField(_('name'), [validators.Required(
                         message=_("Please specify the majoration reason"))])
     price = TextField(_('price'), [validators.Required(
                         message=_("Give the price of the majoration"))])
 
 class CotationFrForm(Form):
-    # choices list
-    ngap_list = []
-    cmu_list = []
-    for ngap in meta.session.query(cotation.NgapKeyFr).all():
-        ngap_list.append( (ngap.id, ngap.key + "-" + ngap.name) )
-    for cmu in meta.session.query(cotation.CmuKeyFr).all():
-        cmu_list.append( (cmu.id, cmu.key + "-" + cmu.name) )
-    # Form
     cotationfr_id = HiddenField(_('ID'))
     key_id = SelectField(_('key_id'), [validators.Required(
-                            message=_("Must provide a ngap key"))],
-                            choices=ngap_list)
-    key_cmu_id = SelectField(_('key_cmu_id'), [validators.Optional()],
-                            choices=cmu_list)
+                            message=_("Must provide a ngap key"))])
+    key_cmu_id = SelectField(_('key_cmu_id'), [validators.Optional()])
     adult_multiplicator = TextField(_('adult_multiplicator'))
     kid_multiplicator = TextField(_('kid_multiplicator'))
     adult_cmu_num = TextField(_('adult_cmu_num'))
@@ -67,14 +60,29 @@ class CotationFrForm(Form):
     exceeding_adult_cmu = TextField(_('exceeding_adult_cmu'))
     exceeding_kid_cmu = TextField(_('exceeding_kid_cmu'))
 
+def get_ngap_choice_list():
+    return [ (ngap.id, ngap.key + "-" + ngap.name) 
+                    for ngap in meta.session.query(cotation.NgapKeyFr).all() ]
 
-ngapkeyfr_fields = [ "name", "key", "unit_price" ]
-cmukeyfr_fields = [ "key", "name" ]
-majorationfr_fields = [ "name", "price" ]
-cotationfr_fields = ["key_id", "key_cmu_id", "adult_multiplicator", 
+def get_cmu_choice_list():
+    return [ (cmu.id, cmu.key + "-" + cmu.name) 
+                    for cmu in meta.session.query(cotation.CmuKeyFr).all() ]
+
+def get_ngapkeyfr_field_list():
+    return [ "name", "key", "unit_price" ]
+
+def get_cmukeyfr_field_list():
+    return [ "key", "name" ]
+
+def get_majorationfr_field_list():
+    return [ "name", "price" ]
+
+def get_cotationfr_field_list():
+    return [ "key_id", "key_cmu_id", "adult_multiplicator", 
                      "kid_multiplicator", "adult_cmu_num", "kid_cmu_num",
                      "exceeding_adult_normal", "exceeding_kid_normal",
                      "exceeding_adult_cmu", "exceeding_kid_cmu" ]
+
 
 @app.route('/cotation?keywords=<keywords>&ordering=<ordering>')
 def list_cotations(keywords="", ordering=""):
@@ -161,7 +169,7 @@ def update_ngap(ngap_id):
     form = NgapKeyFrForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        for f in ngapkeyfr_fields:
+        for f in get_ngapkeyfr_field_list():
             setattr(ngap, f, getattr(form, f).data)
         meta.session.commit()
         return redirect(url_for('show_ngap'))
@@ -172,7 +180,7 @@ def add_ngap():
         return redirect(url_for('show_ngap'))
     form = NgapKeyFrForm(request.form)
     if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in ngapkeyfr_fields}
+        args = {f: getattr(form, f).data for f in get_ngapkeyfr_field_list()}
         new_ngapkeyfr = cotation.NgapKeyFr(**args)
         meta.session.add(new_ngapkeyfr)
         meta.session.commit()
@@ -202,7 +210,7 @@ def update_cmu(cmu_id):
     form = CmuKeyFrForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        for f in cmukeyfr_fields:
+        for f in get_cmukeyfr_field_list():
             setattr(cmu, f, getattr(form, f).data)
         meta.session.commit()
         return redirect(url_for('show_ngap'))
@@ -213,7 +221,7 @@ def add_cmu():
         return redirect(url_for('show_ngap'))
     form = CmuKeyFrForm(request.form)
     if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in cmukeyfr_fields}
+        args = {f: getattr(form, f).data for f in get_cmukeyfr_field_list()}
         new_cmukeyfr = cotation.CmuKeyFr(**args)
         meta.session.add(new_cmukeyfr)
         meta.session.commit()
@@ -244,7 +252,7 @@ def update_majoration(majoration_id):
     form = MajorationFrForm(request.form)
 
     if request.method == 'POST' and form.validate():
-        for f in majorationfr_fields:
+        for f in get_majorationfr_field_list():
             setattr(majoration, f, getattr(form, f).data)
         meta.session.commit()
         return redirect(url_for('show_ngap'))
@@ -255,7 +263,8 @@ def add_majoration():
         return redirect(url_for('show_ngap'))
     form = MajorationFrForm(request.form)
     if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in majorationfr_fields}
+        args = {f: getattr(form, f).data 
+                        for f in get_majorationfr_field_list()}
         new_majorationfr = cotation.MajorationFr(**args)
         meta.session.add(new_majorationfr)
         meta.session.commit()

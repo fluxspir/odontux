@@ -38,7 +38,7 @@ odontux add_acttype -n "Pulpectomie coronaire et radiculaire, groupe prémolaire
 cotid=$(odontux add_cotationfr -k 3 -m 34 --kid_multiplicator 39)
 odontux add_acttype -n "Pulpectomie coronaire et radiculaire, groupe molaires" -c pulpecmol -s 4 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 12)
-odontux add_acttype -n "Détartrage" -a "Detartrage" -c det -s 2 --cotation $cotid
+odontux add_acttype -n "Détartrage" -a "Detartrage" -c det -s 2 --color "#810D36" --cotation $cotid
 odontux add_acttype -n "Détartrage 2nde séance" -c det2 -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 27)
 odontux add_acttype -n "Aero Polissage" -a "Polissage" -c poli -s 2 --cotation $cotid

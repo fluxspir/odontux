@@ -33,7 +33,7 @@ def find():
     
     if request.form["database"] == "act":
         return redirect(url_for('list_acttype', 
-                        keywords=request.form["keywords"].encode("utf_8"),
+                        keywords=request.form["keywords"],
                         ordering=" "))
 
     if request.form['database'] == "cotation":

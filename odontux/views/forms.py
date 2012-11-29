@@ -24,8 +24,10 @@ address_fields = ["street", "building", "city", "postal_code", "county",
                   "country" ]
 phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
-title_list = [ (_("Mr"), _("Mr")), (_("Mme"), _("Mme")),
-                (_("Mlle"), _("Mlle")), (_("Dr"), _("Dr")) ]
+
+def get_title_choice_list():
+    return [ ( "Mr", _("Mr") ), ("Mme", _("Mme") ), ( "Mlle", _("Mlle")),
+             ( "Dr", _("Dr") ), ( "Pr", _("Pr")) ] 
 
 
 

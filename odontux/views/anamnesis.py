@@ -7,7 +7,7 @@
 
 from flask import session, render_template, request, redirect, url_for
 from wtforms import (Form,
-                     SelectField, TextField, BooleanField, 
+                     SelectField, TextField, BooleanField, TextAreaField,
                      HiddenField,
                      validators
                      )
@@ -70,16 +70,16 @@ def _get_forms():
            )
 
 def _get_gen_info_fields():
-    return [ "patient_id", "dentist_id" ]
+    return [ "patient_id", "dentist_id", "time_stamp" ]
 
 def _get_med_hist_fields():
-    return [ "icd10", "disease", "disorder", "habitus", "treatment" ]
+    return [ "mh_id", "icd10", "disease", "disorder", "habitus", "treatment" ]
 
 def _get_past_surg_fields():
-    return [ "surgery_type", "problem", "complication" ]
+    return [ "surg_id", "surgery_type", "problem", "complication" ]
 
 def _get_allergies_fields():
-    return [ "drug", "metal", "food", "other", "reaction" ]
+    return [ "al_id", "drug", "metal", "food", "other", "reaction" ]
 
 @app.route('/patient/anamnesis')
 def list_anamnesis():
@@ -110,6 +110,7 @@ def update_anamnesis():
     (med_form, surg_form, allergies_form, gen_info_form) = _get_forms()
     (medical_history, past_surgeries, allergies) =\
         _get_patient_anamnesis(patient.id)
+    
     return render_template("update_anamnesis.html",
                             patient=patient,
                             medical_history=medical_history,
@@ -140,8 +141,9 @@ def update_medical_history():
         med_fields = _get_med_hist_fields()
         for f in med_fields:
             setattr(medic_hist, f, getattr(med_form, f).data)
-        setattr(medic_hist, "time_stamp",
-                getattr(gen_info_form, "time_stamp").data)
+        for f in gen_info_fields:
+            setattr(medic_hist, "time_stamp", getattr(gen_info_form, 
+                                                      "time_stamp").data)
         meta.session.commit()
         return redirect(url_for('update_anamnesis', patient=patient))
 
