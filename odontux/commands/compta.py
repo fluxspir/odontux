@@ -18,14 +18,7 @@ from gettext import gettext as _
 import os
 import sys
 
-try:
-    import gnucash
-    from gnucash import GncNumeric
-    from base import GnuCash
-    GNUCASH_ACCOUNT = True
-
-except ImportError:
-    GNUCASH_ACCOUNT = False
+import gnucash_handler
 
 class PaymentTypeParser(BaseCommand):
     """ """
@@ -166,41 +159,6 @@ class PaymentParser(BaseCommand):
         return options, args
 
 
-class GnuCashPayment(GnuCash):
-    """ GnuCashPayment tries to 
-    """
-    def _get_payer(self, gcpayer_id):
-        return self.book.CustomerLookupByID(gcpayer_id)
-
-    def _get_paymenttype(self, mean_id):
-        mean = meta.session.query(compta.PaymentType)\
-               .filter(compta.PaymentType.id == mean_id).one()
-        
-        paymenttype = self.parser.get("gnucashdb", mean.name)
-        return self.dentalfund.lookup_by_name(paymenttype)
-            
-    def add_payment(self, mean_id, amount, date):
-        try:
-            payer = self._get_payer(self.gcpatient_id)
-            dest_account = self._get_paymenttype(mean_id)
-            amount = self.gnc_numeric_from_decimal(amount)
-
-#            invoices_list = []
-#            for invoice_id in invoices_id:
-#                invoices_list.append(self.book.InvoiceLookupByID(invoice_id))
-                
-#            payer.ApplyPayment(invoice=None, self.receivables, dest_account, 
-#                            amount, exch=GncNumeric(1), date, memo="", num="")
-            payer.ApplyPayment(None, self.receivables, dest_account, 
-                            amount, GncNumeric(1), date, "", "")
-            
-#            self.gcsession.save()
-            self.gcsession.end()
-            return True
-        except:
-            self.gcsession.end()
-            raise
-
 
 class AddPaymentCommand(BaseCommand, PaymentParser):
     """ """
@@ -224,14 +182,20 @@ class AddPaymentCommand(BaseCommand, PaymentParser):
         if options.invoices:
             options.invoices = options.invoices.decode("utf_8")
 
+        # we want to know the dentist of the payer for instanciating gnucash 
+        # later
+        payer = meta.session.query(administration.Patient)\
+            .filter(administration.Patient.id == payer_id)\
+            .one()
+
         new_payment = compta.Payment(**self.values)
         meta.session.add(new_payment)
         meta.session.commit()
 
         # Telling gnucash the patient paid (not telling for what)
-        if GNUCASH_ACCOUNT:
-            gcpayment = GnuCashPayment(new_payment.payer_id)
-            gcpayment.add_payment(new_payment.mean_id, new_payment.amount, 
+        gcpayment = gnucash_handler.GnuCashPayment(new_payment.payer_id, 
+                                                   payer.dentist_id)
+        gcpayment.add_payment(new_payment.mean_id, new_payment.amount, 
                                   new_payment.cashin_date)
             
         print(new_payment.id)

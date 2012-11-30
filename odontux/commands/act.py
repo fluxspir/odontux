@@ -17,19 +17,9 @@ import datetime
 import os
 import sys
 
-import pdb
+import gnucash_handler
 
 today = datetime.date.today()
-
-try:
-    import gnucash
-    from base import GnuCash
-    from gnucash import Session as GCSession
-    from gnucash import GncNumeric
-    from gnucash.gnucash_business import Invoice, Entry
-    GNUCASH_ACCOUNT = True
-except ImportError:
-    GNUCASH_ACCOUNT = False
 
 
 locale = "fr"
@@ -37,74 +27,6 @@ socialsecuritylocale = "SocialSecurity" + locale.title()
 SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 
-class GnuCashInvoice(GnuCash):
-    """ 
-    The GnuCashInvoice deals with gnucash to enter act and price in an Invoice.
-    As it hasn't been cashed, but that the act "is selled", it will be stocked
-    in an "Receivable Account".
-    An individual invoice will contain every act made on a unique patient
-    during an unique appointment.
-    """
-    def __init__(self, patient_id, appointment_id):
-        # Initialize the self.vars from Parent : GnuCash
-        #   * self.gcsession
-        #   * self.book
-        #   * self.root, self.assets, self.receivables, self.incomes, 
-        #   self.dentalincomes
-        #   * self.gcpatient and self.patient
-        #   * self.currency
-        GnuCash.__init__(self, patient_id)
-        # get the patient (customer) instance from gnucash database
-        self.owner = self.book.CustomerLookupByID(self.gcpatient_id)
-        # invoice_id is build as
-        # Date + appointment_id
-        self.date = meta.session.query(schedule.Appointment)\
-                    .filter(schedule.Appointment.id ==
-                            appointment_id).one().agenda.endtime
-
-        self.invoice_id = "inv_" + str(self.date.year)+\
-                                   str(self.date.month) +\
-                                   str(self.date.day) + "_" +\
-                                   str(appointment_id)
-
-    def _create_invoice_instance(self):
-        return Invoice(self.book, self.invoice_id, self.currency, 
-                       self.owner, self.date)
-        
-    def add_act(self, code, price):
-        # Get an instance for the invoice
-        try:
-            if self.book.InvoiceLookupByID(self.invoice_id):
-                invoice = self.book.InvoiceLookupByID(self.invoice_id)
-                invoice.Unpost(True)
-                invoice.BeginEdit()
-            else:
-                invoice = self._create_invoice_instance()
-                invoice.BeginEdit()
-
-            description = code
-            invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
-
-            invoice_entry = Entry(self.book, invoice)
-            invoice_entry.BeginEdit()
-            invoice_entry.SetDescription(description.encode("utf_8"))
-            invoice_entry.SetQuantity( GncNumeric(1) )
-            invoice_entry.SetInvAccount(self.dentalincomes)
-            invoice_entry.SetInvPrice(invoice_value)
-            invoice_entry.CommitEdit()
-            invoice.CommitEdit()
-            invoice.PostToAccount(self.receivables, self.date, self.date,
-                                  description.encode("utf_8"), True)
-            self.gcsession.save()
-            self.gcsession.end()
-            return self.invoice_id
-        
-        except:
-            self.gcsession.end()
-            raise
-            return False
-
-        
 class ActTypeParser(BaseCommand):
     """ """
     def parse_args(self, args):
@@ -310,12 +232,11 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
         meta.session.add(new_act)
         meta.session.commit()
 
-        if GNUCASH_ACCOUNT:
-            invoice = GnuCashInvoice(patient_id, appointment_id)
-            invoice_id = invoice.add_act(self.values["code"], 
+        invoice = gnucash_handler.GnuCashInvoice(patient_id, appointment_id)
+        invoice_id = invoice.add_act(self.values["code"], 
                                          self.values["price"])
-            new_act.invoice_id = invoice_id
-            meta.session.commit()
+        new_act.invoice_id = invoice_id
+        meta.session.commit()
 
         print(new_act.id)
 

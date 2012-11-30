@@ -8,138 +8,16 @@
 from models import meta, administration, cotation, md, teeth
 from base import BaseCommand
 
-import ConfigParser
 import os
 from sqlalchemy import or_
 from gettext import gettext as _
 import sys
 
-import gnucash
-from base import GnuCash
-from gnucash import Session as GCSession
-from gnucash.gnucash_business import Customer, Address
-GNUCASH_ACCOUNT = True
-
+import gnucash_handler
 
 locale = "fr"
 socialsecuritylocale = "SocialSecurity" + locale.title()
 SocialSecurityLocale = getattr(administration, socialsecuritylocale)
-
-
-class GnuCashCustomer(GnuCash):
-    """
-    This class is meant to manage "Customers" informations in gnucash.
-    """
-
-    def _test_id_already_in_database(self):
-        return self.book.CustomerLookupByID(self.gcpatient_id)
-
-    def _set_name(self):
-        """return customer instance, and his name"""
-        # patient_name :  M. LASTNAME Firstname
-        name = self.patient.title + " " + self.patient.lastname + " " \
-               + self.patient.firstname
-        new_customer = Customer(self.book, self.gcpatient_id, self.currency, 
-                                name.encode("utf_8"))
-#        self.gcsession.save()
-        return new_customer, name
-
-    def _update_name(self):
-        """return customer instance, and his name"""
-        name = self.patient.title + " " + self.patient.lastname + " " \
-               + self.patient.firstname
-        customer = self.book.CustomerLookupByID(self.gcpatient_id)
-        customer.SetName(name.encode("utf_8"))
-#        self.gcsession.save()
-        return customer, name
-
-    def _set_address(self, customer, patientname):
-        """ needs a customer_instance 
-        This address, in gnucash, is asked for billing purpose
-        We'll keep the patient's name as the customer ;
-        the billing's name will be wether patient's name if he's alone
-        in the family, and the " Family patient.lastname " if there
-        is several patients / payers in this family
-        """
-        # Get the payers' names
-        payername = ""
-        payerlist = []
-        for payer in self.patient.family.payers:
-            # The patient is noted as a payer
-            if payer.patient_id == self.patient_id:
-                # The patient pays for himself
-                payername = patientname
-                break
-            else:
-                payerlist.append(payer.patient_id)
-
-        if not payername:
-            # Case the patient ain't recorded as a payer
-            if not payerlist:
-                # Curious case where nobody recorded as a payer for this family
-                # The patient will finally be the payer for gnucash.Customer
-                payername = patientname
-            else:
-                for patient_id in payerlist:
-                    payer = meta.session.query(administration.Patient)\
-                            .filter(administration.Patient.id == patient_id)
-                    payer = payer.one()
-                    payer = payer.title + " " + payer.lastname + " " +\
-                            payer.firstname
-                    payername.join(", ", payer)
-
-        address = customer.GetAddr()
-        address.SetName(payername.encode("utf_8"))
-        if self.patient.family.addresses[-1].street:
-            address.SetAddr1(self.patient.family.addresses[-1]
-                             .street.encode("utf_8"))
-        if self.patient.family.addresses[-1].building:
-            address.SetAddr2(self.patient.family.addresses[-1]
-                             .building.encode("utf_8"))
-        postal_code = ""
-        city = ""
-        if self.patient.family.addresses[-1].postal_code:
-            postal_code = self.patient.family.addresses[-1]\
-                          .postal_code.encode("utf_8")
-        if self.patient.family.addresses[-1].city:
-            city = self.patient.family.addresses[-1].city.encode("utf_8")
-        address.SetAddr3(postal_code  + " " + city)
-        county = ""
-        country = ""
-        if self.patient.family.addresses[-1].county:
-            county = self.patient.family.addresses[-1].county.encode("utf_8")
-        if self.patient.family.addresses[-1].country:
-            country = self.patient.family.addresses[-1].country.encode("utf_8")
-        address.SetAddr4(county + " " + country)
-#        self.gcsession.save()
-
-    def add_customer(self):
-        try:
-            if self._test_id_already_in_database():
-                self.update_customer()
-                return True
-            (new_customer, name) = self._set_name()
-            self._set_address(new_customer, name)
-            self.gcsession.end()
-            return True
-        except:
-            self.gcsession.end()
-            raise
-            return False
-
-    def update_customer(self):
-        try:
-            if not self._test_id_already_in_database():
-                self.self.add_customer()
-                return True
-            (customer, name) = self._update_name()
-            self._set_address(customer, name)
-            self.gcsession.end()
-            return True
-        except:
-            self.gcsession.end()
-            raise
-            return False
 
 
 class PatientParser(BaseCommand):
@@ -283,7 +161,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
 
         (options, args) = self.parse_args(args)
 
-        if not options.lastname:
+        if not options.lastname or not options.dentist_id:
             sys.exit("a lastname must be provide to add a new patient to\
                                                                     database")
 
@@ -437,9 +315,10 @@ class AddPatientCommand(BaseCommand, PatientParser):
 
         meta.session.commit()
 
-        if GNUCASH_ACCOUNT:
-            comptability = GnuCashCustomer(new_patient.id)
-            new_customer = comptability.add_customer()
+        # Add the new patient to gnucash !
+        comptability = gnucash_handler.GnuCashCustomer(new_patient.id, 
+                                                       new_patient.dentist_id)
+        new_customer = comptability.add_customer()
        
         print(new_patient.id)
 
@@ -556,9 +435,9 @@ class PatientMovingInCommand(BaseCommand):
                                             ))
         meta.session.commit()
 
-        if GNUCASH_ACCOUNT:
-            comptability = GnuCashCustomer(patient.id)
-            customer = comptability.update_customer()
+        comptability = gnucash_handler.GnuCashCustomer(patient.id, 
+                                                       patient.dentist_id)
+        customer = comptability.update_customer()
 
 
 class ListPatientCommand(BaseCommand, PatientParser):
@@ -689,9 +568,9 @@ class UpdatePatientCommand(BaseCommand, PatientParser):
 
         meta.session.commit()
 
-        if GNUCASH_ACCOUNT:
-            comptability = GnuCashCustomer(patient.id)
-            customer = comptability.update_customer()
+        comptability = gnucash_handler.GnuCashCustomer(patient.id, 
+                                                       patient.dentist_id)
+        customer = comptability.update_customer()
 
 
 class AddPatientPhoneCommand(BaseCommand, PatientParser):
