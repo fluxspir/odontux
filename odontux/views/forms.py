@@ -14,6 +14,7 @@ from wtforms import (Form, IntegerField, TextField, PasswordField,
 from flask import session, request
 
 from odontux import constants
+from odontux import gnucash_handler
 from odontux.models import (meta,
                             administration,
                             md,
@@ -191,10 +192,15 @@ def update_body_address(body_id, body_type):
             if body_type == "patient":
                 setattr(body.family.addresses[address_index], f, 
                         getattr(form, f).data)
+                meta.session.commit()
+                # update address in gnucash for patient.
+                comptability = gnucash_handler.GnuCashCustomer(body.id,
+                                                 body.dentist_id)
+                customer = comptability.update_customer()
             else:
                 setattr(body.addresses[address_index], f, 
                         getattr(form, f).data)
-        meta.session.commit()
+                meta.session.commit()
         return True
         
 def add_body_address(body_id, body_type):
@@ -206,9 +212,14 @@ def add_body_address(body_id, body_type):
         args = {f: getattr(form, f).data for f in address_fields}
         if body_type == "patient":
             body.family.addresses.append(administration.Address(**args))
+            meta.session.commit()
+            # in gnucash
+            comptability = gnucash_handler.GnuCashCustomer(body.id,
+                                                          body.dentist_id)
+            customer = comptability.update_customer()
         else:
             body.addresses.append(administration.Address(**args))
-        meta.session.commit()
+            meta.session.commit()
         return True
 
 def delete_body_address(body_id, body_type):
