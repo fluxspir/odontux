@@ -30,7 +30,6 @@ class OdontuxUserGeneralInfoForm(Form):
                                         filters=[forms.title_field])
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
-    registration = TextField(_('registration'))
     correspondence_name = TextField(_('correspondence_name'), 
                                     filters=[forms.upper_field])
     sex = SelectField(_('Male'), 
@@ -50,6 +49,12 @@ class OdontuxUserGeneralInfoAdminForm(Form):
     modified_by = IntegerField(_('modified_by'), [validators.Optional()])
     time_stamp = forms.DateField(_("time_stamp"))
 
+class DentistSpecificForm(Form):
+    registration = TextField(_('registration'))
+
+class DentistSpecificAdminForm(Form):
+    gnucash_url = TextField(_("gnucash_url"))
+
 class OdontuxUserPasswordForm(Form):
     password = PasswordField(_('password'), [validators.Required(),
                         validators.Length(min=4), 
@@ -68,11 +73,17 @@ class DentalOfficeForm(Form):
 
 def get_gen_info_field_list():
     return [ "title", "lastname", "firstname", "qualifications", 
-             "registration", "correspondence_name", "sex", "dob", "avatar_id" ]
+             "correspondence_name", "sex", "dob", "avatar_id" ]
 
 def get_gen_info_admin_field_list():
     return [ "username", "role" , "status", "comments", "modified_by", 
              "time_stamp" ]
+
+def get_dentist_specific_field_list():
+    return [ "registration" ]
+
+def get_dentist_specific_admin_field_list():
+    return [ "gnucash_url" ]
 
 def get_password_field_list():
     return [ "password" ]
@@ -119,6 +130,8 @@ def add_user():
     gen_info_form = OdontuxUserGeneralInfoForm(request.form)
     gen_info_form.title.choices = forms.get_title_choice_list()
 
+    dentist_specific_form = DentistSpecificForm(request.form)
+    dentist_specific_admin_form = DentistSpecificAdminForm(request.form)
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
@@ -128,12 +141,16 @@ def add_user():
         and mail_form.validate and password_form.validate()
        ):
         values = {}
-        for f in general_fields:
+        for f in get_gen_info_field_list():
             values[f] = getattr(gen_info_form, f).data
-        for f in info_fields:
+        for f in get_gen_info_admin_field_list():
             values[f] = getattr(gen_info_form, f).data
-        for f in password_fields:
+        for f in get_password_field_list():
             values[f] = getattr(password_form, f).data
+        for f in get_dentist_specific_field_list():
+            values[f] = getattr(dentist_specific_form, f).data
+        for f in get_dentist_specific_admin_field_list():
+            values[f] = getattr(dentist_specific_admin_form, f).data
 
         new_odontuxuser = users.OdontuxUser(**values)
         meta.session.add(new_odontuxuser)
@@ -196,7 +213,9 @@ def add_dental_office():
                             dental_office_form=dental_office_form,
                             address_form=address_form,
                             phone_form=phone_form,
-                            mail_form=mail_form)
+                            mail_form=mail_form,
+                            dentist_specific_form=dentist_specific_form,
+                        dentist_specific_adminform=dentist_specific_admin_form)
 
 # Function for printing the user's updating page, and getting 
 # general and information fields.
@@ -213,23 +232,57 @@ def update_user(body_id, form_to_display):
     # For updating info of user, we're dealing with the form 
     gen_info_form = OdontuxUserGeneralInfoForm(request.form)
     gen_info_form.title.choices = forms.get_title_choice_list()
+
     if session['role'] == constants.ROLE_ADMIN:
         gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
     else:
         gen_info_admin_form = ""
+    if user.role == constants.ROLE_DENTIST: 
+        dentist_specific_form = DentistSpecificForm(request.form)
+    else:
+        dentist_specific_form = ""
+    if (session['role'] == constants.ROLE_ADMIN 
+            and user.role == constants.ROLE_DENTIST):
+        dentist_specific_admin_form = DentistSpecificAdminForm(request.form)
+    else:
+        dentist_specific_admin_form = ""
+
     if request.method == 'POST' and gen_info_form.validate():
         for f in get_gen_info_field_list():
             setattr(user, f, getattr(gen_info_form, f).data)
+        if user.role == constants.ROLE_DENTIST:
+            for f in get_dentist_specific_field_list():
+                setattr(user, f, getattr(dentist_specific_form, f).data)
         if (session['role'] == constants.ROLE_ADMIN
             and gen_info_admin_form.validate() ):
             for f in get_gen_info_admin_field_list():
                 setattr(user, f, getattr(gen_info_admin_form, f).data)
+            if user.role == constants.ROLE_DENTIST:
+                for f in get_dentist_specific_admin_field_list():
+                    setattr(user, f, 
+                            getattr(dentist_specific_admin_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_user', 
                                  body_id=body_id, 
                                  form_to_display="gen_info"))
 
     # When loading the whole update page, we use the form containing all fields
+    # after prepopulating it
+    for f in get_gen_info_field_list():
+        getattr(gen_info_form, f).data = getattr(user, f)
+    if user.role == constants.ROLE_DENTIST:
+        for f in get_dentist_specific_field_list():
+            getattr(dentist_specific_form, f).data = getattr(user, f)
+    if session['role'] == constants.ROLE_ADMIN:
+        for f in get_gen_info_admin_field_list():
+            getattr(gen_info_admin_form, f).data = getattr(user, f)
+        if user.role == constants.ROLE_DENTIST:
+            for f in get_dentist_specific_admin_field_list():
+                try:
+                    getattr(dentist_specific_admin_form, f).data =\
+                    getattr(user, f)
+                except:
+                    pass
 
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
@@ -243,7 +296,9 @@ def update_user(body_id, form_to_display):
                             address_form=address_form,
                             phone_form=phone_form,
                             mail_form=mail_form,
-                            password_form=password_form)
+                            password_form=password_form,
+                            dentist_specific_form=dentist_specific_form,
+                       dentist_specific_admin_form=dentist_specific_admin_form)
 
 @app.route('/dental_office/update?id=<int:body_id>'
             '&form_to_display=<form_to_display>/', methods=['GET', 'POST'])
@@ -259,7 +314,7 @@ def update_dental_office(body_id, form_to_display):
 
     dental_office_form = DentalOfficeForm(request.form)
     if request.method == 'POST' and dental_office_form.validate():
-        for f in get_dental_office_field_list:
+        for f in get_dental_office_field_list():
             setattr(dental_office, f, getattr(dental_office_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_dental_office', 

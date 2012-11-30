@@ -20,29 +20,28 @@
     <form method="post" action={{ url_for('update_user', body_id=user.id, form_to_display="gen_info") }}>
       <dl>
       {% if session.role == session.ROLE_ADMIN %}
-        {{ render_field(gen_info_admin_form.username, value=user.username) }}
+        {{ render_field(gen_info_admin_form.username) }}
       {% endif %}
-      {{ render_field(gen_info_form.title, value=user.title) }}
-      {{ render_field(gen_info_form.lastname, autofocus="autofocus", value=user.lastname) }}
-      {{ render_field(gen_info_form.firstname, value=user.firstname, width="100%") }}
-      {% if user.sex == True %}
-        {{ render_field(gen_info_form.sex, checked="checked") }}
-      {% else %}
-        {{ render_field(gen_info_form.sex ) }}
+      {{ render_field(gen_info_form.title) }}
+      {{ render_field(gen_info_form.lastname, autofocus="autofocus") }}
+      {{ render_field(gen_info_form.firstname) }}
+      {{ render_field(gen_info_form.sex) }}
+      {{ render_field(gen_info_form.dob) }}
+      {{ render_field(gen_info_form.qualifications) }}
+      {{ render_field(gen_info_form.correspondence_name) }}
+      {{ render_field(gen_info_form.avatar_id) }}
+      {% if user.role == session.ROLE_DENTIST %}
+        {{ render_field(dentist_specific_form.registration) }}
       {% endif %}
-      {{ render_field(gen_info_form.dob, value=user.dob) }}
-      {{ render_field(gen_info_form.qualifications, value=user.qualifications) }}
-      {{ render_field(gen_info_form.correspondence_name, value=user.correspondence_name) }}
-      {{ render_field(gen_info_form.avatar_id, value=user.avatar_id|int) }}
-      {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
-        {{ render_field(gen_info_form.registration, value=user.registration) }}
+      {% if session.role == session.ROLE_ADMIN and user.role == session.ROLE_DENTIST %}
+        {{ render_field(dentist_specific_admin_form.gnucash_url) }}
       {% endif %}
 
       {% if session.role == session.ROLE_ADMIN %}
-        {{ render_field(gen_info_admin_form.status, value=user.status) }}
-        {{ render_field(gen_info_admin_form.role, value=user.role) }}
-        {{ render_field(gen_info_admin_form.comments, value=user.comments) }}
-        {{ render_field(gen_info_admin_form.modified_by, value=user.modified_by) }}
+        {{ render_field(gen_info_admin_form.status) }}
+        {{ render_field(gen_info_admin_form.role) }}
+        {{ render_field(gen_info_admin_form.comments) }}
+        {{ render_field(gen_info_admin_form.modified_by) }}
       {% endif %}
       <input type=submit value="Update" />
      </dl>

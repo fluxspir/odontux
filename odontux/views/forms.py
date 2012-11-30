@@ -101,7 +101,7 @@ class TimeField(Field):
 # Generic Forms
 class PhoneForm(Form):
     phonename = TextField('phonename', validators=[validators.Optional()])
-    phonenum = TelField('phonenum', [validators.Optional()])
+    phonenum = TextField('phonenum', [validators.Optional()])
 
 class AddressForm(Form):
     address_id = TextField('address_id')
@@ -124,7 +124,7 @@ class AddressForm(Form):
                                    filters=[title_field])
 
 class MailForm(Form):
-    email = EmailField('email', validators=[validators.Optional(),
+    email = TextField('email', validators=[validators.Optional(),
                                       validators.Email()],
                                       filters=[lower_field])
 

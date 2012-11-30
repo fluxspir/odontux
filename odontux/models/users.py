@@ -64,5 +64,6 @@ class OdontuxUser(Base):
     display_order = Column(Integer, default="")
     modified_by = Column(Integer, default="")
     time_stamp = Column(Date, default=today)
+    gnucash_url = Column(String, default="")
     patients = relationship("Patient", backref="user")
 

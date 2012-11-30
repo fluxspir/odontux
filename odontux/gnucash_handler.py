@@ -54,8 +54,8 @@ class GnuCash():
         home = os.path.expanduser("~")
         self.parser.read(os.path.join(home, ".odontuxrc"))
         #professionnalaccounting_url = self.parser.get("gnucashdb", "url")
-        professionnalaccounting_url = meta.session.query(users.OdontuxUsers)\
-                    .filter(users.OdontuxUsers.id == user_id).one().gnucash_url
+        professionnalaccounting_url = meta.session.query(users.OdontuxUser)\
+                    .filter(users.OdontuxUser.id == user_id).one().gnucash_url
         assets = self.parser.get("gnucashdb", "assets")
         receivables = self.parser.get("gnucashdb", "receivables")
         dentalfund = self.parser.get("gnucashdb", "dentalfund")

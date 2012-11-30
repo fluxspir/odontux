@@ -7,6 +7,7 @@
 
 from base import BaseCommand
 from models import meta, users, administration
+import constants
 
 import os
 import sys
@@ -135,6 +136,10 @@ class OdontuxUserParser(BaseCommand):
         parser.add_option("--update_date", action="store", type="string",
                         help="date since when the person lives here",
                         dest="update_date")
+        
+        parser.add_option("--gnucash_url", action="store", type="string",
+                        help="url for gnucash",
+                        dest="gnucash_url")
 
         (options,args) = parser.parse_args()
 
@@ -201,6 +206,9 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
             options.country = options.country.decode("utf_8").title()
         if options.email:
             options.email = options.email.decode("utf_8").lower()
+
+        if options.role == constants.ROLE_DENTIST:
+            self.values['gnucash_url'] = options.gnucash_url.decode("utf_8")
 
         new_user = users.OdontuxUser(**self.values)
         meta.session.add(new_user)
@@ -279,6 +287,10 @@ class UpdateUserCommand(BaseCommand, OdontuxUserParser):
             user.time_stamp = options.time_stamp
         else:
             user.time_stamp = today
+
+        if user.role == constants.ROLE_DENTIST:
+            if options.gnucash_url:
+                user.gnucash_url = options.gnucash_url
 
         meta.session.commit()      
 

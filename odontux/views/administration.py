@@ -18,7 +18,7 @@ from odontux import constants
 from odontux import gnucash_handler
 from odontux.views import forms, controls
 from odontux.views.log import index
-from odontux.models import meta, administration
+from odontux.models import meta, administration, users
 
 
 # variable to call in database the right table, which should be locale related.
@@ -60,12 +60,14 @@ class PatientGeneralInfoForm(Form):
     inactive = BooleanField(_('Inactive'))
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
-    family_id = TextField(_('family_id'))
-    office_id = TextField(_('Office_id'), [validators.Required(
-                               message=_("Please specify office_id"))])
-    dentist_id = TextField(_('Dentist_id'), [validators.Required(
-                                message=_("Please specify dentist_id"))])
-    socialsecurity_id = TextField(_('socialsecurity_id'), 
+    family_id = IntegerField(_('family_id'), [validators.Optional()])
+    office_id = SelectField(_('Office_id'), [validators.Required(
+                               message=_("Please specify office_id"))], 
+                               coerce=int)
+    dentist_id = SelectField(_('Dentist_id'), [validators.Required(
+                                message=_("Please specify dentist_id"))],
+                                coerce=int)
+    socialsecurity_id = IntegerField(_('socialsecurity_id'), 
                                      [validators.Optional()])
     payer = BooleanField(_('is payer'))
     time_stamp = forms.DateField(_("Time_stamp"))
@@ -109,6 +111,14 @@ def add_patient():
     # two are patient's specific :
     gen_info_form = PatientGeneralInfoForm(request.form)
     gen_info_form.title.choices = forms.get_title_choice_list()
+    gen_info_form.office_id.choices = [ (office.id, office.office_name) 
+                for office in meta.session.query(users.DentalOffice).all() ]
+    gen_info_form.dentist_id.choices = [ (dentist.id, dentist.firstname + " " 
+                                                            + dentist.lastname)
+                for dentist in meta.session.query(users.OdontuxUser).filter(
+                users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
+                users.OdontuxUser.lastname).all() 
+                                        ]
 
     SSN_form = SocialSecurityForm(request.form)
     # three are used for odontux_users and medecine doctors, too
@@ -121,7 +131,8 @@ def add_patient():
         and phone_form.validate() and mail_form.validate() ):
 
         # Stick general information about new patient in database
-        values = {f: getattr(gen_info_form, f).data for f in gen_info_fields}
+        values = {f: getattr(gen_info_form, f).data 
+                        for f in get_gen_info_field_list()}
         new_patient = administration.Patient(**values)
         meta.session.add(new_patient)
         meta.session.commit()
