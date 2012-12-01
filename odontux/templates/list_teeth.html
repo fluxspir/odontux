@@ -1,0 +1,15 @@
+{% extends 'summary_patient.html' %}
+
+{% block main %}
+  <ul>
+    {% for tooth in patient.mouth.teeth %}
+      {% if tooth.surveillance %}
+        <li style="color:red;">
+      {% else %}
+        <li style="color:blue;">
+      {% endif %}
+      {{ tooth.name }} : {{ tooth.state }}
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

@@ -9,6 +9,17 @@
   {% endif %}
 {% endmacro %}
 
+{% macro render_simple_field_line(field) %}
+  {{ field.label }} : {{ field(**kwargs)|safe }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}
+
 {% macro render_field(field) %}
   <dt>{{ field.label }}
   <dd>{{ field(**kwargs)|safe }}
@@ -57,4 +68,15 @@
     </ul>
   {% endif %}
   </td>
+{% endmacro %}
+
+{% macro render_time_field(field) %}
+  {{ field(**kwargs)|safe }}{{ field.label }}
+  {% if field.errors %}
+    <ul class=arrors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
 {% endmacro %}

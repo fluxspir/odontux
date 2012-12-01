@@ -72,7 +72,7 @@ def update_drug():
         return redirect(url_for('list_drugs'))
 
     if session['patient_id']:
-        patient = checksls.get_patient(session['patient_id'])
+        patient = checks.get_patient(session['patient_id'])
     else:
         patient=""
 

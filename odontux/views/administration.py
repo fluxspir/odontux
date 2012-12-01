@@ -86,7 +86,7 @@ def allpatients():
                .order_by(administration.Patient.lastname).all()
     return render_template('list_patients.html', patients=patients)
 
-@app.route('/patient/<int:body_id>/')
+@app.route('/patient?id=<int:body_id>/')
 def enter_patient_file(body_id):
     patient = checks.get_patient(body_id)
 

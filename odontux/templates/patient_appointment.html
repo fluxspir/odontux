@@ -1,18 +1,26 @@
-{% from "_appointmenthelpers.html" import appointment_table_rows %}
+{% from "_appointmenthelpers.html" import appointment_table_opening_tag, appointment_table_header, appointment_table_rows, appointment_table_closing_tag %}
 {% from "_acthelpers.html" import act_table_opening_tag, act_table_header, act_table_rows, act_table_closing_tag %}
 
-{% extends "list_patient_appointments.html" %}
+{% extends "summary_patient.html" %}
+  {% block main %}
+    {% block appointment_title %}
+      {{ appointment_table_opening_tag(appointment.agenda.starttime.date() ) }}
+    {% endblock %}
+    {% block appointment_header %}
+      {{ appointment_table_header(session) }}
+    {% endblock %}
+    {% block appointment_row %}
+      {{ appointment_table_rows(session, appointment, url_for('update_appointment', body_id=session.patient_id, appointment_id=session.appointment_id), "Update") }}
+    {% endblock %}
+    {{ appointment_table_closing_tag() }}
+  <br />
+    {% block appointment_acts %}
+      {{ act_table_opening_tag("acts done in this appointment") }}
+      {{ act_table_header(session) }}
+      {% for gesture, tooth, appointment, act_info, specialty in acts %}
+        {{ act_table_rows(session, gesture, tooth, appointment, act_info, specialty) }}
+      {% endfor %}
+      {{ act_table_closing_tag() }}
 
-  {% block appointment_row %}
-    {{ appointment_table_rows(session, appointment) }}
-  {% endblock %}
-<br />
-  {% block appointment_acts %}
-    {{ act_table_opening_tag("acts done in this appointment") }}
-    {{ act_table_header(session) }}
-    {% for gesture, tooth, appointment, act_info, specialty in acts %}
-      {{ act_table_rows(session, gesture, tooth, appointment, act_info, specialty) }}
-    {% endfor %}
-    {{ act_table_closing_tag() }}
-
+    {% endblock %}
   {% endblock %}

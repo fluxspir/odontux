@@ -23,7 +23,7 @@
     </tr>
 {% endmacro %}
 
-{% macro appointment_table_rows(session, appointment) %}
+{% macro appointment_table_rows(session, appointment, url, button_value) %}
       {% if appointment.emergency %}
         <tr style="background-color:red">
       {% else %}
@@ -31,7 +31,7 @@
       {% endif %}
         <td class="hidden">{{ appointment.id }}</td>
         <td>
-          <a href="{{ url_for('display_day', dateday=appointment.agenda.starttime.date() ) }}">{{ appointment.agenda.starttime.date() }}</a>
+          <a href="{{ url_for('display_day', dateday=appointment.agenda.starttime.date(), dentist_id=session['user_id']) }}">{{ appointment.agenda.starttime.date() }}</a>
         </td>
         <td>{{ appointment.agenda.starttime.time() }}</td>
         <td>{{ appointment.agenda.endtime - appointment.agenda.starttime }}</td>
@@ -58,9 +58,9 @@
         {% endif %}
         <td>{% if appointment.ordonnance %}{{ appointment.ordonnance.id }}{% endif %}</td>
         <td>
-          <form method="post" action="{{ url_for('enter_patient_appointment') }}">
+          <form method="post" action="{{ url }}">
             <input type="hidden" name="appointment_id" value="{{ appointment.id }}" />
-            <input type="submit" value="Select" />
+            <input type="submit" value="{{ button_value }}" />
           </form>
         </td>
       </tr>

@@ -5,11 +5,13 @@
 {% block main %}
   <a href="{{ url_for('add_appointment', body_id=session.patient_id) }}">Add appointment</a>
   {% block appointments %}
-    {{ appointment_table_opening_tag("appointments") }}
+    {% block appointment_title %}
+      {{ appointment_table_opening_tag("appointments") }}
+    {% endblock %}
     {{ appointment_table_header(session) }}
       {% block appointment_row %}
         {% for appointment in appointments %}
-          {{ appointment_table_rows(session, appointment) }}
+          {{ appointment_table_rows(session, appointment, url_for('enter_patient_appointment'), "Select") }}
         {% endfor %}
       {% endblock %}
     {{ appointment_table_closing_tag() }}

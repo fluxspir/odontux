@@ -43,7 +43,7 @@ class OdontuxUserGeneralInfoAdminForm(Form):
     username = TextField(_('username'), [validators.Required(),
                                     validators.Length(min=1, max=20)],
                                      filters=[forms.lower_field])
-    role = SelectField(_('role'), choices=constants.ROLES_LIST, coerce=int)
+    role = SelectField(_('role'), coerce=int)
     status = BooleanField(_('status'))
     comments = TextAreaField(_('comments'))
     modified_by = IntegerField(_('modified_by'), [validators.Optional()])
@@ -130,6 +130,8 @@ def add_user():
     gen_info_form = OdontuxUserGeneralInfoForm(request.form)
     gen_info_form.title.choices = forms.get_title_choice_list()
 
+    gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
+    gen_info_admin_form.role.choices = constants.ROLES_LIST
     dentist_specific_form = DentistSpecificForm(request.form)
     dentist_specific_admin_form = DentistSpecificAdminForm(request.form)
     address_form = forms.AddressForm(request.form)
@@ -144,7 +146,7 @@ def add_user():
         for f in get_gen_info_field_list():
             values[f] = getattr(gen_info_form, f).data
         for f in get_gen_info_admin_field_list():
-            values[f] = getattr(gen_info_form, f).data
+            values[f] = getattr(gen_info_admin_form, f).data
         for f in get_password_field_list():
             values[f] = getattr(password_form, f).data
         for f in get_dentist_specific_field_list():
@@ -172,6 +174,7 @@ def add_user():
 
     return render_template('/add_user.html/', 
                         gen_info_form=gen_info_form,
+                        gen_info_admin_form=gen_info_admin_form,
                         address_form=address_form,
                         phone_form=phone_form,
                         mail_form=mail_form,
@@ -235,6 +238,7 @@ def update_user(body_id, form_to_display):
 
     if session['role'] == constants.ROLE_ADMIN:
         gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
+        gen_info_admin_form.role.choices = constants.ROLES_LIST
     else:
         gen_info_admin_form = ""
     if user.role == constants.ROLE_DENTIST: 

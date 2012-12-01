@@ -25,7 +25,7 @@ class Appointment(Base):
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                         nullable=False)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id),
-                        nullable=False, default=1)
+                        nullable=False)
     agenda = relationship("Agenda", uselist=False, backref="appointment", 
                            cascade="all, delete, delete-orphan")
     emergency = Column(Boolean, default=False)

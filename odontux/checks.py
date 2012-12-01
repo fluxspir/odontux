@@ -54,6 +54,16 @@ def get_patient(patient_id):
     except sqlalchemy.orm.exc.NoResultFound:
         return False
 
+def get_appointment():
+    try:
+        if session['appointment_id']:
+            appointment = meta.session.query(schedule.Appointment)\
+                .filter(schedule.Appointment.id == session['appointment_id']
+                ).one()
+    except KeyError:
+        appointment = None
+    return appointment
+
 def is_patient_self_appointment():
     """ 
     Test if the patient is the one who has the appointment.

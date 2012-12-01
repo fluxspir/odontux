@@ -9,6 +9,8 @@
     {% if session.patient_id %}
         <ul id="patient_navigation">
           <li>
+            <a href="{{ url_for("list_teeth") }}">Mouth</a>
+          <li>
             <a href={{ url_for("list_appointments") }}>Appointments</a>
           </li>
           <li>

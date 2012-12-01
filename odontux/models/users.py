@@ -60,9 +60,9 @@ class OdontuxUser(Base):
                         backref="odontux_user")
     phones = relationship("Phone", secondary=odontux_user_phone_table,
                          backref="odontux_user")
-    avatar_id = Column(Integer, default="")
-    display_order = Column(Integer, default="")
-    modified_by = Column(Integer, default="")
+    avatar_id = Column(Integer, default=None)
+    display_order = Column(Integer, default=None)
+    modified_by = Column(Integer, default=None)
     time_stamp = Column(Date, default=today)
     gnucash_url = Column(String, default="")
     patients = relationship("Patient", backref="user")

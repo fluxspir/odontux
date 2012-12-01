@@ -20,7 +20,7 @@ Add a new user
     {{ render_field(gen_info_form.correspondence_name) }}
     {{ render_field(gen_info_admin_form.status, default=True) }}
     {{ render_field(gen_info_admin_form.comments) }}
-    {{ render_field(gen_info_form.avatar_id) }}
+    {{ render_field(gen_info_admin_form.avatar_id) }}
     {{ render_field(gen_info_admin_form.modified_by) }}
     {{ render_field(dentist_specific_admin_form.gnucash_url) }}
       {{ render_field(phone_form.phonename) }}

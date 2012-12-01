@@ -1,8 +1,9 @@
 {% extends "header.html" %}
-{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_simple_field_line %}
 {% block mainsummary %}
   <form method="post" action="{{ url_for('agenda_date') }}">
-    <input type="date" name="day" />
+    {{ render_simple_field_line( summary_agenda_form.day ) }}
+    {{ render_simple_field_line( summary_agenda_form.dentist_id) }}
     <input type="submit" value="Go" />
   </form>
 {% endblock %}

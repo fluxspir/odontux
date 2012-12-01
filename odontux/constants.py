@@ -23,3 +23,19 @@ ROLES = { ROLE_DENTIST: _("dentist"),
 ROLES_LIST = ROLES.items()  #ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
 
 KID_AGE = 13
+
+TOOTH_STATE = {
+            "s": _("sane"),
+            "x": _("sealing"),
+            "o": _("obturated"),
+            "c": _("crowned"),
+            "d": _("decayed"),
+            "p": _("placed"),
+            "m": _("mobile"),
+            "f": _("fracture"),
+            "a": _("absent"),
+            "b": _("bridge"),
+            "r": _("resin"),
+            "I": _("implant")
+           }
+

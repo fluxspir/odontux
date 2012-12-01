@@ -188,8 +188,8 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
             state = "s"
             self.toothevent_values["sane"] = options.sane.decode("utf_8")
         if options.place:
-            state = "s"
-            self.toothevent_values["place"] = options.sane.decode("utf_8")
+            state = "p"
+            self.toothevent_values["place"] = options.place.decode("utf_8")
         if options.mobility:
             state = "m" 
             self.toothevent_values["mobility"] =\

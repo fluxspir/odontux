@@ -1,13 +1,19 @@
 {% macro date_choice() %}
-        <a href="{{ url_for('display_day', dateday=prevday ) }}">Previous Day</a>
-        <form class="inline" method="post" action="{{ url_for('agenda_date') }}">
-          <input type="date" name="day" value="{{ dateday }}" />
+  {% from "_formhelpers.html" import render_simple_field_line %}
+        <a href="{{ url_for('display_day', dateday=prevday, dentist_id=summary_agenda_form.dentist_id.data) }}">Previous Day</a>
+        <form class="inline" method="post" action="{{ url_for('agenda_date', dateday=summary_agenda_form.day.data, dentist_id=summary_agenda_form.dentist_id.data) }}">
+          {{ render_simple_field_line( summary_agenda_form.day ) }}
+          {{ render_simple_field_line( summary_agenda_form.dentist_id ) }}
           <input type="submit" value="Go" />
         </form>
-        <a href="{{ url_for('display_day', dateday=nextday ) }}">Next Day</a>
+        <a href="{{ url_for('display_day', dateday=nextday, dentist_id=summary_agenda_form.dentist_id.data) }}">Next Day</a>
 {% endmacro %}
+
+
 {% extends "summary_agenda.html" %}
+
 {% block main %}
+
   {% if appointments %}
     <table border=1>
       <caption>
@@ -38,6 +44,8 @@
       </tr>
     {% endfor %}
     </table>
+  
+  
   {% else %}
     {{ date_choice() }}
   {% endif %}

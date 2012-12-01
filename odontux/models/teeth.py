@@ -138,7 +138,7 @@ class RootEvent(Base):
         * sane
         * obturation
         * infected
-        * abscess
+        * apical abscess
     We may add comments
     We may use a color-code for what happened
     For the pics, see "toothevent"
