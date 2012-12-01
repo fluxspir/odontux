@@ -15,10 +15,10 @@ from odontux.views.log import index
 from odontux.views.forms import DateField
 from odontux.models import meta, anamnesis
 from odontux.odonweb import app
-from odontux.views import forms, controls
+from odontux.views import forms
 from gettext import gettext as _
 
-from odontux import constants
+from odontux import constants, checks
 
 
 
@@ -88,7 +88,7 @@ def list_anamnesis():
     and session['role'] != constants.ROLE_ASSISTANT):
         return redirect(url_for('index'))
 
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     medical_history, past_surgeries, allergies = \
         _get_patient_anamnesis(patient.id)
     return render_template("patient_anamnesis.html",
@@ -103,7 +103,7 @@ def update_anamnesis():
         return redirect(url_for('list_patients'))
    
     # Get the patient, and verify if the user is his dentist.
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if not patient.dentist_id == session['user_id']:
         return redirect(url_for('list_patients'))
 
@@ -125,7 +125,7 @@ def update_anamnesis():
 @app.route('/patient/update_medical_history/', methods=['POST'])
 def update_medical_history():
     """ """
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
@@ -150,7 +150,7 @@ def update_medical_history():
 @app.route('/patient/delete_medical_history/', methods=['POST'])
 def delete_medical_history():
     """ """
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
     
@@ -166,7 +166,7 @@ def delete_medical_history():
 @app.route('/patient/add_medical_history/', methods=['POST'])
 def add_medical_history():
     """ """
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
@@ -197,7 +197,7 @@ def add_medical_history():
 @app.route('/patient/update_past_surgery/', methods=['POST'])
 def update_past_surgery():
     """ """
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
@@ -221,7 +221,7 @@ def update_past_surgery():
 @app.route('/patient/delete_past_surgery/', methods=['POST'])
 def delete_past_surgery():
     """ """
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
     
@@ -237,7 +237,7 @@ def delete_past_surgery():
 @app.route('/patient/add_past_surgery/', methods=['POST'])
 def add_past_surgery():
     """ """
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
@@ -266,7 +266,7 @@ def add_past_surgery():
 @app.route('/patient/update_allergies/', methods=['POST'])
 def update_allergies():
     """ """
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 
@@ -290,7 +290,7 @@ def update_allergies():
 @app.route('/patient/delete_allergies/', methods=['POST'])
 def delete_allergies():
     """ """
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
     
@@ -306,7 +306,7 @@ def delete_allergies():
 @app.route('/patient/add_allergies/', methods=['POST'])
 def add_allergies():
     """ """
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     if patient.dentist_id != session['user_id']:
         return redirect(url_for('list_patients'))
 

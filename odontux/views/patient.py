@@ -7,8 +7,7 @@
 
 from flask import session, redirect, url_for, render_template, request
 
-from odontux import constants
-from odontux.views import controls
+from odontux import constants, checks
 from odontux.models import meta, administration, schedule, act, teeth
 from odontux.odonweb import app
 from odontux.views.administration import enter_patient_file
@@ -45,8 +44,8 @@ def enter_patient_appointment():
 
     if request.method == 'POST':
         # First at all, we need to quit old patient, and old appointment.
-        # controls.quit_patient_file()
-        # controls.quit_appointment()
+        # checks.quit_patient_file()
+        # checks.quit_appointment()
 
         # We looking to find a couple patient_appointment by an 
         # appointment_id ( coming from a next_appointment or a
@@ -56,12 +55,12 @@ def enter_patient_appointment():
             appointment = meta.session.query(schedule.Appointment)\
                 .filter(schedule.Appointment.id == 
                         request.form['appointment_id']).one()
-            patient = controls.get_patient(appointment.patient_id)
+            patient = checks.get_patient(appointment.patient_id)
 
         # Case probably rare, but if we want to go in last appointment of 
         # patient known.
         elif request.form['patient_id']:
-            patient = controls.get_patient(request.form['patient_id'])
+            patient = checks.get_patient(request.form['patient_id'])
             appointment = meta.session.query(schedule.Appointment)\
                 .filter(schedule.Appointment.patient_id ==
                         session['patient_id']).all()[-1]
@@ -80,12 +79,12 @@ def enter_patient_appointment():
         # Verify if this patient is really the one who have this appointment
         # because if it isn't, things could get very nasty after...
         # This function should be frequently used.
-        if not controls.is_patient_self_appointment():
+        if not checks.is_patient_self_appointment():
             session.pop('appointment_id', None)
             return redirect(url_for('enter_patient_file',
                             body_id=session['patient_id']))
         
-        acts = controls.get_patient_acts(patient.id, appointment.id,
+        acts = checks.get_patient_acts(patient.id, appointment.id,
                     [ act.AppointmentActReference.tooth_id ]
                     )
         return render_template("patient_appointment.html",
@@ -94,16 +93,16 @@ def enter_patient_appointment():
                                 acts=acts)
 
     # During the 'GET' method :
-    if not controls.is_patient_self_appointment():
+    if not checks.is_patient_self_appointment():
         session.pop('appointment', None)
         return redirect(url_for('enter_patient_file', 
                         body_id=session['patient_id']))
     
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
     appointment = meta.session.query(schedule.Appointment)\
             .filter(schedule.Appointment.id == session['appointment_id'])\
             .one()
-    acts = controls.get_patient_acts(patient.id, appointment.id,
+    acts = checks.get_patient_acts(patient.id, appointment.id,
                     [ act.AppointmentActReference.tooth_id ]
                     )
     return render_template("patient_appointment.html",
@@ -119,11 +118,11 @@ def list_appointments():
         return redirect(url_for('index'))
     # In the improbable (impossible) case that session['patient_id'] doesn't
     # exists when list_appointments is triggered, just flip back to index :
-    if not controls.in_patient_file():
+    if not checks.in_patient_file():
         return redirect(url_for('index'))
     
     # Get the patient in database, and the list of his appointments.
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
 
     appointments = meta.session.query(schedule.Appointment)\
         .filter(schedule.Appointment.patient_id == patient.id).all()
@@ -144,12 +143,12 @@ def list_acts():
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 
-    if not controls.in_patient_file():
+    if not checks.in_patient_file():
         return redirect(url_for('index'))
 
-    patient = controls.get_patient(session['patient_id'])
+    patient = checks.get_patient(session['patient_id'])
 
-    acts = controls.get_patient_acts(patient.id, None,
+    acts = checks.get_patient_acts(patient.id, None,
             [ act.AppointmentActReference.appointment_id, ]
             )
     return render_template("list_patient_acts.html",

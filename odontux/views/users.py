@@ -13,10 +13,10 @@ from wtforms import (Form, IntegerField, TextField, PasswordField,
                     SelectField, BooleanField, TextAreaField, HiddenField,
                     validators)
 
-from odontux import constants
+from odontux import constants, checks
 from odontux.models import meta, users, administration
 from odontux.odonweb import app
-from odontux.views import forms, controls
+from odontux.views import forms
 from odontux.views.log import index
 
 class OdontuxUserGeneralInfoForm(Form):
@@ -95,8 +95,8 @@ def get_dental_office_field_list():
 @app.route('/odontux_user/')
 @app.route('/user/')
 def list_users():
-    controls.quit_patient_file()
-    controls.quit_appointment()
+    checks.quit_patient_file()
+    checks.quit_appointment()
     # when we only want user with role "request.form['role']
     if request.form and request.form['role']:
         try:
@@ -113,8 +113,8 @@ def list_users():
 
 @app.route('/dental_office/')
 def list_dental_offices():
-    controls.quit_patient_file()
-    controls.quit_appointment()
+    checks.quit_patient_file()
+    checks.quit_appointment()
     dental_offices = meta.session.query(users.DentalOffice).all()
     return render_template('list_dental_offices.html', 
                             dental_offices=dental_offices)
@@ -122,8 +122,8 @@ def list_dental_offices():
 @app.route('/add/user/', methods=['GET', 'POST'])
 @app.route('/user/add/', methods=['GET', 'POST'])
 def add_user():
-    controls.quit_patient_file()
-    controls.quit_appointment()
+    checks.quit_patient_file()
+    checks.quit_appointment()
     if session['role'] != constants.ROLE_ADMIN:
         return redirect(url_for("index"))
 
@@ -171,16 +171,18 @@ def add_user():
         return redirect(url_for('list_users'))
 
     return render_template('/add_user.html/', 
-                           gen_info_form=gen_info_form,
-                           address_form=address_form,
-                           phone_form=phone_form,
-                           mail_form=mail_form,
-                           password_form=password_form)
+                        gen_info_form=gen_info_form,
+                        address_form=address_form,
+                        phone_form=phone_form,
+                        mail_form=mail_form,
+                        password_form=password_form,
+                       dentist_specific_form=dentist_specific_form,
+                       dentist_specific_admin_form=dentist_specific_admin_form)
 
 @app.route('/dental_office/add/', methods=['GET', 'POST'])
 def add_dental_office():
-    controls.quit_patient_file()
-    controls.quit_appointemnt()
+    checks.quit_patient_file()
+    checks.quit_appointment()
     if session['role'] != constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 
@@ -193,16 +195,16 @@ def add_dental_office():
         and mail_form.validate()
        ):
         values = {f: getattr(dental_office_form, f).data 
-                            for f in dental_office_fields}
+                            for f in get_dental_office_field_list()}
         new_dental_office = users.DentalOffice(**values)
-        meta.session.add(enw_dental_office)
+        meta.session.add(new_dental_office)
 
         address_args = {f: getattr(address_form, f).data
                         for f in forms.address_fields}
         new_dental_office.addresses.append(administration.Address(
                                                 **address_args))
-        phone_args = {f: getattr(phone_form, f).data
-                        for f in forms.phone_fields}
+        phone_args = {g: getattr(phone_form, f).data
+                        for f,g in forms.phone_fields}
         new_dental_office.phones.append(administration.Phone(
                                                 **phone_args))
         mail_args = {f: getattr(mail_form, f).data
@@ -213,17 +215,15 @@ def add_dental_office():
                             dental_office_form=dental_office_form,
                             address_form=address_form,
                             phone_form=phone_form,
-                            mail_form=mail_form,
-                            dentist_specific_form=dentist_specific_form,
-                        dentist_specific_adminform=dentist_specific_admin_form)
+                            mail_form=mail_form)
 
 # Function for printing the user's updating page, and getting 
 # general and information fields.
 @app.route('/user/update_user?id=<int:body_id>&'
             'form_to_display=<form_to_display>/', methods=['GET', 'POST'])
 def update_user(body_id, form_to_display):
-    controls.quit_patient_file()
-    controls.quit_appointment()
+    checks.quit_patient_file()
+    checks.quit_appointment()
 
     user = forms._get_body(body_id, "user")
     if not forms._check_body_perm(user, "user"):
@@ -304,8 +304,8 @@ def update_user(body_id, form_to_display):
             '&form_to_display=<form_to_display>/', methods=['GET', 'POST'])
 def update_dental_office(body_id, form_to_display):
     """ """
-    controls.quit_patient_file()
-    controls.quit_appointment()
+    checks.quit_patient_file()
+    checks.quit_appointment()
     if not session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 

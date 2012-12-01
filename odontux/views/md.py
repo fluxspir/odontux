@@ -47,6 +47,8 @@ def add_md():
     mail_form = forms.MailForm(request.form)
     
     if request.method == 'POST' and form.validate():
+
+        medecine_doctor = checks.is_body_already_in_database(form)    
         values = {}
         values['lastname'] = form.lastname.data
         values['firstname'] = form.firstname.data

@@ -40,7 +40,7 @@ class GnuCash():
     While coding the assistant/secretary salary, the buying of dental supplies
     and all, we'll add "outcomes", liabilities...
 
-    You may have too in order to :
+    See commands/compta.py for :
         * assets
             * dentalfund
             * check
@@ -55,7 +55,8 @@ class GnuCash():
         self.parser.read(os.path.join(home, ".odontuxrc"))
         #professionnalaccounting_url = self.parser.get("gnucashdb", "url")
         professionnalaccounting_url = meta.session.query(users.OdontuxUser)\
-                    .filter(users.OdontuxUser.id == user_id).one().gnucash_url
+                    .filter(users.OdontuxUser.id == user_id).one()\
+                    .gnucash_url.encode("utf_8")
         assets = self.parser.get("gnucashdb", "assets")
         receivables = self.parser.get("gnucashdb", "receivables")
         dentalfund = self.parser.get("gnucashdb", "dentalfund")
@@ -234,7 +235,7 @@ class GnuCashCustomer(GnuCash):
     def update_customer(self):
         try:
             if not self._test_id_already_in_database():
-                self.self.add_customer()
+                self.add_customer()
                 return True
             (customer, name) = self._update_name()
             self._set_address(customer, name)

@@ -9,7 +9,7 @@ from flask import session, render_template, redirect, url_for, request
 
 from odontux import constants
 from odontux.odonweb import app
-from odontux.views import controls, forms
+from odontux.views import forms
 from odontux.models import meta, teeth
 from odontux.views.log import index
 

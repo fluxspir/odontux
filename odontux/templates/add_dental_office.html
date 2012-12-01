@@ -1,0 +1,24 @@
+{% extends 'header.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="{{ url_for('add_dental_office') }}">
+  <dl>
+    {{ render_field(dental_office_form.office_name, autofocus="autofocus") }}
+    {{ render_field(dental_office_form.owner_lastname) }}
+    {{ render_field(dental_office_form.owner_firstname) }}
+    {{ render_field(dental_office_form.url) }}
+      {{ render_field(phone_form.phonename) }}
+      {{ render_field(phone_form.phonenum) }}
+      {{ render_field(mail_form.email) }}
+      {{ render_field(address_form.street) }}
+      {{ render_field(address_form.building) }}
+      {{ render_field(address_form.city) }}
+      {{ render_field(address_form.postal_code) }}
+      {{ render_field(address_form.county) }}
+      {{ render_field(address_form.country) }}
+  </dl>
+  <p><input type="submit" value="Add">
+</form>
+{% endblock %}
+
+<!---->

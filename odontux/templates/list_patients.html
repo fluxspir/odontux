@@ -1,6 +1,6 @@
-{% extends "summary_patient.html" %}
+{% extends "header.html" %}
 {% block main %}
-{% if session.role != role_admin %}
+{% if session.role != session.ROLE_ADMIN %}
   <a href="/add/patient/">Add new patient</a>
 {% endif %}
   <div id="searchresult">

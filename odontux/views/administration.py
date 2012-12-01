@@ -14,9 +14,9 @@ from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
 from gettext import gettext as _
 
-from odontux import constants
+from odontux import constants, checks
 from odontux import gnucash_handler
-from odontux.views import forms, controls
+from odontux.views import forms
 from odontux.views.log import index
 from odontux.models import meta, administration, users
 
@@ -80,14 +80,15 @@ class SocialSecurityForm(Form):
 
 @app.route('/patients/')
 def allpatients():
+    checks.quit_patient_file()
+    checks.quit_appointment()
     patients = meta.session.query(administration.Patient)\
                .order_by(administration.Patient.lastname).all()
-    return render_template('list_patients.html', patients=patients,
-                            role_admin=constants.ROLE_ADMIN)
+    return render_template('list_patients.html', patients=patients)
 
 @app.route('/patient/<int:body_id>/')
 def enter_patient_file(body_id):
-    patient = controls.get_patient(body_id)
+    patient = checks.get_patient(body_id)
 
     if patient:
         session['patient_id'] = patient.id
@@ -106,7 +107,7 @@ def add_patient():
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for("allpatients"))
    
-    controls.quit_patient_file()
+    checks.quit_patient_file()
     # Forms used for adding a new patient : 
     # two are patient's specific :
     gen_info_form = PatientGeneralInfoForm(request.form)
@@ -130,7 +131,13 @@ def add_patient():
         and SSN_form.validate() and address_form.validate()
         and phone_form.validate() and mail_form.validate() ):
 
-        # Stick general information about new patient in database
+        # Verify patient isn't already in database
+        patient = checks.is_body_already_in_database(gen_info_form)
+        if patient:
+            return redirect(url_for('update_patient', 
+                                    body_id=patient.id,
+                                    form_to_display="gen_info"))
+        
         values = {f: getattr(gen_info_form, f).data 
                         for f in get_gen_info_field_list()}
         new_patient = administration.Patient(**values)
@@ -223,7 +230,7 @@ def add_patient():
                                                  new_patient.dentist_id)
         new_customer = comptability.add_customer()
         
-        return redirect(url_for('list_patients', patient_id=new_patient.id))
+        return redirect(url_for('enter_patient_file', body_id=new_patient.id))
 
     return render_template("/add_patient.html",
                             gen_info_form=gen_info_form,
@@ -238,6 +245,7 @@ def add_patient():
 def update_patient(body_id, form_to_display):
     """ """
     patient = forms._get_body(body_id, "patient")
+    session['patient_id'] = patient.id
     if not forms._check_body_perm(patient, "patient"):
         return redirect(url_for('list_patients', body_id=body_id))
 
@@ -245,7 +253,14 @@ def update_patient(body_id, form_to_display):
     # Others are only needed for the 'GET', see below.
     gen_info_form = PatientGeneralInfoForm(request.form)
     gen_info_form.title.choices = forms.get_title_choice_list()
-    
+    gen_info_form.office_id.choices = [ (office.id, office.office_name) 
+                for office in meta.session.query(users.DentalOffice).all() ]
+    gen_info_form.dentist_id.choices = [ (dentist.id, dentist.firstname + " " 
+                                                            + dentist.lastname)
+                for dentist in meta.session.query(users.OdontuxUser).filter(
+                users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
+                users.OdontuxUser.lastname).all() 
+                                        ]
     if request.method == 'POST' and gen_info_form.validate():
         for f in get_gen_info_field_list():
             setattr(patient, f, getattr(gen_info_form, f).data)

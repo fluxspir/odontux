@@ -8,8 +8,8 @@
 from flask import session, redirect, url_for, request, render_template
 from wtforms import Form, HiddenField, TextField, TextAreaField, validators
 
-from odontux import constants
-from odontux.views import forms, controls
+from odontux import constants, checks
+from odontux.views import forms
 from odontux.models import meta, medication
 from odontux.odonweb import app
 from odontux.views.log import index
@@ -60,7 +60,7 @@ def list_drugs():
         return redirect(url_for('index'))
     drugs = meta.session.query(medication.DrugPrescribed).all()
     if session['patient_id']:
-        patient = controls.get_patient(session['patient_id'])
+        patient = checks.get_patient(session['patient_id'])
     else:
         patient = ""
     return render_template('list_drugs.html', drugs=drugs, patient=patient)
@@ -72,7 +72,7 @@ def update_drug():
         return redirect(url_for('list_drugs'))
 
     if session['patient_id']:
-        patient = controls.get_patient(session['patient_id'])
+        patient = checksls.get_patient(session['patient_id'])
     else:
         patient=""
 
@@ -101,7 +101,7 @@ def delete_drug():
         return redirect(url_for('list_drugs'))
 
     if session['patient_id']:
-        patient = controls.get_patient(session['patient_id'])
+        patient = checks.get_patient(session['patient_id'])
     else:
         patient = ""
 
@@ -119,7 +119,7 @@ def add_drug():
         return redirect(url_for('list_drugs'))
 
     if session['patient_id']:
-        patient = controls.get_patient(session['patient_id'])
+        patient = checks.get_patient(session['patient_id'])
     else:
         patient = ""
 

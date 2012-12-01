@@ -156,7 +156,7 @@ def _check_body_perm(body, body_type):
         return False
     return True
 
-# Get user information in the database
+# Get body information in the database
 def _get_body(body_id, body_type):
     """ Return sqlalchemy object representing the person in database
         we want to update ; could be a patient, an OdontuxUser, a

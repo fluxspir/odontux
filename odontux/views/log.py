@@ -10,16 +10,15 @@ import sqlalchemy
 from odontux.models import meta, users
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
-from odontux.views import controls
 
-from odontux import constants
+from odontux import constants, checks
 
 from gettext import gettext as _
 
 @app.route('/')
 def index():
-    controls.quit_patient_file()
-    controls.quit_appointment()
+    checks.quit_patient_file()
+    checks.quit_appointment()
     if 'username' in session:
         return render_template('index.html')
     return redirect(url_for('login'))
@@ -27,8 +26,8 @@ def index():
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
-    controls.quit_patient_file()
-    controls.quit_appointment()
+    checks.quit_patient_file()
+    checks.quit_appointment()
     if request.method == 'POST':
         try:
             user = meta.session.query(users.OdontuxUser).filter\
@@ -53,8 +52,8 @@ def login():
 
 @app.route('/logout/')
 def logout():
-    controls.quit_patient_file()
-    controls.quit_appointment()
+    checks.quit_patient_file()
+    checks.quit_appointment()
     session.pop('username', None)
     return redirect(url_for('index'))
 

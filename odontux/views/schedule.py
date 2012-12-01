@@ -6,14 +6,15 @@
 #
 
 
-from flask import render_template, request, redirect, url_for 
+from flask import render_template, request, redirect, url_for, session 
 from wtforms import (Form, HiddenField, BooleanField, TextAreaField, TextField,
-                    validators)
+                    IntegerField, validators)
 from gettext import gettext as _
 from sqlalchemy import or_
 from sqlalchemy import cast, Date
 import datetime
 
+from odontux import constants, checks
 from odontux.odonweb import app
 from odontux.models import meta, schedule, administration
 from odontux.views.forms import DateField, TimeField
@@ -26,12 +27,12 @@ class AppointmentForm(Form):
     patient_id = HiddenField('patient_id')
     dentist_id = HiddenField('dentist_id')
     emergency = BooleanField(_('emergency'))
-    reason = TextAreaField(_('reason'))
-    diagnostic = TextAreaField(_('diagnostic'))
-    treatment = TextAreaField(_('treatment'))
-    prognostic = TextAreaField(_('prognostic'))
-    advise = TextAreaField(_('advise'))
-    next_appointment = TextAreaField(_('next_appointment'))
+    reason = TextField(_('reason'))
+    diagnostic = TextField(_('diagnostic'))
+    treatment = TextField(_('treatment'))
+    prognostic = TextField(_('prognostic'))
+    advise = TextField(_('advise'))
+    next_appointment = TextField(_('next_appointment'))
 
 class AgendaForm(Form):
     """ """
@@ -39,10 +40,13 @@ class AgendaForm(Form):
     appointment_id = HiddenField('appointment_id')
     day = DateField(_('day'), [validators.Required(_('Please specify '
                                 'which day the appointment occurs'))])
-    starttime = TimeField(_('starttime'), [validators.Required(_('Please '
+    starthour = IntegerField(_('h'), [validators.Required(_('Please '
                                 'tell which time it started'))])
-    duration = TimeField(_('duration'))
-    endtime = TimeField(_('endtime'))
+    startmin = IntegerField(_('m'), [validators.Required(_("Minutes"))])
+    durationhour = IntegerField(_('h'), [validators.Optional()])
+    durationmin = IntegerField(_('m'), [validators.Optional()])
+    endhour = IntegerField(_('h'), [validators.Optional()])
+    endmin = IntegerField(_('m'), [validators.Optional()])
 
 
 def get_appointment_field_list():
@@ -50,7 +54,8 @@ def get_appointment_field_list():
              "treatment", "prognostic", "advise", "next_appointment" ]
 
 def get_agenda_field_list():
-    return [ "appointment_id", "day", "starttime", "duration", "endtime" ]
+    return [ "appointment_id", "day", "starthour", "startmin", "durationhour",
+             "durationmin", "endhour", "endmin" ]
 
 
 @app.route('/agenda/date/', methods=['POST'])
@@ -90,13 +95,54 @@ def display_day(dateday):
                             dateday=dateday, nextday=nextday, prevday=prevday)
 
 
-@app.route('/agenda/add', methods=['GET', 'POST'])
-def add_appointment():
+def agenda_handler(day, starthour, startmin, durationhour, durationmin, 
+                   endhour, endmin):
+    """
+    return ( (yyyymmdd hh:mm), (yyyymmdd hh:mm) )  == 
+                                                ( startdaytime, enddaytime)
+    """
+    try:
+        starttime = datetime.datetime(day, starthour + " " + startmin)
+    except:
+        raise
+
+    return starttime
+
+@app.route('/agenda/add?id=<int:body_id>', methods=['GET', 'POST'])
+def add_appointment(body_id=""):
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
-    
+
+    if not body_id:
+        checks.quit_patient_file()
+        checks.quit_appointment()
+
     agenda_form = AgendaForm(request.form)
     appointment_form = AppointmentForm(request.form)
+
     if (request.method == 'POST' and agenda_form.validate()
-        and appointment_form.validate() ):
-            pass
+        and appointment_form.validate() 
+       ):
+        # get the appointment agenda schedule first, to raise exception if 
+        # agenda problems
+        (starttime, endtime) = agenda_handler(agenda_form.day.data, 
+                       agenda_form.starthour.data, agenda_form.startmin.data, 
+                       agenda_form.durationhour.data, 
+                       agenda_form.durationmin.data,
+                       agenda_form.endhour.data, agenda_form.endmin.data)
+
+        # add the appointment infos
+        args = { f: getattr(appointment_form, f).data 
+                 for f in get_appointment_field_list() }
+        new_appointment = schedule.Appointment(**args)
+        #meta.session.add(new_appointment)
+        #meta.session.commit()
+
+        # if every thing went fine until now, we just have to add to database
+        # agenda data, and we're done.
+        pass
+
+    # the 'GET method'
+    return render_template('add_appointment.html',
+                            agenda_form=agenda_form,
+                            appointment_form=appointment_form)

@@ -9,15 +9,19 @@ import sqlalchemy
 from flask import session
 from gettext import gettext as _
 
+import datetime
+
+import sqlalchemy
+
 from odontux.models import (
                             meta, 
                             administration, 
                             schedule,
                             act,
                             teeth,
+                            md,
+                            users,
                            )
-
-import pdb
 
 def in_patient_file():
     try:
@@ -46,9 +50,9 @@ def get_patient(patient_id):
         patient = meta.session.query(administration.Patient)\
             .filter(administration.Patient.id == patient_id)\
             .one()
+        return patient
     except sqlalchemy.orm.exc.NoResultFound:
         return False
-    return patient
 
 def is_patient_self_appointment():
     """ 
@@ -149,3 +153,41 @@ def get_patient_acts(patient_id, appointment_id=None, ordering=[]):
 
     return acts
 
+
+def is_body_already_in_database(data, body_type="patient"):
+    """ 
+    Function not working with the commands add_patient / add_md
+    because it gets the
+        " form.xxx.data "
+    and commands come with  " options.xxx " without the final "data" attribute
+
+    we need a trick to change it.
+    """
+    if body_type == "patient":
+        try:
+            patient = meta.session.query(administration.Patient)\
+                .filter(administration.Patient.lastname == data.lastname.data)\
+                .filter(administration.Patient.firstname == 
+                        data.firstname.data)\
+                .filter(administration.Patient.dob == data.dob.data)\
+                .filter(administration.Patient.socialsecurity_id ==
+                        data.socialsecurity_id.data)\
+                .one()
+            return patient
+        except sqlalchemy.orm.exc.NoResultFound:
+            return False
+
+    elif body_type == "md":
+        try:
+            body = meta.session.query(md.MedecineDoctor)\
+                .filter(md.MedecineDoctor.lastname == data.lastname.data)\
+                .filter(md.MedecineDoctor.firstname == data.firstname.data)\
+                .filter(md.MedecineDoctor.postal_code.ilike(
+                        data.postal_code.data))\
+                .one()
+            return body
+        except sqlalchemy.orm.exc.NoResultFound:
+            return False
+    
+    else:
+        return False

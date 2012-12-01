@@ -1,7 +1,4 @@
 {% extends 'header.html' %}
-{% block pagetitle %}
-List of medecine doctors
-{% endblock %}
 {% block main %}
 <div id="list_acttype">
 {% if session.role == session.ROLE_DENTIST or session.role == session.ROLE_NURSE or session.role == session.ROLE_ASSISTANT %}
