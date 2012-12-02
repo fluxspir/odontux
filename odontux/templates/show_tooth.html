@@ -1,0 +1,8 @@
+{% extends 'summary_patient.html' %}
+
+{% block main %}
+  {{ tooth.name }} ; {{ tooth.state }}
+  {% for event in tooth_events %}
+    {{ event.id }}
+  {% endfor %}
+{% endblock %}

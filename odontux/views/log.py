@@ -38,6 +38,7 @@ def login():
                 session['user_id'] = user.id
                 session['role'] = int(user.role)
                 session['ROLES'] = constants.ROLES_LIST
+                session['TOOTH_STATES'] = constants.TOOTH_STATES
                 session['ROLE_DENTIST'] = constants.ROLE_DENTIST
                 session['ROLE_NURSE'] = constants.ROLE_NURSE
                 session['ROLE_ASSISTANT'] = constants.ROLE_ASSISTANT

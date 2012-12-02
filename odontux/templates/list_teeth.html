@@ -1,15 +1,17 @@
 {% extends 'summary_patient.html' %}
 
 {% block main %}
+{% if teeth %}
   <ul>
-    {% for tooth in patient.mouth.teeth %}
-      {% if tooth.surveillance %}
+    {% for tooth_id, name, state, surveillance in teeth %}
+      {% if surveillance %}
         <li style="color:red;">
       {% else %}
         <li style="color:blue;">
       {% endif %}
-      {{ tooth.name }} : {{ tooth.state }}
+      <a href="{{ url_for('show_tooth', tooth_id=tooth_id) }}">{{ name }}</a> : {{ state }}
       </li>
     {% endfor %}
   </ul>
+{% endif %}
 {% endblock %}

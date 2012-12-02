@@ -26,13 +26,13 @@ class Tooth(Base):
         * s : sane ; a root-infected tooth may appear sane !
         * x : sealing
         * o : obturation
-        * C : crowned
+        * c : crowned
         * d : decayed
         * p : place
         * m : mobility
         * f : fracture
         * a : absent
-        * B : bridge
+        * b : bridge
         * r : resin (prosthetic mobile)
         * I : implant
     We may put it under surveillance.

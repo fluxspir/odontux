@@ -24,7 +24,7 @@ ROLES_LIST = ROLES.items()  #ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
 
 KID_AGE = 13
 
-TOOTH_STATE = {
+TOOTH_STATES = {
             "s": _("sane"),
             "x": _("sealing"),
             "o": _("obturated"),
@@ -36,6 +36,7 @@ TOOTH_STATE = {
             "a": _("absent"),
             "b": _("bridge"),
             "r": _("resin"),
-            "I": _("implant")
+            "I": _("implant"),
+            "w": _("without_state"),
            }
 
