@@ -13,7 +13,7 @@ from gettext import gettext as _
 import sqlalchemy
 import os
 import sys
-
+import constants
 
 class EventParser(BaseCommand):
     """ """
@@ -179,7 +179,7 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
             sys.exit(_("Need to provide tooth name where event occured"))
 
         # in Class Toothevent
-        self.event_values['type'] = "t"
+        self.event_values['location'] = constants.EVENT_LOCATION_TOOTH
         if options.appointment_id:
             self.event_values["appointment_id"] = options.appointment_id
         else:
@@ -273,7 +273,7 @@ class AddCrownEventCommand(BaseCommand, EventParser, AddEventCommand):
             sys.exit(_("Need to provide tooth name where event occured"))
 
         # in Class Crownevent
-        self.event_values['type'] = "c"
+        self.event_values['location'] = constants.EVENT_LOCATION_CROWN
         if options.appointment_id:
             self.event_values["appointment_id"] = options.appointment_id
         else:
@@ -358,7 +358,7 @@ class AddRootEventCommand(BaseCommand, EventParser, AddEventCommand):
         else:
             patient_id = os.getenv("patient_id")
 
-        self.event_values['type'] = "r"
+        self.event_values['location'] = EVENT_LOCATION_ROOT
         if options.appointment_id:
             self.event_values["appointment_id"] = options.appointment_id
         else:

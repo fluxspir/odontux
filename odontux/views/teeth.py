@@ -12,7 +12,7 @@ from sqlalchemy import Date, cast
 from odontux import constants, checks
 from odontux.odonweb import app
 from odontux.views import forms
-from odontux.models import meta, teeth
+from odontux.models import meta, teeth, schedule
 from odontux.views.log import index
 
 
@@ -59,20 +59,36 @@ def show_tooth(tooth_id):
     tooth = (tooth.id, tooth.name, constants.TOOTH_STATES[tooth.state], 
              tooth.surveillance)
 
-    events = ( meta.session.query(teeth.Event).filter(
-                    teeth.Event.tooth_id == tooth_id) )
-    import pdb ; pdb.set_trace()
-    events = ( events.filter(
-                    teeth.Event.appointment.agenda.starttime <= 
-                    datetime.datetime(2012,8,8,12,30) )
-                    .all() )
+    events = ( meta.session.query(teeth.Event)
+                    .filter(
+                        teeth.Event.tooth_id == tooth_id
+                        )
+                    .filter(
+                        teeth.Event.appointment_id ==
+                        schedule.Appointment.id
+                        )
+                    .filter(
+                        schedule.Appointment.id == 
+                        schedule.Agenda.appointment_id
+                        )
+                    .filter(
+                        schedule.Agenda.starttime <= 
+                        actual_appointment.agenda.starttime
+                        )
+                    .order_by(
+                        schedule.Agenda.starttime
+                        )
+                    .order_by(
+                        teeth.Event.id
+                        )
+             ).all()
 
-
-    tooth_events = ( meta.session.query(teeth.ToothEvent)
-        .filter(teeth.ToothEvent.tooth_id == tooth_id)
-        .filter(teeth.ToothEvent.appointment_id <= session['appointment_id'])
-        .order_by(teeth.ToothEvent.appointment_id)
-        .all() )
+    events_list = []
+    for event in events:
+        if event.type == "t":
+            tooth_events = ( meta.session.query(teeth.ToothEvent)
+                .filter(teeth.ToothEvent.event_id == event.id)
+                .one() )
 
     crown_events = ( meta.sesion.query(teeth.CrownEvent)
         .filter(teeth.CrownEvent.tooth_id == tooth_id)

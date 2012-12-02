@@ -45,8 +45,7 @@ class Event(Base):
     tooth_id = Column(Integer, ForeignKey(Tooth.id), nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
-    type = Column(String, nullable=False)
-
+    location = Column(Integer, nullable=False)
 
 class ToothEvent(Base):
     """

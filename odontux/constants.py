@@ -40,3 +40,6 @@ TOOTH_STATES = {
             "w": _("without_state"),
            }
 
+EVENT_LOCATION_TOOTH = 0
+EVENT_LOCATION_CROWN = 1
+EVENT_LOCATION_ROOT = 2
