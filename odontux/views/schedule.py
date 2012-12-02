@@ -134,7 +134,8 @@ def display_day(dateday, dentist_id):
     # dateday is return to create links to previous and next day
     return render_template('agenda_day.html', appointments=appointments,
                             dateday=dateday, nextday=nextday, prevday=prevday,
-                            summary_agenda_form=summary_agenda_form)
+                            summary_agenda_form=summary_agenda_form,
+                            dentist_id=dentist_id)
 
 
 def agenda_handler(day, starthour=0, startmin=0, durationhour=0, durationmin=0,
