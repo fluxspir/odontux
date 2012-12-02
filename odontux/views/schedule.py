@@ -109,13 +109,19 @@ def display_day(dateday, dentist_id):
                                          '%Y-%m-%d').date()
     nextday = dateday + datetime.timedelta(days=1)
     prevday = dateday - datetime.timedelta(days=1)
-
     meetings = meta.session.query(schedule.Agenda).filter(or_(
                         cast(schedule.Agenda.starttime, Date) == (dateday),
                         cast(schedule.Agenda.endtime, Date) == (dateday) )
                         ).filter(
                         schedule.Appointment.dentist_id == dentist_id
                         ).all()
+
+#    meetings = meta.session.query(schedule.Agenda).filter(or_(
+#                        schedule.Agenda.starttime == dateday,
+#                        schedule.Agenda.endtime == dateday )
+#                        ).filter(
+#                        schedule.Appointment.dentist_id == dentist_id
+#                        ).all()
     appointments = []
     for meeting in meetings:
         appointment = meta.session.query(schedule.Appointment).filter(

@@ -237,7 +237,6 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
                                          self.values["price"])
         new_act.invoice_id = invoice_id
         meta.session.commit()
-
         print(new_act.id)
 
 class ListActTypeCommand(BaseCommand):

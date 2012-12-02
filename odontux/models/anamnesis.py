@@ -22,7 +22,7 @@ class MedicalHistory(Base):
     __tablename__ = 'medical_history'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id))
-    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
+    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=2)
     icd10 = Column(String, default="")
     disease = Column(String, default="")
     disorder = Column(String, default="")
@@ -35,7 +35,7 @@ class PastSurgeries(Base):
     __tablename__ = 'past_surgeries'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id))
-    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
+    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=2)
     surgery_type = Column(String, default="")
     problem = Column(String, default="")
     complication = Column(String, default="")
@@ -46,7 +46,7 @@ class Allergies(Base):
     __tablename__ = 'allergies'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id))
-    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=1)
+    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=2)
     drug = Column(String, default="")
     metal = Column(String, default="")
     food = Column(String, default="")

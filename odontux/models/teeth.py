@@ -7,15 +7,9 @@
 from meta import Base
 import users, administration, headneck, schedule
 import sqlalchemy
-import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
-
-
-now = datetime.datetime.now()
-today = datetime.date.today()
-
 
 class Tooth(Base):
     """
@@ -44,6 +38,15 @@ class Tooth(Base):
     state = Column(String, default="")
     surveillance = Column(Boolean, default=False)
 
+class Event(Base):
+    """ """
+    __tablename__ = "event"
+    id = Column(Integer, primary_key=True)
+    tooth_id = Column(Integer, ForeignKey(Tooth.id), nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                nullable=False)
+    type = Column(String, nullable=False)
+
 
 class ToothEvent(Base):
     """
@@ -65,9 +68,7 @@ class ToothEvent(Base):
     """
     __tablename__ = 'tooth_event'
     id = Column(Integer, primary_key=True)
-    tooth_id = Column(Integer, ForeignKey(Tooth.id), nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                nullable=False)
+    event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
     sane = Column(String, default="")
     place = Column(String, default="")
     mobility = Column(String, default="")
@@ -105,9 +106,7 @@ class CrownEvent(Base):
     """
     __tablename__ = 'crown_event'
     id = Column(Integer, primary_key=True)
-    tooth_id = Column(Integer, ForeignKey(Tooth.id), nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                nullable=False)
+    event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
     side = Column(String, nullable=False)
     sealing = Column(String, default="")
     decay = Column(String, default="")
@@ -145,9 +144,7 @@ class RootEvent(Base):
     """
     __tablename__ = 'root_event'
     id = Column(Integer, primary_key=True)
-    tooth_id = Column(Integer, ForeignKey(Tooth.id), nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                nullable=False)
+    event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
     canal = Column(String, nullable=False)
     infected = Column(String, default="")
     abscess = Column(String, default="")

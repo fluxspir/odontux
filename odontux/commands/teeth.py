@@ -162,7 +162,7 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
     command_name = "add_toothevent"
 
     def __init__(self):
-
+        self.event_values = {}
         self.toothevent_values = {}
 
     def run(self, args):
@@ -178,11 +178,12 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
         else:
             sys.exit(_("Need to provide tooth name where event occured"))
 
-        # in Class Toothevent    
+        # in Class Toothevent
+        self.event_values['type'] = "t"
         if options.appointment_id:
-            self.toothevent_values["appointment_id"] = options.appointment_id
+            self.event_values["appointment_id"] = options.appointment_id
         else:
-            self.toothevent_values["appointment_id"] =\
+            self.event_values["appointment_id"] =\
             os.getenv("appointment_id")
         if options.sane:
             state = "s"
@@ -238,7 +239,12 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
                 tooth.surveillance = True
             meta.session.commit()
 
-        self.toothevent_values["tooth_id"] = tooth_id
+        self.event_values["tooth_id"] = tooth_id
+        new_event = teeth.Event(**self.event_values)
+        meta.session.add(new_event)
+        meta.session.commit()
+        
+        self.toothevent_values['event_id'] = new_event.id
         new_toothevent = teeth.ToothEvent(**self.toothevent_values)
         meta.session.add(new_toothevent)
         meta.session.commit()
@@ -250,7 +256,7 @@ class AddCrownEventCommand(BaseCommand, EventParser, AddEventCommand):
     command_name = "add_crownevent"
 
     def __init__(self):
-
+        self.event_values = {}
         self.crownevent_values = {}
 
     def run(self, args):
@@ -266,11 +272,12 @@ class AddCrownEventCommand(BaseCommand, EventParser, AddEventCommand):
         else:
             sys.exit(_("Need to provide tooth name where event occured"))
 
-        # in Class Crownevent    
+        # in Class Crownevent
+        self.event_values['type'] = "c"
         if options.appointment_id:
-            self.crownevent_values["appointment_id"] = options.appointment_id
+            self.event_values["appointment_id"] = options.appointment_id
         else:
-            self.crownevent_values["appointment_id"] =\
+            self.event_values["appointment_id"] =\
             os.getenv("appointment_id")
 
         self.crownevent_values["side"] = options.side.decode("utf_8")
@@ -322,7 +329,12 @@ class AddCrownEventCommand(BaseCommand, EventParser, AddEventCommand):
                 tooth.surveillance = True
             meta.session.commit()
 
-        self.crownevent_values["tooth_id"] = tooth_id
+        self.event_values["tooth_id"] = tooth_id
+        new_event = teeth.Event(**self.event_values)
+        meta.session.add(new_event)
+        meta.session.commit()
+
+        self.crownevent_values['event_id'] = new_event.id
         new_crownevent = teeth.CrownEvent(**self.crownevent_values)
         meta.session.add(new_crownevent)
         meta.session.commit()
@@ -334,6 +346,7 @@ class AddRootEventCommand(BaseCommand, EventParser, AddEventCommand):
     command_name = "add_rootevent"
     
     def __init__(self):
+        self.event_values = {}
         self.rootevent_values = {}
 
     def run(self, args):
@@ -344,17 +357,19 @@ class AddRootEventCommand(BaseCommand, EventParser, AddEventCommand):
             patient_id = options.patient_id
         else:
             patient_id = os.getenv("patient_id")
+
+        self.event_values['type'] = "r"
         if options.appointment_id:
-            self.rootevent_values["appointment_id"] = options.appointment_id
+            self.event_values["appointment_id"] = options.appointment_id
         else:
-            self.rootevent_values["appointment_id"] =\
+            self.event_values["appointment_id"] =\
             os.getenv("appointment_id")
 
         if options.name:
             name = options.name.decode("utf_8")
         else:
             sys.exit(_("Need to tell the tooth name where the event occured"))
-
+        
         self.rootevent_values["canal"] = options.canal.decode("utf_8")
         if options.infected:
             self.rootevent_values["infected"] =\
@@ -402,7 +417,12 @@ class AddRootEventCommand(BaseCommand, EventParser, AddEventCommand):
             tooth_id = tooth.id
             meta.session.commit()
 
-        self.rootevent_values["tooth_id"] = tooth_id
+        self.event_values["tooth_id"] = tooth_id
+        new_event = teeth.Event(**self.event_values)
+        meta.session.add(new_event)
+        meta.session.commit()
+
+        self.rootevent_values['event_id'] = new_event.id
         new_rootevent = teeth.RootEvent(**self.rootevent_values)
         meta.session.add(new_rootevent)
         meta.session.commit()

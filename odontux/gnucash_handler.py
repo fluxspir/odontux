@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from models import meta, administration, users
+from models import meta, administration, users, compta, schedule
 
 import ConfigParser
 
@@ -49,14 +49,14 @@ class GnuCash():
             * transfer
             * paypal
     """
-    def __init__(self, patient_id, user_id):
+    def __init__(self, patient_id, dentist_id):
         self.parser = ConfigParser.ConfigParser()
         home = os.path.expanduser("~")
         self.parser.read(os.path.join(home, ".odontuxrc"))
         #professionnalaccounting_url = self.parser.get("gnucashdb", "url")
-        professionnalaccounting_url = meta.session.query(users.OdontuxUser)\
-                    .filter(users.OdontuxUser.id == user_id).one()\
-                    .gnucash_url.encode("utf_8")
+        professionnalaccounting_url = ( meta.session.query(users.OdontuxUser)
+            .filter(users.OdontuxUser.id == dentist_id).one().gnucash_url
+            .encode("utf_8") )
         assets = self.parser.get("gnucashdb", "assets")
         receivables = self.parser.get("gnucashdb", "receivables")
         dentalfund = self.parser.get("gnucashdb", "dentalfund")

@@ -207,7 +207,7 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
         if options.email:
             options.email = options.email.decode("utf_8").lower()
 
-        if options.role == constants.ROLE_DENTIST:
+        if int(options.role) == constants.ROLE_DENTIST:
             self.values['gnucash_url'] = options.gnucash_url.decode("utf_8")
 
         new_user = users.OdontuxUser(**self.values)

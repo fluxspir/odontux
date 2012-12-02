@@ -7,6 +7,8 @@
 
 from flask import session, render_template, redirect, url_for, request
 
+from sqlalchemy import Date, cast
+
 from odontux import constants, checks
 from odontux.odonweb import app
 from odontux.views import forms
@@ -18,7 +20,7 @@ from odontux.views.log import index
 def list_teeth():
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('index'))
-
+    
     patient = checks.get_patient(session['patient_id'])
     appointment = checks.get_appointment()
     if patient.mouth and patient.mouth.teeth:
@@ -45,7 +47,7 @@ def show_tooth(tooth_id):
         return redirect(url_for('index'))
 
     patient = checks.get_patient(session['patient_id'])
-    appointment = checks.get_appointment()
+    actual_appointment = checks.get_appointment()
     
     tooth = meta.session.query(teeth.Tooth)\
         .filter(teeth.Tooth.id == tooth_id)\
@@ -57,25 +59,33 @@ def show_tooth(tooth_id):
     tooth = (tooth.id, tooth.name, constants.TOOTH_STATES[tooth.state], 
              tooth.surveillance)
 
-    tooth_events = meta.session.query(teeth.ToothEvent)\
-        .filter(teeth.ToothEvent.tooth_id == tooth_id)\
-        .filter(teeth.ToothEvent.appointment_id <= session['appointment_id'])\
-        .order_by(teeth.ToothEvent.appointment_id)\
-        .all()
-
-    crown_events = meta.sesion.query(teeth.CrownEvent)\
-        .filter(teeth.CrownEvent.tooth_id == tooth_id)\
-        .filter(teeth.CrownEvent.appointment_id <= session['appointment_id'])\
-        .order_by(teeth.CrownEvent.appointment_id)\
-        .all()
+    events = ( meta.session.query(teeth.Event).filter(
+                    teeth.Event.tooth_id == tooth_id) )
+    import pdb ; pdb.set_trace()
+    events = ( events.filter(
+                    teeth.Event.appointment.agenda.starttime <= 
+                    datetime.datetime(2012,8,8,12,30) )
+                    .all() )
 
 
-    root_events = meta.session.query(teeth.RootEvent)\
-        .filter(teeth.RootEvent.tooth_id == tooth_id)\
-        .filter(teeth.RootEvent.appointment_id <= session['appointment_id'])\
-        .order_by(teeth.RootEvent.appointment_id)\
-        .all()
+    tooth_events = ( meta.session.query(teeth.ToothEvent)
+        .filter(teeth.ToothEvent.tooth_id == tooth_id)
+        .filter(teeth.ToothEvent.appointment_id <= session['appointment_id'])
+        .order_by(teeth.ToothEvent.appointment_id)
+        .all() )
 
+    crown_events = ( meta.sesion.query(teeth.CrownEvent)
+        .filter(teeth.CrownEvent.tooth_id == tooth_id)
+        .filter(teeth.CrownEvent.appointment_id <= session['appointment_id'])
+        .order_by(teeth.CrownEvent.appointment_id)
+        .all() )
+
+    root_events = ( meta.session.query(teeth.RootEvent)
+        .filter(teeth.RootEvent.tooth_id == tooth_id)
+        .filter(teeth.RootEvent.appointment_id <= session['appointment_id'])
+        .order_by(teeth.RootEvent.appointment_id)
+        .all() )
+ 
     tooth_events = [ (event, _get_appointment(event.appointment_id) )
                       for event in tooth_events ]
     

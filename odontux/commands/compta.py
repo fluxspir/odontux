@@ -185,7 +185,7 @@ class AddPaymentCommand(BaseCommand, PaymentParser):
         # we want to know the dentist of the payer for instanciating gnucash 
         # later
         payer = meta.session.query(administration.Patient)\
-            .filter(administration.Patient.id == payer_id)\
+            .filter(administration.Patient.id == self.values['payer_id'])\
             .one()
 
         new_payment = compta.Payment(**self.values)
