@@ -62,22 +62,26 @@ def show_tooth(tooth_id):
         .filter(teeth.ToothEvent.appointment_id <= session['appointment_id'])\
         .order_by(teeth.ToothEvent.appointment_id)\
         .all()
-    tooth_events = [ (event, _get_appointment(event.appointment_id) )
-                      for event in tooth_events ]
 
     crown_events = meta.sesion.query(teeth.CrownEvent)\
         .filter(teeth.CrownEvent.tooth_id == tooth_id)\
         .filter(teeth.CrownEvent.appointment_id <= session['appointment_id'])\
         .order_by(teeth.CrownEvent.appointment_id)\
         .all()
-    crown_events = [ (event, _get_appointment(event.appointment_id) )
-                      for event in crown_events ]
+
 
     root_events = meta.session.query(teeth.RootEvent)\
         .filter(teeth.RootEvent.tooth_id == tooth_id)\
         .filter(teeth.RootEvent.appointment_id <= session['appointment_id'])\
         .order_by(teeth.RootEvent.appointment_id)\
         .all()
+
+    tooth_events = [ (event, _get_appointment(event.appointment_id) )
+                      for event in tooth_events ]
+    
+    crown_events = [ (event, _get_appointment(event.appointment_id) )
+                      for event in crown_events ]
+
     root_events = [ (event, _get_appointment(event.appointment_id) )
                      for event in root_events ]
 
