@@ -64,6 +64,10 @@ class RootEventForm(Form):
     obturation = TextField(_("obturation"))
     inlaycore = TextField(_("inlay core"))
 
+def get_location_choices():
+    return [ constants.EVENT_LOCATION_TOOTH, constants.EVENT_LOCATION_CROWN,
+             constants.EVENT_LOCATION_ROOT ]
+
 def get_event_field_list():
     return [ "tooth_id", "appointment_id", "location", "pic",
              "color", "comments" ]
@@ -232,6 +236,28 @@ def show_tooth(tooth_id):
                                               events_list=events_list)
 
 
-@app.route('/tooth_event/add')
-def add_tooth_event():
-    pass
+@app.route('/tooth_event/add?id=<int:patient_id>&rv_id=<int:appointment_id'
+           '&tooth_id=<tooth_id>')
+def add_event(patient_id, appointment_id, tooth_id):
+    """ """
+    if not session['role'] == constants.ROLE_DENTIST:
+        return redirect(url_for('index'))
+
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment()
+    if not tooth_id == " ":
+        tooth = meta.session.query(teeth.Tooth).filter(
+                teeth.Tooth.id == tooth_id).one()
+
+    event_form = EventForm(request.form)
+    tooth_event_form = ToothEventForm(request.form)
+    crown_event_form = CrownEventForm(request.form)
+    root_event_form = RootEventForm(request.form)
+
+    event_form.appointment_id.choices = [(a.id, a.agenda.starttime.date()
+                            + " " + a.agenda.startime.time() ) for a in
+                            meta.session.query(schedule.Appointment).filter(
+                            schedule.Appointment.id == appointment.id).all() 
+                                            ]
+    event.form.location.choices = get_location_choices()
+    
