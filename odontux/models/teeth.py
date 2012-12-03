@@ -46,6 +46,9 @@ class Event(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
     location = Column(Integer, nullable=False)
+    color = Column(String, default="")
+    pic = Column(String, default="")
+    comments = Column(String, default="")
 
 class ToothEvent(Base):
     """
@@ -66,10 +69,6 @@ class ToothEvent(Base):
     __tablename__ = 'tooth_event'
     id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
-    color = Column(String, default="")
-    pic = Column(String, default="")
-    comments = Column(String, default="")
-    # event
     sane = Column(String, default="")
     place = Column(String, default="")
     mobility = Column(String, default="")
@@ -105,9 +104,6 @@ class CrownEvent(Base):
     __tablename__ = 'crown_event'
     id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
-    color = Column(String, default="")
-    pic = Column(String, default="")
-    comments = Column(String, default="")
     side = Column(String, nullable=False)
     tooth_shade = Column(String, default="")
     # event
@@ -144,9 +140,6 @@ class RootEvent(Base):
     __tablename__ = 'root_event'
     id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
-    color = Column(String, default="")
-    pic = Column(String, default="")
-    comments = Column(String, default="")
     canal = Column(String, nullable=False)
     # event
     infected = Column(String, default="")

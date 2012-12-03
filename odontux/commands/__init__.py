@@ -28,7 +28,8 @@ from schedule import (AddAppointmentCommand, AddAppointmentMemoCommand,
                       UpdateAppointmentCommand)
 from teeth import (AddToothEventCommand, GetToothIdCommand, 
                    AddCrownEventCommand, AddRootEventCommand, 
-                   ListPatientTeethCommand)
+                   ListPatientTeethCommand,
+                   MoveCommentsCommand)
 from medication import (AddDrugPrescribedCommand, MakePrescriptionCommand, 
                         ListDrugCommand)
 from compta import (AddPaymentTypeCommand, UpdatePaymentTypeCommand, 

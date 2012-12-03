@@ -5,15 +5,80 @@
 # Licence BSD
 #
 
+from wtforms import (
+                    Form, 
+                    TextField, TextAreaField,
+                    HiddenField, 
+                    SelectField, 
+                    validators
+                    )
+
 from flask import session, render_template, redirect, url_for, request
 
-from sqlalchemy import Date, cast
+from gettext import gettext as _
 
 from odontux import constants, checks
 from odontux.odonweb import app
 from odontux.views import forms
 from odontux.models import meta, teeth, schedule, headneck
 from odontux.views.log import index
+
+
+class EventForm(Form):
+    event_id = HiddenField(_("ID"))
+    tooth_id = SelectField(_("Tooth"), coerce=int)
+    appointment_id = SelectField(_("Appointment"), coerce=int)
+    location = SelectField(_("Location"), coerce=int)
+    color = TextField(_("color"))
+    pic = TextField(_("pic"))
+    comments = TextAreaField(_("comments"))
+
+class ToothEventForm(Form):
+    toothevent_id = HiddenField(_("ID"))
+    event_id = HiddenField(_("event_id"))
+    sane = TextField(_("sane"))
+    place = TextField(_("place"))
+    mobility = TextField(_("mobility"))
+    fracture = TextField(_("fracture"))
+    abscence = TextField(_("abscence"))
+    replaced = TextField(_("replaced"))
+    implant = TextField(_("implant"))
+
+class CrownEventForm(Form):
+    crownevent_id = HiddenField(_("ID"))
+    event_id = HiddenField(_("event_id"))
+    side = TextField(_("side"))
+    tooth_shade = TextField(_("tooth_shade"))
+    sealing = TextField(_("sealing"))
+    decay = TextField(_("decay"))
+    obturation = TextField(_("obturation"))
+    crowned = TextField(_("crowned"))
+    bridge = TextField(_("bridge"))
+
+class RootEventForm(Form):
+    rootevent_id = HiddenField(_("ID"))
+    event_id = HiddenField(_("event_id"))
+    canal = TextField(_("canal"))
+    infected = TextField(_("infected"))
+    abscess = TextField(_("abscess"))
+    obturation = TextField(_("obturation"))
+    inlaycore = TextField(_("inlay core"))
+
+def get_event_field_list():
+    return [ "tooth_id", "appointment_id", "location", "pic",
+             "color", "comments" ]
+
+def get_tooth_event_field_list():
+    return [ "event_id", "sane", "place", "mobility", "fracture",
+             "abscence", "replaced", "implant" ]
+
+def get_crown_event_field_list():
+    return [ "event_id", "side", "tooth_shade", "sealing", "decay",
+             "obturation", "crowned", "bridge" ]
+
+def get_root_event_field_list():
+    return [ "event_id", "canal", "infected", "abscess", "obturation",
+             "inlaycore" ]
 
 
 def add_mouth(patient_id):
@@ -117,8 +182,8 @@ def show_tooth(tooth_id):
                     event_data = getattr(tooth_event, f)
                     event_description.append( (event_name, event_data) )
 
-            events_list.append( ("tooth", tooth_event, event_description,
-                                 appointment) )
+            events_list.append( (event, "tooth", tooth_event, 
+                                 event_description, appointment) )
 
         elif event.location == constants.EVENT_LOCATION_CROWN[0]:
 
@@ -136,8 +201,8 @@ def show_tooth(tooth_id):
                     event_data = getattr(crown_event, f)
                     event_description.append( (event_name, event_data) )
             
-            events_list.append( ("crown", crown_event,event_description, 
-                                 appointment) )
+            events_list.append( (event, "crown", crown_event,
+                                 event_description, appointment) )
 
         elif event.location == constants.EVENT_LOCATION_ROOT[0]:
 
@@ -155,8 +220,8 @@ def show_tooth(tooth_id):
                     event_data = getattr(root_event, f)
                     event_description.append( (event_name, event_data) )
 
-            events_list.append( ("root", root_event, event_description,
-                                 appointment) )
+            events_list.append( (event, "root", root_event, 
+                                 event_description, appointment) )
 
         else:
             raise Exception(_("Unknown event location"))

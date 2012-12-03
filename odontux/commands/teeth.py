@@ -142,7 +142,7 @@ class AddEventCommand(BaseCommand):
         meta.session.commit()
         return new_mouth.id
 
-    def add_tooth(self, mouth_id, name, state="", surveillance=False):
+    def add_tooth(self, mouth_id, name, state="s", surveillance=False):
         tooth_values = {}
         tooth_values["mouth_id"] = mouth_id
         tooth_values["name"] = name.decode("utf_8")

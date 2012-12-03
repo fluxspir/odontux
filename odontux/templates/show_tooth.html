@@ -23,7 +23,7 @@
       <th>Picture</th>
       <th>Color</th>
     </tr>
-    {% for location, event, event_description, appointment in events_list %}
+    {% for event, location, toothevent, event_description, appointment in events_list %}
      <tr>
       <td>{{ appointment.agenda.starttime.date() }}</td>
       
@@ -49,16 +49,16 @@
 
       <td>
         {% if location == "crown" %}
-          {{ event.side }}
+          {{ toothevent.side }}
         {% elif location == "root" %}
-          {{ event.canal }}
+          {{ toothevent.canal }}
         {% else %}
         {% endif %}
       </td>
 
       <td>
         {% if location == "crown" %}
-          {{ event.tooth_shade }}
+          {{ toothevent.tooth_shade }}
         {% endif %}
       </td>
 

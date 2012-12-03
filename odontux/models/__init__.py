@@ -26,7 +26,7 @@ from softtissues import (SuperiorLip, InferiorLip, LeftCheek, RightCheek,
                          HardPalate, SoftPalate, Tongue, MouthBase)
 from periodonte import (SuperiorGum, InferiorGum, SuperiorAlveolarBone,
                         InferiorAlveolarBone)
-from teeth import Tooth, ToothEvent, CrownEvent, RootEvent
+from teeth import Tooth, Event, ToothEvent, CrownEvent, RootEvent
 from act import Specialty, ActType, AppointmentActReference
 from cotation import NgapKeyFr, CmuKeyFr, MajorationFr, CotationFr
 from compta import PaymentType, Payment
