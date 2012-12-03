@@ -1,8 +1,71 @@
 {% extends 'summary_patient.html' %}
 
 {% block main %}
-  {{ tooth.name }} ; {{ tooth.state }}
-  {% for event in tooth_events %}
-    {{ event.id }}
-  {% endfor %}
+  <table border=1>
+    <caption>
+     {% if tooth.surveillance %}
+        <div class="alert">
+      {% else %}
+        <div>
+      {% endif %}
+        <span class="hidden">Tooth_id = {{ tooth.id }}</span>
+          Tooth {{ tooth.name }} ; state : {{ tooth.state }}
+        </div>
+    </caption>
+    <tr>
+      <th>Date</th>
+      <th>Location</th>
+      <th>Event name</th>
+      <th>Event precisions</th>
+      <th>Situation</th>
+      <th>Tooth_shade</th>
+      <th>Comments</th>
+      <th>Picture</th>
+      <th>Color</th>
+    </tr>
+    {% for location, event, event_description, appointment in events_list %}
+     <tr>
+      <td>{{ appointment.agenda.starttime.date() }}</td>
+      
+      <td>{{ location }}</td>
+      
+      <td>
+        {% for name, data in event_description %}
+          {% if loop.index0 > 0 %}
+            <br />
+          {% endif %}
+          {{ name }}
+        {% endfor %}
+      </td>
+      
+      <td>
+        {% for name, data in event_description %}
+          {% if loop.index0 > 0 %}
+            <br />
+          {% endif %}
+          {{ data }}
+        {% endfor %}
+      </td>
+
+      <td>
+        {% if location == "crown" %}
+          {{ event.side }}
+        {% elif location == "root" %}
+          {{ event.canal }}
+        {% else %}
+        {% endif %}
+      </td>
+
+      <td>
+        {% if location == "crown" %}
+          {{ event.tooth_shade }}
+        {% endif %}
+      </td>
+
+      <td>{{ event.comments }}</td>
+      <td>{{ event.pic }}</td>
+      <td style="background-color:{{ event.color }};"></td>
+    </tr>
+    {% endfor %}
+  </table>
 {% endblock %}

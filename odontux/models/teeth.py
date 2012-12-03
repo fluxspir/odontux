@@ -51,9 +51,7 @@ class ToothEvent(Base):
     """
     A tooth event is an event we can't really class neither as a crown event,
     nor as a root event.
-    A tooth event has to occur to a tooth (tooth_id)
-    We have to note it during an appointment (appointment_id)
-    Event that can occur :
+    Event that can occur to a tooth:
         * sane
         * place
         * mobility
@@ -68,6 +66,10 @@ class ToothEvent(Base):
     __tablename__ = 'tooth_event'
     id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
+    color = Column(String, default="")
+    pic = Column(String, default="")
+    comments = Column(String, default="")
+    # event
     sane = Column(String, default="")
     place = Column(String, default="")
     mobility = Column(String, default="")
@@ -75,9 +77,6 @@ class ToothEvent(Base):
     absence = Column(String, default="")
     replaced = Column(String, default="")
     implant = Column(String, default="")
-    comments = Column(String, default="")
-    color = Column(String, default="")
-    pic = Column(String, default="")
 
 
 class CrownEvent(Base):
@@ -106,16 +105,17 @@ class CrownEvent(Base):
     __tablename__ = 'crown_event'
     id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
+    color = Column(String, default="")
+    pic = Column(String, default="")
+    comments = Column(String, default="")
     side = Column(String, nullable=False)
+    tooth_shade = Column(String, default="")
+    # event
     sealing = Column(String, default="")
     decay = Column(String, default="")
     obturation = Column(String, default="")
     crowned = Column(String, default="")
     bridge = Column(String, default="")
-    comments = Column(String, default="")
-    color = Column(String, default="")
-    pic = Column(String, default="")
-
 
 class RootEvent(Base):
     """
@@ -144,12 +144,13 @@ class RootEvent(Base):
     __tablename__ = 'root_event'
     id = Column(Integer, primary_key=True)
     event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
+    color = Column(String, default="")
+    pic = Column(String, default="")
+    comments = Column(String, default="")
     canal = Column(String, nullable=False)
+    # event
     infected = Column(String, default="")
     abscess = Column(String, default="")
     obturation = Column(String, default="")
     inlaycore = Column(String, default="")
-    comments = Column(String, default="")
-    color = Column(String, default="")
-    pic = Column(String, default="")
 

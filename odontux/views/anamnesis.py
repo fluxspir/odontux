@@ -13,7 +13,7 @@ from wtforms import (Form,
                      )
 from odontux.views.log import index
 from odontux.views.forms import DateField
-from odontux.models import meta, anamnesis
+from odontux.models import meta, anamnesis, md
 from odontux.odonweb import app
 from odontux.views import forms
 from gettext import gettext as _
@@ -91,11 +91,17 @@ def list_anamnesis():
     patient = checks.get_patient(session['patient_id'])
     medical_history, past_surgeries, allergies = \
         _get_patient_anamnesis(patient.id)
+    try:    
+        doctor = meta.session.query(md.MedecineDoctor).filter(
+               md.MedecineDoctor.id == patient.gen_doc_id).one()
+    except:
+        doctor = ""
     return render_template("patient_anamnesis.html",
                             patient=patient,
                             medical_history=medical_history,
                             past_surgeries=past_surgeries,
-                            allergies=allergies)
+                            allergies=allergies,
+                            doctor=doctor)
 
 @app.route('/patient/modify_anamnesis/', methods=['GET', 'POST'])
 def update_anamnesis(): 

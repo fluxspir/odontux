@@ -40,6 +40,14 @@ TOOTH_STATES = {
             "w": _("without_state"),
            }
 
-EVENT_LOCATION_TOOTH = 0
-EVENT_LOCATION_CROWN = 1
-EVENT_LOCATION_ROOT = 2
+EVENT_LOCATION_TOOTH = (0, "tooth")
+EVENT_LOCATION_CROWN = (1, "crown")
+EVENT_LOCATION_ROOT = (2, "root")
+
+# could be turn to [ ( 0 , "sane" ), (1, "place" ), ...]  after a 
+# {models,commands,views}/teeth.py update
+TOOTH_EVENT_ATTRIBUTES = [ "sane", "place", "mobility", "fracture", "absence",
+                           "replaced", "implant" ]
+CROWN_EVENT_ATTRIBUTES = [ "sealing", "decay", "obturation", "crowned", 
+                           "bridge" ]
+ROOT_EVENT_ATTRIBUTES = [ "infected", "abscess", "obturation", "inlaycore" ]

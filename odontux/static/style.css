@@ -33,3 +33,5 @@ a:active {color:red ; text-decoration:none ;}
 .inline {display:inline;}
 nav ul {list-style-type:none;}
 nav li {display:inline;} 
+
+.alert {color:red;}
