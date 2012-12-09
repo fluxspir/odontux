@@ -137,6 +137,8 @@ def show_tooth(tooth_id):
 
     patient = checks.get_patient(session['patient_id'])
     actual_appointment = checks.get_appointment()
+    if not actual_appointment:
+        actual_appointment = patient.appointments[-1]
     
     tooth = meta.session.query(teeth.Tooth)\
         .filter(teeth.Tooth.id == tooth_id)\
