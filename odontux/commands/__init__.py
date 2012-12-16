@@ -7,7 +7,8 @@
 from specialty import ( AddSpecialtyCommand, ListSpecialtyCommand, 
                         UpdateSpecialtyCommand )
 from users import (AddOdontuxUserCommand, AddDentalOfficeCommand,
-                   UserMovingInCommand, UpdateUserCommand)
+                   UserMovingInCommand, UpdateUserCommand,
+                   ListUserCommand)
 from md import (AddMedecineDoctorCommand, ListMedecineDoctorCommand,
                 UpdateMedecineDoctorCommand)
 from cotation import (AddNgapKeyFrCommand, AddCmuKeyFrCommand,
@@ -29,7 +30,7 @@ from schedule import (AddAppointmentCommand, AddAppointmentMemoCommand,
 from teeth import (AddToothEventCommand, GetToothIdCommand, 
                    AddCrownEventCommand, AddRootEventCommand, 
                    ListPatientTeethCommand,
-                   MoveCommentsCommand)
+                  )
 from medication import (AddDrugPrescribedCommand, MakePrescriptionCommand, 
                         ListDrugCommand)
 from compta import (AddPaymentTypeCommand, UpdatePaymentTypeCommand, 

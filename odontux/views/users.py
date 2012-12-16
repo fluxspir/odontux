@@ -346,7 +346,7 @@ def update_user_password(body_id, form_to_display):
         return redirect(url_for('list_users'))
     password_form = OdontuxUserPasswordForm(request.form)
     if request.method == 'POST' and password_form.validate():
-        for f in password_fields:
+        for f in get_password_field_list():
             setattr(user, f, getattr(password_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_user', 

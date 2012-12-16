@@ -9,6 +9,19 @@
   {% endif %}
 {% endmacro %}
 
+{% macro render_simple_hidden_field(field) %}
+  <div class="hidden">
+    {{ field.label }} : {{ field(**kwargs)|safe }}<br />
+  </div>
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}
+
 {% macro render_simple_field_line(field) %}
   {{ field.label }} : {{ field(**kwargs)|safe }}
   {% if field.errors %}

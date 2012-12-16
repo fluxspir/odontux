@@ -46,6 +46,11 @@ class AppointmentParser(BaseCommand):
         parser.add_option("-n", "--next", action="store",\
                         type="string", dest="next_appointment",\
                         help="What's planned to do in next appointment.")
+        parser.add_option("--absent", action="store_true", dest="absent",
+                        default=False, help="Patient absent")
+        parser.add_option("--excuse", action="store", type="string",
+                        dest="excuse", help="Patient's excuse for being "
+                        "absent")
         parser.add_option("-s", "--starttime", action="store",\
                         type="string", dest="starttime",\
                         help="date/hour of beginning of appointment")

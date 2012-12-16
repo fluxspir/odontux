@@ -36,6 +36,8 @@ class Appointment(Base):
     prognostic = Column(String, default="")
     advise = Column(String, default="")
     next_appointment = Column(String, default="")
+    absent = Column(Boolean, default=False)
+    excuse = Column(String, default="")
     administrative_acts = relationship("AppointmentActReference",
                                        backref="appointment")
     ordonnance = relationship("Prescription", backref="appointment",

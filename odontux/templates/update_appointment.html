@@ -8,6 +8,8 @@
         {{ render_field(appointment_form.dentist_id) }}
         {{ render_field(appointment_form.emergency) }}
         {{ render_field(appointment_form.reason) }}
+        {{ render_field(appointment_form.absent) }}
+        {{ render_field(appointment_form.excuse) }}
         {% if session.role == session.ROLE_DENTIST %}
           {{ render_field(appointment_form.diagnostic) }}
           {{ render_field(appointment_form.treatment) }}

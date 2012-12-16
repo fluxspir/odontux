@@ -8,6 +8,8 @@ cotid=$(odontux add_cotationfr -k 1 -m 1 --exceeding_adult_normal 4 --exceeding_
 odontux add_acttype -n "Bilan Bucco Dentaire" -a "BBD" -c BBD -s 9 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 1 -m 1 --exceeding_adult_normal 15 --exceeding_adult_cmu 15)
 odontux add_acttype -n "Bilan Bucco Dentaire 1 ou 2 radios" -a "BBD 1-2 radio" -c BBDrad -s 9 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 3 -m 9 --kid_multiplicator 9)
+odontux add_acttype -n "Scellement sillon" -a "Sealant fissure" -c "seal" -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 7 --kid_multiplicator 8)
 odontux add_acttype -n "Obturation coronaire 1 face amalgame, technique directe" -a "Amalgame 1 face" -c amal1f -s 3 --cotation $cotid
 odontux add_acttype -n "Obturation coronaire 1 face composite, technique directe" -a "Composite 1 face" -c compo1f -s 3 --cotation $cotid
@@ -124,7 +126,7 @@ odontux add_acttype -n "Conception, adaptation et pose d'un inlay-core à clavet
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 35 --adult_cmu_num 4 --exceeding_adult_cmu 0)
 odontux add_acttype -n "Dent à tenon, dans groupe incisivo-canin-prémolaire" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 35 --exceeding_adult_cmu 0)
-odontux add_acttype -n "Dépose de prothèse conjointes métalliques" -a "Dépose couronne" -s 6 --cotation $cotid
+odontux add_acttype -n "Dépose de prothèse conjointes métalliques" -a "Depose prothese couronne" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 18)
 odontux add_acttype -n "Dépose de prothèses conjointes métalliques, pour TTT radiothérapique de tumeurs faciales, obturation provisoire comprise, par élément pilier" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 28 --exceeding_kid_normal 28 --exceeding_adult_cmu 0)

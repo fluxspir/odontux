@@ -146,4 +146,5 @@ class RootEvent(Base):
     abscess = Column(String, default="")
     obturation = Column(String, default="")
     inlaycore = Column(String, default="")
+    screwpost = Column(String, default="")
 

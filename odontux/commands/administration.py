@@ -8,6 +8,8 @@
 from models import meta, administration, cotation, md, teeth
 from base import BaseCommand
 
+import sqlalchemy
+
 import os
 from sqlalchemy import or_
 from gettext import gettext as _
@@ -468,7 +470,7 @@ class ListPatientCommand(BaseCommand, PatientParser):
     def run(self, args):
 
         (options, args) = self.parse_args(args)
-        
+          
         query = self.query
         
         for keyword in args:
@@ -488,7 +490,7 @@ class ListPatientCommand(BaseCommand, PatientParser):
         if options.patient_id:
             try:
                 patient = query.one()
-            # This except arrive when a patient has been put multiples times.
+            # This except occurs when a patient has been put multiples times.
             # it is something to remove, when a test for not insering several
             # times the same patient will be implemented
             except sqlalchemy.orm.exc.MultipleResultsFound:
@@ -497,7 +499,11 @@ class ListPatientCommand(BaseCommand, PatientParser):
 
         else:
             for patient in query:
-                doc = self.querydoc.filter(md.MedecineDoctor.id ==
+                if not patient.gen_doc_id:
+                    doc = self.querydoc.filter(md.MedecineDoctor.lastname ==
+                                            "ANONYME").first()
+                else:
+                    doc = self.querydoc.filter(md.MedecineDoctor.id ==
                                            patient.gen_doc_id).first()
                 
                 print(_(u"{}. {} {} {}, {}\t{} ({} {})\t{} : {} {} {}\t{} {}"

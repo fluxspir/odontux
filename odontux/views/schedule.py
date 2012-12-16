@@ -33,6 +33,8 @@ class AppointmentForm(Form):
     prognostic = TextAreaField(_('prognostic'))
     advise = TextAreaField(_('advise'))
     next_appointment = TextAreaField(_('next_appointment'))
+    absent = BooleanField(_('absent'))
+    excuse = TextField(_('excuse'))
 
 class AgendaForm(Form):
     """ """
@@ -53,7 +55,8 @@ class SummaryAgendaForm(Form):
 
 def get_appointment_field_list():
     return [ "patient_id", "dentist_id", "emergency", "reason", "diagnostic", 
-             "treatment", "prognostic", "advise", "next_appointment" ]
+             "treatment", "prognostic", "advise", "next_appointment", "absent",
+             "excuse"]
 
 def get_agenda_field_list():
     return [ "appointment_id", "day", "starthour", "startmin", "durationhour",

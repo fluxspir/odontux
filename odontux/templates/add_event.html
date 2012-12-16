@@ -1,0 +1,22 @@
+{% from "_formhelpers.html" import render_simple_field, render_simple_hidden_field %}
+{% extends "summary_patient.html" %}
+{% block javascript_specific %}
+  <script type="text/javascript" src="/static/js/event.js"></script>
+{% endblock %}
+{% block main %}
+  <div id="event">
+  {% block event %}
+    <form method="post" action="{{ url_for('add_event', patient_id=patient.id, appointment_id=event_form.appointment_id.data) }}">
+      {{ render_simple_hidden_field(event_form.event_id) }}
+      {{ render_simple_field(event_form.tooth_id) }}
+      {{ render_simple_field(event_form.new_tooth) }}
+      {{ render_simple_field(event_form.appointment_id) }}
+      {{ render_simple_field(event_form.location) }}
+      {{ render_simple_field(event_form.color) }}
+      {{ render_simple_field(event_form.pic) }}
+      {{ render_simple_field(event_form.comments) }}
+      <input type="submit" value="Add" />
+    </form>
+  {% endblock %}
+  </div>
+{% endblock %}

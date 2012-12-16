@@ -10,6 +10,14 @@
         <ul id="patient_navigation">
           <li>
             <a href="{{ url_for("list_teeth") }}">Mouth</a>
+          </li>
+          <li>
+            {% if appointment %}
+              <a href="{{ url_for("add_event", patient_id=session.patient_id, appointment_id=appointment.id) }}">Event</a>
+            {% else %}
+              <a href="{{ url_for("add_event", patient_id=session.patient_id, appointment_id=0) }}">Event</a>
+            {% endif %}
+          </li>
           <li>
             <a href={{ url_for("list_appointments") }}>Appointments</a>
           </li>

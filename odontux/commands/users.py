@@ -9,12 +9,64 @@ from base import BaseCommand
 from models import meta, users, administration
 import constants
 
+from sqlalchemy import or_
+
 import os
 import sys
 import datetime
 
 now = datetime.datetime.now()
 today = datetime.date.today()
+
+class ListUserCommand(BaseCommand):
+    """ """
+
+    command_name = "list_user"
+
+    def __init__(self):
+        self.query = meta.session.query(users.OdontuxUser)
+
+    def parse_args(self, args):
+        parser = self.get_parser()
+
+        parser.add_option("--id", action="store_true", default=False,
+                        help="print only user id", 
+                        dest="user_id")
+
+        parser.add_option("-r", "--role", action="store", type="string",
+               help="Role might be :",
+               dest="role")
+
+        (options, args) = parser.parse_args()
+        return options, args
+
+    def run(self, args):
+
+        (options, args) = self.parse_args(args)
+
+        if not options.role:
+            query = self.query
+        else:
+            for r_id, r_name in constants.ROLES_LIST:
+                if options.role == r_name:
+                    query = self.query.filter(
+                        users.OdontuxUser.role == r_id)
+                    break
+
+        for keyword in args:
+            keyword = "%{}%".format(keyword)
+            query = query.filter(or_(
+                users.OdontuxUser.lastname.ilike(keyword),
+                users.OdontuxUser.firstname.ilike(keyword)
+                )).all()
+
+        if options.user_id:
+            for u in query:
+                print("{}".format(u.id))
+#                print(u.id)
+        else:
+            for u in query:
+                print("{} {} {} {}".format(u.id, u.lastname, u.firstname, u.role))
 
 class OdontuxUserParser(BaseCommand):
     """ """

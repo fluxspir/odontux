@@ -128,6 +128,9 @@ class EventParser(BaseCommand):
             parser.add_option("-I", "--inlaycore", action="store", 
                             type="string", dest="inlaycore",
                             help="use of pilier in the root")
+            parser.add_option("--screwpost", action="store",
+                            type="string", dest="screwpost",
+                            help="screw post in root")
   
         (options, args) = parser.parse_args(args)
         return options, args
@@ -382,6 +385,9 @@ class AddRootEventCommand(BaseCommand, EventParser, AddEventCommand):
         if options.inlaycore:
             self.rootevent_values["inlaycore"] =\
             options.inlaycore.decode("utf_8")
+        if options.screwpost:
+            self.rootevent_values["screwpost"] =\
+            options.screwpost.decode("utf_8")
         if options.comments:
             self.rootevent_values["comments"] =\
             options.comments.decode("utf_8")
