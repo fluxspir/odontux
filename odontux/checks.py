@@ -189,12 +189,9 @@ def is_body_already_in_database(data, body_type="patient"):
 
     elif body_type == "md":
         try:
-            body = meta.session.query(md.MedecineDoctor)\
-                .filter(md.MedecineDoctor.lastname == data.lastname.data)\
-                .filter(md.MedecineDoctor.firstname == data.firstname.data)\
-                .filter(md.MedecineDoctor.postal_code.ilike(
-                        data.postal_code.data))\
-                .one()
+            body = meta.session.query(md.MedecineDoctor).filter(
+                   md.MedecineDoctor.lastname == data.lastname.data).filter(
+                   md.MedecineDoctor.firstname == data.firstname.data).one()
             return body
         except sqlalchemy.orm.exc.NoResultFound:
             return False

@@ -23,10 +23,18 @@ class CotationFrParser(BaseCommand):
         parser = self.get_parser()
 
         if update:
-             parser.add_option("-c", "--cotation", action="store", 
+            parser.add_option("-c", "--cotation", action="store", 
                             type="string",
                             help="id of the cotation to upgrade",
                             dest="cotation_id")
+
+            parser.add_option("--totalprice_adult_normal", action="store",
+                            type="string", dest="totalprice_adult_normal",
+                            help="Total price for an adult normal")
+
+            parser.add_option("--totalprice_adult_cmu", action="store",
+                            type="string", dest="totalprice_adult_cmu",
+                            help="Total price for an adult cmu")
 
         parser.add_option("-k", "--key", action="store", type="string",
                         help="CPAM Key letter for the act.",
@@ -67,14 +75,6 @@ class CotationFrParser(BaseCommand):
         parser.add_option("--exceeding_kid_cmu", action="store",
                         type="string", dest="exceeding_kid_cmu",
                         help="Exceeding, for a kid CMU")
-
-        parser.add_option("--totalprice_adult_normal", action="store",
-                        type="string", dest="totalprice_adult_normal",
-                        help="Total price for an adult normal")
-                        
-        parser.add_option("--totalprice_adult_cmu", action="store",
-                        type="string", dest="totalprice_adult_cmu",
-                        help="Total price for an adult cmu")
 
         (options, args) = parser.parse_args(args)
         return options, args

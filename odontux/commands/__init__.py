@@ -8,7 +8,7 @@ from specialty import ( AddSpecialtyCommand, ListSpecialtyCommand,
                         UpdateSpecialtyCommand )
 from users import (AddOdontuxUserCommand, AddDentalOfficeCommand,
                    UserMovingInCommand, UpdateUserCommand,
-                   ListUserCommand)
+                   ListUserCommand, ListDentalOfficeCommand)
 from md import (AddMedecineDoctorCommand, ListMedecineDoctorCommand,
                 UpdateMedecineDoctorCommand)
 from cotation import (AddNgapKeyFrCommand, AddCmuKeyFrCommand,

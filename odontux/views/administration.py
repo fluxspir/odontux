@@ -118,8 +118,7 @@ def add_patient():
                                                             + dentist.lastname)
                 for dentist in meta.session.query(users.OdontuxUser).filter(
                 users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
-                users.OdontuxUser.lastname).all() 
-                                        ]
+                users.OdontuxUser.lastname).all() ]
 
     SSN_form = SocialSecurityForm(request.form)
     # three are used for odontux_users and medecine doctors, too
@@ -132,7 +131,7 @@ def add_patient():
         and phone_form.validate() and mail_form.validate() ):
 
         # Verify patient isn't already in database
-        patient = checks.is_body_already_in_database(gen_info_form)
+        patient = checks.is_body_already_in_database(gen_info_form, "patient")
         if patient:
             return redirect(url_for('update_patient', 
                                     body_id=patient.id,

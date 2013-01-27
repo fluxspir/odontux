@@ -55,6 +55,7 @@ def find():
         return render_template('list_users.html', users=query.all())
 
     if request.form["database"] == "doctor":
+        keywords = request.form["keywords"].encode("utf_8").split()
         query = meta.session.query(md.MedecineDoctor)
         for keyword in keywords:
             keyword = '%{}%'.format(keyword)
@@ -65,6 +66,7 @@ def find():
         return render_template('list_md.html', doctors=query.all())
 
     if request.form["database"] == "drug":
+        keywords = request.form["keywords"].encode("utf_8").split()
         query = meta.session.query(medication.DrugPrescribed)
         for keyword in keywords:
             keyword = '%{}%'.format(keyword)

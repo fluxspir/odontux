@@ -38,8 +38,10 @@ def enter_patient_appointment():
     is related to the invoice_id in gnucash,
     and may be paid or not.
     """
-
-    if session['role'] != constants.ROLE_DENTIST:
+    try:
+        if session['role'] != constants.ROLE_DENTIST:
+            return redirect(url_for('index'))
+    except KeyError:
         return redirect(url_for('index'))
 
     if request.method == 'POST':
@@ -154,3 +156,7 @@ def list_acts():
     return render_template("list_patient_acts.html",
                             patient=patient,
                             acts=acts)
+
+@app.route("/patient/update_act?id=<int:patient_id>&act=<int:act_id>")
+def update_patient_act(patient_id, act_id):
+    pass

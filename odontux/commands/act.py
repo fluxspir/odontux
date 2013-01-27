@@ -137,7 +137,7 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
         * the act
         * the appointment
         * the social_security code for this act
-        * the actual price of this act
+        *the actual price of this act
     If GnuCash is enabled, it will also make the Invoice.
     
     """

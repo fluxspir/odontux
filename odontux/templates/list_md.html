@@ -9,11 +9,22 @@
     <th>ID</th>
     <th>LastName</th>
     <th>FirstName</th>
+    <th>City</th>
+    <th>postal_code</th>
+    <th>phone</th>
     <th>Modify</th>
 {% for doc in doctors %}
   <tr>
-    <td>{{ doc.id }}</td><td>{{ doc.lastname }}</td><td>{{ doc.firstname }}</td><td>
-    <a href={{ url_for('update_md', body_id=doc.id, form_to_display='gen_info') }}>Update</a></td>
+    <td>{{ doc.id }}</td>
+    <td>{{ doc.lastname }}</td>
+    <td>{{ doc.firstname }}</td>
+    <td>{{ doc.addresses[-1].city }}</td>
+    <td>{{ doc.addresses[-1].postal_code }}</td>
+    <td>{{ doc.phones[-1] }}</td>
+    <td>
+      <a href={{ url_for('update_md', body_id=doc.id, form_to_display='gen_info') }}>Update</a></td>
+    <td>
+      <a href={{ url_for('delete_md', body_id=doc.id) }}>Delete</a></td>
   </tr>
 </div>
 {% endfor %}

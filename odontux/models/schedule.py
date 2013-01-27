@@ -25,12 +25,11 @@ class Appointment(Base):
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                         nullable=False)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id),
-                        nullable=False, default=2)
+                        nullable=False)
     agenda = relationship("Agenda", uselist=False, backref="appointment", 
                            cascade="all, delete, delete-orphan")
     emergency = Column(Boolean, default=False)
-    reason = Column(String, default="dentist didn't precise the appointment's "
-                                    "reason.", nullable=False)
+    reason = Column(String, default="", nullable=False)
     diagnostic = Column(String, default="")
     treatment = Column(String, default="")
     prognostic = Column(String, default="")
@@ -59,7 +58,7 @@ class AppointmentMemo(Base):
     __tablename__ = 'note'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id))
-    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=2)
+    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
     appointment_id = Column(Integer, ForeignKey(Appointment.id))
     time_stamp = Column(DateTime, default=now)
     memo = Column(String, default="")

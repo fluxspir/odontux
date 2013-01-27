@@ -27,6 +27,9 @@ class GeneralInfoForm(Form):
     dentist_id = HiddenField(_('dentist_id'), [validators.Required()])
     time_stamp = DateField(_('time_stamp'))
 
+class MedecineDoctorForm(Form):
+    md_id = SelectField(_('Medecine Doctor'), coerce=int)
+
 class MedicalHistoryForm(Form):
     mh_id = HiddenField('id')
     icd10 = TextField(_('icd10'), filters=[forms.upper_field])
@@ -66,20 +69,21 @@ def _get_forms():
     return (MedicalHistoryForm(request.form),
             PastSurgeriesForm(request.form),
             AllergiesForm(request.form),
-            GeneralInfoForm(request.form)
+            GeneralInfoForm(request.form),
+            MedecineDoctorForm(request.form)
            )
 
 def _get_gen_info_fields():
     return [ "patient_id", "dentist_id", "time_stamp" ]
 
 def _get_med_hist_fields():
-    return [ "mh_id", "icd10", "disease", "disorder", "habitus", "treatment" ]
+    return [ "icd10", "disease", "disorder", "habitus", "treatment" ]
 
 def _get_past_surg_fields():
-    return [ "surg_id", "surgery_type", "problem", "complication" ]
+    return [ "surgery_type", "problem", "complication" ]
 
 def _get_allergies_fields():
-    return [ "al_id", "drug", "metal", "food", "other", "reaction" ]
+    return [ "drug", "metal", "food", "other", "reaction" ]
 
 @app.route('/patient/anamnesis')
 def list_anamnesis():
@@ -113,7 +117,18 @@ def update_anamnesis():
     if not patient.dentist_id == session['user_id']:
         return redirect(url_for('list_patients'))
 
-    (med_form, surg_form, allergies_form, gen_info_form) = _get_forms()
+    (med_form, surg_form, allergies_form, gen_info_form, 
+    medecine_doctor_form) = _get_forms()
+
+    medecine_doctor_form.md_id.choices = [ (doc.id, doc.lastname + " " + 
+                                                    doc.firstname) 
+                                    for doc in meta.session.query(
+                                    md.MedecineDoctor).order_by(
+                                    md.MedecineDoctor.lastname).order_by(
+                                    md.MedecineDoctor.firstname).all()
+                                  ]
+    medecine_doctor_form.md_id.data = patient.gen_doc_id
+
     (medical_history, past_surgeries, allergies) =\
         _get_patient_anamnesis(patient.id)
     
@@ -125,8 +140,19 @@ def update_anamnesis():
                             surg_form=surg_form,
                             allergies=allergies,
                             allergies_form=allergies_form,
-                            gen_info_form=gen_info_form
+                            gen_info_form=gen_info_form,
+                            medecine_doctor_form=medecine_doctor_form
                           )
+
+@app.route('/patient/update_patient_md/', methods=['POST'])
+def update_patient_md():
+    """ """
+    patient = checks.get_patient(session['patient_id'])
+
+    medecine_doctor_form = MedecineDoctorForm(request.form)
+    patient.gen_doc_id = medecine_doctor_form.md_id.data
+    meta.session.commit()
+    return redirect(url_for('update_anamnesis', patient=patient))
 
 @app.route('/patient/update_medical_history/', methods=['POST'])
 def update_medical_history():
@@ -145,6 +171,8 @@ def update_medical_history():
             .filter(anamnesis.MedicalHistory.id == med_form.mh_id.data)\
             .one()
         med_fields = _get_med_hist_fields()
+        gen_info_fields = _get_gen_info_fields()
+        medic_hist.id = med_form.mh_id.data
         for f in med_fields:
             setattr(medic_hist, f, getattr(med_form, f).data)
         for f in gen_info_fields:
@@ -217,6 +245,7 @@ def update_past_surgery():
             .filter(anamnesis.PastSurgeries.id == surg_form.surg_id.data)\
             .one()
         surg_fields = _get_past_surg_fields()
+        past_surgery.id = surg_form.surg_id.data
         for f in surg_fields:
             setattr(past_surgery, f, getattr(surg_form, f).data)
         setattr(past_surgery, "time_stamp",
@@ -286,6 +315,7 @@ def update_allergies():
             .filter(anamnesis.Allergies.id == allergies_form.al_id.data)\
             .one()
         allergies_fields = _get_allergies_fields()
+        allergy.id = allergies_form.al_id.data
         for f in allergies_fields:
             setattr(allergy, f, getattr(allergies_form, f).data)
         setattr(allergy, "time_stamp",

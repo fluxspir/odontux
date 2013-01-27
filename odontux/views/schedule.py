@@ -298,3 +298,4 @@ def add_appointment(body_id):
         return render_template('add_appointment.html',
                             agenda_form=agenda_form,
                             appointment_form=appointment_form)
+

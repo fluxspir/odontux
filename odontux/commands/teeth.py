@@ -182,7 +182,14 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
             sys.exit(_("Need to provide tooth name where event occured"))
 
         # in Class Toothevent
-        self.event_values['location'] = constants.EVENT_LOCATION_TOOTH
+        self.event_values['location'] = constants.EVENT_LOCATION_TOOTH[0]
+        if options.comments:
+            self.event_values["comments"] = options.comments\
+                                                        .decode("utf_8")
+        if options.pic:
+            self.event_values["pic"] = options.pic
+        if options.color:
+            self.event_values['color'] = options.color
         if options.appointment_id:
             self.event_values["appointment_id"] = options.appointment_id
         else:
@@ -212,11 +219,6 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
         if options.implant:
             state = "I"
             self.toothevent_values["implant"] = options.implant.decode("utf_8")
-        if options.comments:
-            self.toothevent_values["comments"] = options.comments\
-                                                        .decode("utf_8")
-        if options.pic:
-            self.toothevent_values["pic"] = options.pic
 
         mouth = (
             meta.session.query(headneck.Mouth)
@@ -276,12 +278,19 @@ class AddCrownEventCommand(BaseCommand, EventParser, AddEventCommand):
             sys.exit(_("Need to provide tooth name where event occured"))
 
         # in Class Crownevent
-        self.event_values['location'] = constants.EVENT_LOCATION_CROWN
+        self.event_values['location'] = constants.EVENT_LOCATION_CROWN[0]
         if options.appointment_id:
             self.event_values["appointment_id"] = options.appointment_id
         else:
             self.event_values["appointment_id"] =\
             os.getenv("appointment_id")
+        if options.comments:
+            self.event_values["comments"] =\
+            options.comments.decode("utf_8")
+        if options.color:
+            self.event_values["color"] = options.color.decode("utf_8")
+        if options.pic:
+            self.event_values["pic"] = options.pic
 
         self.crownevent_values["side"] = options.side.decode("utf_8")
         if options.sealing:
@@ -300,13 +309,6 @@ class AddCrownEventCommand(BaseCommand, EventParser, AddEventCommand):
         if options.bridge:
             state = "b"
             self.crownevent_values["bridge"] = options.bridge.decode("utf_8")
-        if options.comments:
-            self.crownevent_values["comments"] =\
-            options.comments.decode("utf_8")
-        if options.color:
-            self.crownevent_values["color"] = options.color.decode("utf_8")
-        if options.pic:
-            self.crownevent_values["pic"] = options.pic
 
         mouth = (
             meta.session.query(headneck.Mouth)
@@ -361,12 +363,19 @@ class AddRootEventCommand(BaseCommand, EventParser, AddEventCommand):
         else:
             patient_id = os.getenv("patient_id")
 
-        self.event_values['location'] = EVENT_LOCATION_ROOT
+        self.event_values['location'] = constants.EVENT_LOCATION_ROOT[0]
         if options.appointment_id:
             self.event_values["appointment_id"] = options.appointment_id
         else:
             self.event_values["appointment_id"] =\
             os.getenv("appointment_id")
+        if options.comments:
+            self.event_values["comments"] =\
+            options.comments.decode("utf_8")
+        if options.color:
+            self.event_values["color"] = options.color
+        if options.pic:
+            self.event_values["pic"] = options.pic
 
         if options.name:
             name = options.name.decode("utf_8")
@@ -388,13 +397,6 @@ class AddRootEventCommand(BaseCommand, EventParser, AddEventCommand):
         if options.screwpost:
             self.rootevent_values["screwpost"] =\
             options.screwpost.decode("utf_8")
-        if options.comments:
-            self.rootevent_values["comments"] =\
-            options.comments.decode("utf_8")
-        if options.color:
-            self.rootevent_values["color"] = options.color
-        if options.pic:
-            self.rootevent_values["pic"] = options.pic
 
         mouth = (
             meta.session.query(headneck.Mouth)

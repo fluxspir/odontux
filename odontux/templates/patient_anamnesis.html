@@ -1,13 +1,17 @@
 {% extends "summary_patient.html" %}
   <link rel="stylesheet" type="text/css" href="/static/anamnesis.css">
 {% block main %}
+
   <p id="patient_doctor">
-    {% if doctor %}
-      <a href="{{ url_for('update_md', body_id=doctor.id, form_to_display="gen_info") }}">Dr {{ doctor.lastname }} {{ doctor.firstname }}</a>
-    {% else %}
-      Patient without doctor
-    {% endif %}
+    {% block medecine_doctor %}
+      {% if doctor %}
+        <a href="{{ url_for('update_md', body_id=doctor.id, form_to_display="gen_info") }}">Dr {{ doctor.lastname }} {{ doctor.firstname }}</a>
+      {% else %}
+        Patient without doctor
+      {% endif %}
+    {% endblock %}
   </p>
+  
   <div id="medical_history">
     <table border=1>
       <caption>Medical History</caption>

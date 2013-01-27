@@ -37,6 +37,12 @@ class ActTypeForm(Form):
     name = TextAreaField('name')
     color = ColorField('color')
 
+class AppointmentActReferenceForm(Form):
+    appointment_id = SelectField(_('appointment'), coerce=int)
+    act_code = TextField(_('act_code'))
+    act_id = SelectField(_('Choose act in list'), coerce=int)
+    tooth_id = SelectField(_('Choose tooth  in list'), coerce=int)
+    majoration = SelectField(_('Majoration'), coerce=int)
 
 def get_specialty_field_list():
     return [ "name", "color" ]
@@ -44,7 +50,8 @@ def get_specialty_field_list():
 def get_acttype_field_list():
     return [ "specialty_id", "cotationfr_id", "code", "alias", 
              "name", "color" ]
-
+def get_appointmentactreference_field_list():
+    return [ "appointment_id", "act_code", "act_id", "tooth_id", "majoration" ]
 
 def get_specialty_choice_list():
     return [ (choice.id, choice.name) for choice in 
@@ -70,6 +77,31 @@ def get_cotationfr_choice_list():
              ) for cotat, ngap in cotats 
            ]
 
+def get_appointment_choice_list(patient_id):
+    appointment_list = []
+    appointments = meta.session.query(schedule.Appointment).filter(
+                   schedule.Appointment.patient_id == patient_id).order_by(
+                   desc(schedule.Agenda.starttime)).all()
+    for appointment in appointments : 
+        appointment_list.append( (appointment.id, 
+                                  appointment.starttime )
+                               )
+    return appointment_list
+
+def get_act_choice_list():
+    acts_list = []
+    acts = meta.session.query(act.ActType).order_by(
+           act.ActType.spectialty_id).order_by(
+           act.ActType.alias).all()
+    for gesture in acts:
+        acts_list.append((gesture.id, gesture.alias))
+    return acts_list
+
+def get_majoration_choice_list():
+    return [ (maj.id, maj.name) 
+             for maj in meta.session.query(cotation.MajorationFr).order_by(
+                        cotation.MajorationFr.price).all()
+           ]
 
 ####
 # Specialties
@@ -252,3 +284,82 @@ def update_acttype(acttype_id):
                             cotat_form=cotat_form,
                             acttype=acttype
                             )
+
+
+def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
+    """ """
+    values = {}
+    majoration_price = 0
+    if not act_id:
+        raise Exception(_("Need the act_id"))
+    if not appointment_id:
+        raise Exception(_("Need the appointment_id"))
+
+    # Get the majoration, if any...
+    if majoration_id:
+        majoration_price = meta.session.query(act.MajorationFr).filter(
+                       act.MajorationFr.id == majoration_id).one().price
+
+    gesture = meta.session.query(act.ActType).filter(
+              act.ActType.id == act_id).one()
+    # Get data to evaluate the price for this act ; for this, we need to know
+    # the age of the patient, and if it's the state that is going to pay (cmu).
+    execution = meta.session.query(act.CotationFr).filter(
+                act.CotationFr.id == gesture.cotationfr_id).one()
+    patient = meta.session.query(administration.Patient).filter(
+              administration.Patient.id == session['patient_id']).one()
+    if patient.age() < constants.KID_AGE:
+        multiplicator = execution.kid_multiplicator
+        exceeding = execution.exceeding_kid_normal
+    else:
+        multiplicator = execution.adult_multiplicator
+        exceeding = execution.exceeding_adult_normal
+
+    # For some acts, patient under state medical care (CMU) get special prices
+    # (paid directly by the state).
+    patient_right = meta.session.query(SocialSecurityLocale).filter(
+                    SocialSecurityLocale.id == patient.socialsecurity_id).one()
+    key = meta.session.query(cotation.NgapKeyFr).filter(
+          cotation.NgapKeyFr.id == execution.key_id).one()
+
+    # In the appointment_act_reference table, we'll store
+    # appointment, act, and if any, the tooth
+    values['appointment_id'] = appointment_id
+    values['act_id'] = act_id
+    if tooth_id:
+        values['tooth_id'] = tooth_id
+    # the act code
+    if patient_right.cmu:
+        if execution.key_cmu_id:
+            cmu_key = meta.session.query(cotation.CmuKeyFr)\
+                        .filter(cotation.CmuKeyFr.id ==
+                                execution.key_cmu_id).one().key
+            values["code"] = cmu_key + str(execution.adult_cmu_num)
+            exceeding = execution.exceeding_adult_cmu
+            if patient.age() < constants.KID_AGE:
+                exceeding = execution.exceeding_kid_cmu
+        else:
+            values["code"] = key.key + str(multiplicator)
+    else:
+        values["code"] = key.key + str(multiplicator)
+    # the price to pay by the patient.
+    values['price'] = execution.get_price(multiplicator, exceeding, majoration)
+
+    new_act = act.AppointmentActReference(**values)
+    meta.session.add(new_act)
+    meta.session.commit()
+
+    invoice = gnucash_handler.GnucashInvoice(patient.id, appointment_id)
+    invoice_id = invoice.add_act(values['code'], values['price'])
+
+    new_act.invoice_id = invoice_id
+    meta.session.commit()
+    return new_act.id
+
+@app.route('/gesture/add?patient_id=<int:patient_id>'
+           '&appointment_id=<int:appointment_id>', methods=['GET', 'POST'])
+def add_administrativact(patient_id, appointment_id):
+    if not patient_id or not appointment_id:
+        raise Exception(_("Need a patient and an appointment to add an act"))
+
+    

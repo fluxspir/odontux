@@ -1,6 +1,15 @@
+{% from "_formhelpers.html" import render_simple_field, render_simple_hidden_field %}
 {% from "_formhelpers.html" import render_table_field %}
 {% from "_formhelpers.html" import render_table_hidden_field %}
 {% extends "patient_anamnesis.html" %}
+
+  {% block medecine_doctor %}
+    <form method="post" action="{{ url_for('update_patient_md') }}">
+      {{ render_simple_field(medecine_doctor_form.md_id, value=medecine_doctor_form.gen_doc_id) }}
+      <input type="submit" value="Update" />
+    </form>
+  {% endblock %}
+
   {% block medical_history %}
     {% for medhist in medical_history %}
       <tr>
@@ -26,7 +35,6 @@
       <form method="post" action="{{ url_for('add_medical_history') }}">
         {{ render_table_hidden_field(gen_info_form.patient_id, value=patient.id) }}
         {{ render_table_hidden_field(gen_info_form.dentist_id, value=session['user_id']) }}
-        {{ render_table_hidden_field(med_form.mh_id) }}
         {{ render_table_field(med_form.icd10) }}
         {{ render_table_field(med_form.disease) }}
         {{ render_table_field(med_form.disorder) }}

@@ -98,6 +98,10 @@ class AddAppointmentCommand(BaseCommand, AppointmentParser):
         if options.next_appointment:
             self.appointment_values["next_appointment"] =\
             options.next_appointment.decode("utf_8")
+        if options.absent:
+            self.appointment_values["absent"] = options.absent
+        if options.excuse:
+            self.appointment_values['excuse'] = options.excuse
         if options.starttime:
             self.agenda_values["starttime"] = options.starttime
         if options.endtime:
@@ -328,6 +332,10 @@ class UpdateAppointmentCommand(BaseCommand, AppointmentParser):
         if options.next_appointment:
             appointment.next_appointment =\
             options.next_appointment.decode("utf_8")
+        if options.absent:
+            self.appointment_values["absent"] = options.absent
+        if options.excuse:
+            self.appointment_values['excuse'] = options.excuse
         if options.starttime:
             appointment.agenda.starttime = options.starttime.decode("utf_8")
         if options.endtime:

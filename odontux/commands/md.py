@@ -8,8 +8,8 @@
 from base import BaseCommand
 from models import md, meta, administration
 
-
-from sqlalchemy import or_
+import sqlalchemy
+from sqlalchemy import or_, and_
 from gettext import gettext as _
 import sys
 
@@ -116,33 +116,40 @@ class AddMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
         if options.email:
             options.email = options.email.decode("utf_8").lower()
 
+        try:
+            old_md = meta.session.query(md.MedecineDoctor).filter(and_(
+                    md.MedecineDoctor.lastname == options.lastname,
+                    md.MedecineDoctor.firstname == options.firstname
+                    )).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            old_md = ""
 
-        new_medecine_doctor = md.MedecineDoctor(**self.values)
-        meta.session.add(new_medecine_doctor)
-        
-        new_medecine_doctor.addresses.append(administration.Address(
-                           street = options.street,
-                           building = options.building,
-                           city = options.city,
-                           postal_code = options.postal_code,
-                           county = options.county,
-                           country = options.country,
-                           update_date = options.update_date
-                           ))
-        if options.phone_num:
-            if not options.phone_name:
-                options.phone_name = _("defaut")
-            new_medecine_doctor.phones.append(administration.Phone(
-                            name = options.phone_name.decode("utf_8"),
-                            number = options.phone_num.decode("utf_8")
+        if not old_md:
+            new_medecine_doctor = md.MedecineDoctor(**self.values)
+            meta.session.add(new_medecine_doctor)
+            
+            new_medecine_doctor.addresses.append(administration.Address(
+                            street = options.street,
+                            building = options.building,
+                            city = options.city,
+                            postal_code = options.postal_code,
+                            county = options.county,
+                            country = options.country,
+                            update_date = options.update_date
                             ))
-        if options.email:
-            new_medecine_doctor.mails.append(administration.Mail(
-                            email = options.email
-                            ))
+            if options.phone_num:
+                if not options.phone_name:
+                    options.phone_name = _("defaut")
+                new_medecine_doctor.phones.append(administration.Phone(
+                                name = options.phone_name.decode("utf_8"),
+                                number = options.phone_num.decode("utf_8")
+                                ))
+            if options.email:
+                new_medecine_doctor.mails.append(administration.Mail(
+                                email = options.email
+                                ))
 
-        meta.session.commit()
-
+            meta.session.commit()
 
 class ListMedecineDoctorCommand(BaseCommand):
     """ """
@@ -174,7 +181,11 @@ class ListMedecineDoctorCommand(BaseCommand):
                        )
 
         if options.md_id:
-            query = query.one()
+            try:
+                query = query.one()
+            #TODO change this horrible except hack :(
+            except sqlalchemy.orm.exc.MultipleResultsFound:
+                query = query.first()
             print(u"{}".format(query.id))
         else:
             for doc in query:

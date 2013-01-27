@@ -31,7 +31,7 @@ class DrugPrescribed(Base):
 class Prescription(Base):
     __tablename__ = 'prescription'
     id = Column(Integer, primary_key=True)
-    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), default=2,
+    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), 
                         nullable=False)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                         nullable=False)

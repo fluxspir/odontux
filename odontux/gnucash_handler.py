@@ -306,11 +306,11 @@ class GnuCashInvoice(GnuCash):
             invoice_entry.CommitEdit()
             invoice.CommitEdit()
             invoice.PostToAccount(self.receivables, self.date, self.date,
-                                  description.encode("utf_8"), True)
+                                    description.encode("utf_8"), True)
             self.gcsession.save()
             self.gcsession.end()
             return self.invoice_id
-        
+            
         except:
             self.gcsession.end()
             raise

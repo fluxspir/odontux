@@ -8,8 +8,6 @@ cotid=$(odontux add_cotationfr -k 1 -m 1 --exceeding_adult_normal 4 --exceeding_
 odontux add_acttype -n "Bilan Bucco Dentaire" -a "BBD" -c BBD -s 9 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 1 -m 1 --exceeding_adult_normal 15 --exceeding_adult_cmu 15)
 odontux add_acttype -n "Bilan Bucco Dentaire 1 ou 2 radios" -a "BBD 1-2 radio" -c BBDrad -s 9 --cotation $cotid
-cotid=$(odontux add_cotationfr -k 3 -m 9 --kid_multiplicator 9)
-odontux add_acttype -n "Scellement sillon" -a "Sealant fissure" -c "seal" -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 7 --kid_multiplicator 8)
 odontux add_acttype -n "Obturation coronaire 1 face amalgame, technique directe" -a "Amalgame 1 face" -c amal1f -s 3 --cotation $cotid
 odontux add_acttype -n "Obturation coronaire 1 face composite, technique directe" -a "Composite 1 face" -c compo1f -s 3 --cotation $cotid
@@ -29,7 +27,7 @@ cotid=$(odontux add_cotationfr -k 3 -m 17 --exceeding_adult_normal 179.03)
 odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en métal" -a "inlay 3 faces métal" -c IN3fmet -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 17 --exceeding_adult_normal 303.03)
 odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en céramique" -a "Inlay 3 faces ceramique" -c IN3fceram -s 3 --cotation $cotid
-cotid=$(odontux add_cotationfr -k 3 -m 9)
+cotid=$(odontux add_cotationfr -k 3 -m 9 --kid_multiplicator 9)
 odontux add_acttype -n "Scellement prophylactique des puits, sillons et fissures, par dent (valable avant 14 ans, sur les x6 et x7)" -a "Sealant" -c seal -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 7 --kid_multiplicator 10)
 odontux add_acttype -n "Pulpotomie, pulpectomie coronaire, avec obturation de la chambre pulpaire" -c pulpo -s 4 --cotation $cotid
@@ -112,6 +110,8 @@ cotid=$(odontux add_cotationfr -k 6 -m 10)
 odontux add_acttype -n "Traitement d'une hémorragie post-opératoire dans une séance autre que celle de l'intervention" -s 5 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 50 --adult_cmu_num 1 --exceeding_adult_normal 147.5 --exceeding_adult_cmu 122.5)
 odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CCA, couronne coulée métallique" -s 6 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 50 --adult_cmu_num 3 --exceeding_adult_normal 332.5 --exceeding_adult_cmu 267.5)
+odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CIV, couronne à incrustation vestibulaire" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 50 --adult_cmu_num 3 --exceeding_adult_normal 342.5 --exceeding_adult_cmu 267.5)
 odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CCMonocouche, Couronne Céramo Métallique Monocouche" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 50 --adult_cmu_num 3 --exceeding_adult_normal 447.5 --exceeding_adult_cmu 267.5)
@@ -119,6 +119,10 @@ odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de co
 odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CCC, Couronne Céramo Céramique" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 455.5 --exceeding_adult_cmu 128.5)
 odontux add_acttype -n "Inter de brigde en céramique" -a "Inter CCM ceramique" -s 6 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 235.5)
+odontux add_acttype -n "Inter bridge en métal" -a "Inter CCA" -s 6 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 322.5)
+odontux add_acttype -n "Inter bridge à incrutation vestibulaire" -a "Inter CIV" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 57 --exceeding_adult_normal 47.45 --exceeding_adult_cmu 0)
 odontux add_acttype -n "Conception, adaptation et pose d'une infrastructure corono-radiculaire métallique coulée à ancrage radiculaire (inlay-core)" -a "Inlay Core" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 -m 67 --exceeding_adult_normal 45.95 --exceeding_adult_cmu 0)

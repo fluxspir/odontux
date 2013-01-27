@@ -18,6 +18,41 @@ import datetime
 now = datetime.datetime.now()
 today = datetime.date.today()
 
+class ListDentalOfficeCommand(BaseCommand):
+    """ """
+    command_name = "list_dentaloffice"
+    def __init__(self):
+        self.query = meta.session.query(users.DentalOffice)
+    def parse_args(self, args):
+        parser = self.get_parser()
+        parser.add_option("--id", action="store_true", default=False,
+                        help="print only dental office id",
+                        dest="dentaloffice_id")
+        (options, args) = parser.parse_args(args)
+        return options, args
+    def run(self, args):
+        (options, args) = self.parse_args(args)
+
+        query = self.query
+        for keyword in args:
+            if keyword == self.command_name:
+                continue
+            keyword = "%{}%".format(keyword)
+            query = query.filter(or_(
+                users.DentalOffice.office_name.ilike(keyword),
+                users.DentalOffice.owner_lastname.ilike(keyword),
+                users.DentalOffice.owner_firstname.ilike(keyword)
+                ))
+        query = query.all()
+        if options.dentaloffice_id:
+            for d in query:
+                print(d.id)
+        else:
+            for d in query:
+                print("{} {} {} {}".format(d.id, d.office_name.encode("utf_8"),
+                                       d.owner_lastname.encode("utf_8"), 
+                                       d.owner_firstname.encode("utf_8")))
+
 class ListUserCommand(BaseCommand):
     """ """
 
@@ -37,7 +72,7 @@ class ListUserCommand(BaseCommand):
                help="Role might be :",
                dest="role")
 
-        (options, args) = parser.parse_args()
+        (options, args) = parser.parse_args(args)
         return options, args
 
     def run(self, args):
@@ -54,19 +89,23 @@ class ListUserCommand(BaseCommand):
                     break
 
         for keyword in args:
+            if keyword == self.command_name:
+                continue
             keyword = "%{}%".format(keyword)
             query = query.filter(or_(
                 users.OdontuxUser.lastname.ilike(keyword),
                 users.OdontuxUser.firstname.ilike(keyword)
-                )).all()
+                ))
 
+        query = query.all()
         if options.user_id:
             for u in query:
                 print("{}".format(u.id))
 #                print(u.id)
         else:
             for u in query:
-                print("{} {} {} {}".format(u.id, u.lastname, u.firstname, u.role))
+                print("{} {} {} {}".format(u.id, u.lastname, u.firstname, 
+                                           constants.ROLES[u.role]))
 
 class OdontuxUserParser(BaseCommand):
     """ """
@@ -193,7 +232,7 @@ class OdontuxUserParser(BaseCommand):
                         help="url for gnucash",
                         dest="gnucash_url")
 
-        (options,args) = parser.parse_args()
+        (options,args) = parser.parse_args(args)
 
         return options, args
 
@@ -591,3 +630,4 @@ class AddDentalOfficeCommand(BaseCommand, DentalOfficeParser):
                             ))
 
         meta.session.commit()
+        
