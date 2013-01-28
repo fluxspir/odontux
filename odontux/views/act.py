@@ -362,4 +362,4 @@ def add_administrativact(patient_id, appointment_id):
     if not patient_id or not appointment_id:
         raise Exception(_("Need a patient and an appointment to add an act"))
 
-    
+    pass
