@@ -125,6 +125,7 @@ def list_appointments():
     
     # Get the patient in database, and the list of his appointments.
     patient = checks.get_patient(session['patient_id'])
+    checks.quit_appointment()
 
     appointments = meta.session.query(schedule.Appointment)\
         .filter(schedule.Appointment.patient_id == patient.id).all()

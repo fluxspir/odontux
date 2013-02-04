@@ -86,7 +86,23 @@ def get_root_event_field_list():
     return [ "event_id", "canal", "infected", "abscess", "obturation",
              "inlaycore", "screwpost" ]
 
+def get_tooth_id_choice_list(patient_id):
+    patient = checks.get_patient(patient_id)
+    try:
+        patient_teeth = meta.session.query(teeth.Tooth).filter(
+            teeth.Tooth.mouth_id == patient.mouth.id).all()
+    except AttributeError:
+        patient_teeth = ""
 
+    if patient_teeth:
+        tooth_id_list = [(t.id, t.name) for t in 
+                            meta.session.query(teeth.Tooth).filter(
+                            teeth.Tooth.mouth_id == patient.mouth.id).order_by(
+                            teeth.Tooth.name).all() ]
+    else:
+        tooth_id_list = [ ( 0, "") ]
+    return tooth_id_list
+ 
 def add_mouth(patient_id):
     new_mouth = headneck.Mouth(**{"patient_id": patient_id})
     meta.session.add(new_mouth)
@@ -271,20 +287,8 @@ def add_event(patient_id, appointment_id):
     # Create the forms
     event_form = EventForm(request.form)
     # Populate select fields, get defaults data for the 'GET' method
-    try:
-        patient_teeth = meta.session.query(teeth.Tooth).filter(
-            teeth.Tooth.mouth_id == patient.mouth.id).all()
-    except AttributeError:
-        patient_teeth = ""
-
-    if patient_teeth:
-        event_form.tooth_id.choices = [(t.id, t.name) for t in 
-                            meta.session.query(teeth.Tooth).filter(
-                            teeth.Tooth.mouth_id == patient.mouth.id).order_by(
-                            teeth.Tooth.name).all() ]
-    else:
-        event_form.tooth_id.choices = [ ( 0, "") ]
-    
+    event_form.tooth_id.choices = get_tooth_id_choice_list(patient_id)
+   
     # Prepare the appointment select_field :
     event_form.appointment_id.choices = [(a.id, 
                             str(a.agenda.starttime.date()) + " " + 

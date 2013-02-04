@@ -89,9 +89,10 @@ def allpatients():
 @app.route('/patient?id=<int:body_id>/')
 def enter_patient_file(body_id):
     patient = checks.get_patient(body_id)
-
     if patient:
         session['patient_id'] = patient.id
+        if not checks.is_patient_self_appointment():
+            checks.quit_appointment()
         return render_template('patient_file.html', patient=patient)
 
 @app.route('/patient/add/', methods=['GET', 'POST'])

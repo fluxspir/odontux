@@ -7,14 +7,16 @@
 
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, desc
 from gettext import gettext as _
 
 from odontux.odonweb import app
-from odontux import constants
-from odontux.models import meta, act, cotation
+from odontux import constants, checks, gnucash_handler
+from odontux.models import meta, act, cotation, schedule, administration
 from odontux.views import cotation as views_cotation
+from odontux.views import teeth
 from odontux.views.log import index
+from odontux.views.patient import list_acts
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      validators)
@@ -22,6 +24,9 @@ from odontux.views.forms import ColorField
 
 cotationlocale = "Cotation" + constants.LOCALE.title()
 CotationLocale = getattr(cotation, cotationlocale)
+
+socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
+SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 class SpecialtyForm(Form):
     name = TextField('name', [validators.Required(), 
@@ -80,18 +85,20 @@ def get_cotationfr_choice_list():
 def get_appointment_choice_list(patient_id):
     appointment_list = []
     appointments = meta.session.query(schedule.Appointment).filter(
-                   schedule.Appointment.patient_id == patient_id).order_by(
-                   desc(schedule.Agenda.starttime)).all()
+                   schedule.Appointment.patient_id == patient_id).all()
+#    appointments = meta.session.query(schedule.Appointment).filter(
+#                   schedule.Appointment.patient_id == patient_id).order_by(
+#                   desc(schedule.Agenda.starttime)).all()
     for appointment in appointments : 
         appointment_list.append( (appointment.id, 
-                                  appointment.starttime )
+                                  appointment.agenda.starttime )
                                )
     return appointment_list
 
 def get_act_choice_list():
     acts_list = []
     acts = meta.session.query(act.ActType).order_by(
-           act.ActType.spectialty_id).order_by(
+           act.ActType.specialty_id).order_by(
            act.ActType.alias).all()
     for gesture in acts:
         acts_list.append((gesture.id, gesture.alias))
@@ -102,6 +109,14 @@ def get_majoration_choice_list():
              for maj in meta.session.query(cotation.MajorationFr).order_by(
                         cotation.MajorationFr.price).all()
            ]
+
+def get_appointment_act_reference_choice_lists(patient_id):
+    """ """
+    return (get_appointment_choice_list(patient_id), 
+            get_act_choice_list(),
+            teeth.get_tooth_id_choice_list(patient_id), 
+            get_majoration_choice_list() )
+
 
 ####
 # Specialties
@@ -261,7 +276,8 @@ def update_acttype(acttype_id):
     acttype_form.specialty_id.choices = get_specialty_choice_list()
     acttype_form.cotationfr_id.choices = get_cotationfr_choice_list()
     
-    #TODO
+    #TODO (130202 : je me demande ce que je voulais faire à ce todo qui date 
+    # d'on ne sait quand...
     
     if request.method == 'POST' and acttype_form.validate():
         for f in get_acttype_field_list():
@@ -297,15 +313,15 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
 
     # Get the majoration, if any...
     if majoration_id:
-        majoration_price = meta.session.query(act.MajorationFr).filter(
-                       act.MajorationFr.id == majoration_id).one().price
+        majoration_price = meta.session.query(cotation.MajorationFr).filter(
+                       cotation.MajorationFr.id == majoration_id).one().price
 
     gesture = meta.session.query(act.ActType).filter(
               act.ActType.id == act_id).one()
     # Get data to evaluate the price for this act ; for this, we need to know
     # the age of the patient, and if it's the state that is going to pay (cmu).
-    execution = meta.session.query(act.CotationFr).filter(
-                act.CotationFr.id == gesture.cotationfr_id).one()
+    execution = meta.session.query(cotation.CotationFr).filter(
+                cotation.CotationFr.id == gesture.cotationfr_id).one()
     patient = meta.session.query(administration.Patient).filter(
               administration.Patient.id == session['patient_id']).one()
     if patient.age() < constants.KID_AGE:
@@ -343,12 +359,14 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
     else:
         values["code"] = key.key + str(multiplicator)
     # the price to pay by the patient.
-    values['price'] = execution.get_price(multiplicator, exceeding, majoration)
+    values['price'] = execution.get_price(multiplicator, exceeding, 
+                                          majoration_price)
 
     new_act = act.AppointmentActReference(**values)
     meta.session.add(new_act)
     meta.session.commit()
 
+    import pdb ; pdb.set_trace()
     invoice = gnucash_handler.GnucashInvoice(patient.id, appointment_id)
     invoice_id = invoice.add_act(values['code'], values['price'])
 
@@ -362,4 +380,36 @@ def add_administrativact(patient_id, appointment_id):
     if not patient_id or not appointment_id:
         raise Exception(_("Need a patient and an appointment to add an act"))
 
-    pass
+    if (session['role'] == constants.ROLE_ADMIN 
+        or session['role'] == constants.ROLE_SECRETARY):
+        return redirect(url_for('index'))
+
+    # Prepare the formulary dealing with the act of adding an administrativ
+    # act
+    patient = checks.get_patient(session['patient_id'])
+    appointment = checks.get_appointment()
+    admin_act_form = AppointmentActReferenceForm(request.form)
+
+    (admin_act_form.appointment_id.choices, 
+        admin_act_form.act_id.choices, 
+        admin_act_form.tooth_id.choices, 
+        admin_act_form.majoration.choices
+    ) = get_appointment_act_reference_choice_lists(patient_id)
+
+    if request.method == 'POST' and admin_act_form.validate():
+        new_act_id = _add_administrativact(admin_act_form.act_id.data,
+                                            admin_act_form.appointment_id.data,
+                                            admin_act_form.tooth_id.data,
+                                            admin_act_form.majoration.data)
+        if not new_act_id:
+            return redirect(url_for("list_acts"))
+        else:
+            return redirect(url_for("list_acts"))
+
+    # Case in GET method :
+    admin_act_form.appointment_id.data = appointment_id
+
+    return render_template("/add_administrativ_act.html",
+                            patient=patient,
+                            appointment=appointment,
+                            admin_act_form = admin_act_form)
