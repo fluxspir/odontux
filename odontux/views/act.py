@@ -366,8 +366,7 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
     meta.session.add(new_act)
     meta.session.commit()
 
-    import pdb ; pdb.set_trace()
-    invoice = gnucash_handler.GnucashInvoice(patient.id, appointment_id)
+    invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id)
     invoice_id = invoice.add_act(values['code'], values['price'])
 
     new_act.invoice_id = invoice_id

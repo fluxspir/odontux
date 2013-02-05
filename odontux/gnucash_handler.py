@@ -17,7 +17,6 @@ from gnucash import Session as GCSession
 from gnucash import GncNumeric
 from gnucash.gnucash_business import Customer, Address, Invoice, Entry
 
-
 class GnuCash():
     """ 
 
