@@ -412,3 +412,13 @@ def add_administrativact(patient_id, appointment_id):
                             patient=patient,
                             appointment=appointment,
                             admin_act_form = admin_act_form)
+
+@app.route('/gesture/del?patient_id=<int:patient_id>'
+           '&appointment_id=<int:appointment_id>&act_id=<int:act_id>',
+           methods=['POST'])
+def del_administrativact(patient_id, appointment_id, act_id):
+    """ """
+    if session['role'] != constants.ROLE_DENTIST:
+        return redirect(url_for('index'))
+
+    import pdb ; pdb.set_trace()

@@ -253,7 +253,7 @@ class GnuCashInvoice(GnuCash):
     An individual invoice will contain every act made on a unique patient
     during an unique appointment.
     """
-    def __init__(self, patient_id, appointment_id):
+    def __init__(self, patient_id, appointment_id, invoice_id=""):
         # Initialize the self.vars from Parent : GnuCash
         #   * self.gcsession
         #   * self.book
@@ -273,10 +273,13 @@ class GnuCashInvoice(GnuCash):
                     .filter(schedule.Appointment.id ==
                             appointment_id).one().agenda.endtime
 
-        self.invoice_id = "inv_" + str(self.date.year)+\
+        if not invoice_id:
+            self.invoice_id = "inv_" + str(self.date.year)+\
                                    str(self.date.month) +\
                                    str(self.date.day) + "_" +\
                                    str(appointment_id)
+        else:
+            self.invoice_id = invoice_id
 
     def _create_invoice_instance(self):
         return Invoice(self.book, self.invoice_id, self.currency, 
@@ -315,6 +318,12 @@ class GnuCashInvoice(GnuCash):
             raise
             return False
 
+    def del_act(self, code, price,):
+        try:
+            if self.book.InvoiceLookupByID(self.invoice_id):
+                invoice = self.book.InvoiceLookupByID(self.invoice_id)
+                invoice.Unpost(True)
+        #TODO
 
 class GnuCashPayment(GnuCash):
     """ GnuCashPayment tries to 

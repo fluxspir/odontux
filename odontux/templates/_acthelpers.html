@@ -17,6 +17,7 @@
       {% if session.role == session.ROLE_DENTIST %}
         <th>Invoice ID</th>
         <th></th>
+        <th></th>
       {% endif %}
     </tr>
 {% endmacro %}
@@ -39,6 +40,7 @@
         {% if session.role == session.ROLE_DENTIST %}
           <td>{{ gesture.invoice_id }}</td>
           <td>Modify</td>
+          <td>Delete</td>
         {% endif %}
       </tr>
 {% endmacro %}
