@@ -366,8 +366,13 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
     meta.session.add(new_act)
     meta.session.commit()
 
-    invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id)
-    invoice_id = invoice.add_act(values['code'], values['price'])
+    if session['role'] == constants.ROLE_DENTIST:
+        user_id = session['user_id']
+    else:
+        user_id = ""
+    invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
+                                             user_id)
+    invoice_id = invoice.add_act(values['code'], values['price'], new_act.id)
 
     new_act.invoice_id = invoice_id
     meta.session.commit()
@@ -414,11 +419,28 @@ def add_administrativact(patient_id, appointment_id):
                             admin_act_form = admin_act_form)
 
 @app.route('/gesture/del?patient_id=<int:patient_id>'
-           '&appointment_id=<int:appointment_id>&act_id=<int:act_id>',
-           methods=['POST'])
-def del_administrativact(patient_id, appointment_id, act_id):
+           '&appointment_id=<int:appointment_id>&act_id=<int:act_id>'
+           '&code=<code>')
+def remove_administrativact(patient_id, appointment_id, act_id, code):
     """ """
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('index'))
+    patient = checks.get_patient(patient_id)
+    gesture = meta.session.query(act.AppointmentActReference).filter(
+            act.AppointmentActReference.id == act_id)
 
-    import pdb ; pdb.set_trace()
+    if session['role'] == constants.ROLE_DENTIST:
+        user_id = session['user_id']
+    else:
+        user_id = ""
+    invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
+                                             user_id)
+    
+    remove_from_gnucash = invoice.remove_act(code, act_id)
+    if remove_from_gnucash:
+        meta.session.delete(gesture)
+        meta.session.commit()
+
+        return redirect(url_for('list_acts'))
+
+    return redirect(url_for('list_acts'))

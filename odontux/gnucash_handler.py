@@ -12,6 +12,8 @@ import ConfigParser
 from decimal import Decimal
 import os
 
+import constants
+
 import gnucash
 from gnucash import Session as GCSession
 from gnucash import GncNumeric
@@ -253,7 +255,7 @@ class GnuCashInvoice(GnuCash):
     An individual invoice will contain every act made on a unique patient
     during an unique appointment.
     """
-    def __init__(self, patient_id, appointment_id, invoice_id=""):
+    def __init__(self, patient_id, appointment_id, dentist_id, invoice_id=""):
         # Initialize the self.vars from Parent : GnuCash
         #   * self.gcsession
         #   * self.book
@@ -264,7 +266,12 @@ class GnuCashInvoice(GnuCash):
         patient = meta.session.query(administration.Patient)\
                 .filter(administration.Patient.id == patient_id)\
                 .one()
-        GnuCash.__init__(self, patient.id, patient.dentist_id)
+        # If it's a dentist who is entering an act in database, we assume he
+        # did the gesture. Otherwise, if nurse, secretary (...) enters the act
+        # in database, we assume the patient's official dentist made it.
+        if not dentist_id:
+            dentist_id = patient.dentist_id
+        GnuCash.__init__(self, patient.id, dentist_id)
         # get the patient (customer) instance from gnucash database
         self.owner = self.book.CustomerLookupByID(self.gcpatient_id)
         # invoice_id is build as
@@ -285,7 +292,7 @@ class GnuCashInvoice(GnuCash):
         return Invoice(self.book, self.invoice_id, self.currency, 
                        self.owner, self.date)
         
-    def add_act(self, code, price):
+    def add_act(self, code, price, act_id):
         # Get an instance for the invoice
         try:
             if self.book.InvoiceLookupByID(self.invoice_id):
@@ -296,7 +303,7 @@ class GnuCashInvoice(GnuCash):
                 invoice = self._create_invoice_instance()
                 invoice.BeginEdit()
 
-            description = code
+            description = str(act_id) + "_" + code
             invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
 
             invoice_entry = Entry(self.book, invoice)
@@ -318,12 +325,43 @@ class GnuCashInvoice(GnuCash):
             raise
             return False
 
-    def del_act(self, code, price,):
+    def remove_act(self, code, act_id):
         try:
             if self.book.InvoiceLookupByID(self.invoice_id):
                 invoice = self.book.InvoiceLookupByID(self.invoice_id)
                 invoice.Unpost(True)
-        #TODO
+                invoice.BeginEdit()
+            else:
+                raise Exception(_("invoice_id doesn't fit"))
+
+            description = str(act_id) + "_" + code
+
+            for entry in invoice.GetEntries():
+                import pdb ; pdb.set_trace()
+                if entry.GetDescription(entry) == description:
+                    entry.BeginEdit()
+                    entry.RemoveEntry()
+                    entry.CommitEdit()
+                    invoice.CommitEdit()
+                    invoice.PostToAccount(self.receivables, self.date, 
+                                          self.date, 
+                                          description.encode("utf_8"),
+                                          True)
+                    self.gcsession.save()
+                    self.gcsession.end()
+                    return True
+            entry.CommitEdit()
+            invoice.CommitEdit()
+            invoice.PostToAccount(self.receivables, self.date, self.date,
+                                  description.encode("utf_8"), True)
+            self.gcsession.save()
+            self.gcsession.end()
+            return False
+
+        except:
+            self.gcsession.end()
+            raise
+            return False
 
 class GnuCashPayment(GnuCash):
     """ GnuCashPayment tries to 

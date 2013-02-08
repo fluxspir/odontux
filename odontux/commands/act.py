@@ -232,9 +232,12 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
         meta.session.add(new_act)
         meta.session.commit()
 
-        invoice = gnucash_handler.GnuCashInvoice(patient_id, appointment_id)
+        # Here we assume the user who is using command_line interface will be 
+        # the patient dentist.
+        invoice = gnucash_handler.GnuCashInvoice(patient_id, appointment_id
+                                                 user_id="") 
         invoice_id = invoice.add_act(self.values["code"], 
-                                         self.values["price"])
+                                         self.values["price"], new_act.id)
         new_act.invoice_id = invoice_id
         meta.session.commit()
         print(new_act.id)

@@ -40,7 +40,7 @@
         {% if session.role == session.ROLE_DENTIST %}
           <td>{{ gesture.invoice_id }}</td>
           <td>Modify</td>
-          <td>Delete</td>
+          <td><a href="{{url_for('remove_administrativact', patient_id=session.patient_id, appointment_id=appointment.id, act_id=gesture.id, code=gesture.code) }}">Delete</a></td>
         {% endif %}
       </tr>
 {% endmacro %}
