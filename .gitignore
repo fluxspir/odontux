@@ -3,6 +3,7 @@
 *.pyc
 *.swp
 *.sql
+*.xcf
 .coverage
 essai*
 lala*

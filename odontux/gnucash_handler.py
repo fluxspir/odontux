@@ -338,7 +338,8 @@ class GnuCashInvoice(GnuCash):
 
             for entry in invoice.GetEntries():
                 import pdb ; pdb.set_trace()
-                if entry.GetDescription(entry) == description:
+
+                if entry.GetDescription() == description:
                     entry.BeginEdit()
                     entry.RemoveEntry()
                     entry.CommitEdit()

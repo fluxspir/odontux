@@ -1,5 +1,7 @@
 {% extends 'summary_patient.html' %}
-
+{% block css %}
+  <link rel="stylesheet" type="text/css" href="/static/images.css">
+{% endblock %}
 {% block main %}
 {% if teeth %}
   <ul>
@@ -14,4 +16,5 @@
     {% endfor %}
   </ul>
 {% endif %}
+<img id="schema_arcade_mandibulaire" src="/static/img/mouth/Arcade_mandibulaire_face.png" alt="Arcade mandibulaire de face" width="350px" />
 {% endblock %}
