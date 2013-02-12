@@ -427,7 +427,7 @@ def remove_administrativact(patient_id, appointment_id, act_id, code):
         return redirect(url_for('index'))
     patient = checks.get_patient(patient_id)
     gesture = meta.session.query(act.AppointmentActReference).filter(
-            act.AppointmentActReference.id == act_id)
+            act.AppointmentActReference.id == act_id).one()
 
     if session['role'] == constants.ROLE_DENTIST:
         user_id = session['user_id']
