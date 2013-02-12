@@ -17,6 +17,7 @@ import constants
 import gnucash
 from gnucash import Session as GCSession
 from gnucash import GncNumeric
+from gnucash import gnucash_core_c as gnc_core_c
 from gnucash.gnucash_business import Customer, Address, Invoice, Entry
 
 class GnuCash():
@@ -337,12 +338,11 @@ class GnuCashInvoice(GnuCash):
             description = str(act_id) + "_" + code
 
             for entry in invoice.GetEntries():
-                import pdb ; pdb.set_trace()
 
-                if entry.GetDescription() == description:
-                    entry.BeginEdit()
-                    entry.RemoveEntry()
-                    entry.CommitEdit()
+                if gnc_core_c.gncEntryGetDescription(entry) == description:
+                    gnc_core_c.gncEntryBeginEdit(entry)
+#                    gnc_core_c.gncInvoiceRemoveEntry(invoice, entry)
+                    invoice.RemoveEntry(entry)
                     invoice.CommitEdit()
                     invoice.PostToAccount(self.receivables, self.date, 
                                           self.date, 
@@ -351,7 +351,6 @@ class GnuCashInvoice(GnuCash):
                     self.gcsession.save()
                     self.gcsession.end()
                     return True
-            entry.CommitEdit()
             invoice.CommitEdit()
             invoice.PostToAccount(self.receivables, self.date, self.date,
                                   description.encode("utf_8"), True)
