@@ -5,6 +5,7 @@
 # Licence BSD
 
 from flask import Flask
+from flask import Blueprint, g
 import models
 
 from gettext import gettext as _
@@ -26,6 +27,8 @@ DEBUG = False
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+bp = Blueprint('frontend', __name__, url_prefix='/<lang_code>')
 
 models.init()
 

@@ -16,5 +16,19 @@
     {% endfor %}
   </ul>
 {% endif %}
-<img id="schema_arcade_mandibulaire" src="/static/img/mouth/Arcade_mandibulaire_face.png" alt="Arcade mandibulaire de face" width="350px" />
+<div id="mouth_schema">
+  <div id="maxillar_jaw">
+  </div>
+  <div id="mandibular_jaw">
+    <div id="mandibular_jaw_occlusal_view">
+      <img id="" src="/static/img/mouth/Arcade_mandibulaire_occlusale.png" alt="Occlusal view of mandibular jaw" width="70%" height="100%"/>
+    </div>
+    <div id="mandibular_jaw_vestibular_view">
+      <img id="schema_arcade_mandibulaire" src="/static/img/mouth/Arcade_mandibulaire_face.png" alt="Arcade mandibulaire de face" width="70%" height="100%" usemap="#mandibular_vestibular_map" border=1 />
+      <map name="mandibular_vestibular_map">
+        <area shape="rect" coords="0%,0%,150%,170%" id="left_mandibular_frontal" href="link.htm" target="_self" />
+      </map>
+    </div>
+  </div>
+</div>
 {% endblock %}

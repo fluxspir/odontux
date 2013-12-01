@@ -59,7 +59,7 @@ CommandClass = get_command(command_name)
 
 if CommandClass is None:
     # TODO: call usage/help
-#    raise ValueError("Unknown command '{}'.".format(command_name))
+    #raise ValueError("Unknown command '{}'.".format(command_name))
     
     tool_name = command_name
 

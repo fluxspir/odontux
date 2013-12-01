@@ -438,9 +438,10 @@ def remove_administrativact(patient_id, appointment_id, act_id, code):
     
     remove_from_gnucash = invoice.remove_act(code, act_id)
     if remove_from_gnucash:
-        meta.session.delete(gesture)
-        meta.session.commit()
+        pass
+        # was first made to be sure that all fit together with gnucash.
+        # For the moment, we don't care.
 
-        return redirect(url_for('list_acts'))
-
+    meta.session.delete(gesture)
+    meta.session.commit()
     return redirect(url_for('list_acts'))

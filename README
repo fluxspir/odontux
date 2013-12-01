@@ -5,9 +5,10 @@ What does it need :
 Required :
 	* bash : for command-line interface
 	* python : odontux-core is written in that language
-	* sqlalchemy : for database access
+	* sqlalchemy, psycopg2 : for database access
 	* postgresql : that may be change to sqlite or others, in model/__init__.py
 	* python-flask python-wtforms
+
 Recommanded :
 	* gnucash, python-gnucash, libdbd-pgsql
 
@@ -66,3 +67,5 @@ And then, add a dental_office (this probably will be you, or the dental office y
 Any question ? Ask Franck on the irc  oftc.net   (i'm working... the response could arrive late)
 or send me a mail   franck {att} kernlog.net
 Special thank to Bertrand "tamentis" Janin, for all the help he's giving me :)
+
+1DrWycnUrE9Nr6NCicVVFH7YdchJBuCqX4

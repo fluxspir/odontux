@@ -48,6 +48,8 @@ cotid=$(odontux add_cotationfr -k 3 -m 8)
 odontux add_acttype -n "Ligature métallique dans les parodontopathies" -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 40)
 odontux add_acttype -n "Attelle métallique dans les parodontopathies" -s 2 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 53.6 --exceeding_kid_normal 53.6 --exceeding_adult_cmu 53.6)
+odontux add_acttype -n "contention hn" -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 70)
 odontux add_acttype -n "Prothèse attelle de contention quelque soit le nombre de dents ou de crochets" -s 2 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 2 -m 20)
@@ -116,7 +118,9 @@ cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 50 --adult_cmu_num 3 --exceedi
 odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CCMonocouche, Couronne Céramo Métallique Monocouche" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 50 --adult_cmu_num 3 --exceeding_adult_normal 447.5 --exceeding_adult_cmu 267.5)
 odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CCM, Couronne Céramo Métallique Multicouches" -s 6 --cotation $cotid
-odontux add_acttype -n "Couronne dentaire faisant intervenir une technique de coulée métallique" -a "CCC, Couronne Céramo Céramique" -s 6 --cotation $cotid
+odontux add_acttype -n "Couronne dentaire entièrement céramique" -a "CCC, Couronne Céramo Céramique" -s 6 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 62.5)
+odontux add_acttype -n "Couronne provisoire" -a "couronne provisoire" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 455.5 --exceeding_adult_cmu 128.5)
 odontux add_acttype -n "Inter de brigde en céramique" -a "Inter CCM ceramique" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 235.5)
@@ -221,6 +225,12 @@ cotid=$(odontux add_cotationfr -k 4 -m 10 --keycmu 2 --adult_cmu_num 19 --exceed
 odontux add_acttype -n "Réparation de fracture de la plaque base résine" -a "Reparation fracture résine" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 5 -m 6)
 odontux add_acttype -n "Radio retro-alvéolaire, RVG" -s 8 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 5 -m 3)
+odontux add_acttype -n "Radio suivante" -s 8 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 5 -m 21)
 odontux add_acttype -n "Radiographie panoramique dentaire, orthopantomogramme" -s 8 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 5 -m 56)
+odontux add_acttype -n "Bilan radio paro" -s 1 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 35 --exceeding_kid_normal 35 --exceeding_adult_cmu 35)
+odontux add_acttype -n "Sondage parodontal" -s 2 -a "sondage paro pré parodontologie surfaçage" --cotation $cotid
 

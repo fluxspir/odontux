@@ -28,3 +28,18 @@ font-size:2em;
 #list_acttype a:hover { color: blue ; text-decoration : underline}
 #list_acttype a:active { color: blue ; text-decoration : underline}
 
+#act_list_mouth {
+position:absolute;
+top:0%;
+left:0%;
+width:50%;
+height:100%;
+}
+
+#mouth_schema {
+position:absolute;
+top:0%;
+left:50%;
+width:50%;
+height:100%;
+}

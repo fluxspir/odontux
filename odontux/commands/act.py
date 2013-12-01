@@ -182,6 +182,7 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
         patient_id = appointment.patient.id
         patient = meta.session.query(administration.Patient)\
                 .filter(administration.Patient.id == patient_id).one()
+        dentist_id = appointment.dentist_id
         # When the patient is under 13, the cotation for the act may change.
         # as well as the price ; 
         # We'll adapt the price later for CMU's, if needed.
@@ -234,8 +235,8 @@ class AddAdministrativeActCommand(BaseCommand, AppointmentActReferenceParser):
 
         # Here we assume the user who is using command_line interface will be 
         # the patient dentist.
-        invoice = gnucash_handler.GnuCashInvoice(patient_id, appointment_id
-                                                 user_id="") 
+        invoice = gnucash_handler.GnuCashInvoice(patient_id, appointment_id,
+                                                 dentist_id=dentist_id) 
         invoice_id = invoice.add_act(self.values["code"], 
                                          self.values["price"], new_act.id)
         new_act.invoice_id = invoice_id

@@ -7,6 +7,8 @@
 
 from models import meta, administration, users, compta, schedule
 
+from gettext import gettext as _
+
 import ConfigParser
 
 from decimal import Decimal
@@ -330,32 +332,34 @@ class GnuCashInvoice(GnuCash):
         try:
             if self.book.InvoiceLookupByID(self.invoice_id):
                 invoice = self.book.InvoiceLookupByID(self.invoice_id)
-                invoice.Unpost(True)
-                invoice.BeginEdit()
             else:
                 raise Exception(_("invoice_id doesn't fit"))
 
             description = str(act_id) + "_" + code
-
+            number_of_entries = len(invoice.GetEntries())
+            
             for entry in invoice.GetEntries():
-
                 if gnc_core_c.gncEntryGetDescription(entry) == description:
-                    gnc_core_c.gncEntryBeginEdit(entry)
-#                    gnc_core_c.gncInvoiceRemoveEntry(invoice, entry)
-                    invoice.RemoveEntry(entry)
-                    invoice.CommitEdit()
-                    invoice.PostToAccount(self.receivables, self.date, 
-                                          self.date, 
-                                          description.encode("utf_8"),
-                                          True)
-                    self.gcsession.save()
-                    self.gcsession.end()
-                    return True
-            invoice.CommitEdit()
-            invoice.PostToAccount(self.receivables, self.date, self.date,
-                                  description.encode("utf_8"), True)
-            self.gcsession.save()
-            self.gcsession.end()
+                    if number_of_entries > 1 :
+                        invoice.Unpost(True)
+                        invoice.BeginEdit()
+                        gnc_core_c.gncEntryBeginEdit(entry)
+#                        gnc_core_c.gncInvoiceRemoveEntry(invoice, entry)
+                        invoice.RemoveEntry(entry)
+                        invoice.CommitEdit()
+                        invoice.PostToAccount(self.receivables, self.date, 
+                                            self.date, 
+                                            description.encode("utf_8"),
+                                            True)
+                        self.gcsession.save()
+                        self.gcsession.end()
+                        return True
+                    if number_of_entries == 1:
+                        invoice.Unpost(True)
+                        invoice.Destroy()
+                        self.gcsession.save()
+                        self.gcsession.end()
+                        return True
             return False
 
         except:

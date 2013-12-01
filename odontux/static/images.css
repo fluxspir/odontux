@@ -1,6 +1,39 @@
+#maxillar_jaw {
+display:inline-block;
+position:absolute;
+top:0%;
+height:50%;
+width:100%;
+}
+#mandibular_jaw {
+display:inline-block;
+position:absolute;
+top:50%;
+height:50%;
+width:100%;
+}
+#mandibular_jaw_occlusal_view {
+display:inline-block;
+position:absolute;
+top:0%;
+height:40%;
+width:100%;
+text-align:center;
+}
+#mandibular_jaw_vestibular_view {
+display:inline-block;
+position:absolute;
+top:40%;
+height:60%;
+width:100%;
+text-align:center;
+}
+
 #schema_arcade_mandibulaire { 
-position:relative;
 margin:0px;
 padding:0px;
 text-align:right;
+}
+
+#left_mandibular_frontal:hover {
 }
