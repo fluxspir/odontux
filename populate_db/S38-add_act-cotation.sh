@@ -123,6 +123,8 @@ cotid=$(odontux add_cotationfr -k 10 -m 0 --exceeding_adult_normal 62.5)
 odontux add_acttype -n "Couronne provisoire" -a "couronne provisoire" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 455.5 --exceeding_adult_cmu 128.5)
 odontux add_acttype -n "Inter de brigde en céramique" -a "Inter CCM ceramique" -s 6 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 455.5 --exceeding_adult_cmu 128.5)
+odontux add_acttype -n "Inter de brigde en monocouche" -a "Inter CCM monocouche" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 235.5)
 odontux add_acttype -n "Inter bridge en métal" -a "Inter CCA" -s 6 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 4 --keycmu 3 -m 30 --adult_cmu_num 42 --exceeding_adult_normal 322.5)

@@ -448,8 +448,8 @@ class ListPatientTeethCommand(BaseCommand):
         patient_id = os.getenv("patient_id")
 
         try:
-            mouth_id = meta.session.query(headneck.Mouth)\
-                .filter(headneck.Mouth.patient_id == patient_id).one().id
+            mouth_id = meta.session.query(headneck.Mouth).filter(
+                    headneck.Mouth.patient_id == patient_id).one().id
         except sqlalchemy.orm.exc.NoResultFound:
             print(_(u"toutes les dents sont présentes en bouche."
                     .encode("utf_8")))
@@ -502,8 +502,8 @@ class GetToothIdCommand(BaseCommand):
             patient_id = os.getenv("patient_id")
 
         try:
-            mouth_id = self.mouthquery.filter(headneck.Mouth.patient_id\
-            == patient_id).one().id
+            mouth_id = self.mouthquery.filter(
+                        headneck.Mouth.patient_id == patient_id).one().id
         except sqlalchemy.orm.exc.NoResultFound:
             sys.exit(_("The mouth isn't in database yet"))
 
