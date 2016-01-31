@@ -7,7 +7,7 @@
 
 from meta import Base
 
-from sqlalchemy import Table, Column, Integer
+from sqlalchemy import Table, Column, Integer, Numeric
 from sqlalchemy import ForeignKey, MetaData
 
 
@@ -77,4 +77,40 @@ medecine_doctor_phone_table = Table('medecine_doctor_phone', Base.metadata,
 Column('medecine_doctor_id', Integer, ForeignKey('medecine_doctor.id')),
 Column('phone_id', Integer, ForeignKey('phone.id'))
 )
+
+# stock.py / administration.py
+provider_address_table = Table("provider_address", Base.metadata,
+Column("provider_id", Integer, ForeignKey("provider.id")),
+Column("address_id", Integer, ForeignKey("address.id"))
+)
+
+provider_phone_table = Table("provider_phone", Base.metadata,
+Column("provider_id", Integer, ForeignKey("provider.id")),
+Column("phone_id", Integer, ForeignKey("phone.id"))
+)
+
+provider_mail_table = Table("provider_mail", Base.metadata,
+Column("provider_id", Integer, ForeignKey("provider.id")),
+Column("mail_id", Integer, ForeignKey("mail.id"))
+)
+
+# goods.py
+good_kit_table = Table("good_kit", Base.metadata,
+Column("good_id", Integer, ForeignKey("Good.id")),
+Column("kit_id", Integer, ForeignKey("Kit.id"))
+)
+
+# goods.py / appointment.py
+material_appointment_table = Table("material_appointment", Base.metadata,
+Column('id', Integer, primary_key=True),
+Column('material_id', Integer, ForeignKey('Material.id')),
+Column("appointment_id", Integer, ForeignKey("Appointment.id")),
+Column("quantity_used", Numeric)
+)
+
+# traceability.py / goods.py
+traceability_good_table = Table("traceability_good", Base.metadata,
+Column("", Integer, 
+                                        ForeignKey("SterilizationCycle.id")),
+Column("stock
 
