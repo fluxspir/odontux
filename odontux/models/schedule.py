@@ -44,6 +44,9 @@ class Appointment(Base):
     memo = relationship("AppointmentMemo", backref="appointment",
                          cascade="all, delete, delete-orphan")
     events = relationship("Event", backref="appointment")
+    materials = relationship("Material", secondary=material_appointment_table,
+                                                        backref="appointment")
+    kits = relationship("Kit", backref="appointment")
 
 
 class Agenda(Base):
