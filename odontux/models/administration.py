@@ -32,6 +32,7 @@ class Address(Base):
     id = Column(Integer, primary_key=True)
     street = Column(String, default="")
     building = Column(String, default="")
+    complement = Column(String, default="")
     city = Column(String, default="")
     postal_code = Column(String, default="")
     county = Column(String, default="")
@@ -50,6 +51,8 @@ class Phone(Base):
     __tablename__ = 'phone'
     id = Column(Integer, primary_key=True)
     name = Column(String, default="")
+    indicatif = Column(String, default="")
+    area_code = Column(String, default="")
     number = Column(String, default="")
     update_date = Column(Date, default=today)
 
