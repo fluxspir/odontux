@@ -62,7 +62,7 @@ class GoodGeneral(Base):
         * material_type : Famille du bien ; permet des recherches plus ciblées
                     
     """
-    __tablename_ = "good_data"
+    __tablename__ = "good_general"
     id = Column(Integer, primary_key=True)
     odontux_code = Column(String, nullable=False, unique=True) # ForeignKey=GoodName.id ???
     brand = Column(String, default="")
@@ -93,6 +93,7 @@ class MaterialGeneral(GoodGeneral):
             Other value : Items *in activity* enter in the calcul.
 
     """
+    __tablename__ = "material_general"
     id = Column(Integer, ForeignKey(GoodGeneral.id), primary_key=True)
     material_type = Column(String, default="")
     order_threshold = Column(Numeric, default=-1)
@@ -115,8 +116,10 @@ class Good(Base):
     """
     __tablename__ = "good"
     id = Column(Integer, primary_key=True)
-    provider_id = Column(Integer, ForeignKey(Provider.id), nullable=False)
-    good_general_id = Column(Integer, ForeignKey(GoodName.id), nullable=False)
+    provider_id = Column(Integer, ForeignKey(MaterialProvider.id), 
+                                                                nullable=False)
+    good_general_id = Column(Integer, ForeignKey(GoodGeneral.id), 
+                                                                nullable=False)
     good_general = relationship('GoodGeneral')
     acquisition_date = Column(DateTime, default=func.now())
     acquisiton_price = Column(Numeric, default=0)
