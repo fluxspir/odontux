@@ -13,12 +13,14 @@ ROLE_NURSE = 1
 ROLE_ASSISTANT = 2
 ROLE_SECRETARY = 3
 ROLE_ADMIN = 4
+ROLE_PATIENT = 5
 
 ROLES = { ROLE_DENTIST: _("dentist"),
           ROLE_NURSE: _("nurse"),
           ROLE_ASSISTANT: _("assistant"),
           ROLE_SECRETARY: _("secretary"),
           ROLE_ADMIN: _("admin"),
+          ROLE_PATIENT: _("patient"),
         }
 ROLES_LIST = ROLES.items()  #ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
 
