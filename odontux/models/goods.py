@@ -6,11 +6,12 @@
 #
 
 from meta import Base
+import users
 import sqlalchemy
 import datetime
 
 from sqlalchemy import (Table, Column, Integer, String, Date, DateTime, 
-                        Boolean, Interval)
+                        Numeric, Boolean, Interval)
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
 from sqlalchemy.orm import backref, relationship

@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-import users, stock
+import users, goods
 import sqlalchemy
 import datetime
 
