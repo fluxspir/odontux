@@ -14,6 +14,7 @@ from sqlalchemy import (Table, Column, Integer, String,
                         Date, DateTime, Interval,
                         Boolean)
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
 
 class SterilizationCycleType(Base):
@@ -48,7 +49,7 @@ class SterilizationCycleMode(Base):
 class SterilizationCycle(Base):
     __tablename__ = "sterilization_cycle"
     id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime, default=datetime.datetime.now())
+    timestamp = Column(DateTime, default=func.now())
     operator = Column(Integer, ForeignKey(users.OdontuxUser.id),
                                                     nullable=False)
     sterilizator_id = Column(Integer, ForeignKey(goods.Equipment.id),
@@ -68,6 +69,7 @@ class SterilizationCycle(Base):
     __mapper_args__ = {
         'polymorphic_identity': 'sterilization_cycle'
         'polymorphic_on': type
+    }
 
 class SimplifiedTraceability(SterilizationCycle):
     """
