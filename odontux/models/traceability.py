@@ -11,7 +11,7 @@ import users, goods
 import sqlalchemy
 import datetime
 
-from sqlalchemy import (Table, Column, Integer, String, 
+from sqlalchemy import (Table, Column, Integer, String, Numeric
                         Date, DateTime, Interval,
                         Boolean)
 from sqlalchemy import ForeignKey
@@ -68,7 +68,7 @@ class SterilizationCycle(Base):
     type = Column(String(15))
 
     __mapper_args__ = {
-        'polymorphic_identity': 'sterilization_cycle'
+        'polymorphic_identity': 'sterilization_cycle',
         'polymorphic_on': type
     }
 
