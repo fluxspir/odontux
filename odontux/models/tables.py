@@ -120,8 +120,8 @@ Column("validity", Interval, nullable=False)
 # goods.py / appointment.py
 material_appointment_table = Table("material_appointment", Base.metadata,
 Column('id', Integer, primary_key=True),
-Column('material_id', Integer, ForeignKey('Material.id')),
-Column("appointment_id", Integer, ForeignKey("Appointment.id")),
+Column('material_id', Integer, ForeignKey('material.id')),
+Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("quantity_used", Numeric)
 )
 
