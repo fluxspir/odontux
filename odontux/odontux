@@ -68,8 +68,11 @@ if CommandClass is None:
     if ToolClass is None:
         # TODO: call usage/help
         raise ValueError("Unknown command/tool '{}'.".format(tool_name))
-    tool = ToolClass()
-    tool.run(args)
+    try:
+        tool = ToolClass()
+        tool.run(args)
+    except AttributeError:
+        pass
     sys.exit(0)
 
 cmd = CommandClass()
