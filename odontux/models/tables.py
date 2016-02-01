@@ -96,24 +96,24 @@ Column("mail_id", Integer, ForeignKey("mail.id"))
 
 # goods.py
 kit_good_table = Table("kit_good", Base.metadata,
-Column("kit_id", Integer, ForeignKey("Kit.id")),
-Column("good_id", Integer, ForeignKey("Good.id"))
+Column("kit_id", Integer, ForeignKey("kit.id")),
+Column("good_id", Integer, ForeignKey("good.id"))
 )
 
 # traceability.py / goods.py
 traceability_good_table = Table("traceability_good", Base.metadata,
 Column("id", Integer, primary_key=True),
-Column("traceability_id", Integer, ForeignKey("CompleteTraceability.id")),
-Column("good_id", Integer, ForeignKey("Good.id")),
-Column("appointment_id", Integer, ForeignKey("Appointment.id")),
+Column("traceability_id", Integer, ForeignKey("complete_traceability.id")),
+Column("good_id", Integer, ForeignKey("good.id")),
+Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("validity", Interval, nullable=False)
 )
 
 traceability_kit_table = Table("traceability_kit", Base.metadata,
 Column("id", Integer, primary_key=True),
-Column("traceability_id", Integer, ForeignKey("CompleteTraceability.id")),
-Column("kit_id", Integer, ForeignKey("Kit.id")),
-Column("appointment_id", Integer, ForeignKey("Appointment.id")),
+Column("traceability_id", Integer, ForeignKey("complete_traceability.id")),
+Column("kit_id", Integer, ForeignKey("kit.id")),
+Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("validity", Interval, nullable=False)
 )
 
