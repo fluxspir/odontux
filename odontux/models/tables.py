@@ -79,18 +79,18 @@ Column('phone_id', Integer, ForeignKey('phone.id'))
 )
 
 # stock.py / administration.py
-provider_address_table = Table("provider_address", Base.metadata,
-Column("provider_id", Integer, ForeignKey("provider.id")),
+good_provider_address_table = Table("goodprovider_address", Base.metadata,
+Column("good_provider_id", Integer, ForeignKey("good_provider.id")),
 Column("address_id", Integer, ForeignKey("address.id"))
 )
 
-provider_phone_table = Table("provider_phone", Base.metadata,
-Column("provider_id", Integer, ForeignKey("provider.id")),
+good_provider_phone_table = Table("good_provider_phone", Base.metadata,
+Column("good_provider_id", Integer, ForeignKey("good_provider.id")),
 Column("phone_id", Integer, ForeignKey("phone.id"))
 )
 
-provider_mail_table = Table("provider_mail", Base.metadata,
-Column("provider_id", Integer, ForeignKey("provider.id")),
+good_provider_mail_table = Table("good_provider_mail", Base.metadata,
+Column("good_provider_id", Integer, ForeignKey("good_provider.id")),
 Column("mail_id", Integer, ForeignKey("mail.id"))
 )
 

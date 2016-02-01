@@ -6,8 +6,8 @@
 #
 
 from meta import Base
-from tables import (provider_address_table, provider_phone_table, 
-                    provider_mail_table, kit_good_table)
+from tables import (good_provider_address_table, good_provider_phone_table, 
+                    good_provider_mail_table, kit_good_table)
 import users
 import sqlalchemy
 import datetime
@@ -41,15 +41,15 @@ type of good.
 
 """
 
-class MaterialProvider(Base):
-    __tablename__ = "material_provider"
+class GoodProvider(Base):
+    __tablename__ = "good_provider"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    addresses = relationship("Address", secondary=provider_address_table,
+    addresses = relationship("Address", secondary=good_provider_address_table,
                             backref="provider")
-    phones = relationship("Phone", secondary=provider_phone_table,
+    phones = relationship("Phone", secondary=good_provider_phone_table,
                             backref="provider")
-    mails = relationship("Mail", secondary=provider_mail_table,
+    mails = relationship("Mail", secondary=good_provider_mail_table,
                             backref="provider")
 
 class GoodGeneral(Base):
@@ -116,8 +116,7 @@ class Good(Base):
     """
     __tablename__ = "good"
     id = Column(Integer, primary_key=True)
-    provider_id = Column(Integer, ForeignKey(MaterialProvider.id), 
-                                                                nullable=False)
+    provider_id = Column(Integer, ForeignKey(GoodProvider.id), nullable=False)
     good_general_id = Column(Integer, ForeignKey(GoodGeneral.id), 
                                                                 nullable=False)
     good_general = relationship('GoodGeneral')
