@@ -96,8 +96,8 @@ Column("mail_id", Integer, ForeignKey("mail.id"))
 
 # goods.py
 kit_goods_table = Table("kit_goods", Base.metadata,
-Column("kit_id", Integer, ForeignKey("Kit.id"))
-Column("good_id", Integer, ForeignKey("Good.id")),
+Column("kit_id", Integer, ForeignKey("Kit.id")),
+Column("good_id", Integer, ForeignKey("Good.id"))
 )
 
 # traceability.py / goods.py

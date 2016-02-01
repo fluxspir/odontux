@@ -42,7 +42,7 @@ class Appointment(Base):
                          cascade="all, delete, delete-orphan")
     events = relationship("Event", backref="appointment")
     materiovigilance = relationship("Material", 
-                                    secondary=material_appointment_table,
+                                    secondary="material_appointment_table",
                                     backref="appointments")
 
 class Agenda(Base):
