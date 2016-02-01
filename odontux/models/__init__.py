@@ -30,13 +30,17 @@ from teeth import Tooth, Event, ToothEvent, CrownEvent, RootEvent
 from act import Specialty, ActType, AppointmentActReference
 from cotation import NgapKeyFr, CmuKeyFr, MajorationFr, CotationFr
 from compta import PaymentType, Payment
-
+from goods import (MaterialProvider, GoodGeneral, MaterialGeneral,
+                    Good, Equipment, Instrument, Material, KitType, Kit)
+from traceability import (SterilizationCycleType, SterilizationCycleMode,
+                            SterilizationCycle, 
+                            SimplifiedTraceability, CompleteTraceability)
 
 def init():
     parser = ConfigParser.ConfigParser()
     home = os.path.expanduser("~")
     parser.read(os.path.join(home, ".odontuxrc"))
-    db_url = parser.get("db", "url")
+    db_url = parser.get("dbtest", "url")
 
     engine = create_engine(db_url, echo=False, convert_unicode=True)
 #    Session = sessionmaker(bind=engine)
