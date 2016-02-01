@@ -6,6 +6,7 @@
 #
 
 from meta import Base
+from tables import material_appointment_table
 import users, administration
 import sqlalchemy
 import datetime
@@ -42,7 +43,7 @@ class Appointment(Base):
                          cascade="all, delete, delete-orphan")
     events = relationship("Event", backref="appointment")
     materiovigilance = relationship("Material", 
-                                    secondary="material_appointment_table",
+                                    secondary=material_appointment_table,
                                     backref="appointments")
 
 class Agenda(Base):
