@@ -14,7 +14,7 @@ now = datetime.datetime.now()
 from sqlalchemy import (Table, Column, Integer, String, Date, DateTime, 
                         Boolean, Interval)
 from sqlalchemy import ForeignKey
-
+from sqlalchemy.orm import backref, relationship
 
 """
 A "Good" is an entity.

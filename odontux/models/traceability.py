@@ -14,6 +14,7 @@ from sqlalchemy import (Table, Column, Integer, String,
                         Date, DateTime, Interval,
                         Boolean)
 from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship, backref
 
 class SterilizationCycleType(Base):
     """ Cycle can be of type : 
