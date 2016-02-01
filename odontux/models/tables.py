@@ -95,7 +95,7 @@ Column("mail_id", Integer, ForeignKey("mail.id"))
 )
 
 # goods.py
-kit_goods_table = Table("kit_goods", Base.metadata,
+kit_good_table = Table("kit_good", Base.metadata,
 Column("kit_id", Integer, ForeignKey("Kit.id")),
 Column("good_id", Integer, ForeignKey("Good.id"))
 )

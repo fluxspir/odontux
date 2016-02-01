@@ -6,6 +6,8 @@
 #
 
 from meta import Base
+from tables import (provider_address_table, provider_phone_table, 
+                    provider_mail_table, kit_good_table)
 import users
 import sqlalchemy
 import datetime
@@ -188,7 +190,7 @@ class Kit(Base):
     __tablename__ = "kit"
     id = Column(Integer, primary_key=True)
     kit_type_id = Column(Integer, ForeignKey(KitType.id), nullable=False)
-    goods = relationship("Good", secondary=good_kit_table,
+    goods = relationship("Good", secondary=kit_good_table,
                                         backref="kits")
     creation_date = Column(Date, nullable=False)
 

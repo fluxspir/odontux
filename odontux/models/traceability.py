@@ -6,6 +6,7 @@
 #
 
 from meta import Base
+from tables import traceability_good_table, traceability_kit_table
 import users, goods
 import sqlalchemy
 import datetime
@@ -91,9 +92,9 @@ class CompleteTraceability(SterilizationCycle):
     """
     __tablename__ = "complete_traceability"
     id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
-    goods = relationship('Good', secondary="traceability_good_table", 
+    goods = relationship('Good', secondary=traceability_good_table,
                                                     backref="traceabilities")
-    kits = relationship('Kit', secondary="traceability_kit_table",
+    kits = relationship('Kit', secondary=traceability_kit_table,
                                                     backref="traceabilities")
 
     def number_of_items(self):
