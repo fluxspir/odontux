@@ -11,10 +11,7 @@ import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
-
-
-now = datetime.datetime.now()
-today = datetime.date.today()
+from sqlalchemy import func
 
 
 class DrugPrescribed(Base):
@@ -36,7 +33,7 @@ class Prescription(Base):
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                         nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id))
-    time_stamp = Column(Date, nullable=False, default=today)
+    time_stamp = Column(Date, nullable=False, default=func.current_date)
 
 
 class PrescribedDrugReference(Base):

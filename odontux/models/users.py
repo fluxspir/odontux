@@ -15,11 +15,8 @@ from tables import (odontux_user_address_table, odontux_user_mail_table,
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
-
-
-now = datetime.datetime.now()
-today = datetime.date.today()
 
 
 class DentalOffice(Base):
@@ -63,7 +60,7 @@ class OdontuxUser(Base):
     avatar_id = Column(Integer, default=None)
     display_order = Column(Integer, default=None)
     modified_by = Column(Integer, default=None)
-    time_stamp = Column(Date, default=today)
+    time_stamp = Column(Date, default=func.current_date)
     gnucash_url = Column(String, default="")
     patients = relationship("Patient", backref="user")
 

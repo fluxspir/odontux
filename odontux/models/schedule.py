@@ -12,11 +12,8 @@ import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
-
-
-now = datetime.datetime.now()
-today = datetime.date.today()
 
 
 class Appointment(Base):
@@ -62,6 +59,6 @@ class AppointmentMemo(Base):
     patient_id = Column(Integer, ForeignKey(administration.Patient.id))
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
     appointment_id = Column(Integer, ForeignKey(Appointment.id))
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
     memo = Column(String, default="")
 
