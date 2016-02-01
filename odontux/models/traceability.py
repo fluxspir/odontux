@@ -11,7 +11,7 @@ import users, goods
 import sqlalchemy
 import datetime
 
-from sqlalchemy import (Table, Column, Integer, String, Numeric
+from sqlalchemy import (Table, Column, Integer, String, Numeric,
                         Date, DateTime, Interval,
                         Boolean)
 from sqlalchemy import ForeignKey
