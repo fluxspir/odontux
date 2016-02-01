@@ -71,8 +71,8 @@ class GoodGeneral(Base):
     type = Column(String)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'good_general'
-        'polymorphic_on' : type
+        'polymorphic_identity': 'good_general',
+        'polymorphic_on': type
     }
 
 class MaterialGeneral(GoodGeneral):
