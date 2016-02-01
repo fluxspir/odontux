@@ -9,11 +9,10 @@ from meta import Base
 import sqlalchemy
 import datetime
 
-now = datetime.datetime.now()
-
 from sqlalchemy import (Table, Column, Integer, String, Date, DateTime, 
                         Boolean, Interval)
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 from sqlalchemy.orm import backref, relationship
 
 """
@@ -116,7 +115,7 @@ class Good(Base):
     provider_id = Column(Integer, ForeignKey(Provider.id), nullable=False)
     good_general_id = Column(Integer, ForeignKey(GoodName.id), nullable=False)
     good_general = relationship('GoodGeneral')
-    acquisition_date = Column(DateTime, default=now)
+    acquisition_date = Column(DateTime, default=func.now())
     acquisiton_price = Column(Numeric, default=0)
     serial_number = Column(String, default="")
     new = Column(Boolean, default=True)
@@ -143,7 +142,7 @@ class Equipment(Good):
 
 class Instrument(Good):
     """ """
-    __tablename__ = "tool"
+    __tablename__ = "instrument"
     id = Column(Integer, ForeignKey(Good.id), primary_key=True)
 
     __mapper_args__ = {
