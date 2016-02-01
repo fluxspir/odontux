@@ -7,7 +7,7 @@
 
 from meta import Base
 
-from sqlalchemy import Table, Column, Integer, Numeric
+from sqlalchemy import Table, Column, Integer, Numeric, Interval
 from sqlalchemy import ForeignKey, MetaData
 
 
@@ -95,9 +95,26 @@ Column("mail_id", Integer, ForeignKey("mail.id"))
 )
 
 # goods.py
-good_kit_table = Table("good_kit", Base.metadata,
-Column("good_id", Integer, ForeignKey("Good.id")),
+kit_goods_table = Table("kit_of_goods", Base.metadata,
 Column("kit_id", Integer, ForeignKey("Kit.id"))
+Column("good_id", Integer, ForeignKey("Good.id")),
+)
+
+# traceability.py / goods.py
+traceability_good_table = Table("traceability_good", Base.metadata,
+Column("id", Integer, primary_key=True),
+Column("traceability_id", Integer, ForeignKey("CompleteTraceability.id")),
+Column("good_id", Integer, ForeignKey("Good.id")),
+Column("appointment_id", Integer, ForeignKey("Appointment.id")),
+Column("validity", Interval, nullable=False)
+)
+
+traceability_kit_table = Table("traceability_kit", Base.metadata,
+Column("id", Integer, primary_key=True),
+Column("traceability_id", Integer, ForeignKey("CompleteTraceability.id")),
+Column("kit_id", Integer, ForeignKey("Kit.id")),
+Column("appointment_id", Integer, ForeignKey("Appointment.id")),
+Column("validity", Interval, nullable=False)
 )
 
 # goods.py / appointment.py
@@ -108,9 +125,4 @@ Column("appointment_id", Integer, ForeignKey("Appointment.id")),
 Column("quantity_used", Numeric)
 )
 
-# traceability.py / goods.py
-traceability_good_table = Table("traceability_good", Base.metadata,
-Column("", Integer, 
-                                        ForeignKey("SterilizationCycle.id")),
-Column("stock
 

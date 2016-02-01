@@ -123,8 +123,6 @@ class Good(Base):
     user = Column(Integer, ForeignKey(users.OdontuxUser.id))
     office = Column(Integer, ForeignKey(users.DentalOffice.id))
     type = Column(String(20))
-    sterilizations = relationship("")
-
 
     __mapper_args__ = {
         'polymorphic_identity': 'good',
@@ -132,6 +130,9 @@ class Good(Base):
     }
 
 class Equipment(Good):
+    """
+        * lifetime expected ; 0 if forever
+    """
     __tablename__ = "equipment"
     id = Column(Integer, ForeignKey(Good.id), primary_key=True)
     lifetime_expected = Column(Interval, default=0)
@@ -141,13 +142,9 @@ class Equipment(Good):
     }
 
 class Instrument(Good):
-    """
-        * lifetime expected ; 0 if forever
-        * expiration_date
-    """
+    """ """
     __tablename__ = "tool"
     id = Column(Integer, ForeignKey(Good.id), primary_key=True)
-
 
     __mapper_args__ = {
         'polymorphic_identity': 'instrument',
@@ -172,14 +169,10 @@ class Material(Good):
     start_of_use = Column(Date, default=None)
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
-    appointments = relationship("Appointment", 
-                                secondary=material_appointment_table,
-                                backref='material')
 
     __mapper_args__ = {
         'polymorphic_identity': 'material',
     }
-
 
 class KitType(Base):
     """
@@ -198,3 +191,4 @@ class Kit(Base):
     goods = relationship("Good", secondary=good_kit_table,
                                         backref="kits")
     creation_date = Column(Date, nullable=False)
+

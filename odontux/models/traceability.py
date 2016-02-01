@@ -57,8 +57,8 @@ class SterilizationCycle(Base):
     cycle_mode_id = Column(Integer, ForeignKey(SterilizationCycleMode.id),
                                                     nullable=False)
     date = Column(DateTime, nullable=False)
-    cycle_number = Column(Integer, nullable=False)
-    reference = Column(Integer, default=0)
+    cycle_number = Column(Integer, nullable=False, unique=True)
+    reference = Column(Integer, default=0, unique=True)
     complement = Column(String, default="")
     document = Column(String, default="")
 
@@ -74,8 +74,7 @@ class SimplifiedTraceability(SterilizationCycle):
         Number of days in seconds before peremption
     """
     __tablename__ = "simplified_traceability"
-    sterilization_cycle_id = Column(Integer, ForeignKey(SterilizationCycle.id),
-                                                        nullable=False)
+    id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
     number_of_items = Column(Integer, nullable=False)
     validity = Column(Interval, nullable=False)
 
@@ -89,13 +88,13 @@ class CompleteTraceability(SterilizationCycle):
     """
     __tablename__ = "complete_traceability"
     id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
-    sterilization_cycle_id = Column(Integer, ForeignKey(SterilizationCycle.id),
-                                                        nullable=False)
     goods = relationship('Good', secondary="traceability_good_table", 
-                                                        backref="traceability")
+                                                    backref="traceabilities")
+    kits = relationship('Kit', secondary="traceability_kit_table",
+                                                    backref="traceabilities")
 
-    kits = relationship('Kit', secondary=
-
+    def number_of_items(self):
+        pass
 
     __mapper_args__ = {
         'polymorphic_identity': 'complete_traceability'
