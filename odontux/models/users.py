@@ -50,7 +50,7 @@ class OdontuxUser(Base):
     addresses = relationship("Address", secondary=odontux_user_address_table,
                            backref="odontux_user")
     sex = Column(String, default="f")
-    dob = Column(Date, default="1970-01-01")
+    dob = Column(Date, default=datetime.date(1970, 1, 1))
     status = Column(Boolean, default=True)
     comments = Column(String, default="")
     mails = relationship("Mail", secondary=odontux_user_mail_table,
