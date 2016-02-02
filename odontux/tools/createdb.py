@@ -4,6 +4,8 @@
 # v0.4
 # Licence BSD
 
+import pdb
+
 import sqlalchemy
 from sqlalchemy import create_engine
 import models
@@ -38,4 +40,4 @@ class CreateOdontuxDatabaseTool():
             new_admin = users.OdontuxUser(**admin_user)
             meta.session.add(new_admin)
             meta.session.commit()
-
+            
