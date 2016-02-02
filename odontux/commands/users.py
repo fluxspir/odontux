@@ -180,8 +180,8 @@ class OdontuxUserParser(BaseCommand):
                         help="NOT IMPLEMENTED, openmolar retrocompatibility",
                         dest="modified_by")
 
-        parser.add_option("--time_stamp", action="store", type="string",
-                        help="user's file creation, default=now",
+        parser.add_option("--creation_date", action="store", type="string",
+                        help="user's file creation, default=today",
                         dest="time_stamp")
 
         parser.add_option("--phonenum", action="store", type="string",
@@ -248,6 +248,18 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
     def run(self, args):
         (options, args) = self.parse_args(args)
 
+        def _check_date(value):
+            """ Return datetime.date() """
+            msg = "Date must be in format yyyymmdd or ISO : yyyy-mm-dd"
+            if re.match('\d{8}', value) != None
+                return datetime.date(int(val[0:4]), int(val[4:6]), 
+                                                                int(val[6:]))
+            elif re.match('\d{4}-\d{2}-\d{2}') != None:
+                return datetime.date(int(val[0:4]), int(val[5:7]), 
+                                                                int(val[8:]))
+            else:
+                return None
+
         if not options.lastname:
             sys.exit("a lastname is mandatory to add a new user to database")
 
@@ -270,7 +282,7 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
         else:
             self.values["sex"] = "f"
         if options.dob:
-            self.values["dob"] = options.dob
+            self.values["dob"] = _check_date(options.dob)
         if options.inactive:
             self.values["status"] = False
         if options.comments:
@@ -281,8 +293,8 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
             self.values["display_order"] = options.display_order
         if options.modified_by:
             self.values["modified_by"] = options.modified_by.decode("utf_8")
-        if options.time_stamp:
-            self.values["time_stamp"] = options.time_stamp
+        if options.creation_date:
+            self.values["creation_date"] = _check_date(options.creation_date)
         if options.street:
             options.street = options.street.decode("utf_8")
         if options.building:
@@ -295,6 +307,8 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
             options.county = options.county.decode("utf_8").title()
         if options.country:
             options.country = options.country.decode("utf_8").title()
+        if options.update_date:
+            options.update_date = _check_date(options.update_date)
         if options.email:
             options.email = options.email.decode("utf_8").lower()
 
@@ -337,6 +351,19 @@ class UpdateUserCommand(BaseCommand, OdontuxUserParser):
 
     def run(self, args):
         (options, args) = self.parse_args(args, True)
+
+        def _check_date(value):
+            """ Return datetime.date() """
+            msg = "Date must be in format yyyymmdd or ISO : yyyy-mm-dd"
+            if re.match('\d{8}', value) != None
+                return datetime.date(int(val[0:4]), int(val[4:6]), 
+                                                                int(val[6:]))
+            elif re.match('\d{4}-\d{2}-\d{2}') != None:
+                return datetime.date(int(val[0:4]), int(val[5:7]), 
+                                                                int(val[8:]))
+            else:
+                return None
+
         if not options.user_id:
             print(_("the user's id must be provide to update odontux user"))
             sys.exit(1)
@@ -367,15 +394,15 @@ class UpdateUserCommand(BaseCommand, OdontuxUserParser):
         if options.sex:
             user.sex = options.sex
         if options.dob:
-            user.dob = options.dob
+            user.dob = _check_date(options.dob)
         if options.comments:
             user.comments = options.comments.decode("utf_8")
         if options.avatar_id:
             user.avatar_id = options.avatar_id
         if options.display_order:
             user.display_order = options.display_order
-        if options.time_stamp:
-            user.time_stamp = options.time_stamp
+        if options.creation_date:
+            user.creation_date = _check_date(options.creation_date)
         else:
             user.time_stamp = today
 
