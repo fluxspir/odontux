@@ -5,6 +5,10 @@
 # Licence BSD
 #
 
+import pdb
+from base64 import b64decode
+import scrypt
+
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
 from odontux.models import meta, users
@@ -33,20 +37,28 @@ def login():
             user = meta.session.query(users.OdontuxUser).filter\
                    (users.OdontuxUser.username == request.form['username'])\
                    .one()
-            if request.form['password'] == user.password:
-                session['username'] = user.username
-                session['user_id'] = user.id
-                session['role'] = int(user.role)
-                session['ROLES'] = constants.ROLES_LIST
-                session['TOOTH_STATES'] = constants.TOOTH_STATES
-                session['ROLE_DENTIST'] = constants.ROLE_DENTIST
-                session['ROLE_NURSE'] = constants.ROLE_NURSE
-                session['ROLE_ASSISTANT'] = constants.ROLE_ASSISTANT
-                session['ROLE_SECRETARY'] = constants.ROLE_SECRETARY
-                session['ROLE_ADMIN'] = constants.ROLE_ADMIN
-                session['avatar_id'] = user.avatar_id
-                return redirect(url_for('index'))
-            return redirect(url_for('logout'))
+            try:
+                if scrypt.decrypt(b64decode(user.password), 
+                                    request.form['password'].encode("utf_8")):
+                    session['username'] = user.username
+                    session['user_id'] = user.id
+                    session['role'] = int(user.role)
+                    session['ROLES'] = constants.ROLES_LIST
+                    session['TOOTH_STATES'] = constants.TOOTH_STATES
+                    session['ROLE_DENTIST'] = constants.ROLE_DENTIST
+                    session['ROLE_NURSE'] = constants.ROLE_NURSE
+                    session['ROLE_ASSISTANT'] = constants.ROLE_ASSISTANT
+                    session['ROLE_SECRETARY'] = constants.ROLE_SECRETARY
+                    session['ROLE_ADMIN'] = constants.ROLE_ADMIN
+                    session['avatar_id'] = user.avatar_id
+
+                    if request.form['password'] == "please_change_password":
+                        return redirect(url_for('update_user',
+                                                body_id = user.id,
+                                                form_to_display = "gen_info"))
+                    return redirect(url_for('index'))
+            except scrypt.error:
+                return redirect(url_for('logout'))
         except sqlalchemy.orm.exc.NoResultFound:
             return redirect(url_for('logout'))
     return render_template('login.html')

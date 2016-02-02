@@ -11,7 +11,8 @@ import constants
 
 from sqlalchemy import or_
 
-import bcrypt
+from base64 import b64encode
+import scrypt
 import os
 import sys
 import datetime
@@ -258,10 +259,10 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
             else:
                 return None
 
-        def _crypt_password(password):
+        def _hash_password(password, maxtime=0.5, datalength=64):
             """ """
-            salt = bcrypt.gensalt()
-            return bcrypt.hashpw(password, salt)
+            return b64.encode(scrypt.encrypt(os.urandom(datalength), password,
+                                                        maxtime=maxtime))
 
         if not options.lastname:
             sys.exit("a lastname is mandatory to add a new user to database")
@@ -368,10 +369,11 @@ class UpdateUserCommand(BaseCommand, OdontuxUserParser):
             else:
                 return None
 
-        def _crypt_password(password):
+
+        def _hash_password(password, maxtime=0.5, datalength=64):
             """ """
-            salt = bcrypt.gensalt()
-            return bcrypt.hashpw(password, salt)
+            return b64encode(scrypt.encrypt(os.urandom(datalength), password,
+                                                        maxtime=maxtime))
 
         if not options.user_id:
             print(_("the user's id must be provide to update odontux user"))

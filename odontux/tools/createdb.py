@@ -5,6 +5,9 @@
 # Licence BSD
 
 import pdb
+from base64 import b64encode
+import scrypt
+import os
 
 import sqlalchemy
 from sqlalchemy import create_engine
@@ -31,7 +34,9 @@ class CreateOdontuxDatabaseTool():
             print("creating first user \"admin\"")
             admin_user = {
                 "username": "admin",
-                "password": "please_change_password",
+                "password": b64encode(scrypt.encrypt(os.urandom(64),
+                                        "please_change_password",
+                                        maxtime=0.5)),
                 "role": 4,
                 "lastname": "admin",
                 "firstname": "admin",

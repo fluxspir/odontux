@@ -5,6 +5,9 @@
 # Licence BSD
 #
 
+import scrypt
+import os
+
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
 from sqlalchemy import and_, or_
@@ -47,7 +50,7 @@ class OdontuxUserGeneralInfoAdminForm(Form):
     status = BooleanField(_('status'))
     comments = TextAreaField(_('comments'))
     modified_by = IntegerField(_('modified_by'), [validators.Optional()])
-    time_stamp = forms.DateField(_("time_stamp"))
+    creation_date = forms.DateField(_("creation_date"))
 
 class DentistSpecificForm(Form):
     registration = TextField(_('registration'))
@@ -56,11 +59,19 @@ class DentistSpecificAdminForm(Form):
     gnucash_url = TextField(_("gnucash_url"))
 
 class OdontuxUserPasswordForm(Form):
-    password = PasswordField(_('password'), [validators.Required(),
+    password = PasswordField(_('Password'), [validators.Required(),
                         validators.Length(min=4), 
                         validators.EqualTo('confirm', message="Password must\
                         match")])
     confirm = PasswordField(_('Repeat Password'))
+
+class OdontuxUserNewPasswordForm(Form):
+    old_password = PasswordField(_('Old Password'), [validators.Required()])
+    new_password = PasswordField(_('New Password'), [validators.Required(),
+                        validators.Length(min=4), 
+                        validators.EqualTo('confirm', message="Password must\
+                        match")])
+    confirm = PasswordField(_('Repeat New Password'))
 
 
 class DentalOfficeForm(Form):
@@ -77,7 +88,7 @@ def get_gen_info_field_list():
 
 def get_gen_info_admin_field_list():
     return [ "username", "role" , "status", "comments", "modified_by", 
-             "time_stamp" ]
+             "creation_date" ]
 
 def get_dentist_specific_field_list():
     return [ "registration" ]
@@ -148,7 +159,9 @@ def add_user():
         for f in get_gen_info_admin_field_list():
             values[f] = getattr(gen_info_admin_form, f).data
         for f in get_password_field_list():
-            values[f] = getattr(password_form, f).data
+            values[f] = scrypt.encrypt(os.urandom(64), 
+                                        getattr(password_form, f).data, 
+                                        maxtime=0.5)
         for f in get_dentist_specific_field_list():
             values[f] = getattr(dentist_specific_form, f).data
         for f in get_dentist_specific_admin_field_list():
@@ -347,7 +360,9 @@ def update_user_password(body_id, form_to_display):
     password_form = OdontuxUserPasswordForm(request.form)
     if request.method == 'POST' and password_form.validate():
         for f in get_password_field_list():
-            setattr(user, f, getattr(password_form, f).data)
+            setattr(user, f, scrypt.encrypt(os.urandom(64),
+                            getattr(password_form, f).data, 
+                            maxtime=0.5))
         meta.session.commit()
         return redirect(url_for('update_user', 
                                  body_id=body_id,
