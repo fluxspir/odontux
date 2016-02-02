@@ -35,14 +35,14 @@ class Address(Base):
     postal_code = Column(String, default="")
     county = Column(String, default="")
     country = Column(String, default="France")
-    update_date = Column(Date, default=func.current_date)
+    update_date = Column(Date, default=func.current_date())
 
 
 class Mail(Base):
     __tablename__ = 'mail'
     id = Column(Integer, primary_key=True)
     email = Column(String, default="")
-    update_date = Column(Date, default=func.current_date)
+    update_date = Column(Date, default=func.current_date())
 
 
 class Phone(Base):
@@ -52,7 +52,7 @@ class Phone(Base):
     indicatif = Column(String, default="")
     area_code = Column(String, default="")
     number = Column(String, default="")
-    update_date = Column(Date, default=func.current_date)
+    update_date = Column(Date, default=func.current_date())
 
 
 class SocialSecurityFr(Base):
@@ -98,8 +98,8 @@ class Patient(Base):
     office_id = Column(Integer, ForeignKey(users.DentalOffice.id))
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
     gen_doc_id = Column(Integer, ForeignKey(md.MedecineDoctor.id))
-    time_stamp = Column(Date, default=func.current_date)
-    creation_date = Column(Date, default=func.current_date)
+    time_stamp = Column(Date, default=func.current_date())
+    creation_date = Column(Date, default=func.current_date())
     head = relationship("Head", uselist=False, backref="patient", 
                         cascade="all, delete, delete-orphan")
     neck = relationship("Neck", uselist=False, backref="patient",

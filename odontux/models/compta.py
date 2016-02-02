@@ -47,7 +47,7 @@ class Payment(Base):
     amount = Column(Numeric, nullable=False)
     advance = Column(Boolean, default=False, nullable=False)
     comments = Column(String, default="")
-    cashin_date = Column(Date, default=func.current_date)
+    cashin_date = Column(Date, default=func.current_date())
     acts = relationship("AppointmentActReference",
                           secondary=payment_act_table,
                           backref="payments")
