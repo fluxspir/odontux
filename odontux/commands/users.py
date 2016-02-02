@@ -11,6 +11,7 @@ import constants
 
 from sqlalchemy import or_
 
+import bcrypt
 import os
 import sys
 import datetime
@@ -257,11 +258,17 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
             else:
                 return None
 
+        def _crypt_password(password):
+            """ """
+            salt = bcrypt.gensalt()
+            return bcrypt.hashpw(password, salt)
+
         if not options.lastname:
             sys.exit("a lastname is mandatory to add a new user to database")
 
         self.values["username"] = options.username.decode("utf_8").lower()
-        self.values["password"] = options.password.decode("utf_8")
+        self.values["password"] = _crypt_password(
+                                            options.password.decode("utf_8"))
         self.values["role"] = options.role.decode("utf_8")
         self.values["title"] = options.title.decode("utf_8").title()
         self.values["lastname"] = options.lastname.decode("utf_8").upper()
@@ -361,6 +368,11 @@ class UpdateUserCommand(BaseCommand, OdontuxUserParser):
             else:
                 return None
 
+        def _crypt_password(password):
+            """ """
+            salt = bcrypt.gensalt()
+            return bcrypt.hashpw(password, salt)
+
         if not options.user_id:
             print(_("the user's id must be provide to update odontux user"))
             sys.exit(1)
@@ -370,7 +382,7 @@ class UpdateUserCommand(BaseCommand, OdontuxUserParser):
         if options.username:
             user.username = options.username.decode("utf_8").lower()
         if options.password:
-            user.password = options.password.decode("utf_8")
+            user.password = _crypt_password(options.password.decode("utf_8"))
         if options.role:
             user.role = options.role.decode("utf_8")
         if options.title:
