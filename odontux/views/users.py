@@ -6,6 +6,7 @@
 #
 
 import scrypt
+from base64 import b64encode
 import os
 
 from flask import session, render_template, request, redirect, url_for
@@ -159,9 +160,9 @@ def add_user():
         for f in get_gen_info_admin_field_list():
             values[f] = getattr(gen_info_admin_form, f).data
         for f in get_password_field_list():
-            values[f] = scrypt.encrypt(os.urandom(64), 
-                                        getattr(password_form, f).data, 
-                                        maxtime=0.5)
+            values[f] = b64encode(scrypt.encrypt(os.urandom(64), 
+                            getattr(password_form, f).data.encode("utf_8"), 
+                            maxtime=0.5))
         for f in get_dentist_specific_field_list():
             values[f] = getattr(dentist_specific_form, f).data
         for f in get_dentist_specific_admin_field_list():
@@ -360,9 +361,9 @@ def update_user_password(body_id, form_to_display):
     password_form = OdontuxUserPasswordForm(request.form)
     if request.method == 'POST' and password_form.validate():
         for f in get_password_field_list():
-            setattr(user, f, scrypt.encrypt(os.urandom(64),
-                            getattr(password_form, f).data, 
-                            maxtime=0.5))
+            setattr(user, f, b64encode(scrypt.encrypt(os.urandom(64),
+                            getattr(password_form, f).data.encode("utf_8"), 
+                            maxtime=0.5)))
         meta.session.commit()
         return redirect(url_for('update_user', 
                                  body_id=body_id,

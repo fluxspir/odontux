@@ -56,7 +56,9 @@ def login():
                         return redirect(url_for('update_user',
                                                 body_id = user.id,
                                                 form_to_display = "gen_info"))
-                    return redirect(url_for('index'))
+
+                    else:
+                        return redirect(url_for('index'))
             except scrypt.error:
                 return redirect(url_for('logout'))
         except sqlalchemy.orm.exc.NoResultFound:
