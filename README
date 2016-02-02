@@ -8,6 +8,7 @@ Required :
 	* sqlalchemy, psycopg2 : for database access
 	* postgresql : that may be change to sqlite or others, in model/__init__.py
 	* python-flask python-wtforms
+	* python-bcrypt
 
 Recommanded :
 	* gnucash, python-gnucash, libdbd-pgsql
@@ -49,6 +50,8 @@ Start odontux shell
 	$ bash --rcfile ~/.bashodontuxrc
 
 	$ odontux create_odontuxdb
+
+This will create the database and a first user : "admin" ; this user will have the password "please_change_password" ; you must change it right away.
 
 Odontux Commands : 
 First, add yourself ; you are the "user" ; they could be different kind of "user" in the office (dentist, hygienist, nurse, secretary...) ; the access to db will be later be separated for every kind of user.Then, add a medecine_doctor (not the dentist, which is "you"), the one of the first patient you want to add
