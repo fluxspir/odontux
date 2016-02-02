@@ -15,9 +15,6 @@ import os
 import sys
 import datetime
 
-now = datetime.datetime.now()
-today = datetime.date.today()
-
 class ListDentalOfficeCommand(BaseCommand):
     """ """
     command_name = "list_dentaloffice"
@@ -251,7 +248,7 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
         def _check_date(value):
             """ Return datetime.date() """
             msg = "Date must be in format yyyymmdd or ISO : yyyy-mm-dd"
-            if re.match('\d{8}', value) != None
+            if re.match('\d{8}', value) != None:
                 return datetime.date(int(val[0:4]), int(val[4:6]), 
                                                                 int(val[6:]))
             elif re.match('\d{4}-\d{2}-\d{2}') != None:
@@ -355,7 +352,7 @@ class UpdateUserCommand(BaseCommand, OdontuxUserParser):
         def _check_date(value):
             """ Return datetime.date() """
             msg = "Date must be in format yyyymmdd or ISO : yyyy-mm-dd"
-            if re.match('\d{8}', value) != None
+            if re.match('\d{8}', value) != None:
                 return datetime.date(int(val[0:4]), int(val[4:6]), 
                                                                 int(val[6:]))
             elif re.match('\d{4}-\d{2}-\d{2}') != None:
