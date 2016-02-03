@@ -187,14 +187,14 @@ def add_user():
         return redirect(url_for('list_users'))
 
     return render_template('/add_user.html/', 
-                        gen_info_form=gen_info_form,
-                        gen_info_admin_form=gen_info_admin_form,
-                        address_form=address_form,
-                        phone_form=phone_form,
-                        mail_form=mail_form,
-                        password_form=password_form,
-                       dentist_specific_form=dentist_specific_form,
-                       dentist_specific_admin_form=dentist_specific_admin_form)
+                    gen_info_form=gen_info_form,
+                    gen_info_admin_form=gen_info_admin_form,
+                    address_form=address_form,
+                    phone_form=phone_form,
+                    mail_form=mail_form,
+                    password_form=password_form,
+                    dentist_specific_form=dentist_specific_form,
+                    dentist_specific_admin_form=dentist_specific_admin_form)
 
 @app.route('/dental_office/add/', methods=['GET', 'POST'])
 def add_dental_office():
