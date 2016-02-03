@@ -28,11 +28,11 @@ A Material is a special entity that is divisible.
 
 "Asset" has "AssetCategory" datas that remains the same. For example, 
 the "brand name", the "commercial name", the "barcode" of the product will stay
-the same between every good we buy.
+the same between every asset we buy.
 Asset has variable datas, for exemple the day we bought this special "Asset",
 the "price" we paid that special day for it...
 
-"Material" is a type of good that owns general data. We use for that data a 
+"Material" is a type of asset that owns general data. We use for that data a 
 subclass of "AssetCategory" : the "MaterialCategory".
 
 "Kit" is a groupment of, generally, "Device". But a "Kit" may contain any 
@@ -110,13 +110,13 @@ class Asset(Base):
         * acquisition_date
         * acquisiton_price
         * product_new : true if the product is new
-        * user : which user is using this good
-        * office : to which dental office is related the good.
+        * user : which user is using this asset 
+        * office : to which dental office is related the asset
     """
     __tablename__ = "asset"
     id = Column(Integer, primary_key=True)
     provider_id = Column(Integer, ForeignKey(AssetProvider.id), nullable=False)
-    good_general_id = Column(Integer, ForeignKey(AssetCategory.id), 
+    asset_category_id = Column(Integer, ForeignKey(AssetCategory.id), 
                                                                 nullable=False)
     asset_category = relationship('AssetCategory')
     acquisition_date = Column(DateTime, default=func.now())
