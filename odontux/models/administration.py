@@ -32,7 +32,7 @@ class Address(Base):
     building = Column(String, default="")
     complement = Column(String, default="")
     city = Column(String, default="")
-    postal_code = Column(String, default="")
+    zip_code = Column(String, default="")
     county = Column(String, default="")
     country = Column(String, default="France")
     update_date = Column(Date, default=func.current_date())

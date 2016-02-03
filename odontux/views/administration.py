@@ -44,7 +44,7 @@ class PatientGeneralInfoForm(Form):
     lastname = TextField(_('lastname'), [validators.Required(
                           message=_("Lastname required")),
                           validators.Length(min=1, max=30,
-                          message=_("Must provide lastname"))],
+                          message=_("lastname between 1 and 30 characters"))],
                           filters=[forms.upper_field])
     firstname = TextField(_('firstname'), [validators.Length(max=30, 
                            message=_("firstname too long"))],
@@ -119,7 +119,7 @@ def add_patient():
                                                             + dentist.lastname)
                 for dentist in meta.session.query(users.OdontuxUser).filter(
                 users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
-                users.OdontuxUser.lastname).all() ]
+                users.OdontuxUserontuxUser.lastname).all() ]
 
     SSN_form = SocialSecurityForm(request.form)
     # three are used for odontux_users and medecine doctors, too

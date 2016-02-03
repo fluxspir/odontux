@@ -211,9 +211,9 @@ class OdontuxUserParser(BaseCommand):
                         help="name of the city",
                         dest="city")
 
-        parser.add_option("--postal_code", action="store", type="string",
-                        help="postal code of the city",
-                        dest="postal_code")
+        parser.add_option("--zip_code", action="store", type="string",
+                        help="zip code of the city",
+                        dest="zip_code")
 
         parser.add_option("--county", action="store", type="string",
                         help="county's name",
@@ -304,8 +304,8 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
             options.street = options.street.decode("utf_8")
         if options.building:
             options.building = options.building.decode("utf_8")
-        if options.postal_code:
-            options.postal_code = options.postal_code.decode("utf_8")
+        if options.zip_code:
+            options.zip_code = options.zip_code.decode("utf_8")
         if options.city:
             options.city = options.city.decode("utf_8").title()
         if options.county:
@@ -326,7 +326,7 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
                            street = options.street,
                            building = options.building,
                            city = options.city,
-                           postal_code = options.postal_code,
+                           zip_code = options.zip_code,
                            county = options.county,
                            country = options.country,
                            update_date = options.update_date
@@ -457,9 +457,9 @@ class UserMovingInCommand(BaseCommand):
                         help="name of the city",
                         dest="city")
 
-        parser.add_option("--postal_code", action="store", type="string",
-                        help="postal code of the city",
-                        dest="postal_code")
+        parser.add_option("--zip_code", action="store", type="string",
+                        help="zip code of the city",
+                        dest="zip_code")
 
         parser.add_option("--county", action="store", type="string",
                         help="county's name",
@@ -494,8 +494,8 @@ class UserMovingInCommand(BaseCommand):
             options.street = options.street.decode("utf_8")
         if options.building:
             options.building = options.building.decode("utf_8")
-        if options.postal_code:
-            options.postal_code = options.postal_code.decode("utf_8")
+        if options.zip_code:
+            options.zip_code = options.zip_code.decode("utf_8")
         if options.city:
             options.city = options.city.decode("utf_8").title()
         if options.county:
@@ -511,8 +511,8 @@ class UserMovingInCommand(BaseCommand):
                         addr.street = options.street
                     if options.building:
                         addr.building = options.building
-                    if options.postal_code:
-                        addr.postal_code = options.postal_code
+                    if options.zip_code:
+                        addr.zip_code = options.zip_code
                     if options.city:
                         addr.city = options.city
                     if options.county:
@@ -525,7 +525,7 @@ class UserMovingInCommand(BaseCommand):
                                             street = options.street,
                                             building = options.building,
                                             city = options.city,
-                                            postal_code = options.postal_code,
+                                            zip_code = options.zip_code,
                                             county = options.county,
                                             country = options.country,
                                             update_date = options.update_date
@@ -584,9 +584,9 @@ class DentalOfficeParser(BaseCommand):
                         help="name of the city",
                         dest="city")
 
-        parser.add_option("--postal_code", action="store", type="string",
-                        help="postal code of the city",
-                        dest="postal_code")
+        parser.add_option("--zip_code", action="store", type="string",
+                        help="zip code of the city",
+                        dest="zip_code")
 
         parser.add_option("--county", action="store", type="string",
                         help="county's name",
@@ -633,8 +633,8 @@ class AddDentalOfficeCommand(BaseCommand, DentalOfficeParser):
             options.street = options.street.decode("utf_8")
         if options.building:
             options.building = options.building.decode("utf_8")
-        if options.postal_code:
-            options.postal_code = options.postal_code.decode("utf_8")
+        if options.zip_code:
+            options.zip_code = options.zip_code.decode("utf_8")
         if options.city:
             options.city = options.city.decode("utf_8").title()
         if options.county:
@@ -650,7 +650,7 @@ class AddDentalOfficeCommand(BaseCommand, DentalOfficeParser):
                            street = options.street,
                            building = options.building,
                            city = options.city,
-                           postal_code = options.postal_code,
+                           zip_code = options.zip_code,
                            county = options.county,
                            country = options.country,
                            update_date = options.update_date

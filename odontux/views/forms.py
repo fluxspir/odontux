@@ -21,9 +21,10 @@ from odontux.models import (meta,
                             users,
                             )
 
-address_fields = ["street", "building", "city", "postal_code", "county", 
-                  "country" ]
-phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
+address_fields = ["street", "building", "complement", "city", "zip_code", 
+                    "county", "country" ]
+phone_fields = [ ("phonename", "name"), ("indicatif", "indicatif"), 
+                ("area_code", "area_code"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
 
 def get_title_choice_list():
@@ -100,31 +101,35 @@ class TimeField(Field):
 
 # Generic Forms
 class PhoneForm(Form):
-    phonename = TextField('phonename', validators=[validators.Optional()])
-    phonenum = TextField('phonenum', [validators.Optional()])
+    phonename = TextField(_('phonename'), validators=[validators.Optional()])
+    phoneindicatif = TextField(_('country\' indicatif'),
+                                [validators.Optional()])
+    phoneareacode = TextField(_('area_code'), [validators.Optional()])
+    phonenum = TextField(_('phonenum'), [validators.Optional()])
 
 class AddressForm(Form):
     address_id = TextField('address_id')
-    street = TextField('street', validators=[validators.Optional(),
+    street = TextField(_('street'), validators=[validators.Optional(),
                                  validators.Length(max=50, message=_("""Number
                                  and street must be less than 50 characters 
                                  please"""))])
-    building = TextField('building', validators=[validators.Optional(), 
+    complement = TextField(_('complement'), [validators.Optional()])
+    building = TextField(_('building'), validators=[validators.Optional(), 
                                      validators.Length(max=50)])
-    city = TextField('city', validators=[validators.Optional(),
+    city = TextField(_('city'), validators=[validators.Optional(),
                              validators.Length(max=25,
                              message=_("City's name"))], 
                              filters=[title_field])
-    postal_code = TextField('postal_code')
-    county = TextField('county', validators=[validators.Optional(), 
+    zip_code = TextField(_('zip_code'))
+    county = TextField(_('county'), validators=[validators.Optional(), 
                                   validators.Length(max=15)], 
                                  filters=[title_field])
-    country = TextField('country', validators=[validators.Optional(),
+    country = TextField(_('country'), validators=[validators.Optional(),
                                    validators.Length(max=15)],
                                    filters=[title_field])
 
 class MailForm(Form):
-    email = TextField('email', validators=[validators.Optional(),
+    email = TextField(_('email'), validators=[validators.Optional(),
                                       validators.Email()],
                                       filters=[lower_field])
 

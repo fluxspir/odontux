@@ -14,7 +14,7 @@
   {{ render_simple_field(address_form.street) }}
   {{ render_simple_field(address_form.building) }}
   {{ render_simple_field(address_form.city) }}
-  {{ render_simple_field(address_form.postal_code) }}
+  {{ render_simple_field(address_form.zip_code) }}
   {{ render_simple_field(address_form.county) }}
   {{ render_simple_field(address_form.country) }}
 {% endmacro %}
@@ -68,7 +68,7 @@
         <th>street</th>
         <th>building</th>
         <th>city</th>
-        <th>postal_code</th>
+        <th>zip_code</th>
         <th>county</th>
         <th>country</th>
         <th></th>
@@ -80,7 +80,7 @@
           {{ render_table_field(address_form.street, value=address.street) }}
           {{ render_table_field(address_form.building, value=address.building) }}
           {{ render_table_field(address_form.city, value=address.city) }}
-          {{ render_table_field(address_form.postal_code, value=address.postal_code) }}
+          {{ render_table_field(address_form.zip_code, value=address.zip_code) }}
           {{ render_table_field(address_form.county, value=address.county) }}
           {{ render_table_field(address_form.country, value=address.country) }}
           <td><input type=submit value="Update" /></td>
@@ -97,7 +97,7 @@
           {{ render_table_field(address_form.street) }}
           {{ render_table_field(address_form.building) }}
           {{ render_table_field(address_form.city) }}
-          {{ render_table_field(address_form.postal_code) }}
+          {{ render_table_field(address_form.zip_code) }}
           {{ render_table_field(address_form.county) }}
           {{ render_table_field(address_form.country) }}
           <td><input type=submit value="Add new address" /></td>
