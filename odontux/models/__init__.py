@@ -30,8 +30,8 @@ from teeth import Tooth, Event, ToothEvent, CrownEvent, RootEvent
 from act import Specialty, ActType, AppointmentActReference
 from cotation import NgapKeyFr, CmuKeyFr, MajorationFr, CotationFr
 from compta import PaymentType, Payment
-from goods import (GoodProvider, GoodGeneral, MaterialGeneral,
-                    Good, Equipment, Instrument, Material, KitType, Kit)
+from assets import (AssetProvider, AssetCategory, MaterialCategory,
+                    Asset, Device, Material, KitType, Kit)
 from traceability import (SterilizationCycleType, SterilizationCycleMode,
                             SterilizationCycle, 
                             SimplifiedTraceability, CompleteTraceability)

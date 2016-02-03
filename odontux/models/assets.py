@@ -6,8 +6,8 @@
 #
 
 from meta import Base
-from tables import (good_provider_address_table, good_provider_phone_table, 
-                    good_provider_mail_table, kit_good_table)
+from tables import (asset_provider_address_table, asset_provider_phone_table, 
+                    asset_provider_mail_table, kit_asset_table)
 import users
 import sqlalchemy
 import datetime
@@ -19,29 +19,28 @@ from sqlalchemy import func
 from sqlalchemy.orm import backref, relationship
 
 """
-A "Good" is an entity.
-A "Good" may be an "Equipment", an "Instrument", or some "Material/consumible".
-An "Equipment" is a machine or something fix, that can't be move or replace 
-easily.
-An Instrument is a tool that is currently use, generaly many times with a
+An "Asset" is an entity/item...
+An "Asset" may be a "Device" or some "Material/consumible".
+A "Device" is an appliance or something fix, that can't be move or replace 
+easily or an instrument that is currently use, generaly many times with a
 process of decontamination/sterilization between uses.
 A Material is a special entity that is divisible. 
 
-"Good" has "GoodGeneral" datas that remains the same. For example, the "brand 
-name", the "commercial name", the "barcode" of the product will stay the same 
-between every good we buy.
-Good has variable datas, for exemple the day we bought this special "Good", the
-"price" we paid that special day for it...
+"Asset" has "AssetCategory" datas that remains the same. For example, 
+the "brand name", the "commercial name", the "barcode" of the product will stay
+the same between every good we buy.
+Asset has variable datas, for exemple the day we bought this special "Asset",
+the "price" we paid that special day for it...
 
 "Material" is a type of good that owns general data. We use for that data a 
-subclass of "GoodGeneral" : the "MaterialGeneral".
+subclass of "AssetCategory" : the "MaterialCategory".
 
-"Kit" is a groupment of, generally, "Instrument". But a "Kit" may contain any 
-type of good.
+"Kit" is a groupment of, generally, "Device". But a "Kit" may contain any 
+type of Asset.
 
 """
 
-class GoodProvider(Base):
+class AssetProvider(Base):
     __tablename__ = "good_provider"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
@@ -52,7 +51,7 @@ class GoodProvider(Base):
     mails = relationship("Mail", secondary=good_provider_mail_table,
                             backref="provider")
 
-class GoodGeneral(Base):
+class AssetCategory(Base):
     """ 
         * odontux_code : pourrait = id ; ou être plus explicite ; à voir.
         * brand : The manufacturer of the product
@@ -62,9 +61,9 @@ class GoodGeneral(Base):
         * material_type : Famille du bien ; permet des recherches plus ciblées
                     
     """
-    __tablename__ = "good_general"
+    __tablename__ = "asset_category"
     id = Column(Integer, primary_key=True)
-    odontux_code = Column(String, nullable=False, unique=True) # ForeignKey=GoodName.id ???
+    odontux_code = Column(String, nullable=False, unique=True)
     brand = Column(String, default="")
     commercial_name = Column(String, default="")
     description = Column(String, default="")
@@ -73,13 +72,13 @@ class GoodGeneral(Base):
     type = Column(String)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'good_general',
+        'polymorphic_identity': 'asset_category',
         'polymorphic_on': type
     }
 
-class MaterialGeneral(GoodGeneral):
+class MaterialCategory(AssetCategory):
     """
-        General's data about Goods whose "type" is Material.
+        Generals' datas about Asset whose "type" is Material.
 
         * material_type : utilisation's family to find the material more easily
         * unity of the quantity : 
@@ -93,8 +92,8 @@ class MaterialGeneral(GoodGeneral):
             Other value : Items *in activity* enter in the calcul.
 
     """
-    __tablename__ = "material_general"
-    id = Column(Integer, ForeignKey(GoodGeneral.id), primary_key=True)
+    __tablename__ = "material_category"
+    id = Column(Integer, ForeignKey(AssetCategory.id), primary_key=True)
     material_type = Column(String, default="")
     order_threshold = Column(Numeric, default=-1)
     unity = Column(Integer, default=0)
@@ -102,24 +101,24 @@ class MaterialGeneral(GoodGeneral):
     automatic_decrease = Column(Integer, default=1)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'material_general'
+        'polymorphic_identity': 'material_category'
     }
 
-class Good(Base):
+class Asset(Base):
     """
-        * material_provider_id : from whom it was bought
+        * provider_id : from whom it was bought
         * acquisition_date
         * acquisiton_price
         * product_new : true if the product is new
         * user : which user is using this good
         * office : to which dental office is related the good.
     """
-    __tablename__ = "good"
+    __tablename__ = "asset"
     id = Column(Integer, primary_key=True)
-    provider_id = Column(Integer, ForeignKey(GoodProvider.id), nullable=False)
-    good_general_id = Column(Integer, ForeignKey(GoodGeneral.id), 
+    provider_id = Column(Integer, ForeignKey(AssetProvider.id), nullable=False)
+    good_general_id = Column(Integer, ForeignKey(AssetCategory.id), 
                                                                 nullable=False)
-    good_general = relationship('GoodGeneral')
+    asset_category = relationship('AssetCategory')
     acquisition_date = Column(DateTime, default=func.now())
     acquisiton_price = Column(Numeric, default=0)
     serial_number = Column(String, default="")
@@ -129,32 +128,23 @@ class Good(Base):
     type = Column(String(20))
 
     __mapper_args__ = {
-        'polymorphic_identity': 'good',
+        'polymorphic_identity': 'asset',
         'polymorphic_on': type
     }
 
-class Equipment(Good):
+class Device(Asset):
     """
         * lifetime expected ; 0 if forever
     """
-    __tablename__ = "equipment"
-    id = Column(Integer, ForeignKey(Good.id), primary_key=True)
+    __tablename__ = "device"
+    id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
     lifetime_expected = Column(Interval, default=0)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'equipment',
+        'polymorphic_identity': 'device',
     }
 
-class Instrument(Good):
-    """ """
-    __tablename__ = "instrument"
-    id = Column(Integer, ForeignKey(Good.id), primary_key=True)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'instrument',
-    }
-
-class Material(Good):
+class Material(Asset):
     """
         expiration_alert : default to two weeks
         end_use_reason : 
@@ -165,7 +155,7 @@ class Material(Good):
             4 : Lost
     """
     __tablename__ = "material"
-    id = Column(Integer, ForeignKey(Good.id), primary_key=True)
+    id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
     used_in_traceability_of = Column(String)
     actual_quantity = Column(Numeric, default=1)
     expiration_date = Column(Date)
@@ -192,7 +182,7 @@ class Kit(Base):
     __tablename__ = "kit"
     id = Column(Integer, primary_key=True)
     kit_type_id = Column(Integer, ForeignKey(KitType.id), nullable=False)
-    goods = relationship("Good", secondary=kit_good_table,
+    assets = relationship("Asset", secondary=kit_asset_table,
                                         backref="kits")
     creation_date = Column(Date, nullable=False)
 

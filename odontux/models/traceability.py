@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-from tables import traceability_good_table, traceability_kit_table
+from tables import traceability_asset_table, traceability_kit_table
 import users, goods
 import sqlalchemy
 import datetime
@@ -53,7 +53,7 @@ class SterilizationCycle(Base):
     timestamp = Column(DateTime, default=func.now())
     operator = Column(Integer, ForeignKey(users.OdontuxUser.id),
                                                     nullable=False)
-    sterilizator_id = Column(Integer, ForeignKey(goods.Equipment.id),
+    sterilizator_id = Column(Integer, ForeignKey(assets.Device.id),
                                                     nullable=False)
     cycle_type_id = Column(Integer, ForeignKey(SterilizationCycleType.id), 
                                                     nullable=False)
@@ -92,12 +92,13 @@ class CompleteTraceability(SterilizationCycle):
     """
     __tablename__ = "complete_traceability"
     id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
-    goods = relationship('Good', secondary=traceability_good_table,
+    assets = relationship('Asset', secondary=traceability_asset_table,
                                                     backref="traceabilities")
     kits = relationship('Kit', secondary=traceability_kit_table,
                                                     backref="traceabilities")
 
     def number_of_items(self):
+        # return func.sum(self.assets + self.kits)
         pass
 
     __mapper_args__ = {

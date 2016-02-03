@@ -78,33 +78,33 @@ Column('medecine_doctor_id', Integer, ForeignKey('medecine_doctor.id')),
 Column('phone_id', Integer, ForeignKey('phone.id'))
 )
 
-# stock.py / administration.py
-good_provider_address_table = Table("goodprovider_address", Base.metadata,
-Column("good_provider_id", Integer, ForeignKey("good_provider.id")),
+# assets.py / administration.py
+asset_provider_address_table = Table("assetprovider_address", Base.metadata,
+Column("asset_provider_id", Integer, ForeignKey("asset_provider.id")),
 Column("address_id", Integer, ForeignKey("address.id"))
 )
 
-good_provider_phone_table = Table("good_provider_phone", Base.metadata,
-Column("good_provider_id", Integer, ForeignKey("good_provider.id")),
+asset_provider_phone_table = Table("asset_provider_phone", Base.metadata,
+Column("asset_provider_id", Integer, ForeignKey("asset_provider.id")),
 Column("phone_id", Integer, ForeignKey("phone.id"))
 )
 
-good_provider_mail_table = Table("good_provider_mail", Base.metadata,
-Column("good_provider_id", Integer, ForeignKey("good_provider.id")),
+asset_provider_mail_table = Table("asset_provider_mail", Base.metadata,
+Column("asset_provider_id", Integer, ForeignKey("asset_provider.id")),
 Column("mail_id", Integer, ForeignKey("mail.id"))
 )
 
-# goods.py
-kit_good_table = Table("kit_good", Base.metadata,
+# assets.py
+kit_asset_table = Table("kit_asset", Base.metadata,
 Column("kit_id", Integer, ForeignKey("kit.id")),
-Column("good_id", Integer, ForeignKey("good.id"))
+Column("asset_id", Integer, ForeignKey("asset.id"))
 )
 
-# traceability.py / goods.py
-traceability_good_table = Table("traceability_good", Base.metadata,
+# traceability.py / assets.py
+traceability_asset_table = Table("traceability_asset", Base.metadata,
 Column("id", Integer, primary_key=True),
 Column("traceability_id", Integer, ForeignKey("complete_traceability.id")),
-Column("good_id", Integer, ForeignKey("good.id")),
+Column("asset_id", Integer, ForeignKey("asset.id")),
 Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("validity", Interval, nullable=False)
 )
@@ -117,7 +117,7 @@ Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("validity", Interval, nullable=False)
 )
 
-# goods.py / appointment.py
+# assets.py / appointment.py
 material_appointment_table = Table("material_appointment", Base.metadata,
 Column('id', Integer, primary_key=True),
 Column('material_id', Integer, ForeignKey('material.id')),
