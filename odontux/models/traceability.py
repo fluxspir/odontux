@@ -7,7 +7,7 @@
 
 from meta import Base
 from tables import traceability_asset_table, traceability_kit_table
-import users, goods
+import users, assets
 import sqlalchemy
 import datetime
 
