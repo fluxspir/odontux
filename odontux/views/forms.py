@@ -23,8 +23,8 @@ from odontux.models import (meta,
 
 address_fields = ["street", "building", "complement", "city", "zip_code", 
                     "county", "country" ]
-phone_fields = [ ("phonename", "name"), ("indicatif", "indicatif"), 
-                ("area_code", "area_code"), ("phonenum", "number") ]
+phone_fields = [ ("phonename", "name"), ("phoneindicatif", "indicatif"), 
+                ("phoneareacode", "area_code"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
 
 def get_title_choice_list():
