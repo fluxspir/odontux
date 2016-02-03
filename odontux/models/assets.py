@@ -41,14 +41,14 @@ type of Asset.
 """
 
 class AssetProvider(Base):
-    __tablename__ = "good_provider"
+    __tablename__ = "asset_provider"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    addresses = relationship("Address", secondary=good_provider_address_table,
+    addresses = relationship("Address", secondary=asset_provider_address_table,
                             backref="provider")
-    phones = relationship("Phone", secondary=good_provider_phone_table,
+    phones = relationship("Phone", secondary=asset_provider_phone_table,
                             backref="provider")
-    mails = relationship("Mail", secondary=good_provider_mail_table,
+    mails = relationship("Mail", secondary=asset_provider_mail_table,
                             backref="provider")
 
 class AssetCategory(Base):
