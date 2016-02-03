@@ -1,0 +1,11 @@
+{% extends "header.html" %}
+{% block main %}
+<a href="{{ url_for('list_providers') }}">List Providers</a>
+<br />
+<a href="{{ url_for('list_assets', assets_type='all') }}">List all Assets</a>
+<br />
+<a href="{{ url_for('list_assets', assets_type='device') }}">List Devices</a>
+<br />
+<a href="{{ url_for('list_assets', assets_type='material') }}">List Materials</a>
+
+{% endblock %}

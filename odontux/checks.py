@@ -21,6 +21,7 @@ from odontux.models import (
                             teeth,
                             md,
                             users,
+                            assets
                            )
 
 def in_patient_file():

@@ -63,3 +63,6 @@ from patient import (
 from teeth import (
                     list_teeth,
                   )
+from assets import (
+                    my_assets, add_provider, list_providers, list_assets
+                    )

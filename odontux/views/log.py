@@ -50,6 +50,7 @@ def login():
                     session['ROLE_ASSISTANT'] = constants.ROLE_ASSISTANT
                     session['ROLE_SECRETARY'] = constants.ROLE_SECRETARY
                     session['ROLE_ADMIN'] = constants.ROLE_ADMIN
+                    session['ROLE_PATIENT'] = constants.ROLE_PATIENT
                     session['avatar_id'] = user.avatar_id
 
                     if request.form['password'] == "please_change_password":

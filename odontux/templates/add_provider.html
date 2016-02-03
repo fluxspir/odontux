@@ -1,0 +1,27 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+Add a new assets' provider
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="/provider/add/">
+  <dl>
+    {{ render_field(name_form.name, autofocus="autofocus") }}
+      {{ render_field(phone_form.phonename) }}
+      {{ render_field(phone_form.phoneindicatif) }}
+      {{ render_field(phone_form.phoneareacode) }}
+      {{ render_field(phone_form.phonenum) }}
+      {{ render_field(mail_form.email) }}
+      {{ render_field(address_form.street) }}
+      {{ render_field(address_form.building) }}
+      {{ render_field(address_form.complement) }}
+      {{ render_field(address_form.city) }}
+      {{ render_field(address_form.zip_code) }}
+      {{ render_field(address_form.county) }}
+      {{ render_field(address_form.country) }}
+  </dl>
+  <p><input type="submit" value="Add">
+</form>
+{% endblock %}
+
+<!---->
