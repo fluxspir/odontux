@@ -6,7 +6,7 @@
   <div id="searchresult">
   {% block searchresult %}
     {% for provider in providers %}
-      {{ provider.name }} <a href={{ url_for('update_provider', provider_id=provider.id, ) }}>Update</a><br />
+      {{ provider.name }} <a href={{ url_for('update_provider', body_id=provider.id, form_to_display='general_form') }}>Update</a><br />
     {% endfor %}
   {% endblock %}
   </div>

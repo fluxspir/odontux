@@ -19,6 +19,7 @@ from odontux.models import (meta,
                             administration,
                             md,
                             users,
+                            assets
                             )
 
 address_fields = ["street", "building", "complement", "city", "zip_code", 
@@ -156,6 +157,9 @@ def _check_body_perm(body, body_type):
     elif body_type == 'patient':
         if session['role'] == constants.ROLE_ADMIN:
             return False
+    elif body_type == 'provider':
+        if session['role'] == constants.ROLE_ADMIN:
+            return False
     else:
         raise Exception(_("Unknown body type"))
         return False
@@ -179,6 +183,9 @@ def _get_body(body_id, body_type):
     elif body_type == "dental_office":
         body = meta.session.query(users.DentalOffice).filter\
             (users.DentalOffice.id == body_id).one()
+    elif body_type == "provider":
+        body = meta.session.query(assets.AssetProvider).filter(
+            assets.AssetProvider.id == body_id).one()
     else:
         raise Exception(_("please specify known body_type"))
     return body

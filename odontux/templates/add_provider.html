@@ -3,10 +3,11 @@
 Add a new assets' provider
 {% endblock %}
 {% block main %}
-{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_field, render_hidden_field %}
 <form method="post" action="/provider/add/">
   <dl>
-    {{ render_field(name_form.name, autofocus="autofocus") }}
+    {{ render_hidden_field(general_form.active) }}
+    {{ render_field(general_form.name, autofocus="autofocus") }}
       {{ render_field(phone_form.phonename) }}
       {{ render_field(phone_form.phoneindicatif) }}
       {{ render_field(phone_form.phoneareacode) }}

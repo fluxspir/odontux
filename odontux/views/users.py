@@ -48,7 +48,7 @@ class OdontuxUserGeneralInfoAdminForm(Form):
                                     validators.Length(min=1, max=20)],
                                      filters=[forms.lower_field])
     role = SelectField(_('role'), coerce=int)
-    status = BooleanField(_('status'))
+    active = BooleanField(_('active'))
     comments = TextAreaField(_('comments'))
     modified_by = IntegerField(_('modified_by'), [validators.Optional()])
     creation_date = forms.DateField(_("creation_date"))
@@ -88,7 +88,7 @@ def get_gen_info_field_list():
              "correspondence_name", "sex", "dob", "avatar_id" ]
 
 def get_gen_info_admin_field_list():
-    return [ "username", "role" , "status", "comments", "modified_by", 
+    return [ "username", "role" , "active", "comments", "modified_by", 
              "creation_date" ]
 
 def get_dentist_specific_field_list():

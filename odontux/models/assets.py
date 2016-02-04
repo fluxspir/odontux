@@ -41,9 +41,13 @@ type of Asset.
 """
 
 class AssetProvider(Base):
+    """ 
+        status : if True, we work we
+    """
     __tablename__ = "asset_provider"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    active = Column(Boolean, default=True)
     addresses = relationship("Address", secondary=asset_provider_address_table,
                             backref="provider")
     phones = relationship("Phone", secondary=asset_provider_phone_table,
