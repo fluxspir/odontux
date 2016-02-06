@@ -40,6 +40,13 @@ type of Asset.
 
 """
 
+#class BarcodeType(Base):
+#    __tablename__ = "barcode_type"
+#    id = Column(Integer, primary_key=True)
+#    dimension = Column(Integer(1), nullable=False)
+#    name = Column(String(15), nullable=False)
+#
+
 class AssetProvider(Base):
     """ 
         status : if True, we work we
@@ -67,17 +74,24 @@ class AssetCategory(Base):
     """
     __tablename__ = "asset_category"
     id = Column(Integer, primary_key=True)
-    odontux_code = Column(String, nullable=False, unique=True)
-    brand = Column(String, default="")
-    commercial_name = Column(String, default="")
+    barcode = Column(String, default="", unique=True)
+    brand = Column(String, default="", nullable=False)
+    commercial_name = Column(String, default="", nullable=False)
     description = Column(String, default="")
-    barcode = Column(String, default="")
-
     type = Column(String)
 
     __mapper_args__ = {
         'polymorphic_identity': 'asset_category',
         'polymorphic_on': type
+    }
+
+class DeviceCategory(AssetCategory):
+    __tablename__ = "device_category"
+    id = Column(Integer, ForeignKey(AssetCategory.id), primary_key=True)
+    sterilizable = Column(Boolean, nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'device_category'
     }
 
 class MaterialCategory(AssetCategory):
@@ -102,7 +116,7 @@ class MaterialCategory(AssetCategory):
     order_threshold = Column(Numeric, default=-1)
     unity = Column(Integer, default=0)
     initial_quantity = Column(Numeric, default=1)
-    automatic_decrease = Column(Integer, default=1)
+    automatic_decrease = Column(Numeric, default=1)
 
     __mapper_args__ = {
         'polymorphic_identity': 'material_category'
@@ -113,7 +127,8 @@ class Asset(Base):
         * provider_id : from whom it was bought
         * acquisition_date
         * acquisiton_price
-        * product_new : true if the product is new
+        * serial_number : odontux unique identifiant
+        * new : true if the product is new
         * user : which user is using this asset 
         * office : to which dental office is related the asset
     """
@@ -125,7 +140,6 @@ class Asset(Base):
     asset_category = relationship('AssetCategory')
     acquisition_date = Column(DateTime, default=func.now())
     acquisiton_price = Column(Numeric, default=0)
-    serial_number = Column(String, default="")
     new = Column(Boolean, default=True)
     user = Column(Integer, ForeignKey(users.OdontuxUser.id))
     office = Column(Integer, ForeignKey(users.DentalOffice.id))

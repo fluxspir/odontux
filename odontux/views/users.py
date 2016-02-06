@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Franck Labadille
-# 2012/11/05
-# v0.5
+# 2016/02/06
+# v0.6
 # Licence BSD
 #
 
