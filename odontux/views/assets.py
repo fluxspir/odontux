@@ -6,9 +6,10 @@
 #
 
 import pdb
+import datetime
 import os
 
-from flask import session, render_template, request, redirect, url_for
+from flask import session, render_template, request, redirect, url_for, jsonify
 import sqlalchemy
 from sqlalchemy import and_, or_
 from gettext import gettext as _
@@ -17,11 +18,32 @@ from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
                     validators)
 
 from odontux import constants, checks
-from odontux.models import meta, assets, administration
+from odontux.models import meta, assets, administration, users
 from odontux.odonweb import app
 from odontux.views import forms
 from odontux.views.forms import DateField
 from odontux.views.log import index
+
+def last_user_asset():
+    try:
+        return meta.session.query(assets.Asset).order_by(
+                                    assets.Asset.id.desc()).first().user_id
+    except AttributeError:
+        return 1
+
+def last_office_asset():
+    try:
+        return meta.session.query(assets.Asset).order_by(
+                                    assets.Asset.id.desc()).first().office_id
+    except AttributeError:
+        return 1
+
+def last_asset_provider():
+    try:
+        return meta.session.query(assets.Asset).order_by(
+                                    assets.Asset.id.desc()).first().provider_id
+    except AttributeError:
+        return 1
 
 class AssetProviderForm(Form):
     asset_provider_id = HiddenField(_('id'))
@@ -40,7 +62,6 @@ class AssetCategoryForm(Form):
     commercial_name = TextField(_('Commercial name'), [validators.required(
                                     message=_('Commercial name required'))])
     description = TextAreaField(_('Description'), [validators.Optional()])
-    #type = SelectField(_('Type'))
     type = SelectField(_('Type'), description='ChangementType()')
 
 class DeviceCategoryForm(Form):
@@ -61,31 +82,119 @@ class MaterialCategoryForm(Form):
 
 class AssetForm(Form):
     asset_id  = HiddenField(_('id'))
-    provider_id = SelectField(_('Provider'), coerce=int)
-    asset_category_id = SelectField(_('Asset Category'), coerce=int)
+    provider_id = SelectField(_('Provider'), coerce=int,
+                                                default=last_asset_provider())
+    #asset_category_id = SelectField(_('Asset Category'), coerce=int)
     acquisition_date = DateField(_('Acquisition Date'))
+    acquisition_price = DecimalField(_('Acquisition Price'))
     new = BooleanField(_('Asset new'))
-    user = SelectField(_("Dentist owner"), coerce=int)
-    office = SelectField(_("Office_where it is"), coerce=int)
-    type = SelectField(_('Type'), description='ChangementType()')
+    user_id = SelectField(_("Dentist owner"), coerce=int, 
+                                                default=last_user_asset())
+    office_id = SelectField(_("Office_where it is"), coerce=int,
+                                                default=last_office_asset())
+    #type = SelectField(_('Type'), description='ChangementType()')
+    quantity = IntegerField(_('Quantity'), [validators.Optional()], default=1)
 
 class DeviceForm(Form):
     device_id = HiddenField(_('id'))
-    lifetime_expected = DecimalField(_('Lifetime in years'), 
+    lifetime_expected = IntegerField(_('Lifetime expected in years'), 
                                                     [validators.Optional()])
 
 class MaterialForm(Form):
     material_id = HiddenField(_('id'))
-    used_in_traceabily_of = HiddenField(_('Use in traceability of'))
+    used_in_traceabily_of = HiddenField(_('Used in traceability of'))
     actual_quantity = DecimalField(_('Actual Quantity'),
                                                     [validators.Optional()])
     expiration_date = DateField(_('Expiration Date'),
                                                     [validators.Optional()])
     expiration_alert = DecimalField(_('Expiration Alert'),
                                                     [validators.Optional()])
+    service = BooleanField(_('In service since'), description='InService()')
     start_of_use = DateField(_('Start of Use'), [validators.Optional()])
     end_of_use = DateField(_('End of Use'), [validators.Optional()])
     end_use_reason = SelectField(_('Reason to end of use'), coerce=int)
+    batch_number = TextField(_('Batch number'), [validators.Optional()])
+
+def get_asset_provider_field_list():
+    return [ "name", "active" ]
+
+def get_asset_type_choices():
+    return [ ( "device", _("Device") ), 
+            ( "material", _("Material") ) ]
+
+def get_material_cat_unity_choices():
+    return [ ( 0, _("pieces/items") ), ( 1, _("volume in mL") ), 
+                (2, _("weight in gr") ) ]
+
+def get_asset_cat_field_list():
+    return [ "barcode", "brand", "commercial_name",
+                "description", "type" ]
+
+def get_device_cat_field_list():
+    return [ "sterilizable" ]
+
+def get_material_cat_field_list():
+    return [ "material_type", "order_threshold", "unity", 
+            "initial_quantity", "automatic_decrease" ]
+
+def get_asset_provider_choices(active=True):    
+    query = meta.session.query(assets.AssetProvider).filter(
+                                assets.AssetProvider.active == active).all()
+    return [( f.id, f.name) for f in query ]
+
+def get_asset_category_choices(barcode="", brand="", commercial_name="", 
+                                    description=""):
+    query = meta.session.query(assets.AssetCategory)
+    if barcode:
+        # we want to return a list
+        query = query.filter(assets.AssetCategory.barcode == barcode).one()
+        return [ ( query.id, (query.brand, query.commercial_name)) ]
+    if brand:
+        brand = '%{}%'.format(brand)
+        query = query.filter(assets.AssetCategory.brand.ilike(brand))
+    if commercial_name:
+        commercial_name = '%{}%'.format(commercial_name)
+        query = query.filter(assets.AssetCategory.commercial_name.ilike(
+                                                            commercial_name))
+    if description:
+        description = '%{}%'.format(description)
+        query = query.filter(assets.AssetCategory.description.ilike(
+                                                            description))
+    query = query.all()
+    return [ ( q.id, (q.brand, q.commercial_name) ) for q in query ]
+
+def get_user_choices(active=True):
+    query = meta.session.query(users.OdontuxUser).filter(
+                    users.OdontuxUser.role == constants.ROLE_DENTIST).filter(
+                    users.OdontuxUser.active == active).all()
+    user_list = [ (q.id, q.username) for q in query ]
+    user_list.append( (0, "") )
+    return user_list
+
+def get_office_choices(active=True):
+    query = meta.session.query(users.DentalOffice).filter(
+                    users.DentalOffice.active == active).all()
+    office_list = [ (q.id, q.office_name) for q in query ]
+    office_list.append( (0, "") )
+    return office_list
+
+def verify_asset_cat_already_in_db(new_asset):
+    """ test if barcode in db ; 
+        if not, test if both brand and commercial_name are in it.
+    """
+    asset_cat_in_db = meta.session.query(assets.AssetCategory).filter(
+                assets.AssetCategory.barcode == new_asset.barcode.data
+                                                        ).one_or_none()
+    if not asset_cat_in_db:
+        asset_cat_in_db = meta.session.query(assets.AssetCategory
+                ).filter(and_(
+                assets.AssetCategory.brand == new_asset.brand.data,
+                assets.AssetCategory.commercial_name == 
+                new_asset.brand.data
+                )).one_or_none()
+    return asset_cat_in_db
+
+
 
 
 @app.route('/provider/add/', methods=['GET', 'POST'])
@@ -104,7 +213,6 @@ def add_provider():
     mail_form = forms.MailForm(request.form)
     general_form.active.data = True  # we want that a new provider that we 
                                         # add to be active by default.
-
     if (request.method == 'POST' 
         and general_form.validate()
         and address_form.validate()
@@ -116,7 +224,7 @@ def add_provider():
         if provider:
             return redirect(url_for('update_provider'))
         values = {f: getattr(general_form, f).data
-                    for f in get_general_form_field_list()}
+                    for f in get_asset_provider_field_list()}
         new_provider = assets.AssetProvider(**values)
         meta.session.add(new_provider)
         meta.session.commit()
@@ -274,106 +382,152 @@ def my_assets():
     return render_template('my_assets.html')
 
 @app.route('/list_assets?assets_type=<assets_type>/')
-def list_assets(assets_type):
+def list_assets(assets_type="all"):
     checks.quit_patient_file()
     checks.quit_appointment()
 
-    assets_list = meta.session.query(assets.Asset).all()
+    assets_list = meta.session.query(assets.Asset)
+    if assets_type == "device":
+        assets_list = assets_list.filter(assets.Asset.type == "device").all()
+    elif assets_type == "material":
+        assets_list = assets_list.filter(assets.Asset.type == "material").all()
+    else:
+        assets_list = assets_list.all()
     return render_template('list_assets.html', assets_list=assets_list)
 
-@app.route('/list_asset_category?assets_type=<assets_type>/')
-def list_asset_category(assets_type):
-    checks.quit_patient_file()
-    checks.quit_appointment()
+@app.route('/add/asset/', methods=['POST', 'GET'])
+def add_asset():
+    def _add_device_category(asset_cat_form, device_cat_form):
+        values = {f: getattr(asset_cat_form, f).data
+                for f in get_asset_cat_field_list()}
+        for f in get_device_cat_field_list():
+            values[f] = getattr(device_cat_form, f).data
+        new_device_cat = assets.DeviceCategory(**values)
+        meta.session.add(new_device_cat)
+        meta.session.commit()
+        return new_device_cat
+
+    def _add_material_category(asset_cat_form, material_cat_form):
+        values = {f: getattr(asset_cat_form, f).data
+                for f in get_asset_cat_field_list()}
+        for f in get_material_cat_field_list():
+            values[f] = getattr(material_cat_form, f).data
+        new_material_cat = assets.MaterialCategory(**values)
+        meta.session.add(new_material_cat)
+        meta.session.commit()
+        return new_material_cat
+
+    def _add_device(asset_form, device_form):
+        values = {f: getattr(asset_form, f).data
+                for f in add_asset_field_list }
+        if asset_form.user_id.data:
+            values['user_id'] = asset_form.user_id.data
+        if asset_form.office_id.data:
+            values['office_id'] = asset_form.office_id.data
+        values['asset_category_id'] = asset_cat.id
+            
+        values['lifetime_expected'] = datetime.timedelta(
+                                    365 * device_form.lifetime_expected.data)
+        new_device = assets.Device(**values)
+        meta.session.add(new_device)
+        meta.session.commit()
+
+
+    def _add_material(asset_form, material_form):
+        values = {f: getattr(asset_form, f).data
+                for f in add_asset_field_list }
+        if asset_form.user_id.data:
+            values['user_id'] = asset_form.user_id.data
+        if asset_form.office_id.data:
+            values['office_id'] = asset_form.office_id.data
+        values['asset_category_id'] = asset_cat.id
+        for f in add_material_field_list:
+            values[f] = getattr(material_form, f).data
+        if material_form.service.data:
+            values['start_of_use'] = material_form.start_of.use.data
+        values['actual_quantity'] = asset_cat.initial_quantity
+        new_material = assets.Material(**values)
+        meta.session.add(new_material)
+        meta.session.commit()
+
     
-    if assets_type == "all":
-        asset_categories = meta.session.query(assets.AssetCategory).all()
-    return render_template('list_assets.html', assets_type=assets_type)
-
-@app.route('/add/asset_category/', methods=['POST', 'GET'])
-def add_asset_category():
-
-    def get_asset_category_type_choices():
-        return [ ( "device_category", _("Device") ), 
-                ( "material_category", _("Material") ) ]
-    def get_material_cat_unity_choices():
-        return [ ( 0, _("pieces") ), ( 1, _("volume") ), (2, _("weight") ) ]
-
-    def get_asset_cat_field_list():
-        return [ "barcode", "brand", "commercial_name",
-                    "description", "type" ]
-
-    def get_device_cat_field_list():
-        return [ "sterilizable" ]
-
-    def get_material_cat_field_list():
-        return [ "material_type", "order_threshold", "unity", 
-                "initial_quantity", "automatic_decrease" ]
-
-    def verify_asset_cat_already_in_db(new_asset):
-        asset_cat_in_db = meta.session.query(assets.AssetCategory).filter(
-                    assets.AssetCategory.barcode == new_asset.barcode.data
-                                                            ).one_or_none()
-        if not asset_cat_in_db:
-            asset_cat_in_db = meta.session.query(assets.AssetCategory
-                    ).filter(and_(
-                    assets.AssetCategory.brand == new_asset.brand.data,
-                    assets.AssetCategory.commercial_name == 
-                    new_asset.brand.data
-                    )).one_or_none()
-        return asset_cat_in_db
-
-    def add_device_category(asset_form, device_form):
-        if asset_form.validate() and device_form.validate():
-            values = {f: getattr(asset_form, f).data
-                    for f in get_asset_cat_field_list()}
-            for f in get_device_cat_field_list():
-                values[f] = getattr(device_form, f).data
-            new_asset_cat = assets.DeviceCategory(**values)
-            meta.session.add(new_asset_cat)
-            meta.session.commit()
-            return redirect(url_for('list_asset_category'))
-
-    def add_material_category(asset_form, material_form):
-        if asset_form.validate() and material_form.validate(): 
-            values = {f: getattr(asset_form, f).data
-                    for f in get_asset_cat_field_list()}
-            for f in get_material_cat_field_list():
-                values[f] = getattr(material_form, f).data
-            new_material_cat = assets.MaterialCategory(**values)
-            meta.session.add(new_material_cat)
-            meta.session.commit()
-            return redirect(url_for('list_asset_category'))
-
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
+
     asset_category_form = AssetCategoryForm(request.form)
-    asset_category_form.type.choices = get_asset_category_type_choices()
+    asset_category_form.type.choices = get_asset_type_choices()
     device_category_form = DeviceCategoryForm(request.form)
     material_category_form = MaterialCategoryForm(request.form)
     material_category_form.unity.choices = get_material_cat_unity_choices()
- 
-    asset_cat_in_db = verify_asset_cat_already_in_db(asset_category_form)
-    if asset_cat_in_db:
-        return redirect(url_for('index'))
-        #return redirect(url_for('add_asset', asset_cat_in_db ))
+    asset_form = AssetForm(request.form)
+    asset_form.provider_id.choices = get_asset_provider_choices()
+    if not asset_form.provider_id.choices:
+        return redirect(url_for('add_provider'))
+    asset_form.type.choices = get_asset_type_choices()
+    asset_form.user_id.choices = get_user_choices()
+    asset_form.office_id.choices = get_office_choices()
+    device_form = DeviceForm(request.form)
+    material_form = MaterialForm(request.form)
     
-    if ( request.method == 'POST' 
-                    and asset_category_form.type.data == "device_category"):
-        add_device_category(asset_category_form, device_category_form)
+    # POSTING and adding the data :
+    asset_cat = verify_asset_cat_already_in_db(asset_category_form)
+    if not asset_cat:
+        """ Create a new AssetCategory """
+        if ( request.method == 'POST'
+            and asset_category_form.type.data == "device"
+            and asset_category_form.validate() 
+            and device_category_form.validate() ):
+            asset_cat = _add_device_category(asset_category_form, 
+                                            device_category_form)
 
-    if ( request.method == 'POST' 
-                    and asset_category_form.type.data == "material_category"):
-        add_material_category(asset_category_form, material_category_form)
+        if ( request.method == 'POST'
+            and asset_category_form.type.data == "material"
+            and asset_category_form.validate() 
+            and material_category_form.validate() ):
+            asset_cat = _add_material_category(asset_category_form, 
+                                            material_category_form)
 
-    return render_template('add_asset_category.html',
-                            asset_form=asset_category_form,
-                            device_form=device_category_form,
-                            material_form=material_category_form)
+    add_asset_field_list = [ "provider_id", "acquisition_date", 
+                        "acquisition_price", "new" ]
+
+    add_material_field_list = [ "used_in_traceability", "expiration_date", 
+                                "expiration_alert", "batch_number" ]
+   
+    if ( request.method == 'POST' and asset_form.type.data == "device" 
+        and asset_form.validate() and device_form.validate() ):
+        i = 0
+        while asset_form.quantity.data > i:
+            _add_device(asset_form, device_form)
+            i += 1
+
+    if ( request.method == 'POST' and asset_form.type.data == "material"
+        and asset_form.validate() and material_form.validate() ):
+        i = 0
+        while asset_form.quantity.data > i:
+            _add_material(asset_form, material_form)
+            i += 1
+ 
+    return render_template('add_asset.html',
+                            asset_category_form=asset_category_form,
+                            asset_form=asset_form,
+                            device_category_form=device_category_form,
+                            device_form=device_form,
+                            material_category_form=material_category_form,
+                            material_form=material_form)
 
 
-@app.route('/add/asset/')
-def add_asset():
-    pass
+@app.route('/test_barcode/')
+def test_barcode():
+    barcode = request.args.get('barcode', None)
+    if barcode:
+        asset_category = meta.session.query(assets.AssetCategory).filter(
+                    assets.AssetCategory.barcode == barcode).one_or_none()
+        if asset_category:
+            return jsonify(success=True,
+                            brand=asset_category.brand, 
+                            commercial_name=asset_category.commercial_name)
+    return jsonify(success=False)
+ 
+   

@@ -81,7 +81,7 @@ class AssetCategory(Base):
     type = Column(String)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'asset_category',
+        'polymorphic_identity': 'asset',
         'polymorphic_on': type
     }
 
@@ -91,7 +91,7 @@ class DeviceCategory(AssetCategory):
     sterilizable = Column(Boolean, nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'device_category'
+        'polymorphic_identity': 'device'
     }
 
 class MaterialCategory(AssetCategory):
@@ -119,7 +119,7 @@ class MaterialCategory(AssetCategory):
     automatic_decrease = Column(Numeric, default=1)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'material_category'
+        'polymorphic_identity': 'material'
     }
 
 class Asset(Base):
@@ -138,11 +138,11 @@ class Asset(Base):
     asset_category_id = Column(Integer, ForeignKey(AssetCategory.id), 
                                                                 nullable=False)
     asset_category = relationship('AssetCategory')
-    acquisition_date = Column(DateTime, default=func.now())
-    acquisiton_price = Column(Numeric, default=0)
+    acquisition_date = Column(Date, default=func.current_date())
+    acquisition_price = Column(Numeric, default=0)
     new = Column(Boolean, default=True)
-    user = Column(Integer, ForeignKey(users.OdontuxUser.id))
-    office = Column(Integer, ForeignKey(users.DentalOffice.id))
+    user_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
+    office_id = Column(Integer, ForeignKey(users.DentalOffice.id))
     type = Column(String(20))
 
     __mapper_args__ = {
@@ -181,6 +181,7 @@ class Material(Asset):
     start_of_use = Column(Date, default=None)
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
+    batch_number = Column(String)
 
     __mapper_args__ = {
         'polymorphic_identity': 'material',

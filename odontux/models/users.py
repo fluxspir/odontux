@@ -25,6 +25,7 @@ class DentalOffice(Base):
     office_name = Column(String, default="")
     owner_lastname = Column(String, default="")
     owner_firstname = Column(String, default="")
+    active = Column(Boolean, default=True)
     url = Column(String, default="")
     addresses = relationship("Address", secondary=dental_office_address_table,
                            backref="dental_office")

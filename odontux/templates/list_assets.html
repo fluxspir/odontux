@@ -1,7 +1,7 @@
 {% extends "header.html" %}
 {% block main %}
 {% if session.role != session.ROLE_ADMIN %}
-  <a href="{{ url_for('add_asset_category') }}">Add new asset category</a>
+  <a href="{{ url_for('add_asset') }}">Add new asset category</a>
 {% endif %}
   <div id="searchresult">
   {% block searchresult %}

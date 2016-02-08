@@ -32,6 +32,8 @@ class CreateOdontuxDatabaseTool():
         if not query:
             # create an admin user
             print("creating first user \"admin\"")
+            print("password : please_change_password")
+            print("Would be a great idea to change the admin password")
             admin_user = {
                 "username": "admin",
                 "password": b64encode(scrypt.encrypt(os.urandom(64),
