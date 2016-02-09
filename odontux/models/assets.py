@@ -166,21 +166,22 @@ class Material(Asset):
     """
         expiration_alert : default to two weeks
         end_use_reason : 
-            0 : Natural end of the material
-            1 : Unconvenient
-            2 : Obsolete/Out of date (périmé)
-            3 : Removed from market
-            4 : Lost
+            0 or None : in stock or in use.
+            1 : Natural end of the material
+            2 : Unconvenient
+            3 : Obsolete/Out of date (périmé)
+            4 : Removed from market
+            5 : Lost
     """
     __tablename__ = "material"
     id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
     used_in_traceability_of = Column(String)
     actual_quantity = Column(Numeric, default=1)
     expiration_date = Column(Date)
-    expiration_alert = Column(Interval, default=1209600)
+    expiration_alert = Column(Interval, default=datetime.timedelta(15))
     start_of_use = Column(Date, default=None)
     end_of_use = Column(Date, default=None)
-    end_use_reason = Column(Integer, default=0)
+    end_use_reason = Column(Integer, default=None)
     batch_number = Column(String)
 
     __mapper_args__ = {

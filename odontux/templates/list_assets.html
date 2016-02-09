@@ -3,11 +3,12 @@
 {% if session.role != session.ROLE_ADMIN %}
   <a href="{{ url_for('add_asset') }}">Add new asset category</a>
 {% endif %}
+<br />
   <div id="searchresult">
   {% block searchresult %}
-    {% for asset in assets %}
-        {{ provider.name }} <a href={{ url_for('update_provider', body_id=provider.id, form_to_display='general_form') }}>Update</a><br />
-    {% endfor %}
+    {% for (asset_category, asset) in assets_list %}
+        {{ asset_category.brand }} {{ asset_category.commercial_name }} {{ asset.expiration_date }} <br/>
+        {% endfor %}
   {% endblock %}
   </div>
 

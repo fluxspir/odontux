@@ -20,3 +20,13 @@ function ChangementType() {
   }
 }
 
+function InService() {
+  var service = document.getElementById("service").value;
+  if (service == 0) {
+    document.getElementById("service_start").style.display = "none";
+  } else {
+    document.getElementById("service_start").style.display = "block";
+  };
+};
+
+

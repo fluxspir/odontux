@@ -60,6 +60,7 @@ Add a new asset.
     {{ render_simple_field(asset_form.new) }}
     {{ render_simple_field(asset_form.user_id) }}
     {{ render_simple_field(asset_form.office_id) }}
+    {{ render_simple_field(asset_form.quantity) }}
   </div>
   <div id="device">
     {{ render_simple_field(device_form.lifetime_expected) }}
@@ -68,7 +69,11 @@ Add a new asset.
     {{ render_simple_field(material_form.batch_number) }}
     {{ render_simple_field(material_form.expiration_date) }}
     {{ render_simple_field(material_form.expiration_alert) }}
-    {{ render_simple_field(material_form.service) }}
+    {{ render_field_js_onchange(material_form.service) }}
+    {{ render_hidden_field(material_form.end_use_reason) }}
+    <div id="service_start">
+      {{ render_simple_field(material_form.start_of_use) }}
+    </div>
   </div>
 
   <div id="add_the_asset">
@@ -78,7 +83,9 @@ Add a new asset.
 
 <script type="text/javascript" src="/static/js/find_db.js"></script>
 <script type="text/javascript" src="/static/js/select_field.js"></script>
-<script type="text/javascript" src="/static/js/reset_all_on_load.js"></script>
+{% if clear_form %}
+    <script type="text/javascript" src="/static/js/reset_all_on_load.js"></script>;
+{% endif %}
 {% endblock %}
 
 <!---->

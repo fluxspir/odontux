@@ -9,5 +9,6 @@ window.onload = function() {
   document.getElementById( "asset" ).style.display = "none";
   document.getElementById( "device" ).style.display = "none";
   document.getElementById( "material" ).style.display = "none";
+  document.getElementById( "service_start" ).style.display = "none";
   document.getElementById( "add_the_asset" ).style.display = "none";
 }

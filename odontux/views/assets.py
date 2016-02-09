@@ -15,13 +15,14 @@ from sqlalchemy import and_, or_
 from gettext import gettext as _
 from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
                     SelectField, BooleanField, TextAreaField, DecimalField,
+                    DateField,
                     validators)
 
 from odontux import constants, checks
 from odontux.models import meta, assets, administration, users
 from odontux.odonweb import app
 from odontux.views import forms
-from odontux.views.forms import DateField
+#from odontux.views.forms import DateField
 from odontux.views.log import index
 
 def last_user_asset():
@@ -85,7 +86,8 @@ class AssetForm(Form):
     provider_id = SelectField(_('Provider'), coerce=int,
                                                 default=last_asset_provider())
     #asset_category_id = SelectField(_('Asset Category'), coerce=int)
-    acquisition_date = DateField(_('Acquisition Date'))
+    acquisition_date = DateField(_('Acquisition Date'), format='%Y-%m-%d',
+                                    )
     acquisition_price = DecimalField(_('Acquisition Price'))
     new = BooleanField(_('Asset new'))
     user_id = SelectField(_("Dentist owner"), coerce=int, 
@@ -102,17 +104,22 @@ class DeviceForm(Form):
 
 class MaterialForm(Form):
     material_id = HiddenField(_('id'))
-    used_in_traceabily_of = HiddenField(_('Used in traceability of'))
+    used_in_traceability_of = HiddenField(_('Used in traceability of'))
     actual_quantity = DecimalField(_('Actual Quantity'),
                                                     [validators.Optional()])
-    expiration_date = DateField(_('Expiration Date'),
-                                                    [validators.Optional()])
-    expiration_alert = DecimalField(_('Expiration Alert'),
+    expiration_date = DateField(_('Expiration Date'), format='%Y-%m-%d',
+                                        validators=[validators.Optional()])
+    expiration_alert = IntegerField(_('Expiration Alert'),
                                                     [validators.Optional()])
     service = BooleanField(_('In service since'), description='InService()')
-    start_of_use = DateField(_('Start of Use'), [validators.Optional()])
+    start_of_use = DateField(_('Start of Use'), 
+                                    format='%Y-%m-%d',
+                                    validators=[validators.Optional()])
     end_of_use = DateField(_('End of Use'), [validators.Optional()])
-    end_use_reason = SelectField(_('Reason to end of use'), coerce=int)
+    #TODO
+    # end_use_reason raise a TypeError on adding; validators.Optional() ne
+    # fonctionne pas ici. Que faire ?
+    end_use_reason = SelectField(_('Reason to end of use'), coerce=int ) 
     batch_number = TextField(_('Batch number'), [validators.Optional()])
 
 def get_asset_provider_field_list():
@@ -125,6 +132,11 @@ def get_asset_type_choices():
 def get_material_cat_unity_choices():
     return [ ( 0, _("pieces/items") ), ( 1, _("volume in mL") ), 
                 (2, _("weight in gr") ) ]
+
+def get_material_end_use_reason_choices():
+    return [ (0, _('in stock or in use') ), ( 1, _('Natural end of material')),
+            (2, _('Unconvenient') ), (3, _('Obsolete / Out of date') ), 
+            (4, _('Remove from market') ), (5, _('Lost') ) ]
 
 def get_asset_cat_field_list():
     return [ "barcode", "brand", "commercial_name",
@@ -381,19 +393,25 @@ def my_assets():
 
     return render_template('my_assets.html')
 
-@app.route('/list_assets?assets_type=<assets_type>/')
-def list_assets(assets_type="all"):
+@app.route('/list_assets?asset_type=<asset_type>/')
+def list_assets(asset_type="all"):
     checks.quit_patient_file()
     checks.quit_appointment()
-
-    assets_list = meta.session.query(assets.Asset)
-    if assets_type == "device":
-        assets_list = assets_list.filter(assets.Asset.type == "device").all()
-    elif assets_type == "material":
-        assets_list = assets_list.filter(assets.Asset.type == "material").all()
+    
+    assets_list = [] 
+    if asset_type == "device":
+        last_assets_list = meta.session.query(assets.Device).limit(10).all()
+    elif asset_type == "material":
+        last_assets_list = meta.session.query(assets.Material).limit(10).all()
     else:
-        assets_list = assets_list.all()
-    return render_template('list_assets.html', assets_list=assets_list)
+        last_assets_list = meta.session.query(assets.Asset).limit(10).all()
+    for asset in last_assets_list:
+        asset_category = meta.session.query(assets.AssetCategory).filter(
+                            assets.AssetCategory.id == asset.asset_category_id
+                            ).one()
+        assets_list.append( (asset_category, asset) )
+    return render_template('list_assets.html', 
+                            assets_list=assets_list)
 
 @app.route('/add/asset/', methods=['POST', 'GET'])
 def add_asset():
@@ -445,6 +463,9 @@ def add_asset():
             values[f] = getattr(material_form, f).data
         if material_form.service.data:
             values['start_of_use'] = material_form.start_of.use.data
+        if material_form.expiration_alert:
+            values['expiration_alert'] = datetime.timedelta(
+                                        material_form.expiration_alert.data)
         values['actual_quantity'] = asset_cat.initial_quantity
         new_material = assets.Material(**values)
         meta.session.add(new_material)
@@ -465,11 +486,11 @@ def add_asset():
     asset_form.provider_id.choices = get_asset_provider_choices()
     if not asset_form.provider_id.choices:
         return redirect(url_for('add_provider'))
-    asset_form.type.choices = get_asset_type_choices()
     asset_form.user_id.choices = get_user_choices()
     asset_form.office_id.choices = get_office_choices()
     device_form = DeviceForm(request.form)
     material_form = MaterialForm(request.form)
+    material_form.end_use_reason.choices = get_material_end_use_reason_choices()
     
     # POSTING and adding the data :
     asset_cat = verify_asset_cat_already_in_db(asset_category_form)
@@ -488,34 +509,42 @@ def add_asset():
             and material_category_form.validate() ):
             asset_cat = _add_material_category(asset_category_form, 
                                             material_category_form)
-
     add_asset_field_list = [ "provider_id", "acquisition_date", 
                         "acquisition_price", "new" ]
 
-    add_material_field_list = [ "used_in_traceability", "expiration_date", 
+    add_material_field_list = [ "used_in_traceability_of", "expiration_date", 
                                 "expiration_alert", "batch_number" ]
    
-    if ( request.method == 'POST' and asset_form.type.data == "device" 
+    if ( request.method == 'POST' 
+        and asset_category_form.type.data == "device" 
         and asset_form.validate() and device_form.validate() ):
         i = 0
         while asset_form.quantity.data > i:
             _add_device(asset_form, device_form)
             i += 1
-
-    if ( request.method == 'POST' and asset_form.type.data == "material"
+        return redirect(url_for('list_assets', asset_type="device"))
+    
+    if ( request.method == 'POST' 
+        and asset_category_form.type.data == "material"
         and asset_form.validate() and material_form.validate() ):
         i = 0
         while asset_form.quantity.data > i:
             _add_material(asset_form, material_form)
             i += 1
- 
+        return redirect(url_for('list_assets', asset_type="material"))
+
+    if request.method == 'POST':
+        clear_form = False
+    else:
+        clear_form = True
     return render_template('add_asset.html',
                             asset_category_form=asset_category_form,
                             asset_form=asset_form,
                             device_category_form=device_category_form,
                             device_form=device_form,
                             material_category_form=material_category_form,
-                            material_form=material_form)
+                            material_form=material_form,
+                            clear_form=clear_form)
 
 
 @app.route('/test_barcode/')
@@ -524,10 +553,35 @@ def test_barcode():
     if barcode:
         asset_category = meta.session.query(assets.AssetCategory).filter(
                     assets.AssetCategory.barcode == barcode).one_or_none()
-        if asset_category:
-            return jsonify(success=True,
-                            brand=asset_category.brand, 
-                            commercial_name=asset_category.commercial_name)
+        if not asset_category:
+            return jsonify(success=False)
+
+        if asset_category.type == "device":
+            asset = meta.session.query(assets.DeviceCategory).filter(
+                            assets.DeviceCategory.barcode == barcode).one()
+            return jsonify(success=True, type="device",
+                                        brand=asset.brand,
+                                        barcode=asset.barcode,
+                                        commercial_name=asset.commercial_name,
+                                        description=asset.description,
+                                        sterilizable=asset.sterilizable,
+                                        )
+
+        if asset_category.type == "material":
+            asset = meta.session.query(assets.MaterialCategory).filter(
+                            assets.MaterialCategory.barcode == barcode).one()
+            return jsonify(success=True, type="material",
+                            brand=asset.brand,
+                            barcode=asset.barcode,
+                            commercial_name=asset.commercial_name,
+                            description=asset.description,
+                            material_type=asset.material_type,
+                            order_threshold=float(asset.order_threshold),
+                            unity=asset.unity,
+                            initial_quantity=float(asset.initial_quantity),
+                            automatic_decrease=float(asset.automatic_decrease),
+                            )
+                            
+
+        raise ValueError('The asset type in database neither is "device" nor "material"')
     return jsonify(success=False)
- 
-   
