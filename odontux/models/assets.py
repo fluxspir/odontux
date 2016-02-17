@@ -8,7 +8,7 @@
 from meta import Base
 from tables import (asset_provider_address_table, asset_provider_phone_table, 
                     asset_provider_mail_table, kit_asset_table)
-import users, act
+import users, act, schedule
 import sqlalchemy
 import datetime
 
@@ -209,4 +209,5 @@ class Kit(Base):
     assets = relationship("Asset", secondary=kit_asset_table,
                                         backref="kits")
     creation_date = Column(Date, nullable=False)
-
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                default=0)

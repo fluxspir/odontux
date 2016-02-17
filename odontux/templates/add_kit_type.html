@@ -6,8 +6,8 @@ Add a new kit type
 {% from "_formhelpers.html" import render_simple_field, render_hidden_field %}
 <form method="post" action="/provider/add/">
   <dl>
-      {{ render_simple_field(kit_name_form.name) }}
-      {{ render_simple_field(kit_structure_form.assets_list }}
+      {{ render_simple_field(kit_structure_form.name) }}
+      {{ render_simple_field(kit_structure_form.assets_list) }}
   </dl>
   <p><input type="submit" value="Add">
 </form>

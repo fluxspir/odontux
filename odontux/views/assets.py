@@ -19,7 +19,7 @@ from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
                     validators)
 
 from odontux import constants, checks
-from odontux.models import meta, assets, administration, users, act
+from odontux.models import meta, assets, administration, users, act, schedule
 from odontux.odonweb import app
 from odontux.views import forms
 #from odontux.views.forms import DateField
@@ -132,11 +132,14 @@ class KitStructureForm(Form):
 
 class KitForm(Form):
     id = HiddenField(_('id'))
-    creation_date = DateField(_('Creation Date of the Kit'))
+    kit_structure_id = SelectField(_('Type of kit'), coerce=int)
     assets_in_kit = SelectMultipleField(_('Assets in the Kit'), coerce=int)
+    creation_date = DateField(_('Creation Date of the Kit'))
 
-def get_kit_structure_assets_choices():
+def get_kit_structure_assets_list_choices():
     assets_category = meta.session.query(assets.AssetCategory).all()
+    if not assets_category:
+        return [ (0, "") ]
     return [ (r.id, r.brand + " || " + r.commercial_name) 
                                                     for r in assets_category ]
 
@@ -628,13 +631,33 @@ def add_kit_type():
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    kit_name_form = KitNameForm(request.form)
     kit_structure_form = KitStructureForm(request.form)
+    kit_structure_form.assets_list.choices = \
+                                        get_kit_structure_assets_list_choices()
 
     if request.method == 'POST':
         pass
 
     return render_template('add_kit_type.html',
-                                kit_name_form=kit_name_form,
                                 kit_structure_form=kit_structure_form)
 
+@app.route('/list/kits/', methods=['GET'])
+@app.route('/list/kits/?kit_types=<kit_types>', methods=['GET'])
+def list_kits(kit_types=""):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    if not kit_types:
+        kits_list = meta.session.query(assets.Kit).all()
+    else:
+        kits_list = []
+        for kit_type in kit_types.split(","):
+            query = meta.session.query(assets.Kit).filter(
+                        assets.Kit.kit_structure_id == kit_type).all()
+            for kit in query:
+                kits_list.append(kit)
+    
+    return render_template('list_kits.html',
+                            kits_list=kits_list)
