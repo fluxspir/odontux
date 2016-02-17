@@ -15,11 +15,11 @@ from sqlalchemy import and_, or_
 from gettext import gettext as _
 from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
                     SelectField, BooleanField, TextAreaField, DecimalField,
-                    DateField,
+                    DateField, SelectMultipleField,
                     validators)
 
 from odontux import constants, checks
-from odontux.models import meta, assets, administration, users
+from odontux.models import meta, assets, administration, users, act
 from odontux.odonweb import app
 from odontux.views import forms
 #from odontux.views.forms import DateField
@@ -60,9 +60,10 @@ class AssetCategoryForm(Form):
     barcode = TextField(_('Barcode'), [validators.Optional()])
     brand = TextField(_('Brand'), [validators.Required(
                                         message=_("Brand's name required"))])
-    commercial_name = TextField(_('Commercial name'), [validators.required(
+    commercial_name = TextField(_('Commercial name'), [validators.Required(
                                     message=_('Commercial name required'))])
     description = TextAreaField(_('Description'), [validators.Optional()])
+    asset_specialty_id = SelectField(_('Specialty'), coerce=int)
     type = SelectField(_('Type'), description='ChangementType()')
 
 class DeviceCategoryForm(Form):
@@ -71,8 +72,6 @@ class DeviceCategoryForm(Form):
 
 class MaterialCategoryForm(Form):
     material_category_id = HiddenField(_('id'))
-    material_type = TextField(_("Utilization's family"), 
-                                                    [validators.Optional()])
     order_threshold = DecimalField(_("Order's threshold"), 
                                                     [validators.Optional()])
     unity = SelectField(_('Unity'), coerce=int)
@@ -96,6 +95,15 @@ class AssetForm(Form):
                                                 default=last_office_asset())
     #type = SelectField(_('Type'), description='ChangementType()')
     quantity = IntegerField(_('Quantity'), [validators.Optional()], default=1)
+    service = BooleanField(_('In service since'), description='InService()')
+    start_of_use = DateField(_('Start of Use'), 
+                                    format='%Y-%m-%d',
+                                    validators=[validators.Optional()])
+    end_of_use = DateField(_('End of Use'), [validators.Optional()])
+    #TODO
+    # end_use_reason raise a TypeError on adding; validators.Optional() ne
+    # fonctionne pas ici. Que faire ?
+    end_use_reason = SelectField(_('Reason to end of use'), coerce=int ) 
 
 class DeviceForm(Form):
     device_id = HiddenField(_('id'))
@@ -111,16 +119,26 @@ class MaterialForm(Form):
                                         validators=[validators.Optional()])
     expiration_alert = IntegerField(_('Expiration Alert'),
                                                     [validators.Optional()])
-    service = BooleanField(_('In service since'), description='InService()')
-    start_of_use = DateField(_('Start of Use'), 
-                                    format='%Y-%m-%d',
-                                    validators=[validators.Optional()])
-    end_of_use = DateField(_('End of Use'), [validators.Optional()])
-    #TODO
-    # end_use_reason raise a TypeError on adding; validators.Optional() ne
-    # fonctionne pas ici. Que faire ?
-    end_use_reason = SelectField(_('Reason to end of use'), coerce=int ) 
     batch_number = TextField(_('Batch number'), [validators.Optional()])
+
+class KitStructureForm(Form):
+    id = HiddenField(_('id'))
+    name = TextField(_('Name of new kind of Kit'), [validators.Required(
+                        message=_("Give a name to the Kit")),
+                        validators.Length(max=30, 
+                        message=_('Max : 30 characters'))],
+                        filters=[forms.title_field])
+    assets_list = SelectMultipleField(_('Type of Assets'), coerce=int)
+
+class KitForm(Form):
+    id = HiddenField(_('id'))
+    creation_date = DateField(_('Creation Date of the Kit'))
+    assets_in_kit = SelectMultipleField(_('Assets in the Kit'), coerce=int)
+
+def get_kit_structure_assets_choices():
+    assets_category = meta.session.query(assets.AssetCategory).all()
+    return [ (r.id, r.brand + " || " + r.commercial_name) 
+                                                    for r in assets_category ]
 
 def get_asset_provider_field_list():
     return [ "name", "active" ]
@@ -129,24 +147,25 @@ def get_asset_type_choices():
     return [ ( "device", _("Device") ), 
             ( "material", _("Material") ) ]
 
+
 def get_material_cat_unity_choices():
     return [ ( 0, _("pieces/items") ), ( 1, _("volume in mL") ), 
                 (2, _("weight in gr") ) ]
 
-def get_material_end_use_reason_choices():
+def get_asset_end_use_reason_choices():
     return [ (0, _('in stock or in use') ), ( 1, _('Natural end of material')),
             (2, _('Unconvenient') ), (3, _('Obsolete / Out of date') ), 
             (4, _('Remove from market') ), (5, _('Lost') ) ]
 
 def get_asset_cat_field_list():
     return [ "barcode", "brand", "commercial_name",
-                "description", "type" ]
+                "description", "type"]
 
 def get_device_cat_field_list():
     return [ "sterilizable" ]
 
 def get_material_cat_field_list():
-    return [ "material_type", "order_threshold", "unity", 
+    return [ "order_threshold", "unity", 
             "initial_quantity", "automatic_decrease" ]
 
 def get_asset_provider_choices(active=True):    
@@ -189,6 +208,12 @@ def get_office_choices(active=True):
     office_list = [ (q.id, q.office_name) for q in query ]
     office_list.append( (0, "") )
     return office_list
+
+def get_asset_specialty_choices():
+    query = meta.session.query(act.Specialty).all()
+    specialty_list = [ (s.id, s.name) for s in query ]
+    specialty_list.append( (0, "") )
+    return specialty_list
 
 def verify_asset_cat_already_in_db(new_asset):
     """ test if barcode in db ; 
@@ -418,6 +443,9 @@ def add_asset():
     def _add_device_category(asset_cat_form, device_cat_form):
         values = {f: getattr(asset_cat_form, f).data
                 for f in get_asset_cat_field_list()}
+        if asset_cat_form.asset_specialty_id.data:
+            values['asset_specialty_id'] =\
+                                        asset_cat_form.asset_specialty_id.data
         for f in get_device_cat_field_list():
             values[f] = getattr(device_cat_form, f).data
         new_device_cat = assets.DeviceCategory(**values)
@@ -428,6 +456,9 @@ def add_asset():
     def _add_material_category(asset_cat_form, material_cat_form):
         values = {f: getattr(asset_cat_form, f).data
                 for f in get_asset_cat_field_list()}
+        if asset_cat_form.asset_specialty_id.data:
+            values['asset_specialty_id'] =\
+                                        asset_cat_form.asset_specialty_id.data
         for f in get_material_cat_field_list():
             values[f] = getattr(material_cat_form, f).data
         new_material_cat = assets.MaterialCategory(**values)
@@ -442,6 +473,8 @@ def add_asset():
             values['user_id'] = asset_form.user_id.data
         if asset_form.office_id.data:
             values['office_id'] = asset_form.office_id.data
+        if asset_form.service.data:
+            values['start_of_use'] = asset_form.start_of.use.data
         values['asset_category_id'] = asset_cat.id
             
         values['lifetime_expected'] = datetime.timedelta(
@@ -459,10 +492,10 @@ def add_asset():
         if asset_form.office_id.data:
             values['office_id'] = asset_form.office_id.data
         values['asset_category_id'] = asset_cat.id
+        if asset_form.service.data:
+            values['start_of_use'] = asset_form.start_of.use.data
         for f in add_material_field_list:
             values[f] = getattr(material_form, f).data
-        if material_form.service.data:
-            values['start_of_use'] = material_form.start_of.use.data
         if material_form.expiration_alert:
             values['expiration_alert'] = datetime.timedelta(
                                         material_form.expiration_alert.data)
@@ -478,6 +511,8 @@ def add_asset():
         return redirect(url_for('index'))
 
     asset_category_form = AssetCategoryForm(request.form)
+    asset_category_form.asset_specialty_id.choices =\
+                                                get_asset_specialty_choices()
     asset_category_form.type.choices = get_asset_type_choices()
     device_category_form = DeviceCategoryForm(request.form)
     material_category_form = MaterialCategoryForm(request.form)
@@ -488,9 +523,9 @@ def add_asset():
         return redirect(url_for('add_provider'))
     asset_form.user_id.choices = get_user_choices()
     asset_form.office_id.choices = get_office_choices()
+    asset_form.end_use_reason.choices = get_asset_end_use_reason_choices()
     device_form = DeviceForm(request.form)
     material_form = MaterialForm(request.form)
-    material_form.end_use_reason.choices = get_material_end_use_reason_choices()
     
     # POSTING and adding the data :
     asset_cat = verify_asset_cat_already_in_db(asset_category_form)
@@ -560,12 +595,13 @@ def test_barcode():
             asset = meta.session.query(assets.DeviceCategory).filter(
                             assets.DeviceCategory.barcode == barcode).one()
             return jsonify(success=True, type="device",
-                                        brand=asset.brand,
-                                        barcode=asset.barcode,
-                                        commercial_name=asset.commercial_name,
-                                        description=asset.description,
-                                        sterilizable=asset.sterilizable,
-                                        )
+                                brand=asset.brand,
+                                barcode=asset.barcode,
+                                commercial_name=asset.commercial_name,
+                                description=asset.description,
+                                asset_specialty_id=asset.asset_specialty_id,
+                                sterilizable=asset.sterilizable,
+                                )
 
         if asset_category.type == "material":
             asset = meta.session.query(assets.MaterialCategory).filter(
@@ -575,7 +611,7 @@ def test_barcode():
                             barcode=asset.barcode,
                             commercial_name=asset.commercial_name,
                             description=asset.description,
-                            material_type=asset.material_type,
+                            asset_specialty_id=asset.asset_specialty_id,
                             order_threshold=float(asset.order_threshold),
                             unity=asset.unity,
                             initial_quantity=float(asset.initial_quantity),
@@ -585,3 +621,20 @@ def test_barcode():
 
         raise ValueError('The asset type in database neither is "device" nor "material"')
     return jsonify(success=False)
+
+@app.route('/add/kit_type/', methods=['GET', 'POST'])
+def add_kit_type():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    kit_name_form = KitNameForm(request.form)
+    kit_structure_form = KitStructureForm(request.form)
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('add_kit_type.html',
+                                kit_name_form=kit_name_form,
+                                kit_structure_form=kit_structure_form)
+

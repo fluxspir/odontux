@@ -64,5 +64,6 @@ from teeth import (
                     list_teeth,
                   )
 from assets import (
-                    my_assets, add_provider, list_providers, list_assets
+                    my_assets, add_provider, list_providers, list_assets, 
+                    add_asset, add_kit_type
                     )

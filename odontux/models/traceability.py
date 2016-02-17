@@ -28,6 +28,11 @@ class SterilizationCycleType(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
 
+class SterilizationComplement(Base):
+    __tablename__ = "sterilization_complement"
+    id = Column(Integer, primary_key=True)
+    complement = Column(String, nullable=False)
+
 class SterilizationCycleMode(Base):
     """
         Cycles mode :
@@ -51,7 +56,7 @@ class SterilizationCycle(Base):
     __tablename__ = "sterilization_cycle"
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=func.now())
-    operator = Column(Integer, ForeignKey(users.OdontuxUser.id),
+    user_id = Column(Integer, ForeignKey(users.OdontuxUser.id),
                                                     nullable=False)
     sterilizator_id = Column(Integer, ForeignKey(assets.Device.id),
                                                     nullable=False)
@@ -59,12 +64,10 @@ class SterilizationCycle(Base):
                                                     nullable=False)
     cycle_mode_id = Column(Integer, ForeignKey(SterilizationCycleMode.id),
                                                     nullable=False)
-    date = Column(DateTime, nullable=False)
-    cycle_number = Column(Integer, nullable=False, unique=True)
-    reference = Column(Integer, default=0, unique=True)
-    complement = Column(String, default="")
+    complement_id = Column(Integer, ForeignKey(SterilizationComplement.id),
+                                                    nullable=False)
+    reference = Column(String, default="")
     document = Column(String, default="")
-
     type = Column(String(15))
 
     __mapper_args__ = {
@@ -80,7 +83,7 @@ class SimplifiedTraceability(SterilizationCycle):
     __tablename__ = "simplified_traceability"
     id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
     number_of_items = Column(Integer, nullable=False)
-    validity = Column(Interval, nullable=False)
+    expiration_date = Column(Date, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'simplified_traceability'

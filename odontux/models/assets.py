@@ -8,7 +8,7 @@
 from meta import Base
 from tables import (asset_provider_address_table, asset_provider_phone_table, 
                     asset_provider_mail_table, kit_asset_table)
-import users
+import users, act
 import sqlalchemy
 import datetime
 
@@ -69,7 +69,7 @@ class AssetCategory(Base):
         * commercial name of the product
         * description... indispensable ?
         * barcode : pour scanner les produits entrant en stock.
-        * material_type : Famille du bien ; permet des recherches plus ciblées
+        * asset_type : Famille du bien ; permet des recherches plus ciblées
                     
     """
     __tablename__ = "asset_category"
@@ -78,6 +78,7 @@ class AssetCategory(Base):
     brand = Column(String, default="", nullable=False)
     commercial_name = Column(String, default="", nullable=False)
     description = Column(String, default="")
+    asset_specialty_id = Column(Integer, ForeignKey(act.Specialty.id))
     type = Column(String)
 
     __mapper_args__ = {
@@ -98,7 +99,6 @@ class MaterialCategory(AssetCategory):
     """
         Generals' datas about Asset whose "type" is Material.
 
-        * material_type : utilisation's family to find the material more easily
         * unity of the quantity : 
                     0 = pieces
                     1 = volume
@@ -112,7 +112,6 @@ class MaterialCategory(AssetCategory):
     """
     __tablename__ = "material_category"
     id = Column(Integer, ForeignKey(AssetCategory.id), primary_key=True)
-    material_type = Column(String, default="")
     order_threshold = Column(Numeric, default=-1)
     unity = Column(Integer, default=0)
     initial_quantity = Column(Numeric, default=1)
@@ -131,6 +130,13 @@ class Asset(Base):
         * new : true if the product is new
         * user : which user is using this asset 
         * office : to which dental office is related the asset
+        * end_use_reason : 
+            0 or None : in stock or in use.
+            1 : Natural end of the material
+            2 : Unconvenient
+            3 : Obsolete/Out of date (périmé)
+            4 : Removed from market
+            5 : Lost
     """
     __tablename__ = "asset"
     id = Column(Integer, primary_key=True)
@@ -143,6 +149,9 @@ class Asset(Base):
     new = Column(Boolean, default=True)
     user_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
     office_id = Column(Integer, ForeignKey(users.DentalOffice.id))
+    start_of_use = Column(Date, default=None)
+    end_of_use = Column(Date, default=None)
+    end_use_reason = Column(Integer, default=None)
     type = Column(String(20))
 
     __mapper_args__ = {
@@ -165,13 +174,6 @@ class Device(Asset):
 class Material(Asset):
     """
         expiration_alert : default to two weeks
-        end_use_reason : 
-            0 or None : in stock or in use.
-            1 : Natural end of the material
-            2 : Unconvenient
-            3 : Obsolete/Out of date (périmé)
-            4 : Removed from market
-            5 : Lost
     """
     __tablename__ = "material"
     id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
@@ -179,29 +181,31 @@ class Material(Asset):
     actual_quantity = Column(Numeric, default=1)
     expiration_date = Column(Date)
     expiration_alert = Column(Interval, default=datetime.timedelta(15))
-    start_of_use = Column(Date, default=None)
-    end_of_use = Column(Date, default=None)
-    end_use_reason = Column(Integer, default=None)
     batch_number = Column(String)
 
     __mapper_args__ = {
         'polymorphic_identity': 'material',
     }
 
-class KitType(Base):
+class KitStructure(Base):
     """
+        This table will enable to create kits more easily.
+        asset_category_id : Assets that may be include in this type of kit.
+        This way, when we want to create a kit, only assets relevent are in
+        the choice list.
     """
-    __tablename__ = "kit_type"
+    __tablename__ = "kit_structure"
     id = Column(Integer, primary_key=True)
     name = Column(String(30), nullable=False)
-
+    asset_category_id = Column(Integer, ForeignKey(AssetCategory.id))
 
 class Kit(Base):
     """
     """
     __tablename__ = "kit"
     id = Column(Integer, primary_key=True)
-    kit_type_id = Column(Integer, ForeignKey(KitType.id), nullable=False)
+    kit_structure_id = Column(Integer, ForeignKey(KitStructure.id), 
+                                                                nullable=False)
     assets = relationship("Asset", secondary=kit_asset_table,
                                         backref="kits")
     creation_date = Column(Date, nullable=False)

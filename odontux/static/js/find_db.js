@@ -7,6 +7,7 @@ $(function () {
     document.getElementById( "brand" ).value = null;
     $('#commercial_name').val(null);
     $('#description').val(null);
+    $('#asset_specialty_id').val(null);
   }
   var set_default_asset = function() {
     $('#acquisition_date').val(today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate() );
@@ -20,7 +21,6 @@ $(function () {
     $('#lifetime_expected').val(null);
   }
   var set_default_material_category = function() {
-    $('#material_type').val(null);
     $('#unity').val(1);
     $('#initial_quantity').val(null);
     $('#automatic_decrease').val(null);
@@ -61,6 +61,7 @@ $(function () {
       document.getElementById( "brand" ).value = data.brand;
       document.getElementById( "commercial_name" ).value = data.commercial_name;
       $('#description').val(data.description);
+      $('#asset_specialty_id').val(data.asset_specialty_id);
       document.getElementById( "asset" ).style.display = "block";
       set_default_asset();
       set_default_device();
@@ -75,7 +76,6 @@ $(function () {
         $('#device').hide();
         $('#material_category').show();
         $('#material').show();
-        $('#material_type').val(data.material_type);
         $('#order_threshold').val(data.order_threshold);
         $('#unity').val(data.unity);
         $('#initial_quantity').val(data.initial_quantity);

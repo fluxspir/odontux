@@ -31,7 +31,7 @@ from act import Specialty, ActType, AppointmentActReference
 from cotation import NgapKeyFr, CmuKeyFr, MajorationFr, CotationFr
 from compta import PaymentType, Payment
 from assets import (AssetProvider, AssetCategory, MaterialCategory,
-                    Asset, Device, Material, KitType, Kit)
+                    Asset, Device, Material, KitStructure, Kit)
 from traceability import (SterilizationCycleType, SterilizationCycleMode,
                             SterilizationCycle, 
                             SimplifiedTraceability, CompleteTraceability)

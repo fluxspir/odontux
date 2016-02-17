@@ -7,7 +7,7 @@
 
 from meta import Base
 
-from sqlalchemy import Table, Column, Integer, Numeric, Interval
+from sqlalchemy import Table, Column, Integer, Numeric, Date
 from sqlalchemy import ForeignKey, MetaData
 
 
@@ -106,7 +106,7 @@ Column("id", Integer, primary_key=True),
 Column("traceability_id", Integer, ForeignKey("complete_traceability.id")),
 Column("asset_id", Integer, ForeignKey("asset.id")),
 Column("appointment_id", Integer, ForeignKey("appointment.id")),
-Column("validity", Interval, nullable=False)
+Column("expiration_date", Date, nullable=False)
 )
 
 traceability_kit_table = Table("traceability_kit", Base.metadata,
@@ -114,7 +114,7 @@ Column("id", Integer, primary_key=True),
 Column("traceability_id", Integer, ForeignKey("complete_traceability.id")),
 Column("kit_id", Integer, ForeignKey("kit.id")),
 Column("appointment_id", Integer, ForeignKey("appointment.id")),
-Column("validity", Interval, nullable=False)
+Column("expiration_date", Date, nullable=False)
 )
 
 # assets.py / appointment.py

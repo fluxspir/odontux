@@ -24,6 +24,12 @@ Add a new asset.
   </div>
 
   <div id="asset_category">
+      Asset Specialty
+      {{ render_simple_field(asset_category_form.asset_specialty_id) }}
+      <a href={{ url_for('add_specialty') }}>Add a Specialty</a>
+    Select Provider : {{ render_simple_field(asset_form.provider_id) }} or <a href={{ url_for('add_provider') }}>Add a new provider</a>
+  </a>
+
     <dl>
       <th>brand</th>
       {{ render_table_field(asset_category_form.brand) }}
@@ -31,9 +37,6 @@ Add a new asset.
       {{ render_table_field(asset_category_form.commercial_name) }}
       <th>Description</th>
       {{ render_table_field(asset_category_form.description) }}
-    </dl>
-    Select Provider : {{ render_simple_field(asset_form.provider_id) }} or <a href={{ url_for('add_provider') }}>Add a new provider</a>
-  </a>
   </div>
   <div id="device_category">
     <dl>
@@ -43,11 +46,9 @@ Add a new asset.
   </div>
   <div id="material_category">
     <dl>
-      <th>Material Type</th>
-      {{ render_table_field(material_category_form.material_type) }}
-      {{ render_table_field(material_category_form.unity) }}
       <th>Initial Quantity</th>
       {{ render_table_field(material_category_form.initial_quantity) }}
+      {{ render_table_field(material_category_form.unity) }}
       <th>Automatic Decrease</th>
       {{ render_table_field(material_category_form.automatic_decrease) }}
       <th>Order Threshold</th>
@@ -61,7 +62,13 @@ Add a new asset.
     {{ render_simple_field(asset_form.user_id) }}
     {{ render_simple_field(asset_form.office_id) }}
     {{ render_simple_field(asset_form.quantity) }}
+    {{ render_field_js_onchange(asset_form.service) }}
+    {{ render_hidden_field(asset_form.end_use_reason) }}
+    <div id="service_start">
+      {{ render_simple_field(asset_form.start_of_use) }}
+    </div>
   </div>
+
   <div id="device">
     {{ render_simple_field(device_form.lifetime_expected) }}
   </div>
@@ -69,11 +76,6 @@ Add a new asset.
     {{ render_simple_field(material_form.batch_number) }}
     {{ render_simple_field(material_form.expiration_date) }}
     {{ render_simple_field(material_form.expiration_alert) }}
-    {{ render_field_js_onchange(material_form.service) }}
-    {{ render_hidden_field(material_form.end_use_reason) }}
-    <div id="service_start">
-      {{ render_simple_field(material_form.start_of_use) }}
-    </div>
   </div>
 
   <div id="add_the_asset">
