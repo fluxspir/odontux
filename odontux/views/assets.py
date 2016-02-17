@@ -650,13 +650,16 @@ def list_kits(kit_types=""):
         return redirect(url_for('index'))
 
     if not kit_types:
-        kits_list = meta.session.query(assets.Kit).all()
+        kits_list = meta.session.query(assets.Kit).filter(
+                                assets.Kit.appointment_id == None).all()
     else:
         kits_list = []
+        query = meta.session.query(assets.Kit).filter(
+                                assets.Kit.appointment_id == None)
         for kit_type in kit_types.split(","):
-            query = meta.session.query(assets.Kit).filter(
+            q = query.filter(
                         assets.Kit.kit_structure_id == kit_type).all()
-            for kit in query:
+            for kit in q:
                 kits_list.append(kit)
     
     return render_template('list_kits.html',
