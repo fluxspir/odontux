@@ -73,7 +73,7 @@ from traceability import (
                     update_sterilization_cycle_type,
                     add_sterilization_complement, 
                     list_sterilization_complement,
-                    update_sterilization_complement
+                    update_sterilization_complement,
                     add_sterilization_cycle_mode,
                     list_sterilization_cycle_mode,
                     update_sterilization_cycle_mode
