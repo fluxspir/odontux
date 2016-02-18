@@ -628,7 +628,7 @@ def test_barcode():
 @app.route('/add/kit_type/', methods=['GET', 'POST'])
 def add_kit_type():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
-                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+                        constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     kit_structure_form = KitStructureForm(request.form)
@@ -645,7 +645,9 @@ def add_kit_type():
 @app.route('/list/kits/?kit_types=<kit_types>', methods=['GET'])
 def list_kits(kit_types=""):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
-                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+                        constants.ROLE_ASSISTANT ]
+    checks.quit_patient_file()
+    checks.quit_appointment()
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 

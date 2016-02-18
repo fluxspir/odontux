@@ -19,7 +19,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
 
 class SterilizationCycleType(Base):
-    """ Cycle can be of type : 
+    """ Cycle Name can be of type : 
         * Test cycle
         * Stérilization cycle
         * Both ?
@@ -29,6 +29,11 @@ class SterilizationCycleType(Base):
     name = Column(String, nullable=False)
 
 class SterilizationComplement(Base):
+    """
+        the complement is, for exemple, the prion's cycle indicator that was
+        conform or not.
+        Any other complement may be add.
+    """
     __tablename__ = "sterilization_complement"
     id = Column(Integer, primary_key=True)
     complement = Column(String, nullable=False)
@@ -53,6 +58,11 @@ class SterilizationCycleMode(Base):
     comment = Column(String)
 
 class SterilizationCycle(Base):
+    """
+        reference = cycle's internal number of the autoclave, or any other
+            reference we'd like.
+        document = path to scanned document or anything else.
+    """
     __tablename__ = "sterilization_cycle"
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=func.now())

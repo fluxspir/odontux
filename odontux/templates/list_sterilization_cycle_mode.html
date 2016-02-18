@@ -1,0 +1,17 @@
+{% extends "header.html" %}
+{% block main %}
+{% if session.role != session.ROLE_ADMIN %}
+  <!-- <a href="{{ url_for('add_asset') }}">Add new asset</a> -->
+{% endif %}
+<br />
+<a href={{ url_for('add_sterilization_cycle_mode') }}>Add new sterilization cycle mode</a>
+  <div id="searchresult">
+  {% block searchresult %}
+    {% for ste_cycle_mode in ste_cycle_modes %}
+      {{ ste_cycle_mode.id }} -- {{ ste_cycle_mode.name }} -- {{ ste_cycle_mode.heat_type }} -- {{ ste_cycle_mode.temperature }} -- {{ ste_cycle_mode.pressure }} -- {{ ste_cycle_mode.sterilization_duration }}<br />
+      Comments : {{ ste_cycle_mode.comments }}<a href={{ url_for('update_sterilization_cycle_mode', ste_cycle_mode_id=ste_cycle_mode.id) }}>Update</a><br />
+    {% endfor %}
+  {% endblock %}
+  </div>
+
+{% endblock %}
