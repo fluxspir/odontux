@@ -316,6 +316,7 @@ class AddPatientCommand(BaseCommand, PatientParser):
             new_patient.socialsecurity_id = socialsecurity.id
 
         meta.session.commit()
+        print(new_patient.id)
 
         # Add the new patient to gnucash !
         comptability = gnucash_handler.GnuCashCustomer(new_patient.id, 

@@ -5,6 +5,8 @@
 # licence BSD
 #
 
+import pdb
+
 from base import BaseCommand
 from models import meta, users, administration
 import constants
@@ -14,6 +16,7 @@ from sqlalchemy import or_
 from base64 import b64encode
 import scrypt
 import os
+import re
 import sys
 import datetime
 
@@ -181,7 +184,7 @@ class OdontuxUserParser(BaseCommand):
 
         parser.add_option("--creation_date", action="store", type="string",
                         help="user's file creation, default=today",
-                        dest="time_stamp")
+                        dest="creation_date")
 
         parser.add_option("--phonenum", action="store", type="string",
                         help="user's phone number",
@@ -246,30 +249,28 @@ class AddOdontuxUserCommand(BaseCommand, OdontuxUserParser):
 
     def run(self, args):
         (options, args) = self.parse_args(args)
-
         def _check_date(value):
             """ Return datetime.date() """
             msg = "Date must be in format yyyymmdd or ISO : yyyy-mm-dd"
             if re.match('\d{8}', value) != None:
-                return datetime.date(int(val[0:4]), int(val[4:6]), 
-                                                                int(val[6:]))
+                return datetime.date(int(value[0:4]), int(value[4:6]), 
+                                                                int(value[6:]))
             elif re.match('\d{4}-\d{2}-\d{2}') != None:
-                return datetime.date(int(val[0:4]), int(val[5:7]), 
-                                                                int(val[8:]))
+                return datetime.date(int(value[0:4]), int(value[5:7]), 
+                                                                int(value[8:]))
             else:
                 return None
 
         def _hash_password(password, maxtime=0.5, datalength=64):
             """ """
-            return b64.encode(scrypt.encrypt(os.urandom(datalength), password,
+            return b64encode(scrypt.encrypt(os.urandom(datalength), password,
                                                         maxtime=maxtime))
 
         if not options.lastname:
             sys.exit("a lastname is mandatory to add a new user to database")
 
         self.values["username"] = options.username.decode("utf_8").lower()
-        self.values["password"] = _crypt_password(
-                                            options.password.decode("utf_8"))
+        self.values["password"] = _hash_password(options.password)
         self.values["role"] = options.role.decode("utf_8")
         self.values["title"] = options.title.decode("utf_8").title()
         self.values["lastname"] = options.lastname.decode("utf_8").upper()
@@ -384,7 +385,7 @@ class UpdateUserCommand(BaseCommand, OdontuxUserParser):
         if options.username:
             user.username = options.username.decode("utf_8").lower()
         if options.password:
-            user.password = _crypt_password(options.password.decode("utf_8"))
+            user.password = _hash_password(options.password.decode("utf_8"))
         if options.role:
             user.role = options.role.decode("utf_8")
         if options.title:

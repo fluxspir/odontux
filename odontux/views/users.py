@@ -514,3 +514,16 @@ def delete_user_mail(body_id, form_to_display):
         return redirect(url_for("update_user", body_id=body_id,
                                  form_to_display="mail"))
     return redirect(url_for('list_users'))
+
+@app.route('/delete/dental_office?id=<int:body_id>')
+def delete_dental_office(body_id):
+    if session['role'] != constants.ROLE_ADMIN:
+        return redirect(url_for('list_dental_offices'))
+   
+    dental_office = meta.session.query(users.DentalOffice).filter(
+                        users.DentalOffice.id == body_id).one_or_none()
+    meta.session.delete(dental_office)
+    meta.session.commit()
+    return redirect(url_for('list_dental_offices'))
+
+

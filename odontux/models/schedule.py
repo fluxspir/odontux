@@ -36,12 +36,14 @@ class Appointment(Base):
     absent = Column(Boolean, default=False)
     excuse = Column(String, default="")
     administrative_acts = relationship("AppointmentActReference",
-                                       backref="appointment")
+                                       backref="appointment",
+                                       cascade="all, delete, delete-orphan")
     ordonnance = relationship("Prescription", backref="appointment",
                               cascade="all, delete, delete-orphan")
     memo = relationship("AppointmentMemo", backref="appointment",
                          cascade="all, delete, delete-orphan")
-    events = relationship("Event", backref="appointment")
+    events = relationship("Event", backref="appointment",
+                        cascade="all, delete, delete-orphan")
     materiovigilance = relationship("Material", 
                                     secondary=material_appointment_table,
                                     backref="appointments")

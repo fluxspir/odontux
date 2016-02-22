@@ -107,7 +107,9 @@ class Patient(Base):
     mouth = relationship("Mouth", uselist=False, backref="patient", 
                         cascade="all, delete, delete-orphan")
     appointments = relationship("Appointment", backref="patient",
-                        cascade="all, delete")
+                        cascade="all, delete, delete-orphan")
+    payer = relationship("Payer", backref="patient",
+                        cascade="all, delete, delete-orphan")
 
     def age(self):
         return (

@@ -119,7 +119,7 @@ def add_patient():
                                                             + dentist.lastname)
                 for dentist in meta.session.query(users.OdontuxUser).filter(
                 users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
-                users.OdontuxUserontuxUser.lastname).all() ]
+                users.OdontuxUser.lastname).all() ]
 
     SSN_form = SocialSecurityForm(request.form)
     # three are used for odontux_users and medecine doctors, too
@@ -238,6 +238,18 @@ def add_patient():
                             address_form=address_form,
                             phone_form=phone_form,
                             mail_form=mail_form)
+
+@app.route('/delete/patient?id=<int:body_id>')
+def delete_patient(body_id):
+    if session['role'] != constants.ROLE_ADMIN:
+        return redirect(url_for('index'))
+   
+    patient = meta.session.query(administration.Patient).filter(
+                        administration.Patient.id == body_id).one_or_none()
+    meta.session.delete(patient)
+    meta.session.commit()
+    return redirect(url_for('index'))
+
 
 @app.route('/patient/update_patient?id=<int:body_id>'
            '&form_to_display=<form_to_display>/',
