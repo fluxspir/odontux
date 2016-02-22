@@ -5,7 +5,11 @@
 # Licence BSD
 #
 
+import pdb
+
+
 from models import meta, administration, users, compta, schedule
+import constants
 
 from gettext import gettext as _
 
@@ -13,11 +17,11 @@ import ConfigParser
 
 from decimal import Decimal
 import os
+import datetime
 
-import constants
 
 import gnucash
-from gnucash import Session as GCSession
+from gnucash import Session as GCSession, GUID
 from gnucash import GncNumeric
 from gnucash import gnucash_core_c as gnc_core_c
 from gnucash.gnucash_business import Customer, Address, Invoice, Entry
@@ -69,8 +73,8 @@ class GnuCash():
 
         # Precise on which patient we'll work on
         self.patient_id = patient_id
-        self.patient = meta.session.query(administration.Patient)\
-                        .filter(administration.Patient.id == patient_id).one()
+        self.patient = meta.session.query(administration.Patient).filter(
+                                administration.Patient.id == patient_id).one()
 
         # Set the gnucash patient_id
         self.gcpatient_id = "pat_" + str(self.patient_id)
@@ -253,7 +257,7 @@ class GnuCashCustomer(GnuCash):
 class GnuCashInvoice(GnuCash):
     """ 
     The GnuCashInvoice deals with gnucash to enter act and price in an Invoice.
-    As it hasn't been cashed, but that the act "is selled", it will be stocked
+    As it hasn't been cashed, but that the act "is sold", it will be stocked
     in an "Receivable Account".
     An individual invoice will contain every act made on a unique patient
     during an unique appointment.
@@ -266,9 +270,8 @@ class GnuCashInvoice(GnuCash):
         #   self.dentalincomes
         #   * self.gcpatient and self.patient
         #   * self.currency
-        patient = meta.session.query(administration.Patient)\
-                .filter(administration.Patient.id == patient_id)\
-                .one()
+        patient = meta.session.query(administration.Patient).filter(
+                                administration.Patient.id == patient_id).one()
         # If it's a dentist who is entering an act in database, we assume he
         # did the gesture. Otherwise, if nurse, secretary (...) enters the act
         # in database, we assume the patient's official dentist made it.
@@ -279,9 +282,8 @@ class GnuCashInvoice(GnuCash):
         self.owner = self.book.CustomerLookupByID(self.gcpatient_id)
         # invoice_id is build as
         # Date + appointment_id
-        self.date = meta.session.query(schedule.Appointment)\
-                    .filter(schedule.Appointment.id ==
-                            appointment_id).one().agenda.endtime
+        self.date = meta.session.query(schedule.Appointment).filter(
+                    schedule.Appointment.id ==appointment_id).one().agenda.endtime
 
         if not invoice_id:
             self.invoice_id = "inv_" + str(self.date.year)+\
@@ -308,7 +310,6 @@ class GnuCashInvoice(GnuCash):
 
             description = str(act_id) + "_" + code
             invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
-
             invoice_entry = Entry(self.book, invoice)
             invoice_entry.BeginEdit()
             invoice_entry.SetDescription(description.encode("utf_8"))
@@ -318,7 +319,7 @@ class GnuCashInvoice(GnuCash):
             invoice_entry.CommitEdit()
             invoice.CommitEdit()
             invoice.PostToAccount(self.receivables, self.date, self.date,
-                                    description.encode("utf_8"), True)
+                                    description.encode("utf_8"), True, False)
             self.gcsession.save()
             self.gcsession.end()
             return self.invoice_id
@@ -350,7 +351,7 @@ class GnuCashInvoice(GnuCash):
                         invoice.PostToAccount(self.receivables, self.date, 
                                             self.date, 
                                             description.encode("utf_8"),
-                                            True)
+                                            True, False)
                         self.gcsession.save()
                         self.gcsession.end()
                         return True
@@ -390,10 +391,12 @@ class GnuCashPayment(GnuCash):
 #            for invoice_id in invoices_id:
 #                invoices_list.append(self.book.InvoiceLookupByID(invoice_id))
                 
-#            payer.ApplyPayment(invoice=None, self.receivables, dest_account, 
-#                            amount, exch=GncNumeric(1), date, memo="", num="")
-            payer.ApplyPayment(None, self.receivables, dest_account, 
-                            amount, GncNumeric(1), date, "", "")
+#            payer.ApplyPayment(invoice=None, None, account=self.receivables, 
+#                           dest_account, 
+#                            amount, exch=GncNumeric(1), date, memo="", num="",
+#                            autopay=False)
+            payer.ApplyPayment(None, None, self.receivables, dest_account, 
+                            amount, GncNumeric(1), date, "", "", False)
             
 #            self.gcsession.save()
             self.gcsession.end()
