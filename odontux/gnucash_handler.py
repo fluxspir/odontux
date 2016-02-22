@@ -210,9 +210,9 @@ class GnuCashCustomer(GnuCash):
         if self.patient.family.addresses[-1].building:
             address.SetAddr2(self.patient.family.addresses[-1]
                              .building.encode("utf_8"))
-        postal_code = ""
+        zip_code = ""
         city = ""
-        if self.patient.family.addresses[-1].postal_code:
+        if self.patient.family.addresses[-1].zip_code:
             postal_code = self.patient.family.addresses[-1]\
                           .postal_code.encode("utf_8")
         if self.patient.family.addresses[-1].city:
