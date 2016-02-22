@@ -7,7 +7,12 @@
   {% block searchresult %}
     {% for patient in patients %}
       <a href={{ url_for('enter_patient_file', body_id=patient.id) }}>{{ patient.lastname }} {{ patient.firstname }}</a> 
-      <a href={{ url_for('update_patient', body_id=patient.id, form_to_display='gen_info') }}>Update</a><br />
+      <a href={{ url_for('update_patient', body_id=patient.id, form_to_display='gen_info') }}>Update</a>
+      {% if session.role == session.ROLE_ADMIN %}
+            <a href={{ url_for('delete_patient', body_id=patient.id) }}>Del</a>
+      {% endif %}
+            <br />
+
     {% endfor %}
   {% endblock %}
   </div>
