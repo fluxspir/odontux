@@ -1,0 +1,19 @@
+{% extends "header.html" %}
+{% block main %}
+{% if session.role != session.ROLE_ADMIN %}
+  <!-- <a href="{{ url_for('add_asset') }}">Add new asset</a> -->
+{% endif %}
+<br />
+<a href={{ url_for('add_simplified_traceability') }}>Add new simplified traceability sterilization cycle</a>
+  <div id="searchresult">
+  {% block searchresult %}
+    {% for ste_cycle in ste_cycles %}
+      {{ ste_cycle.user.username }} -- {{ ste_cycle.reference }}<br />
+      {% if session.role == session.ROLE_DENTIST %}
+      <a href={{ url_for('update_sterilization_cycle', ste_cycle_id=ste_cycle.id) }}>Update</a><br />
+      {% endif %}
+    {% endfor %}
+  {% endblock %}
+  </div>
+
+{% endblock %}

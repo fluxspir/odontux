@@ -63,12 +63,14 @@ class AssetCategoryForm(Form):
     commercial_name = TextField(_('Commercial name'), [validators.Required(
                                     message=_('Commercial name required'))])
     description = TextAreaField(_('Description'), [validators.Optional()])
-    asset_specialty_id = SelectField(_('Specialty'), coerce=int)
+    asset_specialty_id = SelectField(_('Specialty'), coerce=int, 
+                                        validators=[validators.Optional()])
     type = SelectField(_('Type'), description='ChangementType()')
 
 class DeviceCategoryForm(Form):
     device_category_id = HiddenField(_('id'))
     sterilizable = BooleanField(_('Sterilizable'))
+    sterilizer = BooleanField(_('This device is an Autoclave/Sterilizer ?'))
 
 class MaterialCategoryForm(Form):
     material_category_id = HiddenField(_('id'))
@@ -161,11 +163,11 @@ def get_asset_end_use_reason_choices():
             (4, _('Remove from market') ), (5, _('Lost') ) ]
 
 def get_asset_cat_field_list():
-    return [ "barcode", "brand", "commercial_name",
+    return [ "brand", "commercial_name",
                 "description", "type"]
 
 def get_device_cat_field_list():
-    return [ "sterilizable" ]
+    return [ "sterilizable", "sterilizer" ]
 
 def get_material_cat_field_list():
     return [ "order_threshold", "unity", 
@@ -222,20 +224,18 @@ def verify_asset_cat_already_in_db(new_asset):
     """ test if barcode in db ; 
         if not, test if both brand and commercial_name are in it.
     """
-    asset_cat_in_db = meta.session.query(assets.AssetCategory).filter(
-                assets.AssetCategory.barcode == new_asset.barcode.data
-                                                        ).one_or_none()
+    asset_cat_in_db = None
+    if new_asset.barcode.data:
+        asset_cat_in_db = meta.session.query(assets.AssetCategory).filter(
+                        assets.AssetCategory.barcode == new_asset.barcode.data
+                                                                ).one_or_none()
     if not asset_cat_in_db:
-        asset_cat_in_db = meta.session.query(assets.AssetCategory
-                ).filter(and_(
-                assets.AssetCategory.brand == new_asset.brand.data,
-                assets.AssetCategory.commercial_name == 
-                new_asset.brand.data
-                )).one_or_none()
+        asset_cat_in_db = meta.session.query(assets.AssetCategory).filter(and_(
+                            assets.AssetCategory.brand == new_asset.brand.data,
+                            assets.AssetCategory.commercial_name == 
+                            new_asset.commercial_name.data
+                            )).one_or_none()
     return asset_cat_in_db
-
-
-
 
 @app.route('/provider/add/', methods=['GET', 'POST'])
 @app.route('/add/provider/', methods=['GET', 'POST'])
@@ -446,6 +446,10 @@ def add_asset():
     def _add_device_category(asset_cat_form, device_cat_form):
         values = {f: getattr(asset_cat_form, f).data
                 for f in get_asset_cat_field_list()}
+        if asset_cat_form.barcode.data:
+            values["barcode"] = asset_cat_form.barcode.data
+        else:
+            values['barcode'] = None
         if asset_cat_form.asset_specialty_id.data:
             values['asset_specialty_id'] =\
                                         asset_cat_form.asset_specialty_id.data
@@ -459,6 +463,10 @@ def add_asset():
     def _add_material_category(asset_cat_form, material_cat_form):
         values = {f: getattr(asset_cat_form, f).data
                 for f in get_asset_cat_field_list()}
+        if asset_cat_form.barcode.data:
+            values["barcode"] = asset_cat_form.barcode.data
+        else:
+            values['barcode'] = None
         if asset_cat_form.asset_specialty_id.data:
             values['asset_specialty_id'] =\
                                         asset_cat_form.asset_specialty_id.data
@@ -469,7 +477,7 @@ def add_asset():
         meta.session.commit()
         return new_material_cat
 
-    def _add_device(asset_form, device_form):
+    def _add_device(asset_form, device_form, asset_cat):
         values = {f: getattr(asset_form, f).data
                 for f in add_asset_field_list }
         if asset_form.user_id.data:
@@ -477,17 +485,18 @@ def add_asset():
         if asset_form.office_id.data:
             values['office_id'] = asset_form.office_id.data
         if asset_form.service.data:
-            values['start_of_use'] = asset_form.start_of.use.data
+            values['start_of_use'] = asset_form.start_of_use.data
         values['asset_category_id'] = asset_cat.id
-            
-        values['lifetime_expected'] = datetime.timedelta(
+        
+        if device_form.lifetime_expected.data:
+            values['lifetime_expected'] = datetime.timedelta(
                                     365 * device_form.lifetime_expected.data)
         new_device = assets.Device(**values)
         meta.session.add(new_device)
         meta.session.commit()
 
 
-    def _add_material(asset_form, material_form):
+    def _add_material(asset_form, material_form, asset_cat):
         values = {f: getattr(asset_form, f).data
                 for f in add_asset_field_list }
         if asset_form.user_id.data:
@@ -558,7 +567,7 @@ def add_asset():
         and asset_form.validate() and device_form.validate() ):
         i = 0
         while asset_form.quantity.data > i:
-            _add_device(asset_form, device_form)
+            _add_device(asset_form, device_form, asset_cat)
             i += 1
         return redirect(url_for('list_assets', asset_type="device"))
     
@@ -567,7 +576,7 @@ def add_asset():
         and asset_form.validate() and material_form.validate() ):
         i = 0
         while asset_form.quantity.data > i:
-            _add_material(asset_form, material_form)
+            _add_material(asset_form, material_form, asset_cat)
             i += 1
         return redirect(url_for('list_assets', asset_type="material"))
 

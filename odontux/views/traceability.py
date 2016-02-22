@@ -19,7 +19,7 @@ from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
                     validators)
 
 from odontux import constants, checks
-from odontux.models import meta, traceability
+from odontux.models import meta, traceability, assets, users
 from odontux.odonweb import app
 from odontux.views import forms
 from odontux.views.log import index
@@ -45,13 +45,14 @@ class SterilizationCycleModeForm(Form):
                                             ), [validators.Required()])
     comment = TextAreaField(_('Comments'))
 
-class SterilizationCycle(Form):
+class SterilizationCycleForm(Form):
     id = HiddenField(_('id'))
     user_id = SelectField(_('Operator of sterilization cycle'), coerce=int)
-    sterilizator_id = SelectField(_('Sterilizator'), coerce=int)
+    sterilizer_id = SelectField(_('Sterilizer'), coerce=int)
     cycle_type_id = SelectField(_('Cycle Type'), coerce = int)
     cycle_mode_id = SelectField(_('Cycle Mode'), coerce = int)
-    complement_id = SelectField(_('Complement'), coerce = int)
+    cycle_complement_id = SelectField(_('Complement'), coerce = int)
+    cycle_date = DateField(_('Date'), [validators.Required()])
     reference = TextField(_('Reference'), [validators.Optional()])
     document = TextField(_('Path to document'), [validators.Optional()])
 
@@ -70,6 +71,13 @@ class CompleteTraceabilityForm(Form):
 
 def get_sterilization_cycle_mode_field_list():
     return [ "name", "heat_type", "temperature", "pressure", "comment" ]
+
+def get_sterilization_cycle_field_list():
+    return [ "user_id", "sterilizer_id", "cycle_type_id", "cycle_mode_id",
+                "cycle_complement_id", "reference", "document", "cycle_date" ]
+
+def get_complete_traceability_field_list():
+    return [ "item_id", "validity" ]
 
 @app.route('/traceability/')
 def traceability_portal():
@@ -272,12 +280,49 @@ def list_sterilization_cycle_mode():
     ste_cycle_modes = meta.session.query(traceability.SterilizationCycleMode
                                                                         ).all()
     return render_template('list_sterilization_cycle_mode.html',
-                                ste_cycle_modess=ste_cycle_modes)
+                                ste_cycle_modes=ste_cycle_modes)
+
+def get_ste_cycle_form_user_id_choices():
+    return meta.session.query(users.OdontuxUser.id, users.OdontuxUser.username
+                                        ).filter(users.OdontuxUser.role.in_([
+                                                constants.ROLE_DENTIST,
+                                                constants.ROLE_ASSISTANT,
+                                                constants.ROLE_NURSE ]) ).all()
+                                                
+def get_ste_cycle_form_sterilizer_id_choices():
+    ste_cycle_form_list = []
+
+    query = meta.session.query(assets.DeviceCategory).filter(
+                            assets.DeviceCategory.sterilizer == True).all()
+    for q in query:
+        device_list = meta.session.query(assets.Device).filter(
+                                assets.Device.asset_category_id == q.id).all()
+        for dev in device_list:
+            ste_cycle_form_list.append( (dev.id, q.commercial_name) )
+
+    return ste_cycle_form_list
+#        
+#    return meta.session.query(assets.Device.id, 
+#                            assets.DeviceCategory.commercial_name
+#                    ).filter(assets.DeviceCategory.sterilizer == True
+#                            ).all()
+#
 
 
+def get_ste_cycle_form_cycle_type_id_choices():
+    return meta.session.query(traceability.SterilizationCycleType.id,
+                                traceability.SterilizationCycleType.name).all()
 
-@app.route('/add/sterilization_cycle/', methods=["GET", "POST"])
-def add_sterilization_cycle():
+def get_ste_cycle_form_cycle_mode_id_choices():
+    return meta.session.query(traceability.SterilizationCycleMode.id,
+                                traceability.SterilizationCycleMode.name).all()
+
+def get_ste_cycle_form_cycle_complement_id_choices():
+    return meta.session.query(traceability.SterilizationComplement.id,
+                        traceability.SterilizationComplement.complement).all()
+
+@app.route('/add/simplified_traceability/', methods=["GET", "POST"])
+def add_simplified_traceability():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
@@ -285,5 +330,56 @@ def add_sterilization_cycle():
 
     checks.quit_patient_file()
     checks.quit_appointment()
-    pass
+    
+    ste_cycle_form = SterilizationCycleForm(request.form)
+    ste_cycle_form.user_id.choices = get_ste_cycle_form_user_id_choices()
+    ste_cycle_form.sterilizer_id.choices = \
+                            get_ste_cycle_form_sterilizer_id_choices()
+    ste_cycle_form.cycle_type_id.choices = \
+                            get_ste_cycle_form_cycle_type_id_choices()
+    ste_cycle_form.cycle_mode_id.choices = \
+                            get_ste_cycle_form_cycle_mode_id_choices()
+    ste_cycle_form.cycle_complement_id.choices = \
+                            get_ste_cycle_form_cycle_complement_id_choices()
 
+    simple_traceability_form = SimplifiedTraceabilityForm(request.form)
+
+    if ( request.method == "POST" and ste_cycle_form.validate() 
+                           and simple_traceability_form.validate() ):
+        
+        values = { f: getattr(ste_cycle_form, f).data 
+                    for f in get_sterilization_cycle_field_list() }
+        
+        values['expiration_date'] = ( ste_cycle_form.cycle_date.data +
+                    datetime.timedelta(simple_traceability_form.validity.data))
+                                        
+        values['number_of_items'] = simple_traceability_form.number_of_items
+
+        new_simple_traceability = traceability.SimplifiedTraceability(**values)
+        meta.session.add(new_simple_traceability)
+        meta.session.commit()
+        return redirect(url_for('list_sterilization_cycle'))
+
+    return render_template('add_simplified_traceability.html',
+                        ste_cycle_form=ste_cycle_form,
+                        simple_traceability_form=simple_traceability_form)
+
+@app.route('/list/sterilization_cycle/', methods=['GET', 'POST'])
+def list_sterilization_cycle():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    
+    ste_cycles = meta.session.query(traceability.SterilizationCycle).all()
+    
+    return render_template('list_sterilization_cycle.html',
+                                            ste_cycles=ste_cycles)
+
+@app.route('/update/sterilization_cycle?id=<int:ste_cycle_mode_id>', 
+                                                    methods=['GET', 'POST'])
+def update_sterilization_cycle(ste_cycle_id):
+    pass

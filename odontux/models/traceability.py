@@ -68,17 +68,23 @@ class SterilizationCycle(Base):
     timestamp = Column(DateTime, default=func.now())
     user_id = Column(Integer, ForeignKey(users.OdontuxUser.id),
                                                     nullable=False)
-    sterilizator_id = Column(Integer, ForeignKey(assets.Device.id),
+    user = relationship("users.OdontuxUser")
+    sterilizer_id = Column(Integer, ForeignKey(assets.Device.id),
                                                     nullable=False)
+    sterilizer = relationship("assets.Device")
     cycle_type_id = Column(Integer, ForeignKey(SterilizationCycleType.id), 
                                                     nullable=False)
+    cycle_type = relationship("SterilizationCycleType")
     cycle_mode_id = Column(Integer, ForeignKey(SterilizationCycleMode.id),
                                                     nullable=False)
-    complement_id = Column(Integer, ForeignKey(SterilizationComplement.id),
-                                                    nullable=False)
+    cycle_mode = relationship("SterilizationCycleMode")
+    cycle_complement_id = Column(Integer, ForeignKey(
+                                SterilizationComplement.id), nullable=False)
+    cycle_complement = relationship("SterilizationComplement")
+    cycle_date = Column(Date, nullable=False)
     reference = Column(String, default="")
     document = Column(String, default="")
-    type = Column(String(15))
+    type = Column(String(30))
 
     __mapper_args__ = {
         'polymorphic_identity': 'sterilization_cycle',

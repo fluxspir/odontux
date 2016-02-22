@@ -74,7 +74,7 @@ class AssetCategory(Base):
     """
     __tablename__ = "asset_category"
     id = Column(Integer, primary_key=True)
-    barcode = Column(String, default="", unique=True)
+    barcode = Column(String, unique=True, nullable=True)
     brand = Column(String, default="", nullable=False)
     commercial_name = Column(String, default="", nullable=False)
     description = Column(String, default="")
@@ -90,6 +90,7 @@ class DeviceCategory(AssetCategory):
     __tablename__ = "device_category"
     id = Column(Integer, ForeignKey(AssetCategory.id), primary_key=True)
     sterilizable = Column(Boolean, nullable=False)
+    sterilizer = Column(Boolean, default=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'device'
@@ -165,7 +166,7 @@ class Device(Asset):
     """
     __tablename__ = "device"
     id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
-    lifetime_expected = Column(Interval, default=0)
+    lifetime_expected = Column(Interval, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'device',
