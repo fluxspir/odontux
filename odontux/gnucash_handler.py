@@ -283,7 +283,7 @@ class GnuCashInvoice(GnuCash):
         # invoice_id is build as
         # Date + appointment_id
         self.date = meta.session.query(schedule.Appointment).filter(
-                    schedule.Appointment.id ==appointment_id).one().agenda.endtime
+                schedule.Appointment.id ==appointment_id).one().agenda.endtime
 
         if not invoice_id:
             self.invoice_id = "inv_" + str(self.date.year)+\

@@ -74,7 +74,7 @@ class EventParser(BaseCommand):
                             help="use it if the tooth is missing",
                             type="string",  dest="absence")
 
-            parser.add_option("-r", "--replaced", action="store",
+            parser.add_option("-r", "--replaced", "--resin", action="store",
                             help="use it to tell the tooth was replaced",
                             type="string", dest="replaced")
 
@@ -184,8 +184,7 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
         # in Class Toothevent
         self.event_values['location'] = constants.EVENT_LOCATION_TOOTH[0]
         if options.comments:
-            self.event_values["comments"] = options.comments\
-                                                        .decode("utf_8")
+            self.event_values["comments"] = options.comments.decode("utf_8")
         if options.pic:
             self.event_values["pic"] = options.pic
         if options.color:
@@ -193,8 +192,7 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
         if options.appointment_id:
             self.event_values["appointment_id"] = options.appointment_id
         else:
-            self.event_values["appointment_id"] =\
-            os.getenv("appointment_id")
+            self.event_values["appointment_id"] =os.getenv("appointment_id")
         if options.sane:
             state = "s"
             self.toothevent_values["sane"] = options.sane.decode("utf_8")
@@ -203,19 +201,19 @@ class AddToothEventCommand(BaseCommand, EventParser, AddEventCommand):
             self.toothevent_values["place"] = options.place.decode("utf_8")
         if options.mobility:
             state = "m" 
-            self.toothevent_values["mobility"] =\
-            options.mobility.decode("utf_8")
+            self.toothevent_values["mobility"] =options.mobility.decode(
+                                                                    "utf_8")
         if options.fracture:
             state = "f"
-            self.toothevent_values["fracture"] =\
-            options.fracture.decode("utf_8")
+            self.toothevent_values["fracture"] =options.fracture.decode(
+                                                                    "utf_8")
         if options.absence:
             state = "a"
             self.toothevent_values["absence"] = options.absence.decode("utf_8")
         if options.replaced:
             state = "r"
-            self.toothevent_values["replaced"] = options.replaced\
-                                                        .decode("utf_8")
+            self.toothevent_values["replaced"] = options.replaced.decode(
+                                                                    "utf_8")
         if options.implant:
             state = "I"
             self.toothevent_values["implant"] = options.implant.decode("utf_8")
@@ -313,7 +311,7 @@ class AddCrownEventCommand(BaseCommand, EventParser, AddEventCommand):
         mouth = (
             meta.session.query(headneck.Mouth)
                 .filter(headneck.Mouth.patient_id == patient_id)
-        ).first()
+        ).one_or_none()
         if mouth:
             mouth_id = mouth.id
         else:
@@ -323,7 +321,7 @@ class AddCrownEventCommand(BaseCommand, EventParser, AddEventCommand):
             meta.session.query(teeth.Tooth)
                 .filter(and_(teeth.Tooth.mouth_id == mouth_id,
                             teeth.Tooth.name == name))
-        ).first()
+        ).one_or_none()
         if not tooth:
             tooth_id = self.add_tooth(mouth_id, name, state, 
                                       options.surveillance)

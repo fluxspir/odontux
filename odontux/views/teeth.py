@@ -5,6 +5,7 @@
 # Licence BSD
 #
 
+import pdb
 from wtforms import (
                     Form, 
                     TextField, TextAreaField,
@@ -128,9 +129,30 @@ def checks_if_mouth_exists(patient_id):
     return False
 
 
-def _set_tooth_state():
+def _set_tooth_state(tooth_id, state):
     """ """
-    pass
+    tooth = meta.session.query(teeth.Tooth).filter(
+                        teeth.Tooth.id == tooth_id).one()
+    tooth_state = {
+        "sane": "s",
+        "sealing": "x",
+        "obturation": "o",
+        "crowned": "c",
+        "decay": "d",
+        "place": "p",
+        "mobility": "m",
+        "fracture": "f",
+        "absence": "a",
+        "absent": "a",
+        "bridge": "b",
+        "resin": "r",
+        "implant": "I"
+        }
+    try:
+        tooth.state = tooth_state[state]
+        meta.session.commit()
+    except KeyError:
+        pass
 
 
 @app.route('/patient/teeth/')
@@ -362,7 +384,7 @@ def add_toothevent(patient_id, appointment_id, event_id):
         for f in get_tooth_event_field_list():
             toothevent_values[f] = getattr(tooth_event_form, f).data
             if getattr(tooth_event_form, f).data:
-                _set_tooth_state(f, getattr(tooth_event_form, f).data)
+                _set_tooth_state(event.tooth_id, f)
         new_toothevent = teeth.ToothEvent(**toothevent_values)
         meta.session.add(new_toothevent)
         meta.session.commit()
@@ -394,7 +416,7 @@ def add_crownevent(patient_id, appointment_id, event_id):
         for f in get_crown_event_field_list():
             crownevent_values[f] = getattr(crown_event_form, f).data
             if getattr(crown_event_form, f).data:
-                _set_tooth_state(f, getattr(crown_event_form, f).data)
+                _set_tooth_state(event.tooth_id, f)
         new_crownevent = teeth.CrownEvent(**crownevent_values)
         meta.session.add(new_crownevent)
         meta.session.commit()
