@@ -113,7 +113,7 @@ class CompleteTraceability(SterilizationCycle):
     id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
     assets = relationship('Asset', secondary=traceability_asset_table,
                                                     backref="traceabilities")
-    kits = relationship('Kit', secondary=traceability_kit_table,
+    kits = relationship('AssetKit', secondary=traceability_kit_table,
                                                     backref="traceabilities")
 
     def number_of_items(self):

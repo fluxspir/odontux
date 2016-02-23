@@ -7,7 +7,8 @@
 
 from meta import Base
 from tables import (asset_provider_address_table, asset_provider_phone_table, 
-                    asset_provider_mail_table, kit_asset_table)
+                    asset_provider_mail_table, kit_asset_table,
+                    kitstructure_assetcategory_table)
 import users, act, schedule
 import sqlalchemy
 import datetime
@@ -188,27 +189,30 @@ class Material(Asset):
         'polymorphic_identity': 'material',
     }
 
-class KitStructure(Base):
+class AssetKitStructure(Base):
     """
         This table will enable to create kits more easily.
         asset_category_id : Assets that may be include in this type of kit.
         This way, when we want to create a kit, only assets relevent are in
         the choice list.
     """
-    __tablename__ = "kit_structure"
+    __tablename__ = "asset_kit_structure"
     id = Column(Integer, primary_key=True)
     name = Column(String(30), nullable=False)
-    asset_category_id = Column(Integer, ForeignKey(AssetCategory.id))
+    type_of_assets = relationship("AssetCategory", 
+                                secondary=kitstructure_assetcategory_table,
+                                backref="kits_structure")
+    active = Column(Boolean, default=True)
 
-class Kit(Base):
+class AssetKit(Base):
     """
     """
-    __tablename__ = "kit"
+    __tablename__ = "asset_kit"
     id = Column(Integer, primary_key=True)
-    kit_structure_id = Column(Integer, ForeignKey(KitStructure.id), 
+    asset_kit_structure_id = Column(Integer, ForeignKey(AssetKitStructure.id), 
                                                                 nullable=False)
     assets = relationship("Asset", secondary=kit_asset_table,
                                         backref="kits")
     creation_date = Column(Date, nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                                default=0)
+                                                           default=None)

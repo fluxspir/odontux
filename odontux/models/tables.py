@@ -96,8 +96,14 @@ Column("mail_id", Integer, ForeignKey("mail.id"))
 
 # assets.py
 kit_asset_table = Table("kit_asset", Base.metadata,
-Column("kit_id", Integer, ForeignKey("kit.id")),
+Column("kit_id", Integer, ForeignKey("asset_kit.id")),
 Column("asset_id", Integer, ForeignKey("asset.id"))
+)
+
+kitstructure_assetcategory_table = Table("kit_structure_asset_category", 
+                                                                Base.metadata,
+Column("kit_structure_id", Integer, ForeignKey("asset_kit_structure.id")),
+Column("asset_category_id", Integer, ForeignKey("asset_category.id"))
 )
 
 # traceability.py / assets.py
@@ -112,7 +118,7 @@ Column("expiration_date", Date, nullable=False)
 traceability_kit_table = Table("traceability_kit", Base.metadata,
 Column("id", Integer, primary_key=True),
 Column("traceability_id", Integer, ForeignKey("complete_traceability.id")),
-Column("kit_id", Integer, ForeignKey("kit.id")),
+Column("kit_id", Integer, ForeignKey("asset_kit.id")),
 Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("expiration_date", Date, nullable=False)
 )

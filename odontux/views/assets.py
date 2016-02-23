@@ -123,16 +123,16 @@ class MaterialForm(Form):
                                                     [validators.Optional()])
     batch_number = TextField(_('Batch number'), [validators.Optional()])
 
-class KitStructureForm(Form):
+class AssetKitStructureForm(Form):
     id = HiddenField(_('id'))
     name = TextField(_('Name of new kind of Kit'), [validators.Required(
                         message=_("Give a name to the Kit")),
                         validators.Length(max=30, 
                         message=_('Max : 30 characters'))],
                         filters=[forms.title_field])
-    assets_list = SelectMultipleField(_('Type of Assets'), coerce=int)
+    assets_category_list = SelectMultipleField(_('Type of Assets'), coerce=int)
 
-class KitForm(Form):
+class AssetKitForm(Form):
     id = HiddenField(_('id'))
     kit_structure_id = SelectField(_('Type of kit'), coerce=int)
     assets_in_kit = SelectMultipleField(_('Assets in the Kit'), coerce=int)
@@ -640,8 +640,8 @@ def add_kit_type():
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    kit_structure_form = KitStructureForm(request.form)
-    kit_structure_form.assets_list.choices = \
+    kit_structure_form = AssetKitStructureForm(request.form)
+    kit_structure_form.assets_category_list.choices = \
                                         get_kit_structure_assets_list_choices()
 
     if request.method == 'POST':
@@ -662,14 +662,14 @@ def list_kits(kit_types=""):
 
     if not kit_types:
         kits_list = meta.session.query(assets.Kit).filter(
-                                assets.Kit.appointment_id == None).all()
+                                assets.AssetKit.appointment_id == None).all()
     else:
         kits_list = []
         query = meta.session.query(assets.Kit).filter(
-                                assets.Kit.appointment_id == None)
+                                assets.AssetKit.appointment_id == None)
         for kit_type in kit_types.split(","):
             q = query.filter(
-                        assets.Kit.kit_structure_id == kit_type).all()
+                        assets.AssetKit.kit_structure_id == kit_type).all()
             for kit in q:
                 kits_list.append(kit)
     
