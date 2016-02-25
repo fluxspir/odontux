@@ -213,11 +213,11 @@ class GnuCashCustomer(GnuCash):
         zip_code = ""
         city = ""
         if self.patient.family.addresses[-1].zip_code:
-            postal_code = self.patient.family.addresses[-1]\
-                          .postal_code.encode("utf_8")
+            zip_code = self.patient.family.addresses[-1]\
+                          .zip_code.encode("utf_8")
         if self.patient.family.addresses[-1].city:
             city = self.patient.family.addresses[-1].city.encode("utf_8")
-        address.SetAddr3(postal_code  + " " + city)
+        address.SetAddr3(zip_code  + " " + city)
         county = ""
         country = ""
         if self.patient.family.addresses[-1].county:

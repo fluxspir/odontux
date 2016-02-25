@@ -327,8 +327,8 @@ def update_dental_office(body_id, form_to_display):
     if not session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 
-    dental_office = meta.session.query(users.DentalOffice)\
-            .filter(users.DentalOffice.id == body_id).one()
+    dental_office = meta.session.query(users.DentalOffice).filter(
+                                        users.DentalOffice.id == body_id).one()
 
     dental_office_form = DentalOfficeForm(request.form)
     if request.method == 'POST' and dental_office_form.validate():
