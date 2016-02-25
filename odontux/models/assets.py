@@ -6,6 +6,7 @@
 #
 
 from meta import Base
+import meta
 from tables import (asset_provider_address_table, asset_provider_phone_table, 
                     asset_provider_mail_table, kit_asset_table,
                     kitstructure_assetcategory_table)
@@ -160,7 +161,18 @@ class Asset(Base):
         'polymorphic_identity': 'asset',
         'polymorphic_on': type
     }
-
+    
+    def element_of_kit(self):
+        query =  meta.session.query(AssetKit
+                                    ).filter(AssetKit.end_of_use == None
+                                    ).filter(AssetKit.end_use_reason == None
+                                    ).all()
+        for q in query:
+            for asset in q.assets:
+                if asset.id == self.id:
+                    return True
+        return False
+                                    
 class Device(Asset):
     """
         * lifetime expected ; 0 if forever
@@ -206,6 +218,7 @@ class AssetKitStructure(Base):
 
 class AssetKit(Base):
     """
+        * end_use_reason : same as "Asset"
     """
     __tablename__ = "asset_kit"
     id = Column(Integer, primary_key=True)
@@ -216,3 +229,6 @@ class AssetKit(Base):
     creation_date = Column(Date, nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                            default=None)
+    end_of_use = Column(Date, default=None)
+    end_use_reason = Column(Integer, default=None)
+

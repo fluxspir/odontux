@@ -46,6 +46,7 @@ def last_asset_provider():
     except AttributeError:
         return 1
 
+
 class AssetProviderForm(Form):
     asset_provider_id = HiddenField(_('id'))
     name = TextField(_('Asset provider name'), [validators.Required(
@@ -87,8 +88,7 @@ class AssetForm(Form):
     provider_id = SelectField(_('Provider'), coerce=int,
                                                 default=last_asset_provider())
     #asset_category_id = SelectField(_('Asset Category'), coerce=int)
-    acquisition_date = DateField(_('Acquisition Date'), format='%Y-%m-%d',
-                                    )
+    acquisition_date = DateField(_('Acquisition Date'), format='%Y-%m-%d')
     acquisition_price = DecimalField(_('Acquisition Price'))
     new = BooleanField(_('Asset new'))
     user_id = SelectField(_("Dentist owner"), coerce=int, 
@@ -102,10 +102,8 @@ class AssetForm(Form):
                                     format='%Y-%m-%d',
                                     validators=[validators.Optional()])
     end_of_use = DateField(_('End of Use'), [validators.Optional()])
-    #TODO
-    # end_use_reason raise a TypeError on adding; validators.Optional() ne
-    # fonctionne pas ici. Que faire ?
-    end_use_reason = SelectField(_('Reason to end of use'), coerce=int ) 
+    end_use_reason = SelectField(_('Reason to end of use'), coerce=int, 
+                                    validators=[validators.Optional()]) 
 
 class DeviceForm(Form):
     device_id = HiddenField(_('id'))
@@ -131,19 +129,39 @@ class AssetKitStructureForm(Form):
                         message=_('Max : 30 characters'))],
                         filters=[forms.title_field])
     assets_category_list = SelectMultipleField(_('Type of Assets'), coerce=int)
+    active = BooleanField(_('active'))
 
 class AssetKitForm(Form):
     id = HiddenField(_('id'))
-    kit_structure_id = SelectField(_('Type of kit'), coerce=int)
-    assets_in_kit = SelectMultipleField(_('Assets in the Kit'), coerce=int)
-    creation_date = DateField(_('Creation Date of the Kit'))
+    asset_kit_structure_id = SelectField(_('Type of kit'), coerce=int)
+    assets = SelectMultipleField(_('Assets in the Kit'), coerce=int)
+    creation_date = DateField(_('Creation Date of the Kit'), format='%Y-%m-%d')
+    end_of_use = DateField(_('End of Use'), [validators.Optional()])
+    end_use_reason = SelectField(_('Reason to end of use'), coerce=int ) 
 
-def get_kit_structure_assets_list_choices():
+def get_kit_structure_assets_choices():
     assets_category = meta.session.query(assets.AssetCategory).all()
     if not assets_category:
         return [ (0, "") ]
     return [ (r.id, r.brand + " || " + r.commercial_name) 
                                                     for r in assets_category ]
+
+def get_assets_in_kit_choices():
+    # Asset, to be added in a kit must :
+    #   * Be in usable state
+    #   * be sterilizable
+    #   * Not be in a kit sterilized ready to use
+    assets_list = []
+    query = meta.session.query(assets.Device).join(assets.DeviceCategory
+                            ).filter(assets.Device.end_of_use == None
+                            ).filter(assets.Device.end_use_reason == None
+                            ).filter(assets.DeviceCategory.sterilizable == True
+                            ).all()
+    for asset in query:
+        if not asset.element_of_kit():
+            assets_list.append( (asset.id, (asset.asset_category.brand + " " +
+                                    asset.asset_category.commercial_name) ) )
+    return assets_list
 
 def get_asset_provider_field_list():
     return [ "name", "active" ]
@@ -152,12 +170,11 @@ def get_asset_type_choices():
     return [ ( "device", _("Device") ), 
             ( "material", _("Material") ) ]
 
-
 def get_material_cat_unity_choices():
     return [ ( 0, _("pieces/items") ), ( 1, _("volume in mL") ), 
                 (2, _("weight in gr") ) ]
 
-def get_asset_end_use_reason_choices():
+def get_end_use_reason_choices():
     return [ (0, _('in stock or in use') ), ( 1, _('Natural end of material')),
             (2, _('Unconvenient') ), (3, _('Obsolete / Out of date') ), 
             (4, _('Remove from market') ), (5, _('Lost') ) ]
@@ -219,6 +236,10 @@ def get_asset_specialty_choices():
     specialty_list = [ (s.id, s.name) for s in query ]
     specialty_list.append( (0, "") )
     return specialty_list
+
+def get_kit_structure_id_choices():
+    return meta.session.query(assets.AssetKitStructure.id, 
+                                assets.AssetKitStructure.name).all()
 
 def verify_asset_cat_already_in_db(new_asset):
     """ test if barcode in db ; 
@@ -310,7 +331,7 @@ def update_provider(body_id, form_to_display):
     if not forms._check_body_perm(provider, "provider"):
         return redirect(url_for('list_providers'))
 
-    if session['role'] != 0:
+    if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('list_providers'))
 
     general_form = AssetProviderForm(request.form)
@@ -535,7 +556,7 @@ def add_asset():
         return redirect(url_for('add_provider'))
     asset_form.user_id.choices = get_user_choices()
     asset_form.office_id.choices = get_office_choices()
-    asset_form.end_use_reason.choices = get_asset_end_use_reason_choices()
+    asset_form.end_use_reason.choices = get_end_use_reason_choices()
     device_form = DeviceForm(request.form)
     material_form = MaterialForm(request.form)
     
@@ -642,13 +663,77 @@ def add_kit_type():
         return redirect(url_for('index'))
     kit_structure_form = AssetKitStructureForm(request.form)
     kit_structure_form.assets_category_list.choices = \
-                                        get_kit_structure_assets_list_choices()
+                                        get_kit_structure_assets_choices()
 
-    if request.method == 'POST':
-        pass
+    if request.method == 'POST' and kit_structure_form.validate():
+        new_asset_kit = assets.AssetKitStructure(
+                                        name=kit_structure_form.name.data)
+        meta.session.add(new_asset_kit)
+        for val in kit_structure_form.assets_category_list.data:
+            asset = meta.session.query(assets.AssetCategory).filter(
+                                assets.AssetCategory.id == val).one()
+            new_asset_kit.type_of_assets.append(asset)
+
+        meta.session.commit()
+        return redirect(url_for('my_assets'))
 
     return render_template('add_kit_type.html',
                                 kit_structure_form=kit_structure_form)
+
+@app.route('/update/kit_type?id=<kit_type_id>', methods=['GET', 'POST'])
+def update_kit_type(kit_type_id):
+
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    
+    kit_structure_form = AssetKitStructureForm(request.form)
+    kit_structure_form.assets_category_list.choices = \
+                                        get_kit_structure_assets_choices()
+    kit_structure = meta.session.query(assets.AssetKitStructure).filter(
+                assets.AssetKitStructure.id == kit_type_id).one_or_none()
+    if not kit_structure:
+        return render_template('list_kit_type')
+    asset_list = [ asset.id for asset in kit_structure.type_of_assets ]
+
+    if request.method == 'POST' and kit_structure_form.validate():
+        for f in [ "name", "active" ]:
+            setattr(kit_structure, f, getattr(kit_structure_form, f).data)
+
+        for val in set(kit_structure_form.assets_category_list.data) \
+                                                            - set(asset_list):
+            asset = meta.session.query(assets.AssetCategory).filter(
+                                assets.AssetCategory.id == val).one()
+            kit_structure.type_of_assets.append(asset)
+        for val in set(asset_list) - \
+                        set(kit_structure_form.assets_category_list.data):
+            asset = meta.session.query(assets.AssetCategory).filter(
+                                assets.AssetCategory.id == val).one()
+            kit_structure.type_of_assets.remove(asset)
+        meta.session.commit()
+        return redirect(url_for('list_kit_type'))
+
+    kit_structure_form.assets_category_list.data = asset_list
+    kit_structure_form.active.data = kit_structure.active
+    return render_template('update_kit_type.html',
+                                kit_structure_form=kit_structure_form,
+                                kit_structure=kit_structure,
+                                asset_list=asset_list)
+
+   
+
+@app.route('/list/kit_type/')
+def list_kit_type():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    kit_types = meta.session.query(assets.AssetKitStructure).all()
+
+    return render_template('list_kit_type.html', kit_types=kit_types)
+   
 
 @app.route('/list/kits/', methods=['GET'])
 @app.route('/list/kits/?kit_types=<kit_types>', methods=['GET'])
@@ -661,17 +746,48 @@ def list_kits(kit_types=""):
         return redirect(url_for('index'))
 
     if not kit_types:
-        kits_list = meta.session.query(assets.Kit).filter(
+        kits_list = meta.session.query(assets.AssetKit).filter(
                                 assets.AssetKit.appointment_id == None).all()
     else:
         kits_list = []
-        query = meta.session.query(assets.Kit).filter(
+        query = meta.session.query(assets.AssetKit).filter(
                                 assets.AssetKit.appointment_id == None)
         for kit_type in kit_types.split(","):
             q = query.filter(
-                        assets.AssetKit.kit_structure_id == kit_type).all()
+                    assets.AssetKit.asset_kit_structure_id == kit_type).all()
             for kit in q:
                 kits_list.append(kit)
     
     return render_template('list_kits.html',
                             kits_list=kits_list)
+
+
+@app.route('/add/kit/', methods=['GET', 'POST'])
+def add_kit():
+    def _get_asset_kit_field_list():
+        return [ "asset_kit_structure_id", "creation_date" ]
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    
+    kit_form = AssetKitForm(request.form)
+    kit_form.asset_kit_structure_id.choices = get_kit_structure_id_choices()
+    kit_form.assets.choices = get_assets_in_kit_choices()
+    kit_form.end_use_reason.choices = get_end_use_reason_choices()
+    
+    if request.method == "POST" and kit_form.validate():
+        values = { f: getattr(kit_form, f).data
+            for f in _get_asset_kit_field_list() }
+        new_kit = assets.AssetKit(**values)
+        meta.session.add(new_kit)
+        for asset_id in kit_form.assets.data:
+            asset = meta.session.query(assets.Asset).filter(
+                                assets.Asset.id == asset_id).one()
+            new_kit.assets.append(asset)
+        meta.session.commit()
+        return redirect(url_for('list_kits'))
+
+    kit_form.creation_date.data = datetime.date.today()
+    return render_template('add_kit.html',
+                            kit_form=kit_form)

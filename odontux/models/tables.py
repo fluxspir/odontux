@@ -79,7 +79,7 @@ Column('phone_id', Integer, ForeignKey('phone.id'))
 )
 
 # assets.py / administration.py
-asset_provider_address_table = Table("assetprovider_address", Base.metadata,
+asset_provider_address_table = Table("asset_provider_address", Base.metadata,
 Column("asset_provider_id", Integer, ForeignKey("asset_provider.id")),
 Column("address_id", Integer, ForeignKey("address.id"))
 )

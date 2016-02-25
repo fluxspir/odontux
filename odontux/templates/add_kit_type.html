@@ -4,10 +4,11 @@ Add a new kit type
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_simple_field, render_hidden_field %}
-<form method="post" action="/provider/add/">
+<form method="post" action={{ url_for('add_kit_type') }}>
   <dl>
       {{ render_simple_field(kit_structure_form.name) }}
       {{ render_simple_field(kit_structure_form.assets_category_list) }}
+      {{ render_simple_field(kit_structure_form.active, default=True) }}
   </dl>
   <p><input type="submit" value="Add">
 </form>

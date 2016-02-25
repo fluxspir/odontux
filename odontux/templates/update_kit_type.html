@@ -1,0 +1,12 @@
+{% extends 'header.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action={{ url_for('update_kit_type', kit_type_id=kit_structure.id) }}>
+  <dl>
+    {{ render_field(kit_structure_form.name, value=kit_structure.name) }}
+    {{ render_field(kit_structure_form.assets_category_list) }}
+    {{ render_field(kit_structure_form.active) }}
+  </dl>
+  <p><input type="submit" value="Update">
+</form>
+{% endblock %}

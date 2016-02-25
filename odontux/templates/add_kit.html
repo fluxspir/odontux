@@ -1,0 +1,17 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+Add a new kit type
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_simple_field, render_hidden_field %}
+<form method="post" action={{ url_for('add_kit') }}>
+  <dl>
+      {{ render_simple_field(kit_form.asset_kit_structure_id) }}
+      {{ render_simple_field(kit_form.creation_date) }}
+      {{ render_simple_field(kit_form.assets) }}
+      {{ render_simple_field(kit_form.end_use_reason) }}
+  </dl>
+  <p><input type="submit" value="Add">
+</form>
+{% endblock %}
+

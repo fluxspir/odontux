@@ -170,7 +170,7 @@ def update_specialty(specialty_id):
 # Acts
 #####
 
-@app.route('/acttype?keywords=<keywords>&ordering=<ordering>')
+@app.route('/list/acttype?keywords=<keywords>&ordering=<ordering>')
 def list_acttype(keywords="", ordering=""):
     """ The target is too display dentist's gesture, describing it, its values.
     Looking in ActType table, we may decide to print only 
@@ -241,6 +241,8 @@ def add_acttype():
     """ """
     # TODO  BECAUSE DIFFICULT TO MAKE IT "PERFECT"
     form = ActTypeForm(request.form)
+    form.specialty_id.choices = get_specialty_choice_list()
+    form.cotationfr_id.choices = get_cotationfr_choice_list()
     if request.method == 'POST' and form.validate():
         values = {}
         values['specialty_id'] = form.specialty_id.data
@@ -252,7 +254,8 @@ def add_acttype():
         new_acttype = act.ActType(**values)
         meta.session.add(new_acttype)
         meta.session.commit()
-        return redirect(url_for('list_acttype'))
+        return redirect(url_for('list_acttype', keywords="", 
+                                                ordering=""))
     return render_template('/add_act.html', form=form)
 
 @app.route('/act/update_acttype=<int:acttype_id>/', methods=['GET', 'POST'])
