@@ -106,6 +106,7 @@ class MaterialCategory(AssetCategory):
                     0 = pieces
                     1 = volume
                     2 = weight
+                    3 = length
         * initial_quantity : how much of the product there is in one box
         * automatic_decresase : quantity of unity to decrease on a specific 
             utilisation.
@@ -144,6 +145,7 @@ class Asset(Base):
     __tablename__ = "asset"
     id = Column(Integer, primary_key=True)
     provider_id = Column(Integer, ForeignKey(AssetProvider.id), nullable=False)
+    provider = relationship('AssetProvider')
     asset_category_id = Column(Integer, ForeignKey(AssetCategory.id), 
                                                                 nullable=False)
     asset_category = relationship('AssetCategory')
@@ -154,7 +156,7 @@ class Asset(Base):
     office_id = Column(Integer, ForeignKey(users.DentalOffice.id))
     start_of_use = Column(Date, default=None)
     end_of_use = Column(Date, default=None)
-    end_use_reason = Column(Integer, default=None)
+    end_use_reason = Column(Integer, default=0)
     type = Column(String(20))
 
     __mapper_args__ = {
@@ -165,7 +167,7 @@ class Asset(Base):
     def element_of_kit(self):
         query =  meta.session.query(AssetKit
                                     ).filter(AssetKit.end_of_use == None
-                                    ).filter(AssetKit.end_use_reason == None
+                                    ).filter(AssetKit.end_use_reason == 0
                                     ).all()
         for q in query:
             for asset in q.assets:
@@ -224,11 +226,12 @@ class AssetKit(Base):
     id = Column(Integer, primary_key=True)
     asset_kit_structure_id = Column(Integer, ForeignKey(AssetKitStructure.id), 
                                                                 nullable=False)
+    asset_kit_structure = relationship("AssetKitStructure")
     assets = relationship("Asset", secondary=kit_asset_table,
                                         backref="kits")
     creation_date = Column(Date, nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                            default=None)
     end_of_use = Column(Date, default=None)
-    end_use_reason = Column(Integer, default=None)
+    end_use_reason = Column(Integer, default=0)
 

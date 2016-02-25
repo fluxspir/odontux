@@ -111,8 +111,8 @@ class PhoneForm(Form):
 class AddressForm(Form):
     address_id = TextField('address_id')
     street = TextField(_('street'), validators=[validators.Optional(),
-                                 validators.Length(max=50, message=_("""Number
-                                 and street must be less than 50 characters 
+                                 validators.Length(max=100, message=_("""Number
+                                 and street must be less than 100 characters 
                                  please"""))])
     complement = TextField(_('complement'), [validators.Optional()])
     building = TextField(_('building'), validators=[validators.Optional(), 

@@ -133,7 +133,7 @@ def list_specialty(ordering=[]):
     specialties = query.all()
     return render_template('list_specialty.html', specialties=specialties)
 
-@app.route('/specialty/add/', methods=['GET', 'POST'])
+@app.route('/add/specialty/', methods=['GET', 'POST'])
 def add_specialty():
     form = SpecialtyForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -165,6 +165,14 @@ def update_specialty(specialty_id):
     return render_template('update_specialty.html', form=form, 
                             specialty=specialty)
 
+@app.route('/delete/specialty?id=<int:specialty_id>')
+def delete_specialty(specialty_id):
+    specialty = meta.session.query(act.Specialty).filter(
+                    act.Specialty.id == specialty_id).one()
+    meta.session.delete(specialty)
+    meta.session.commit()
+    return redirect(url_for('list_specialty'))
+        
 
 #####
 # Acts

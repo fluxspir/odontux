@@ -6,8 +6,8 @@
 <br />
   <div id="searchresult">
   {% block searchresult %}
-    {% for (asset_category, asset) in assets_list %}
-        {{ asset_category.brand }} {{ asset_category.commercial_name }} {{ asset.expiration_date }} <br/>
+    {% for asset in assets_list %}
+        {{ asset.asset_category.brand }} {{ asset.asset_category.commercial_name }} {{ asset.expiration_date }} <br/>
         {% endfor %}
   {% endblock %}
   </div>

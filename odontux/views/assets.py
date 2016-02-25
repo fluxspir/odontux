@@ -46,7 +46,6 @@ def last_asset_provider():
     except AttributeError:
         return 1
 
-
 class AssetProviderForm(Form):
     asset_provider_id = HiddenField(_('id'))
     name = TextField(_('Asset provider name'), [validators.Required(
@@ -85,8 +84,7 @@ class MaterialCategoryForm(Form):
 
 class AssetForm(Form):
     asset_id  = HiddenField(_('id'))
-    provider_id = SelectField(_('Provider'), coerce=int,
-                                                default=last_asset_provider())
+    provider_id = SelectField(_('Provider'), coerce=int)
     #asset_category_id = SelectField(_('Asset Category'), coerce=int)
     acquisition_date = DateField(_('Acquisition Date'), format='%Y-%m-%d')
     acquisition_price = DecimalField(_('Acquisition Price'))
@@ -117,7 +115,7 @@ class MaterialForm(Form):
                                                     [validators.Optional()])
     expiration_date = DateField(_('Expiration Date'), format='%Y-%m-%d',
                                         validators=[validators.Optional()])
-    expiration_alert = IntegerField(_('Expiration Alert'),
+    expiration_alert = IntegerField(_('Expiration Alert in days'),
                                                     [validators.Optional()])
     batch_number = TextField(_('Batch number'), [validators.Optional()])
 
@@ -172,7 +170,7 @@ def get_asset_type_choices():
 
 def get_material_cat_unity_choices():
     return [ ( 0, _("pieces/items") ), ( 1, _("volume in mL") ), 
-                (2, _("weight in gr") ) ]
+                (2, _("weight in gr") ), (3, _('length in m') ) ]
 
 def get_end_use_reason_choices():
     return [ (0, _('in stock or in use') ), ( 1, _('Natural end of material')),
@@ -447,20 +445,20 @@ def list_assets(asset_type="all"):
     checks.quit_patient_file()
     checks.quit_appointment()
     
-    assets_list = [] 
     if asset_type == "device":
-        last_assets_list = meta.session.query(assets.Device).limit(10).all()
+        last_assets_list = meta.session.query(assets.Device).order_by(
+                                        assets.Device.acquisition_date.desc()
+                                        ).limit(100).all()
     elif asset_type == "material":
-        last_assets_list = meta.session.query(assets.Material).limit(10).all()
+        last_assets_list = meta.session.query(assets.Material).order_by(
+                                        assets.Asset.acquisition_date.desc()
+                                        ).limit(100).all()
     else:
-        last_assets_list = meta.session.query(assets.Asset).limit(10).all()
-    for asset in last_assets_list:
-        asset_category = meta.session.query(assets.AssetCategory).filter(
-                            assets.AssetCategory.id == asset.asset_category_id
-                            ).one()
-        assets_list.append( (asset_category, asset) )
+        last_assets_list = meta.session.query(assets.Asset).order_by(
+                                        assets.Asset.acquisition_date.desc()
+                                        ).limit(100).all()
     return render_template('list_assets.html', 
-                            assets_list=assets_list)
+                            assets_list=last_assets_list)
 
 @app.route('/add/asset/', methods=['POST', 'GET'])
 def add_asset():
@@ -526,10 +524,10 @@ def add_asset():
             values['office_id'] = asset_form.office_id.data
         values['asset_category_id'] = asset_cat.id
         if asset_form.service.data:
-            values['start_of_use'] = asset_form.start_of.use.data
+            values['start_of_use'] = asset_form.start_of_use.data
         for f in add_material_field_list:
             values[f] = getattr(material_form, f).data
-        if material_form.expiration_alert:
+        if material_form.expiration_alert.data:
             values['expiration_alert'] = datetime.timedelta(
                                         material_form.expiration_alert.data)
         values['actual_quantity'] = asset_cat.initial_quantity
@@ -605,6 +603,7 @@ def add_asset():
         clear_form = False
     else:
         clear_form = True
+    asset_form.provider_id.data = last_asset_provider()
     return render_template('add_asset.html',
                             asset_category_form=asset_category_form,
                             asset_form=asset_form,
@@ -761,6 +760,19 @@ def list_kits(kit_types=""):
     return render_template('list_kits.html',
                             kits_list=kits_list)
 
+@app.route('/view/kit?id=<kit_id>')
+def view_kit(kit_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    kit = meta.session.query(assets.AssetKit).filter(
+                                assets.AssetKit.id == kit_id).one()
+
+    return render_template("view_kit.html", kit=kit)
 
 @app.route('/add/kit/', methods=['GET', 'POST'])
 def add_kit():
@@ -791,3 +803,7 @@ def add_kit():
     kit_form.creation_date.data = datetime.date.today()
     return render_template('add_kit.html',
                             kit_form=kit_form)
+
+@app.route('/update/kit?id=<int:kit_id>', methods=['GET', 'POST'])
+def update_kit(kit_id):
+    pass

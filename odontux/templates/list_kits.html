@@ -7,7 +7,7 @@
   <div id="searchresult">
   {% block searchresult %}
     {% for kit in kits_list %}
-      {{kit.id}} -- {{ kit.creation_date }}
+      {{kit.id}} -- {{ kit.asset_kit_structure.name }} ; {{ kit.creation_date }} : <a href="{{ url_for('view_kit', kit_id=kit.id) }}">View</a>
       <ul>
     {% endfor %}
   {% endblock %}
