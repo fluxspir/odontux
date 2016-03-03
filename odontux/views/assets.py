@@ -47,7 +47,7 @@ def last_asset_provider():
         return 1
 
 class AssetProviderForm(Form):
-    asset_provider_id = HiddenField(_('id'))
+    id = HiddenField(_('id'))
     name = TextField(_('Asset provider name'), [validators.Required(
                                 message=_("Provider's name required")),
                                 validators.Length(max=30, 
@@ -56,7 +56,7 @@ class AssetProviderForm(Form):
     active = BooleanField(_('Active'))
 
 class AssetCategoryForm(Form):
-    asset_category_id = HiddenField(_('id'))
+    id = HiddenField(_('id'))
     barcode = TextField(_('Barcode'), [validators.Optional()])
     brand = TextField(_('Brand'), [validators.Required(
                                         message=_("Brand's name required"))])
@@ -68,12 +68,12 @@ class AssetCategoryForm(Form):
     type = SelectField(_('Type'), description='ChangementType()')
 
 class DeviceCategoryForm(Form):
-    device_category_id = HiddenField(_('id'))
+    id = HiddenField(_('id'))
     sterilizable = BooleanField(_('Sterilizable'))
     sterilizer = BooleanField(_('This device is an Autoclave/Sterilizer ?'))
 
 class MaterialCategoryForm(Form):
-    material_category_id = HiddenField(_('id'))
+    id = HiddenField(_('id'))
     order_threshold = DecimalField(_("Order's threshold"), 
                                                     [validators.Optional()])
     unity = SelectField(_('Unity'), coerce=int)
@@ -83,7 +83,7 @@ class MaterialCategoryForm(Form):
                                                     [validators.Optional()])
 
 class AssetForm(Form):
-    asset_id  = HiddenField(_('id'))
+    id  = HiddenField(_('id'))
     provider_id = SelectField(_('Provider'), coerce=int)
     #asset_category_id = SelectField(_('Asset Category'), coerce=int)
     acquisition_date = DateField(_('Acquisition Date'), format='%Y-%m-%d')
@@ -242,6 +242,7 @@ def get_kit_structure_id_choices():
 def verify_asset_cat_already_in_db(new_asset):
     """ test if barcode in db ; 
         if not, test if both brand and commercial_name are in it.
+        return instance of asset_category if exist
     """
     asset_cat_in_db = None
     if new_asset.barcode.data:
@@ -613,6 +614,120 @@ def add_asset():
                             material_form=material_form,
                             clear_form=clear_form)
 
+@app.route('/update/asset_category?id=<int:asset_category_id>', methods=['GET', 'POST'])
+def update_asset_category(asset_category_id):
+    pass
+
+@app.route('/update/asset?id=<int:asset_id>', methods=['GET', 'POST'])
+def update_asset(asset_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    
+    asset = meta.session.query(assets.Asset).filter(
+                            assets.Asset.id == asset_id).one()
+
+    asset_form = AssetForm(request.form)
+    asset_form.provider_id.choices = get_asset_provider_choices()
+    asset_form.user_id.choices = get_user_choices()
+    asset_form.office_id.choices = get_office_choices()
+    asset_form.end_use_reason.choices = get_end_use_reason_choices()
+    device_form = DeviceForm(request.form)
+    material_form = MaterialForm(request.form)
+
+    update_asset_field_list = [ "id", "provider_id", "acquisition_date", 
+                        "acquisition_price", "new", "user_id", "office_id",
+                        "start_of_use", "end_of_use", "end_use_reason"]
+
+    update_device_field_list = [ "lifetime_expected" ]
+
+    update_material_field_list = [ "used_in_traceability_of", 
+                    "expiration_date", "actual_quantity", "expiration_alert", 
+                    "batch_number" ]
+ 
+    if (request.method == 'POST' and asset.type == "device"
+        and asset_form.validate() and device_form.validate() ):
+        for f in update_asset_field_list:
+            setattr(asset, f, getattr(asset_form, f).data)
+        for f in update_device_field_list:
+            if f == "lifetime_expected":
+                setattr(asset, f, datetime.timedelta(getattr(
+                                                device_form, f).data * 365))
+        meta.session.commit()
+        return redirect(url_for('view_device', asset_id=asset.id))
+        
+    if (request.method == "POST" and asset.type == "material"
+        and asset_form.validate() and material_form.validate() ):
+        for f in update_asset_field_list:
+            setattr(asset, f, getattr(asset_form, f).data)
+        for f in update_material_field_list:
+            if f == "expiration_alert":
+                setattr(asset, f, datetime.timedelta(getattr(
+                                                    material_form, f).data))
+            else:
+                setattr(asset, f, getattr(material_form, f).data)
+        meta.session.commit()
+        return redirect(url_for('view_material', asset_id=asset.id))
+
+   
+    if request.method == 'POST':
+        clear_form = False
+    else:
+        clear_form = True
+
+    if asset.type == "device":
+        for f in update_asset_field_list:
+            getattr(asset_form, f).data = getattr(asset, f)
+        for f in update_device_field_list:
+            if f == "lifetime_expected":
+                getattr(device_form, f).data =\
+                            int(getattr(asset, f).total_seconds() / (86400*365))
+            else:
+                getattr(device_form, f).data = getattr(asset, f)
+        return render_template('update_device.html',
+                            asset_form=asset_form,
+                            device_form=device_form,
+                            asset=asset,
+                            clear_form=clear_form)
+
+    else:
+        for f in update_asset_field_list:
+            getattr(asset_form, f).data = getattr(asset, f)
+        for f in update_material_field_list:
+            if f == "expiration_alert":
+                getattr(material_form, f).data =\
+                                    int(getattr(asset, f).total_seconds() / 86400)
+            else:
+                getattr(material_form, f).data = getattr(asset, f)
+        return render_template('update_material.html',
+                            asset_form=asset_form,
+                            material_form=material_form,
+                            asset=asset,
+                            clear_form=clear_form)
+
+@app.route('/view/asset&id=<int:asset_id>')
+def view_asset(asset_id):
+    asset = meta.session.query(assets.Asset).filter(
+                                    assets.Asset.id == asset_id).one()
+    if asset.type == "device":
+        return redirect(url_for('view_device', asset_id=asset_id))
+    elif asset.type == "material":
+        return redirect(url_for('view_material', asset_id=asset_id))
+    else:
+        return redirect(url_for('index'))
+
+@app.route('/view/device&id=<int:asset_id>')
+def view_device(asset_id):
+    asset = meta.session.query(assets.Asset).filter(
+                                assets.Asset.id == asset_id).one()
+    return render_template('view_device.html', asset=asset)
+
+@app.route('/view/material&id=<int:asset_id>')
+def view_material(asset_id):
+    asset = meta.session.query(assets.Asset).filter(
+                                assets.Asset.id == asset_id).one()
+    return render_template('view_material.html', asset=asset)
 
 @app.route('/test_barcode/')
 def test_barcode():
