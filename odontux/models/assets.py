@@ -183,7 +183,7 @@ class Device(Asset):
     """
     __tablename__ = "device"
     id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
-    lifetime_expected = Column(Interval, nullable=True)
+    lifetime_expected = Column(Interval, default=None)
 
     __mapper_args__ = {
         'polymorphic_identity': 'device',

@@ -651,7 +651,7 @@ def update_asset(asset_id):
         for f in update_asset_field_list:
             setattr(asset, f, getattr(asset_form, f).data)
         for f in update_device_field_list:
-            if f == "lifetime_expected":
+            if f == "lifetime_expected" and getattr(device_form, f).data:
                 setattr(asset, f, datetime.timedelta(getattr(
                                                 device_form, f).data * 365))
         meta.session.commit()
@@ -680,7 +680,7 @@ def update_asset(asset_id):
         for f in update_asset_field_list:
             getattr(asset_form, f).data = getattr(asset, f)
         for f in update_device_field_list:
-            if f == "lifetime_expected":
+            if f == "lifetime_expected" and getattr(asset, f):
                 getattr(device_form, f).data =\
                             int(getattr(asset, f).total_seconds() / (86400*365))
             else:
