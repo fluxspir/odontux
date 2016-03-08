@@ -138,7 +138,9 @@ class AssetKitForm(Form):
     end_use_reason = SelectField(_('Reason to end of use'), coerce=int ) 
 
 def get_kit_structure_assets_choices():
-    assets_category = meta.session.query(assets.AssetCategory).all()
+    assets_category = meta.session.query(assets.DeviceCategory).filter(
+                                    assets.DeviceCategory.sterilizable == True
+                                    ).all()
     if not assets_category:
         return [ (0, "") ]
     return [ (r.id, r.brand + " || " + r.commercial_name) 
@@ -150,9 +152,9 @@ def get_assets_in_kit_choices():
     #   * be sterilizable
     #   * Not be in a kit sterilized ready to use
     assets_list = []
-    query = meta.session.query(assets.Device).join(assets.DeviceCategory
-                            ).filter(assets.Device.end_of_use == None
-                            ).filter(assets.Device.end_use_reason == None
+    query = meta.session.query(assets.Asset).join(assets.DeviceCategory
+                            ).filter(assets.Asset.end_of_use == None
+                            ).filter(assets.Asset.end_use_reason == 0
                             ).filter(assets.DeviceCategory.sterilizable == True
                             ).all()
     for asset in query:
