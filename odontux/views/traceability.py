@@ -15,7 +15,7 @@ from sqlalchemy import and_, or_
 from gettext import gettext as _
 from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
                     SelectField, BooleanField, TextAreaField, DecimalField,
-                    DateField,
+                    DateField, SelectMultipleField,
                     validators)
 
 from odontux import constants, checks
@@ -59,13 +59,14 @@ class SterilizationCycleForm(Form):
 class SimplifiedTraceabilityForm(Form):
     id = HiddenField(_('id'))
     number_of_items = IntegerField(_('Number of Items'),
-                                                    [validators.Required()])
+                                                    [validators.InputRequired()
+                                                    ])
     validity = IntegerField(_('Validity in days'), [validators.Required()],
                                                 default=90)
 
 class CompleteTraceabilityForm(Form):
     id = HiddenField(_('id'))
-    item_id = SelectField(_('item'), coerce=int)
+    items_id = SelectMultipleField(_('items'), coerce=int)
     validity = IntegerField(_('Validity in days'), [validators.Required()],
                                                     default=90)
 
@@ -353,7 +354,8 @@ def add_simplified_traceability():
         values['expiration_date'] = ( ste_cycle_form.cycle_date.data +
                     datetime.timedelta(simple_traceability_form.validity.data))
                                         
-        values['number_of_items'] = simple_traceability_form.number_of_items
+        values['number_of_items'] = \
+                                simple_traceability_form.number_of_items.data
 
         new_simple_traceability = traceability.SimplifiedTraceability(**values)
         meta.session.add(new_simple_traceability)
@@ -379,7 +381,52 @@ def list_sterilization_cycle():
     return render_template('list_sterilization_cycle.html',
                                             ste_cycles=ste_cycles)
 
-@app.route('/update/sterilization_cycle?id=<int:ste_cycle_mode_id>', 
+@app.route('/update/sterilization_cycle?id=<int:ste_cycle_id>', 
                                                     methods=['GET', 'POST'])
 def update_sterilization_cycle(ste_cycle_id):
     pass
+
+@app.route('/add/complete_traceability/', methods=["GET", "POST"])
+def add_complete_traceability():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    
+    ste_cycle_form = SterilizationCycleForm(request.form)
+    ste_cycle_form.user_id.choices = get_ste_cycle_form_user_id_choices()
+    ste_cycle_form.sterilizer_id.choices = \
+                            get_ste_cycle_form_sterilizer_id_choices()
+    ste_cycle_form.cycle_type_id.choices = \
+                            get_ste_cycle_form_cycle_type_id_choices()
+    ste_cycle_form.cycle_mode_id.choices = \
+                            get_ste_cycle_form_cycle_mode_id_choices()
+    ste_cycle_form.cycle_complement_id.choices = \
+                            get_ste_cycle_form_cycle_complement_id_choices()
+
+    complete_traceability_form = CompleteTraceabilityForm(request.form)
+
+
+    if ( request.method == "POST" and ste_cycle_form.validate() 
+                           and complete_traceability_form.validate() ):
+        
+        values = { f: getattr(ste_cycle_form, f).data 
+                    for f in get_sterilization_cycle_field_list() }
+        
+        values['expiration_date'] = ( ste_cycle_form.cycle_date.data +
+                    datetime.timedelta(simple_traceability_form.validity.data))
+                                        
+
+        new_complete_traceability = traceability.CompleteTraceability(**values)
+        meta.session.add(new_complete_traceability)
+        meta.session.commit()
+        return redirect(url_for('list_sterilization_cycle'))
+
+    return render_template('add_complete_traceability.html',
+                        ste_cycle_form=ste_cycle_form,
+                        complete_traceability_form=complete_traceability_form)
+
+

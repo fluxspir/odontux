@@ -4,14 +4,16 @@
   <!-- <a href="{{ url_for('add_asset') }}">Add new asset</a> -->
 {% endif %}
 <br />
-<a href={{ url_for('add_simplified_traceability') }}>Add new simplified traceability sterilization cycle</a>
+<a href={{ url_for('add_simplified_traceability') }}>Add new SIMPLIFIED traceability sterilization cycle</a> || <a href={{ url_for('add_complete_traceability') }}>Add new COMPLETE traceability sterilization cycle</a> 
+<br /><br />
   <div id="searchresult">
   {% block searchresult %}
     {% for ste_cycle in ste_cycles %}
-      {{ ste_cycle.user.username }} -- {{ ste_cycle.reference }}<br />
+      Cycle id : {{ ste_cycle.id }} || {{ ste_cycle.cycle_date }} | Type : {{ ste_cycle.cycle_type.name }} -- Mode : {{ ste_cycle.cycle_mode.name }} -- User : {{ ste_cycle.user.username }} -- {{ ste_cycle.reference }}
       {% if session.role == session.ROLE_DENTIST %}
-      <a href={{ url_for('update_sterilization_cycle', ste_cycle_id=ste_cycle.id) }}>Update</a><br />
+      <a href={{ url_for('update_sterilization_cycle', ste_cycle_id=ste_cycle.id) }}>Update</a>
       {% endif %}
+      <br />
     {% endfor %}
   {% endblock %}
   </div>
