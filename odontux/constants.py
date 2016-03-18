@@ -53,3 +53,8 @@ TOOTH_EVENT_ATTRIBUTES = [ "sane", "place", "mobility", "fracture", "absence",
 CROWN_EVENT_ATTRIBUTES = [ "sealing", "decay", "obturation", "crowned", 
                            "bridge" ]
 ROOT_EVENT_ATTRIBUTES = [ "infected", "abscess", "obturation", "inlaycore" ]
+
+END_USE_REASON = [ (0, _('In stock or in use') ), ( 1, _('Natural end of the asset')),
+            (2, _('Unconvenient') ), (3, _('Obsolete / Out of date') ), 
+            (4, _('Remove from market') ), (5, _('Lost') ) ]
+
