@@ -175,10 +175,9 @@ def get_material_cat_unity_choices():
                 (2, _("weight in gr") ), (3, _('length in m') ) ]
 
 def get_end_use_reason_choices():
-    return [ (0, _('in stock or in use') ), ( 1, _('Natural end of material')),
-            (2, _('Unconvenient') ), (3, _('Obsolete / Out of date') ), 
-            (4, _('Remove from market') ), (5, _('Lost') ) ]
-
+    return constants.END_USE_REASON
+    
+    
 def get_asset_cat_field_list():
     return [ "brand", "commercial_name",
                 "description", "type"]

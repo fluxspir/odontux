@@ -14,6 +14,12 @@
   Start of use : {{ asset.start_of_use }} <br />
   Expected lifetime : {{ asset.lifetime_expected }} <br />
   end of use : {{ asset.end_of_use }} <br />
+  Reason to end of use : 
+    {% for reason in session.end_use_reason %}
+      {% if reason[0] == asset.end_use_reason %}
+        {{ reason[1] }}
+      {% endif %}
+    {% endfor %}
   <br />
   <a href="{{ url_for('update_asset', asset_id=asset.id) }}">Update</a>
 

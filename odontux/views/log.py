@@ -52,6 +52,7 @@ def login():
                     session['ROLE_ADMIN'] = constants.ROLE_ADMIN
                     session['ROLE_PATIENT'] = constants.ROLE_PATIENT
                     session['avatar_id'] = user.avatar_id
+                    session['end_use_reason'] = constants.END_USE_REASON
 
                     if request.form['password'] == "please_change_password":
                         return redirect(url_for('update_user',

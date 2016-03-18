@@ -386,8 +386,12 @@ def list_sterilization_cycle():
 def update_sterilization_cycle(ste_cycle_id):
     pass
 
-@app.route('/add/complete_traceability/', methods=["GET", "POST"])
-def add_complete_traceability():
+@app.route('/update_assets_in_complete_traceability/')
+def update_assets_in_complete_traceability():
+    pass
+
+@app.route('/select/asset_for_complete_traceability/', methods=['GET', 'POST'])
+def select_asset_for_complete_traceability():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
@@ -395,38 +399,92 @@ def add_complete_traceability():
 
     checks.quit_patient_file()
     checks.quit_appointment()
-    
-    ste_cycle_form = SterilizationCycleForm(request.form)
-    ste_cycle_form.user_id.choices = get_ste_cycle_form_user_id_choices()
-    ste_cycle_form.sterilizer_id.choices = \
-                            get_ste_cycle_form_sterilizer_id_choices()
-    ste_cycle_form.cycle_type_id.choices = \
-                            get_ste_cycle_form_cycle_type_id_choices()
-    ste_cycle_form.cycle_mode_id.choices = \
-                            get_ste_cycle_form_cycle_mode_id_choices()
-    ste_cycle_form.cycle_complement_id.choices = \
-                            get_ste_cycle_form_cycle_complement_id_choices()
 
-    complete_traceability_form = CompleteTraceabilityForm(request.form)
+    if request.method == 'POST':
+        pass
+
+    assets_list = []
+
+    # Je veux créer une liste des assets pouvant faire partie de la prochaine stérilisation.
+    # Pour en faire partie, je cherche dans mes assets :
+    #   * end_of_use == None : pas de date de fin d'utilisation (donc en service)
+    #   * end_use_reason == 0 : 0 → le asset est considéré comme "in use or in stock
+    #   * le asset est un élément stérilisable
+    #   * le asset n'est pas stériliser - en sachet OU la date de péremption de sa stérilisation
+    # est dépassée
+    #   
+    # Les assets qui sont dans des kits ne rentrent pas dans cette liste ; cette liste, sera
+    # incrémentée (de la même façon) par les kits juste après. Pour cette raison, je ne veux
+    # pas que des assets faisant partie de kits apparaissent :
+    #   * les kits en fonctionnement (end_use == None et end_use_reason == 0) n'apparaissent
+    # pas
+    #   * les assets filtrés ne doivent pas parti de ces kits.
+    #
+    query = meta.session.query(assets.Asset).join(assets.DeviceCategory
+                            ).filter(assets.Asset.end_of_use == None
+                            ).filter(assets.Asset.end_use_reason == 0
+                            ).filter(assets.DeviceCategory.sterilizable == True
+                            )
+    # comment faire :
+    query = query.filter(or_(
+                assets.Asset.id =! tracebility.CompleteTraceability.assets_id,
+                traceability.CompleteTraceability.expiration_date < datetime.date.today()
+                )
+                )
+
+    query = query.filter(assets.AssetKit.end_of_use == None
+                        ).filter(assets.AssetKit.end_use_reason == 0
+                        ).filter(assets.Asset.id =! assets.AssetKit.assets.asset_id
+                        )
 
 
-    if ( request.method == "POST" and ste_cycle_form.validate() 
-                           and complete_traceability_form.validate() ):
-        
-        values = { f: getattr(ste_cycle_form, f).data 
-                    for f in get_sterilization_cycle_field_list() }
-        
-        values['expiration_date'] = ( ste_cycle_form.cycle_date.data +
-                    datetime.timedelta(simple_traceability_form.validity.data))
-                                        
 
-        new_complete_traceability = traceability.CompleteTraceability(**values)
-        meta.session.add(new_complete_traceability)
-        meta.session.commit()
-        return redirect(url_for('list_sterilization_cycle'))
-
-    return render_template('add_complete_traceability.html',
-                        ste_cycle_form=ste_cycle_form,
-                        complete_traceability_form=complete_traceability_form)
+    return render_template('select_assets_for_complete_traceability.html',
+                                assets_list=assets_list)
 
 
+
+#@app.route('/add/complete_traceability/', methods=["GET", "POST"])
+#def add_complete_traceability():
+#    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+#                        constants.ROLE_ASSISTANT ]
+#    if session['role'] not in authorized_roles:
+#        return redirect(url_for('index'))
+#
+#    checks.quit_patient_file()
+#    checks.quit_appointment()
+#    
+#    ste_cycle_form = SterilizationCycleForm(request.form)
+#    ste_cycle_form.user_id.choices = get_ste_cycle_form_user_id_choices()
+#    ste_cycle_form.sterilizer_id.choices = \
+#                            get_ste_cycle_form_sterilizer_id_choices()
+#    ste_cycle_form.cycle_type_id.choices = \
+#                            get_ste_cycle_form_cycle_type_id_choices()
+#    ste_cycle_form.cycle_mode_id.choices = \
+#                            get_ste_cycle_form_cycle_mode_id_choices()
+#    ste_cycle_form.cycle_complement_id.choices = \
+#                            get_ste_cycle_form_cycle_complement_id_choices()
+#
+#    complete_traceability_form = CompleteTraceabilityForm(request.form)
+#
+#
+#    if ( request.method == "POST" and ste_cycle_form.validate() 
+#                           and complete_traceability_form.validate() ):
+#        
+#        values = { f: getattr(ste_cycle_form, f).data 
+#                    for f in get_sterilization_cycle_field_list() }
+#        
+#        values['expiration_date'] = ( ste_cycle_form.cycle_date.data +
+#                    datetime.timedelta(simple_traceability_form.validity.data))
+#                                        
+#
+#        new_complete_traceability = traceability.CompleteTraceability(**values)
+#        meta.session.add(new_complete_traceability)
+#        meta.session.commit()
+#        return redirect(url_for('list_sterilization_cycle'))
+#
+#    return render_template('add_complete_traceability.html',
+#                        ste_cycle_form=ste_cycle_form,
+#                        complete_traceability_form=complete_traceability_form)
+#
+#
