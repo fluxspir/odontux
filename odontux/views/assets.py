@@ -152,11 +152,15 @@ def get_assets_in_kit_choices():
     #   * be sterilizable
     #   * Not be in a kit sterilized ready to use
     assets_list = []
-    query = meta.session.query(assets.Asset).join(assets.DeviceCategory
-                            ).filter(assets.Asset.end_of_use == None
-                            ).filter(assets.Asset.end_use_reason == 0
-                            ).filter(assets.DeviceCategory.sterilizable == True
-                            ).all()
+    query = (
+            meta.session.query(assets.Asset).join(assets.DeviceCategory)
+            .filter(assets.Asset.end_of_use == None)
+            .filter(assets.Asset.end_use_reason ==
+                                        constants.END_USE_REASON_IN_USE_STOCK)
+            .filter(assets.DeviceCategory.sterilizable == True)
+            .all()
+        )
+
     for asset in query:
         if not asset.element_of_kit():
             assets_list.append( (asset.id, (asset.asset_category.brand + " " +
@@ -176,7 +180,6 @@ def get_material_cat_unity_choices():
 
 def get_end_use_reason_choices():
     return constants.END_USE_REASON
-    
     
 def get_asset_cat_field_list():
     return [ "brand", "commercial_name",

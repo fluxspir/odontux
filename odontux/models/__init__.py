@@ -40,7 +40,7 @@ def init():
     parser = ConfigParser.ConfigParser()
     home = os.path.expanduser("~")
     parser.read(os.path.join(home, ".odontuxrc"))
-    db_url = parser.get("db", "url")
+    db_url = parser.get("dbtest", "url")
 
     engine = create_engine(db_url, echo=False, convert_unicode=True)
 #    Session = sessionmaker(bind=engine)

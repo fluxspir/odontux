@@ -54,7 +54,17 @@ CROWN_EVENT_ATTRIBUTES = [ "sealing", "decay", "obturation", "crowned",
                            "bridge" ]
 ROOT_EVENT_ATTRIBUTES = [ "infected", "abscess", "obturation", "inlaycore" ]
 
-END_USE_REASON = [ (0, _('In stock or in use') ), ( 1, _('Natural end of the asset')),
-            (2, _('Unconvenient') ), (3, _('Obsolete / Out of date') ), 
-            (4, _('Remove from market') ), (5, _('Lost') ) ]
+END_USE_REASON_IN_USE_STOCK = 0
+END_USE_REASON_NATURAL_END = 1
+END_USE_REASON_UNCONVENIENT = 2
+END_USE_REASON_OBSOLETE = 3
+END_USE_REASON_REMOVE_MARKET = 4
+END_USE_REASON_LOST = 5
+END_USE_REASON = [ (END_USE_REASON_IN_USE_STOCK, _('In stock or in use') ), 
+                    ( END_USE_REASON_NATURAL_END, _('Natural end of the asset')),
+                    ( END_USE_REASON_UNCONVENIENT, _('Unconvenient') ), 
+                    ( END_USE_REASON_OBSOLETE, _('Obsolete / Out of date') ), 
+                    ( END_USE_REASON_REMOVE_MARKET, _('Remove from market') ), 
+                    ( END_USE_REASON_LOST, _('Lost') ) 
+                ]
 

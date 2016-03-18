@@ -390,8 +390,8 @@ def update_sterilization_cycle(ste_cycle_id):
 def update_assets_in_complete_traceability():
     pass
 
-@app.route('/select/asset_for_complete_traceability/', methods=['GET', 'POST'])
-def select_asset_for_complete_traceability():
+@app.route('/select/assets_for_complete_traceability/', methods=['GET', 'POST'])
+def select_assets_for_complete_traceability():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
@@ -420,32 +420,57 @@ def select_asset_for_complete_traceability():
     # pas
     #   * les assets filtrés ne doivent pas parti de ces kits.
     #
-    query = meta.session.query(assets.Asset).join(assets.DeviceCategory
-                            ).filter(assets.Asset.end_of_use == None
-                            ).filter(assets.Asset.end_use_reason == 0
-                            ).filter(assets.DeviceCategory.sterilizable == True
-                            )
-    # comment faire :
-    query = query.filter(or_(
-                assets.Asset.id =! tracebility.CompleteTraceability.assets_id,
-                traceability.CompleteTraceability.expiration_date < datetime.date.today()
-                )
-                )
-
-    query = query.filter(assets.AssetKit.end_of_use == None
-                        ).filter(assets.AssetKit.end_use_reason == 0
-                        ).filter(assets.Asset.id =! assets.AssetKit.assets.asset_id
-                        )
-
-
-
+    query = (
+        meta.session.query(assets.Asset)
+            .filter(assets.Asset.end_of_use == None)
+            .filter(assets.Asset.end_use_reason ==
+                                        constants.END_USE_REASON_IN_USE_STOCK)
+            .filter(assets.DeviceCategory.sterilizable == True)
+            .filter(~assets.Asset.id.in_(
+                meta.session.query(traceability.CompleteTraceability)))
+            .filter(traceability.CompleteTraceability.expiration_date.in_(
+                meta.session.query(traceability.CompleteTraceability.expiration_date<
+                                                        datetime.date.today())))
+            .filter(~assets.Asset.id.in_(
+                        meta.session.query(assets.AssetKit)
+                            .filter(assets.AssetKit.end_of_use == None)
+                            .filter(assets.AssetKit.end_use_reason ==
+                                        constants.END_USE_REASON_IN_USE_STOCK)
+                                        )
+                    )
+    )
+    pdb.set_trace()
+#    old_complete_traceabilities =\
+#                meta.session.query(traceability.CompleteTraceability).all()
+#    if old_complete_traceabilities:
+#        for old_traceability in old_complete_traceabilities:
+#            query = (
+#                query.filter(or_(
+#                    assets.Asset.id != old_traceability.asset_id,
+#                    traceability.CompleteTraceability.expiration_date <\
+#                            datetime.date.today()
+#                )
+#            )
+#        )
+#    kits = (
+#        meta.session.query(assets.AssetKit)
+#            .filter(assets.AssetKit.end_of_use == None)
+#            .filter(assets.AssetKit.end_use_reason ==\
+#                            constants.END_USE_REASON_IN_USE_STOCK)
+#            all()
+#    )
+#    if kits:
+#        for kit in kits:
+#        query = query.filter(assets.Asset.id != kit.asset_id
+#
     return render_template('select_assets_for_complete_traceability.html',
                                 assets_list=assets_list)
 
 
 
-#@app.route('/add/complete_traceability/', methods=["GET", "POST"])
-#def add_complete_traceability():
+@app.route('/add/complete_traceability/', methods=["GET", "POST"])
+def add_complete_traceability():
+    pass
 #    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
 #                        constants.ROLE_ASSISTANT ]
 #    if session['role'] not in authorized_roles:
