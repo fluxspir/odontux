@@ -426,18 +426,31 @@ def select_assets_for_complete_traceability():
             .filter(assets.Asset.end_use_reason ==
                                         constants.END_USE_REASON_IN_USE_STOCK)
             .filter(assets.DeviceCategory.sterilizable == True)
-            .filter(~assets.Asset.id.in_(
-                meta.session.query(traceability.CompleteTraceability)))
-            .filter(traceability.CompleteTraceability.expiration_date.in_(
-                meta.session.query(traceability.CompleteTraceability.expiration_date<
-                                                        datetime.date.today())))
-            .filter(~assets.Asset.id.in_(
+            )
+    pdb.set_trace()
+    
+#    query2 = meta.session.query(traceability.CompleteTraceability).all()
+
+    query = (
+            query.filter(~assets.Asset.id.in_(
+                meta.session.query(
+                            traceability.CompleteTraceability.assets)
+                                            )
+                        )
+            )
+    pdb.set_trace()
+            #.filter(traceability.CompleteTraceability.expiration_date.in_(
+            #    meta.session.query(traceability.CompleteTraceability.assets.expiration_date<
+            #                                            datetime.date.today())))
+    query = (
+            query.filter(~assets.Asset.id.in_(
                         meta.session.query(assets.AssetKit)
                             .filter(assets.AssetKit.end_of_use == None)
                             .filter(assets.AssetKit.end_use_reason ==
                                         constants.END_USE_REASON_IN_USE_STOCK)
                                         )
                     )
+            
     )
     pdb.set_trace()
 #    old_complete_traceabilities =\
