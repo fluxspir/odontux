@@ -414,21 +414,23 @@ def select_assets_for_complete_traceability():
                                         constants.END_USE_REASON_IN_USE_STOCK)
             # the asset is a device marked as sterilizable
             .filter(assets.DeviceCategory.sterilizable == True)
-
             .filter(or_(
-                # the sterilized asset wasn't use on an appointment but its 
-                # sterilization expiration date is passed.
-                and_(
-                    traceability.AssetSterilized.appointment_id.is_(None),
-                    traceability.AssetSterilized.expiration_date <= 
+                        and_(
+                            traceability.AssetSterilized.asset_id.isnot(None),
+                            # the sterilized asset wasn't use on an appointment
+                            # but its sterilization expiration date is passed.
+                            and_(
+                        traceability.AssetSterilized.appointment_id.is_(None),
+                        traceability.AssetSterilized.expiration_date <= 
                                                         datetime.date.today()
-                    ),
+                            ),
                 # the asset doesn't exist in the sterilized environment without
                 # an appointment_id correlation, which means it could be 
                 # sterilized
-                traceability.AssetSterilized.appointment_id.isnot(None)
+                    traceability.AssetSterilized.appointment_id.isnot(None)
+                        )
+                    )
                 )
-            )
             # the asset can't be in a kit that...
             .filter(~assets.Asset.id.in_(
                 meta.session.query(assets.AssetKit).join(
