@@ -84,42 +84,56 @@ class SterilizationCycle(Base):
     cycle_date = Column(Date, nullable=False)
     reference = Column(String, default="")
     document = Column(String, default="")
-    type = Column(String(30))
+#    type = Column(String(30))
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'sterilization_cycle',
-        'polymorphic_on': type
-    }
+#    __mapper_args__ = {
+#        'polymorphic_identity': 'sterilization_cycle',
+#        'polymorphic_on': type
+#    }
+#
 
-class SimplifiedTraceability(SterilizationCycle):
-    """
-        Number of items in the cycle
-        Number of days in seconds before peremption
-    """
-    __tablename__ = "simplified_traceability"
-    id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
-    number_of_items = Column(Integer, nullable=False)
+class AssetSterilized(Base):
+    """ """
+    __tablename__ = "asset_sterilized"
+    id = Column(Integer, primary_key=True)
+    traceability_id = Column(Integer, ForeignKey(SterilizationCycle.id), 
+                                                                nullable=False)
+    asset_id = Column(Integer, ForeignKey(assets.Asset.id))
+    kit_id = Column(Integer, ForeignKey(assets.AssetKit.id))
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id))
     expiration_date = Column(Date, nullable=False)
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'simplified_traceability'
-    }
+#class SimplifiedTraceability(SterilizationCycle):
+#    """
+#        Number of items in the cycle
+#        Number of days in seconds before peremption
+#    """
+#    __tablename__ = "simplified_traceability"
+#    id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
+#    number_of_items = Column(Integer, nullable=False)
+#    expiration_date = Column(Date, nullable=False)
+#
+#    __mapper_args__ = {
+#        'polymorphic_identity': 'simplified_traceability'
+#    }
+#
+#class CompleteTraceability(SterilizationCycle):
+#    """
+#        
+#    """
+#    __tablename__ = "complete_traceability"
+#    id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
+#    assets = relationship('Asset', secondary=traceability_asset_table,
+#                                                    backref="traceabilities")
+#    kits = relationship('AssetKit', secondary=traceability_kit_table,
+#                                                    backref="traceabilities")
+#
+#    def number_of_items(self):
+#        # return func.sum(self.assets + self.kits)
+#        pass
+#
+#    __mapper_args__ = {
+#        'polymorphic_identity': 'complete_traceability'
+#    }
+#
 
-class CompleteTraceability(SterilizationCycle):
-    """
-        
-    """
-    __tablename__ = "complete_traceability"
-    id = Column(Integer, ForeignKey(SterilizationCycle.id), primary_key=True)
-    assets = relationship('Asset', secondary=traceability_asset_table,
-                                                    backref="traceabilities")
-    kits = relationship('AssetKit', secondary=traceability_kit_table,
-                                                    backref="traceabilities")
-
-    def number_of_items(self):
-        # return func.sum(self.assets + self.kits)
-        pass
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'complete_traceability'
-    }
