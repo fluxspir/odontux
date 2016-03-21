@@ -91,9 +91,9 @@ class AssetSterilized(Base):
     id = Column(Integer, primary_key=True)
     traceability_id = Column(Integer, ForeignKey(SterilizationCycle.id), 
                                                                 nullable=False)
-    asset_id = Column(Integer, ForeignKey(assets.Asset.id), default=0)
-    kit_id = Column(Integer, ForeignKey(assets.AssetKit.id), default=0)
+    asset_id = Column(Integer, ForeignKey(assets.Asset.id), default=None)
+    kit_id = Column(Integer, ForeignKey(assets.AssetKit.id), default=None)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id), 
-                                                                default=0)
+                                                                default=None)
     expiration_date = Column(Date, nullable=False)
 

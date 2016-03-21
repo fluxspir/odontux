@@ -406,7 +406,7 @@ def select_assets_for_complete_traceability():
     assets_list = []
 
     query = (
-        meta.session.query(assets.Asset).join(traceability.AssetSterilized)
+        meta.session.query(assets.Asset)
             # the asset hasn't a thow_away date
             .filter(assets.Asset.end_of_use == None)
             # the asset is still in use or in stock
@@ -414,35 +414,51 @@ def select_assets_for_complete_traceability():
                                         constants.END_USE_REASON_IN_USE_STOCK)
             # the asset is a device marked as sterilizable
             .filter(assets.DeviceCategory.sterilizable == True)
-            .filter(or_(
-                        and_(
-                            traceability.AssetSterilized.asset_id.isnot(None),
-                            # the sterilized asset wasn't use on an appointment
-                            # but its sterilization expiration date is passed.
-                            and_(
-                        traceability.AssetSterilized.appointment_id.is_(None),
-                        traceability.AssetSterilized.expiration_date <= 
+        )
+    
+    query2 = (
+        query.filter(or_(
+            # The asset never was Sterilized
+            ~assets.Asset.id.in_(
+                meta.session.query(traceability.AssetSterilized.asset_id)
+                ),
+            # The asset had been sterilized but wasn't use on an appointment
+            # and its sterilization expiration date is passed. 
+            assets.Asset.id.in_(
+                meta.session.query(traceability.AssetSterilized.asset_id)
+                    .filter(traceability.AssetSterilized.appointment_id.is_(
+                                                                        None))
+                    .filter(traceability.AssetSterilized.expiration_date <=
                                                         datetime.date.today()
-                            ),
-                # the asset doesn't exist in the sterilized environment without
-                # an appointment_id correlation, which means it could be 
-                # sterilized
-                    traceability.AssetSterilized.appointment_id.isnot(None)
+                            )
+                    ),
+            # the asset doesn't exist in the sterilized environment without
+            # an appointment_id correlation, which means it could be 
+            # sterilized
+            ~assets.Asset.id.in_(
+                meta.session.query(traceability.AssetSterilized.asset_id)
+                    .filter(traceability.AssetSterilized.appointment_id.is_(
+                                                                        None)
                         )
                     )
                 )
+            )
+        )
+    query3 = (
+        query2.filter(
             # the asset can't be in a kit that...
-            .filter(~assets.Asset.id.in_(
+            ~assets.Asset.id.in_(
                 meta.session.query(assets.AssetKit).join(
-                                                        assets.AssetKit.assets)
-                    # ... has not been use
+                                                assets.AssetKit.assets)
+                    # has not been use
                     .filter(assets.AssetKit.end_of_use.is_(None))
                     .filter(assets.AssetKit.end_use_reason !=
                                         constants.END_USE_REASON_IN_USE_STOCK)
                     .filter(assets.AssetKit.appointment_id.is_(None))
                     )
                 )
-    )
+            )
+        
     pdb.set_trace()
 
 #    kits = (
