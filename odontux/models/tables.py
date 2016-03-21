@@ -106,23 +106,6 @@ Column("kit_structure_id", Integer, ForeignKey("asset_kit_structure.id")),
 Column("asset_category_id", Integer, ForeignKey("asset_category.id"))
 )
 
-# traceability.py / assets.py
-traceability_asset_table = Table("traceability_asset", Base.metadata,
-Column("id", Integer, primary_key=True),
-Column("traceability_id", Integer, ForeignKey("complete_traceability.id")),
-Column("asset_id", Integer, ForeignKey("asset.id")),
-Column("appointment_id", Integer, ForeignKey("appointment.id")),
-Column("expiration_date", Date, nullable=False)
-)
-
-traceability_kit_table = Table("traceability_kit", Base.metadata,
-Column("id", Integer, primary_key=True),
-Column("traceability_id", Integer, ForeignKey("complete_traceability.id")),
-Column("kit_id", Integer, ForeignKey("asset_kit.id")),
-Column("appointment_id", Integer, ForeignKey("appointment.id")),
-Column("expiration_date", Date, nullable=False)
-)
-
 # assets.py / appointment.py
 material_appointment_table = Table("material_appointment", Base.metadata,
 Column('id', Integer, primary_key=True),

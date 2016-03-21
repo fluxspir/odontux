@@ -33,8 +33,7 @@ from compta import PaymentType, Payment
 from assets import (AssetProvider, AssetCategory, MaterialCategory,
                     Asset, Device, Material, AssetKitStructure, AssetKit)
 from traceability import (SterilizationCycleType, SterilizationCycleMode,
-                            SterilizationCycle, 
-                            SimplifiedTraceability, CompleteTraceability)
+                            SterilizationCycle, AssetSterilized)
 
 def init():
     parser = ConfigParser.ConfigParser()

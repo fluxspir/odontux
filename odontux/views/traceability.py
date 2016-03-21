@@ -405,66 +405,44 @@ def select_assets_for_complete_traceability():
 
     assets_list = []
 
-    # Je veux créer une liste des assets pouvant faire partie de la prochaine stérilisation.
-    # Pour en faire partie, je cherche dans mes assets :
-    #   * end_of_use == None : pas de date de fin d'utilisation (donc en service)
-    #   * end_use_reason == 0 : 0 → le asset est considéré comme "in use or in stock
-    #   * le asset est un élément stérilisable
-    #   * le asset n'est pas stériliser - en sachet OU la date de péremption de sa stérilisation
-    # est dépassée
-    #   
-    # Les assets qui sont dans des kits ne rentrent pas dans cette liste ; cette liste, sera
-    # incrémentée (de la même façon) par les kits juste après. Pour cette raison, je ne veux
-    # pas que des assets faisant partie de kits apparaissent :
-    #   * les kits en fonctionnement (end_use == None et end_use_reason == 0) n'apparaissent
-    # pas
-    #   * les assets filtrés ne doivent pas parti de ces kits.
-    #
     query = (
-        meta.session.query(assets.Asset)
+        meta.session.query(assets.Asset).join(traceability.AssetSterilized)
+            # the asset hasn't a thow_away date
             .filter(assets.Asset.end_of_use == None)
+            # the asset is still in use or in stock
             .filter(assets.Asset.end_use_reason ==
                                         constants.END_USE_REASON_IN_USE_STOCK)
+            # the asset is a device marked as sterilizable
             .filter(assets.DeviceCategory.sterilizable == True)
-            )
-    pdb.set_trace()
-    
-#    query2 = meta.session.query(traceability.CompleteTraceability).all()
 
-    query = (
-            query.filter(~assets.Asset.id.in_(
-                meta.session.query(
-                            traceability.CompleteTraceability.assets)
-                                            )
-                        )
+            .filter(or_(
+                # the sterilized asset wasn't use on an appointment but its 
+                # sterilization expiration date is passed.
+                and_(
+                    traceability.AssetSterilized.appointment_id.is_(None),
+                    traceability.AssetSterilized.expiration_date <= 
+                                                        datetime.date.today()
+                    ),
+                # the asset doesn't exist in the sterilized environment without
+                # an appointment_id correlation, which means it could be 
+                # sterilized
+                traceability.AssetSterilized.appointment_id.isnot(None)
+                )
             )
-    pdb.set_trace()
-            #.filter(traceability.CompleteTraceability.expiration_date.in_(
-            #    meta.session.query(traceability.CompleteTraceability.assets.expiration_date<
-            #                                            datetime.date.today())))
-    query = (
-            query.filter(~assets.Asset.id.in_(
-                        meta.session.query(assets.AssetKit)
-                            .filter(assets.AssetKit.end_of_use == None)
-                            .filter(assets.AssetKit.end_use_reason ==
+            # the asset can't be in a kit that...
+            .filter(~assets.Asset.id.in_(
+                meta.session.query(assets.AssetKit).join(
+                                                        assets.AssetKit.assets)
+                    # ... has not been use
+                    .filter(assets.AssetKit.end_of_use.is_(None))
+                    .filter(assets.AssetKit.end_use_reason !=
                                         constants.END_USE_REASON_IN_USE_STOCK)
-                                        )
+                    .filter(assets.AssetKit.appointment_id.is_(None))
                     )
-            
+                )
     )
     pdb.set_trace()
-#    old_complete_traceabilities =\
-#                meta.session.query(traceability.CompleteTraceability).all()
-#    if old_complete_traceabilities:
-#        for old_traceability in old_complete_traceabilities:
-#            query = (
-#                query.filter(or_(
-#                    assets.Asset.id != old_traceability.asset_id,
-#                    traceability.CompleteTraceability.expiration_date <\
-#                            datetime.date.today()
-#                )
-#            )
-#        )
+
 #    kits = (
 #        meta.session.query(assets.AssetKit)
 #            .filter(assets.AssetKit.end_of_use == None)
