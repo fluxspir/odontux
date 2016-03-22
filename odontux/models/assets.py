@@ -81,6 +81,7 @@ class AssetCategory(Base):
     commercial_name = Column(String, default="", nullable=False)
     description = Column(String, default="")
     asset_specialty_id = Column(Integer, ForeignKey(act.Specialty.id))
+    asset_specialty = relationship("act.Specialty")
     type = Column(String)
 
     __mapper_args__ = {
@@ -92,7 +93,7 @@ class DeviceCategory(AssetCategory):
     __tablename__ = "device_category"
     id = Column(Integer, ForeignKey(AssetCategory.id), primary_key=True)
     sterilizable = Column(Boolean, nullable=False)
-    validity = Column(Interval, default=datetime.timedelta(15))
+    validity = Column(Interval, default=datetime.timedelta(90))
     sterilizer = Column(Boolean, default=False)
 
     __mapper_args__ = {
@@ -166,12 +167,22 @@ class Asset(Base):
         'polymorphic_identity': 'asset',
         'polymorphic_on': type
     }
-    
+
+    def is_sterilizable(self):
+        query = (
+            meta.session.query(DeviceCategory)
+                .filter(DeviceCategory.id == self.asset_category_id)
+                .one_or_none().sterilizable
+            )
+        return query
+
     def element_of_kit(self):
-        query =  meta.session.query(AssetKit
-                                    ).filter(AssetKit.end_of_use == None
-                                    ).filter(AssetKit.end_use_reason == 0
-                                    ).all()
+        query = (
+            meta.session.query(AssetKit)
+                .filter(AssetKit.end_of_use.is_(None))
+                .filter(AssetKit.end_use_reason == 0)
+                .filter(AssetKit.appointment_id.is_(None))
+                ).all()
         for q in query:
             for asset in q.assets:
                 if asset.id == self.id:
