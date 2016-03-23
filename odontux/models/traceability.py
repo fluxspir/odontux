@@ -76,7 +76,7 @@ class SterilizationCycle(Base):
                                                     nullable=False)
     cycle_type = relationship("SterilizationCycleType")
     cycle_mode_id = Column(Integer, ForeignKey(SterilizationCycleMode.id),
-                                                    nullable=False)
+                                                   nullable=False)
     cycle_mode = relationship("SterilizationCycleMode")
     cycle_complement_id = Column(Integer, ForeignKey(
                                 SterilizationComplement.id), nullable=False)
@@ -89,11 +89,11 @@ class AssetSterilized(Base):
     """ """
     __tablename__ = "asset_sterilized"
     id = Column(Integer, primary_key=True)
-    traceability_id = Column(Integer, ForeignKey(SterilizationCycle.id), 
+    sterilization_cycle_id = Column(Integer, ForeignKey(SterilizationCycle.id),
                                                                 nullable=False)
     asset_id = Column(Integer, ForeignKey(assets.Asset.id), default=None)
     kit_id = Column(Integer, ForeignKey(assets.AssetKit.id), default=None)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id), 
                                                                 default=None)
     expiration_date = Column(Date, nullable=False)
-
+4

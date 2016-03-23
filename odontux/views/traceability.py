@@ -56,20 +56,20 @@ class SterilizationCycleForm(Form):
     reference = TextField(_('Reference'), [validators.Optional()])
     document = TextField(_('Path to document'), [validators.Optional()])
 
-class SimplifiedTraceabilityForm(Form):
-    id = HiddenField(_('id'))
-    number_of_items = IntegerField(_('Number of Items'),
-                                                    [validators.InputRequired()
-                                                    ])
-    validity = IntegerField(_('Validity in days'), [validators.Required()],
-                                                default=90)
-
-class CompleteTraceabilityForm(Form):
-    id = HiddenField(_('id'))
-    items_id = SelectMultipleField(_('items'), coerce=int)
-    validity = IntegerField(_('Validity in days'), [validators.Required()],
-                                                    default=90)
-
+#class SimplifiedTraceabilityForm(Form):
+#    id = HiddenField(_('id'))
+#    number_of_items = IntegerField(_('Number of Items'),
+#                                                    [validators.InputRequired()
+#                                                    ])
+#    validity = IntegerField(_('Validity in days'), [validators.Required()],
+#                                                default=90)
+#
+#class CompleteTraceabilityForm(Form):
+#    id = HiddenField(_('id'))
+#    items_id = SelectMultipleField(_('items'), coerce=int)
+#    validity = IntegerField(_('Validity in days'), [validators.Required()],
+#                                                    default=90)
+#
 def get_sterilization_cycle_mode_field_list():
     return [ "name", "heat_type", "temperature", "pressure", "comment" ]
 
@@ -322,8 +322,8 @@ def get_ste_cycle_form_cycle_complement_id_choices():
     return meta.session.query(traceability.SterilizationComplement.id,
                         traceability.SterilizationComplement.complement).all()
 
-@app.route('/add/simplified_traceability/', methods=["GET", "POST"])
-def add_simplified_traceability():
+@app.route('/add/sterilization_cycle/', methods=["GET", "POST"])
+def add_sterilization_cycle():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
@@ -333,6 +333,33 @@ def add_simplified_traceability():
     checks.quit_appointment()
     
     ste_cycle_form = SterilizationCycleForm(request.form)
+
+    if ( request.method == "POST" and ste_cycle_form.validate() 
+                           and simple_traceability_form.validate() ):
+        
+        values = { f: getattr(ste_cycle_form, f).data 
+                    for f in get_sterilization_cycle_field_list() }
+        
+        new_sterilization_cycle = traceability.SterilizationCycle(**values)
+        meta.session.add(new_sterilization_cycle)
+        meta.session.commit()
+        
+        for asset in session['assets_to_sterilize']:
+            values = {}
+            values['sterilization_cycle_id'] = new_sterilization_cycle.id
+            values['expiration_date'] = datetime.timedelta(asset[2])
+            if asset[0] == "a":
+                values['asset_id'] = asset[1]
+            elif asset[0] == "k":
+                values['kit_id'] = asset[1]
+            else:
+                pass
+            new_asset_sterilized = traceability.AssetSterilized(**values)
+            meta.session.add(new_asset_sterilized)
+            meta.session.commit()
+
+        return redirect(url_for('list_sterilization_cycle'))
+
     ste_cycle_form.user_id.choices = get_ste_cycle_form_user_id_choices()
     ste_cycle_form.sterilizer_id.choices = \
                             get_ste_cycle_form_sterilizer_id_choices()
@@ -343,28 +370,8 @@ def add_simplified_traceability():
     ste_cycle_form.cycle_complement_id.choices = \
                             get_ste_cycle_form_cycle_complement_id_choices()
 
-    simple_traceability_form = SimplifiedTraceabilityForm(request.form)
-
-    if ( request.method == "POST" and ste_cycle_form.validate() 
-                           and simple_traceability_form.validate() ):
-        
-        values = { f: getattr(ste_cycle_form, f).data 
-                    for f in get_sterilization_cycle_field_list() }
-        
-        values['expiration_date'] = ( ste_cycle_form.cycle_date.data +
-                    datetime.timedelta(simple_traceability_form.validity.data))
-                                        
-        values['number_of_items'] = \
-                                simple_traceability_form.number_of_items.data
-
-        new_simple_traceability = traceability.SimplifiedTraceability(**values)
-        meta.session.add(new_simple_traceability)
-        meta.session.commit()
-        return redirect(url_for('list_sterilization_cycle'))
-
-    return render_template('add_simplified_traceability.html',
-                        ste_cycle_form=ste_cycle_form,
-                        simple_traceability_form=simple_traceability_form)
+    return render_template('add_sterilization_cycle.html',
+                        ste_cycle_form=ste_cycle_form)
 
 @app.route('/list/sterilization_cycle/', methods=['GET', 'POST'])
 def list_sterilization_cycle():
@@ -403,12 +410,25 @@ def select_assets_for_complete_traceability():
     if request.method == 'POST':
         pass
 
-    query = (
+    query_kits = (
+        meta.session.query(assets.AssetKit)
+            .filter(assets.AssetKit.end_of_use.is_(None),
+                    assets.AssetKit.end_use_reason ==
+                                        constants.END_USE_REASON_IN_USE_STOCK,
+                    assets.AssetKit.appointment_id.is_(None)
+            ).join(assets.AssetKitStructure)
+                .order_by(
+                assets.AssetKitStructure.name,
+                assets.AssetKit.id
+                )
+        )
+
+    query_assets = (
         meta.session.query(assets.Asset)
             # the asset hasn't a thow_away date : it's probably in service
             # the asset is still marked : in use or in stock
             # Asset is in use, not in stock
-            .filter(assets.Asset.end_of_use == None,
+            .filter(assets.Asset.end_of_use.is_(None),
                     assets.Asset.end_use_reason ==
                                         constants.END_USE_REASON_IN_USE_STOCK,
                     assets.Asset.start_of_use.isnot(None)
@@ -469,23 +489,16 @@ def select_assets_for_complete_traceability():
 
         
     assets_list = []
-    for asset in query.all():
+    kits_list = []
+
+    for asset in query_assets.all():
         if not asset.element_of_kit():
             assets_list.append(asset)
+    for kit in query_kits.all():
+        kits_list.append(kit)
 
-
-#    kits = (
-#        meta.session.query(assets.AssetKit)
-#            .filter(assets.AssetKit.end_of_use == None)
-#            .filter(assets.AssetKit.end_use_reason ==\
-#                            constants.END_USE_REASON_IN_USE_STOCK)
-#            all()
-#    )
-#    if kits:
-#        for kit in kits:
-#        query = query.filter(assets.Asset.id != kit.asset_id
-#
     return render_template('select_assets_for_complete_traceability.html',
+                                kits_list=kits_list,
                                 assets_list=assets_list)
 
 

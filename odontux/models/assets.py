@@ -220,7 +220,7 @@ class Material(Asset):
 class AssetKitStructure(Base):
     """
         This table will enable to create kits more easily.
-        asset_category_id : Assets that may be include in this type of kit.
+        type_of_assets : Assets that may be include in this type of kit.
         This way, when we want to create a kit, only assets relevent are in
         the choice list.
     """
@@ -248,4 +248,4 @@ class AssetKit(Base):
                                                            default=None)
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
-
+    

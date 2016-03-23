@@ -4,7 +4,7 @@ Add a Simple Sterilization Cycle
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_field, render_hidden_field, render_field_js_onchange %}
-<form method="post" action={{ url_for('add_simplified_traceability') }}>
+<form method="post" action={{ url_for('add_sterilization_cycle') }}>
 
     {{ render_field(ste_cycle_form.user_id) }}
     {{ render_field(ste_cycle_form.sterilizer_id) }}

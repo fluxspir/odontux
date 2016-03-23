@@ -4,9 +4,13 @@
   <a href="{{ url_for('index') }}">NE PAS CLIQUER</a>
 {% endif %}
 <br />
-        {{ assets_list|length }} <br />
   <div id="searchresult">
   {% block searchresult %}
+    <strong>Kits</strong> : {{ kits_list|length }}<br />
+    {% for kit in kits_list %}
+      <a href="{{ url_for('view_kit', kit_id=kit.id) }}">{{ kit.id }} -- {{ kit.asset_kit_structure.name }}</a> <br />
+    {% endfor %}
+    <strong>Assets</strong> : {{ assets_list|length }} <br />
     {% for asset in assets_list %}
         <a href="{{ url_for('view_asset', asset_id=asset.id) }}">{{ asset.id }} -- {{ asset.asset_category.brand }} {{ asset.asset_category.commercial_name }} -- {{ asset.asset_category.description }} -- {{ asset.expiration_date }}</a> ||| {{ asset.asset_category.asset_specialty.name }} <br />
         {% endfor %}
