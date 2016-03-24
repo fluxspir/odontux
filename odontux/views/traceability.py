@@ -56,13 +56,17 @@ class SterilizationCycleForm(Form):
     reference = TextField(_('Reference'), [validators.Optional()])
     document = TextField(_('Path to document'), [validators.Optional()])
 
+class AssetTraceabilityForm(Form):
+    item_id = HiddenField(_('id'))
+    item_type = HiddenField(_('type'))
+    validity = IntegerField(_('Validity in days'), [validators.Required()],
+                                default=90)
+
 #class SimplifiedTraceabilityForm(Form):
 #    id = HiddenField(_('id'))
 #    number_of_items = IntegerField(_('Number of Items'),
 #                                                    [validators.InputRequired()
 #                                                    ])
-#    validity = IntegerField(_('Validity in days'), [validators.Required()],
-#                                                default=90)
 #
 #class CompleteTraceabilityForm(Form):
 #    id = HiddenField(_('id'))
@@ -322,83 +326,7 @@ def get_ste_cycle_form_cycle_complement_id_choices():
     return meta.session.query(traceability.SterilizationComplement.id,
                         traceability.SterilizationComplement.complement).all()
 
-@app.route('/add/sterilization_cycle/', methods=["GET", "POST"])
-def add_sterilization_cycle():
-    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
-                        constants.ROLE_ASSISTANT ]
-    if session['role'] not in authorized_roles:
-        return redirect(url_for('index'))
-
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
-    ste_cycle_form = SterilizationCycleForm(request.form)
-
-    if ( request.method == "POST" and ste_cycle_form.validate() 
-                           and simple_traceability_form.validate() ):
-        
-        values = { f: getattr(ste_cycle_form, f).data 
-                    for f in get_sterilization_cycle_field_list() }
-        
-        new_sterilization_cycle = traceability.SterilizationCycle(**values)
-        meta.session.add(new_sterilization_cycle)
-        meta.session.commit()
-        
-        for asset in session['assets_to_sterilize']:
-            values = {}
-            values['sterilization_cycle_id'] = new_sterilization_cycle.id
-            values['expiration_date'] = datetime.timedelta(asset[2])
-            if asset[0] == "a":
-                values['asset_id'] = asset[1]
-            elif asset[0] == "k":
-                values['kit_id'] = asset[1]
-            else:
-                pass
-            new_asset_sterilized = traceability.AssetSterilized(**values)
-            meta.session.add(new_asset_sterilized)
-            meta.session.commit()
-
-        return redirect(url_for('list_sterilization_cycle'))
-
-    ste_cycle_form.user_id.choices = get_ste_cycle_form_user_id_choices()
-    ste_cycle_form.sterilizer_id.choices = \
-                            get_ste_cycle_form_sterilizer_id_choices()
-    ste_cycle_form.cycle_type_id.choices = \
-                            get_ste_cycle_form_cycle_type_id_choices()
-    ste_cycle_form.cycle_mode_id.choices = \
-                            get_ste_cycle_form_cycle_mode_id_choices()
-    ste_cycle_form.cycle_complement_id.choices = \
-                            get_ste_cycle_form_cycle_complement_id_choices()
-
-    return render_template('add_sterilization_cycle.html',
-                        ste_cycle_form=ste_cycle_form)
-
-@app.route('/list/sterilization_cycle/', methods=['GET', 'POST'])
-def list_sterilization_cycle():
-    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
-                        constants.ROLE_ASSISTANT ]
-    if session['role'] not in authorized_roles:
-        return redirect(url_for('index'))
-
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
-    ste_cycles = meta.session.query(traceability.SterilizationCycle).all()
-    
-    return render_template('list_sterilization_cycle.html',
-                                            ste_cycles=ste_cycles)
-
-@app.route('/update/sterilization_cycle?id=<int:ste_cycle_id>', 
-                                                    methods=['GET', 'POST'])
-def update_sterilization_cycle(ste_cycle_id):
-    pass
-
-@app.route('/update_assets_in_complete_traceability/')
-def update_assets_in_complete_traceability():
-    pass
-
-@app.route('/select/assets_for_complete_traceability/', methods=['GET', 'POST'])
-def select_assets_for_complete_traceability():
+def get_assets_list_for_sterilization_cycle():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
@@ -407,8 +335,10 @@ def select_assets_for_complete_traceability():
     checks.quit_patient_file()
     checks.quit_appointment()
 
-    if request.method == 'POST':
-        pass
+    assets_list = {
+        "assets": [],
+        "kits": []
+        }
 
     query_kits = (
         meta.session.query(assets.AssetKit)
@@ -487,21 +417,141 @@ def select_assets_for_complete_traceability():
                         )
             )
 
-        
-    assets_list = []
-    kits_list = []
-
+    for kit in query_kits.all():
+        assets_list['kits'].append(kit)
     for asset in query_assets.all():
         if not asset.element_of_kit():
-            assets_list.append(asset)
-    for kit in query_kits.all():
-        kits_list.append(kit)
+            assets_list['assets'].append(asset)
 
-    return render_template('select_assets_for_complete_traceability.html',
-                                kits_list=kits_list,
-                                assets_list=assets_list)
+    return assets_list
 
+@app.route('/create/sterilization_list', methods=["GET", "POST"])
+def create_sterilization_list():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
 
+    checks.quit_patient_file()
+    checks.quit_appointment()
+
+    if not 'assets_to_sterilize' in session:
+        return redirect(url_for('add_sterilization_cycle'))
+
+    if request.method == 'POST' :
+        pass
+
+    assets_list = get_assets_list_for_sterilization_cycle()
+    assets_forms_list = { "kits": [], "assets": [] }
+
+    for kit in assets_list['kits']:
+        form = AssetSterilizedForm(request.form)
+        form.item_id.data = kit.id
+        form.item_type.data = "kit"
+        form.validity.data = kit.asset_kit_structure.validity
+        assets_form_list["kits"].append(kit, form)
+    for asset in assets_list['assets']:
+        form = AssetSterilizedForm(request.form)
+        form.item_id.data = asset.id
+        form.item_type.data = "asset"
+        form.validity.data = asset.asset_category.validity
+        assets_form_list['assets'].append(asset, form)
+
+    for asset in session['assets_to_sterilize']:
+        if asset[0] == "a":
+            if asset[1] in assets_list['assets']:
+                assets_form_list['assets'][asset[1].id].pop()
+        if asset[0] == "k":
+            if asset[1] in assets_list['kits']:
+                assets_list['kits'][asset[1].id].pop()
+
+    return render_template('select_assets_for_sterilization.html',
+                                                assets_list=assets_form_list)
+    
+
+@app.route('/add/sterilization_cycle/', methods=["GET", "POST"])
+def add_sterilization_cycle():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    
+    ste_cycle_form = SterilizationCycleForm(request.form)
+
+    if not 'assets_to_sterilize' in session:
+        # session['assets_to_sterilize'] = list of asset_to_sterilize
+        # asset_to_sterilize = ( type, asset, form, validity_in_days )
+        # type = "a" ou "k" ou None
+        # asset = instance of asset ou kit.
+        # form : AssetSterilizedForm
+        # validity_in_days of the sterilization
+        session['assets_to_sterilize'] = []
+
+    if ( request.method == "POST" and ste_cycle_form.validate() 
+                           and simple_traceability_form.validate() ):
+        
+        values = { f: getattr(ste_cycle_form, f).data 
+                    for f in get_sterilization_cycle_field_list() }
+        
+        new_sterilization_cycle = traceability.SterilizationCycle(**values)
+        meta.session.add(new_sterilization_cycle)
+        meta.session.commit()
+        
+        for asset in session['assets_to_sterilize']:
+            values = {}
+            values['sterilization_cycle_id'] = new_sterilization_cycle.id
+            values['expiration_date'] = datetime.date(
+                                        new_sterilization_cycle.cycle_date + 
+                                        datetime.timedelta(asset[3]))
+            if asset[0] == "a":
+                values['asset_id'] = asset[1]
+            elif asset[0] == "k":
+                values['kit_id'] = asset[1]
+            else:
+                pass
+            new_asset_sterilized = traceability.AssetSterilized(**values)
+            meta.session.add(new_asset_sterilized)
+            meta.session.commit()
+    
+        session['assets_to_sterilize'].pop()
+        return redirect(url_for('list_sterilization_cycle'))
+
+    ste_cycle_form.user_id.choices = get_ste_cycle_form_user_id_choices()
+    ste_cycle_form.sterilizer_id.choices = \
+                            get_ste_cycle_form_sterilizer_id_choices()
+    ste_cycle_form.cycle_type_id.choices = \
+                            get_ste_cycle_form_cycle_type_id_choices()
+    ste_cycle_form.cycle_mode_id.choices = \
+                            get_ste_cycle_form_cycle_mode_id_choices()
+    ste_cycle_form.cycle_complement_id.choices = \
+                            get_ste_cycle_form_cycle_complement_id_choices()
+
+    #assets_list = get_assets_list_for_sterilization_cycle()
+    return render_template('add_sterilization_cycle.html',
+                        ste_cycle_form=ste_cycle_form)
+
+@app.route('/list/sterilization_cycle/', methods=['GET', 'POST'])
+def list_sterilization_cycle():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    
+    ste_cycles = meta.session.query(traceability.SterilizationCycle).all()
+    
+    return render_template('list_sterilization_cycle.html',
+                                            ste_cycles=ste_cycles)
+
+@app.route('/update/sterilization_cycle?id=<int:ste_cycle_id>', 
+                                                    methods=['GET', 'POST'])
+def update_sterilization_cycle(ste_cycle_id):
+    pass
 
 @app.route('/add/complete_traceability/', methods=["GET", "POST"])
 def add_complete_traceability():
