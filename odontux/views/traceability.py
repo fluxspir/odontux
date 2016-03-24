@@ -56,7 +56,7 @@ class SterilizationCycleForm(Form):
     reference = TextField(_('Reference'), [validators.Optional()])
     document = TextField(_('Path to document'), [validators.Optional()])
 
-class AssetTraceabilityForm(Form):
+class AssetSterilizedForm(Form):
     item_id = HiddenField(_('id'))
     item_type = HiddenField(_('type'))
     validity = IntegerField(_('Validity in days'), [validators.Required()],
@@ -386,8 +386,8 @@ def get_assets_list_for_sterilization_cycle():
                 # appointment and its sterilization expiration date is passed. 
                 assets.Asset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
-                        .filter(traceability.AssetSterilized.appointment_id.is_(
-                                                                        None))
+                        .filter(traceability.AssetSterilized.appointment_id.is_
+                                                                        (None))
                         .filter(traceability.AssetSterilized.expiration_date <=
                                                         datetime.date.today()
                                 )
@@ -401,9 +401,8 @@ def get_assets_list_for_sterilization_cycle():
                 # sterilized
                 ~assets.Asset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
-                        .filter(traceability.AssetSterilized.appointment_id.is_(
-                                                                        None)
-                            )
+                        .filter(traceability.AssetSterilized.appointment_id.is_
+                                                                        (None))
                         )
                     )
                 ).join(assets.AssetCategory, act.Specialty)
@@ -425,6 +424,31 @@ def get_assets_list_for_sterilization_cycle():
 
     return assets_list
 
+@app.route('/remove/asset_from_sterilization', methods=["POST"])
+def remove_asset_from_sterilization():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    
+    form = AssetSterilizedForm(request.form)
+    if form.validate():
+        pdb.set_trace() 
+        if form.item_type.data == "kit":
+            session['assets_to_sterilize'] = [
+                (t, a_id, v) for (t, a_id, v) in session['assets_to_sterilize']
+                if t == "k" and not a_id == form.item_id.data ]
+            pdb.set_trace() 
+        if form.item_type.data == "asset":
+            session['assets_to_sterilize'] = [
+                (t, a_id, v) for (t, a_id, v) in session['assets_to_sterilize']
+                if t == "a" and not a_id == form.item_id.data ]
+
+    return redirect(url_for('create_sterilization_list'))
+
 @app.route('/create/sterilization_list', methods=["GET", "POST"])
 def create_sterilization_list():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
@@ -437,37 +461,81 @@ def create_sterilization_list():
 
     if not 'assets_to_sterilize' in session:
         return redirect(url_for('add_sterilization_cycle'))
-
-    if request.method == 'POST' :
-        pass
-
-    assets_list = get_assets_list_for_sterilization_cycle()
-    assets_forms_list = { "kits": [], "assets": [] }
-
-    for kit in assets_list['kits']:
+    # create list of asset to sterilize with their own form,
+    # and own datas
+    sterilize_assets_list = { "kits": [], "assets": [] }
+    for ( t, a_id, v) in session['assets_to_sterilize']:
         form = AssetSterilizedForm(request.form)
-        form.item_id.data = kit.id
-        form.item_type.data = "kit"
-        form.validity.data = kit.asset_kit_structure.validity
-        assets_form_list["kits"].append(kit, form)
-    for asset in assets_list['assets']:
-        form = AssetSterilizedForm(request.form)
-        form.item_id.data = asset.id
-        form.item_type.data = "asset"
-        form.validity.data = asset.asset_category.validity
-        assets_form_list['assets'].append(asset, form)
-
-    for asset in session['assets_to_sterilize']:
-        if asset[0] == "a":
-            if asset[1] in assets_list['assets']:
-                assets_form_list['assets'][asset[1].id].pop()
-        if asset[0] == "k":
-            if asset[1] in assets_list['kits']:
-                assets_list['kits'][asset[1].id].pop()
-
-    return render_template('select_assets_for_sterilization.html',
-                                                assets_list=assets_form_list)
+        form.item_id.data = a_id
+        form.validity.data = v
+        if t == "a":
+            asset = ( meta.session.query(assets.Asset)
+                        .filter(assets.Asset.id == a_id).one() )
+            form.item_type.data = "asset"
+            sterilize_assets_list['assets'].append( (asset, form) )
+        if t == "k":
+            kit = ( meta.session.query(assets.AssetKit)
+                        .filter(assets.AssetKit.id == a_id).one() )
+            form.item_type.data = "kit"
+            sterilize_assets_list['kits'].append( (kit, form) )
     
+    form = AssetSterilizedForm(request.form)
+
+    if request.method == 'POST' and form.validate():
+        if form.item_type.data == "kit":
+            kit = ( meta.session.query(assets.AssetKit)
+                        .filter(assets.AssetKit.id == form.item_id.data)
+                        .one()
+                    )
+            session['assets_to_sterilize'].append(
+                                        ("k", kit.id, form.validity.data))
+            sterilize_assets_list['kits'].append( (kit, form) )
+        if form.item_type.data == "asset":
+            asset = ( meta.session.query(assets.Asset)
+                        .filter(assets.Asset.id == form.item_id.data)
+                        .one()
+                    )
+            session['assets_to_sterilize'].append(
+                                        ("a", asset.id, form.validity.data))
+            sterilize_assets_list['assets'].append( (asset, form) )
+
+        return redirect(url_for('create_sterilization_list'))
+
+    # get list of assets
+    assets_list = get_assets_list_for_sterilization_cycle()
+    # each asset has his own form, with own datas.
+    # creation of a new  with asset and form.
+    assets_form_list = { "kits": [], "assets": [] }
+
+    # list des kit_id to sterilize and asset_id
+    ste_kit_id_list = []
+    ste_asset_id_list = []
+    for item in sterilize_assets_list['kits']:
+        ste_kit_id_list.append(item[0].id)
+    for item in sterilize_assets_list['assets']:
+        ste_asset_id_list.append(item[0].id)
+    # creation of the kits' forms.
+    for kit in assets_list['kits']:
+        if kit.id not in ste_kit_id_list:
+            form = AssetSterilizedForm(request.form)
+            form.item_id.data = kit.id
+            form.item_type.data = "kit"
+            form.validity.data = int(
+                    kit.asset_kit_structure.validity.total_seconds() / 86400)
+            assets_form_list["kits"].append((kit, form))
+    # creation of the assets' forms.
+    for asset in assets_list['assets']:
+        if asset.id not in ste_asset_id_list:
+            form = AssetSterilizedForm(request.form)
+            form.item_id.data = asset.id
+            form.item_type.data = "asset"
+            form.validity.data = int(
+                    asset.asset_category.validity.total_seconds() / 86400)
+            assets_form_list['assets'].append((asset, form))
+    
+    return render_template('select_assets_for_sterilization.html',
+                                assets_list=assets_form_list,
+                                sterilize_assets_list=sterilize_assets_list)
 
 @app.route('/add/sterilization_cycle/', methods=["GET", "POST"])
 def add_sterilization_cycle():
@@ -483,11 +551,10 @@ def add_sterilization_cycle():
 
     if not 'assets_to_sterilize' in session:
         # session['assets_to_sterilize'] = list of asset_to_sterilize
-        # asset_to_sterilize = ( type, asset, form, validity_in_days )
+        # asset_to_sterilize = ( type, {asset,kit}_id, validity_in_days )
         # type = "a" ou "k" ou None
-        # asset = instance of asset ou kit.
-        # form : AssetSterilizedForm
-        # validity_in_days of the sterilization
+        # asset_id = id of the asset/kit ; or None
+        # validity in days
         session['assets_to_sterilize'] = []
 
     if ( request.method == "POST" and ste_cycle_form.validate() 
@@ -553,48 +620,4 @@ def list_sterilization_cycle():
 def update_sterilization_cycle(ste_cycle_id):
     pass
 
-@app.route('/add/complete_traceability/', methods=["GET", "POST"])
-def add_complete_traceability():
-    pass
-#    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
-#                        constants.ROLE_ASSISTANT ]
-#    if session['role'] not in authorized_roles:
-#        return redirect(url_for('index'))
-#
-#    checks.quit_patient_file()
-#    checks.quit_appointment()
-#    
-#    ste_cycle_form = SterilizationCycleForm(request.form)
-#    ste_cycle_form.user_id.choices = get_ste_cycle_form_user_id_choices()
-#    ste_cycle_form.sterilizer_id.choices = \
-#                            get_ste_cycle_form_sterilizer_id_choices()
-#    ste_cycle_form.cycle_type_id.choices = \
-#                            get_ste_cycle_form_cycle_type_id_choices()
-#    ste_cycle_form.cycle_mode_id.choices = \
-#                            get_ste_cycle_form_cycle_mode_id_choices()
-#    ste_cycle_form.cycle_complement_id.choices = \
-#                            get_ste_cycle_form_cycle_complement_id_choices()
-#
-#    complete_traceability_form = CompleteTraceabilityForm(request.form)
-#
-#
-#    if ( request.method == "POST" and ste_cycle_form.validate() 
-#                           and complete_traceability_form.validate() ):
-#        
-#        values = { f: getattr(ste_cycle_form, f).data 
-#                    for f in get_sterilization_cycle_field_list() }
-#        
-#        values['expiration_date'] = ( ste_cycle_form.cycle_date.data +
-#                    datetime.timedelta(simple_traceability_form.validity.data))
-#                                        
-#
-#        new_complete_traceability = traceability.CompleteTraceability(**values)
-#        meta.session.add(new_complete_traceability)
-#        meta.session.commit()
-#        return redirect(url_for('list_sterilization_cycle'))
-#
-#    return render_template('add_complete_traceability.html',
-#                        ste_cycle_form=ste_cycle_form,
-#                        complete_traceability_form=complete_traceability_form)
-#
-#
+
