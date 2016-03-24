@@ -96,4 +96,4 @@ class AssetSterilized(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id), 
                                                                 default=None)
     expiration_date = Column(Date, nullable=False)
-4
+

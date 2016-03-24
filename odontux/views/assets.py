@@ -685,8 +685,8 @@ def update_asset(asset_id):
             getattr(asset_form, f).data = getattr(asset, f)
         for f in update_device_field_list:
             if f == "lifetime_expected" and getattr(asset, f):
-                getattr(device_form, f).data =\
-                            int(getattr(asset, f).total_seconds() / (86400*365))
+                getattr(device_form, f).data = int(
+                            getattr(asset, f).total_seconds() / (86400*365))
             else:
                 getattr(device_form, f).data = getattr(asset, f)
         return render_template('update_device.html',
@@ -700,8 +700,8 @@ def update_asset(asset_id):
             getattr(asset_form, f).data = getattr(asset, f)
         for f in update_material_field_list:
             if f == "expiration_alert":
-                getattr(material_form, f).data =\
-                                    int(getattr(asset, f).total_seconds() / 86400)
+                getattr(material_form, f).data = int(
+                                    getattr(asset, f).total_seconds() / 86400)
             else:
                 getattr(material_form, f).data = getattr(asset, f)
         return render_template('update_material.html',

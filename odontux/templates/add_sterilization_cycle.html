@@ -14,11 +14,18 @@ Add a Simple Sterilization Cycle
     {{ render_field(ste_cycle_form.cycle_date) }}
     {{ render_field(ste_cycle_form.reference) }}
     {{ render_field(ste_cycle_form.document) }}
-    {{ render_field(simple_traceability_form.number_of_items) }}
-    {{ render_field(simple_traceability_form.validity) }}
+<br />
+Assets and Kits in this sterilization :<br />
+  {% for asset in session['assets_to_sterilize'] %}
+      
+  {% endfor %}
+<br />
+<a href="{{ url_for('create_sterilization_list') }}">Update Assets List to sterilize</a>
+<br />
+<br />
+Total number of assets in this sterilization cycle : {{ session['assets_to_sterilize']|length }}
 
-
-  <p><input type="submit" value="Add">
+  <p><input type="submit" value="Add sterilization cycle">
 </form>
 
 {% endblock %}

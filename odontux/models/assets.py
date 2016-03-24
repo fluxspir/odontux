@@ -230,6 +230,7 @@ class AssetKitStructure(Base):
     type_of_assets = relationship("AssetCategory", 
                                 secondary=kitstructure_assetcategory_table,
                                 backref="kits_structure")
+    validity = Column(Interval, default=datetime.timedelta(90))
     active = Column(Boolean, default=True)
 
 class AssetKit(Base):
@@ -248,4 +249,3 @@ class AssetKit(Base):
                                                            default=None)
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
-    

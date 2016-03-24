@@ -436,16 +436,21 @@ def remove_asset_from_sterilization():
     
     form = AssetSterilizedForm(request.form)
     if form.validate():
-        pdb.set_trace() 
         if form.item_type.data == "kit":
             session['assets_to_sterilize'] = [
                 (t, a_id, v) for (t, a_id, v) in session['assets_to_sterilize']
-                if t == "k" and not a_id == form.item_id.data ]
-            pdb.set_trace() 
+                if t == "k" and a_id != int(form.item_id.data)
+                or t == "a" ]
+#            new = []
+#            for (t, a_id, v) in session['assets_to_sterilize']:
+#                pdb.set_trace() 
+#                if t == "k" and a_id != form.item_id.data:
+#                    new.append((t, a_id, v))
         if form.item_type.data == "asset":
             session['assets_to_sterilize'] = [
                 (t, a_id, v) for (t, a_id, v) in session['assets_to_sterilize']
-                if t == "a" and not a_id == form.item_id.data ]
+                if t == "a" and not a_id == int(form.item_id.data) 
+                or t == "k" ]
 
     return redirect(url_for('create_sterilization_list'))
 
