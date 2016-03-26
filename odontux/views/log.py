@@ -71,7 +71,8 @@ def login():
 def logout():
     checks.quit_patient_file()
     checks.quit_appointment()
-    session.pop('username', None)
+    #session.pop('username', None)
+    session.clear()
     return redirect(url_for('index'))
 
 app.secret_key = SECRET_KEY

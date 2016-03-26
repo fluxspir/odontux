@@ -1,30 +1,63 @@
 {% extends 'header.html' %}
 {% block pagetitle %}
-Add a Simple Sterilization Cycle
+Add a Sterilization Cycle
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_field, render_hidden_field, render_field_js_onchange %}
 <form method="post" action={{ url_for('add_sterilization_cycle') }}>
-
-    {{ render_field(ste_cycle_form.user_id) }}
-    {{ render_field(ste_cycle_form.sterilizer_id) }}
-    {{ render_field(ste_cycle_form.cycle_type_id) }}
-    {{ render_field(ste_cycle_form.cycle_mode_id) }}
-    {{ render_field(ste_cycle_form.cycle_complement_id) }}
-    {{ render_field(ste_cycle_form.cycle_date) }}
-    {{ render_field(ste_cycle_form.reference) }}
-    {{ render_field(ste_cycle_form.document) }}
+  <table>
+    <caption>Add a Sterilization Cycle</caption>
+    <tr>
+      <td>{{ render_field(ste_cycle_form.user_id) }}</td>
+      <td>{{ render_field(ste_cycle_form.sterilizer_id) }}</td>
+    </tr>
+    <tr>
+      <td>{{ render_field(ste_cycle_form.cycle_type_id) }}</td>
+      <td>{{ render_field(ste_cycle_form.cycle_complement_id) }}</td>
+      <td>{{ render_field(ste_cycle_form.cycle_mode_id) }}</td>
+    </tr>
+    <tr>
+      <td>{{ render_field(ste_cycle_form.cycle_date) }}</td>
+      <td>{{ render_field(ste_cycle_form.reference) }}</td>
+      <td>{{ render_field(ste_cycle_form.document) }}</td>
+    </tr>
+  </table>
 <br />
-Assets and Kits in this sterilization :<br />
-  {% for asset in session['assets_to_sterilize'] %}
-      
-  {% endfor %}
+  <table>
+    <caption>Resume of Assets to be sterilized</caption>
+    <tr>
+      <th>Kits in this sterilization : </th>
+      <th>Assets in this sterilization : </th>
+      <th>Unmarked assets :</th>
+    </tr>
+    <tr>
+      <td>{{ kits_to_sterilize|length }}</td>
+      <td>{{ assets_to_sterilize|length }}</td>
+      <td> {{ session['uncategorized_assets_sterilization'][0] }}</td>
+    </tr>
+    <tr>
+      <td>
+        {% for kit in kits_to_sterilize %}
+          {{ kit.id }} - {{ kit.asset_kit_structure.name }}<br />
+        {% endfor %}
+      </td>
+      <td>
+        {% for asset in assets_to_sterilize %}
+          {{ asset.id}} - {{ asset.asset_category.brand }}<br />
+        {% endfor %}
+      </td>
+      <td></td>
+    </tr>
+  </table>
 <br />
-<a href="{{ url_for('create_sterilization_list') }}">Update Assets List to sterilize</a>
+<br />
+<a href="{{ url_for('create_sterilization_list') }}">
+                                            Update Assets List to sterilize</a>
 <br />
 <br />
-Total number of assets in this sterilization cycle : {{ session['assets_to_sterilize']|length }}
-
+Total number of assets in this sterilization cycle : 
+                                    {{ session['assets_to_sterilize']|length + 
+                                    session['uncategorized_assets_sterilization'][0] }}
   <p><input type="submit" value="Add sterilization cycle">
 </form>
 
