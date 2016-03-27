@@ -10,7 +10,7 @@ import meta
 from tables import (asset_provider_address_table, asset_provider_phone_table, 
                     asset_provider_mail_table, kit_asset_table,
                     kitstructure_assetcategory_table)
-import users, act, schedule
+import users, act, schedule 
 import sqlalchemy
 import datetime
 
@@ -162,6 +162,7 @@ class Asset(Base):
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
     type = Column(String(20))
+    sterilizations = relationship('AssetSterilized')
 
     __mapper_args__ = {
         'polymorphic_identity': 'asset',
@@ -188,7 +189,20 @@ class Asset(Base):
                 if asset.id == self.id:
                     return True
         return False
-                                    
+    
+#    def is_sterilized(self):
+#        if not self.is_sterilizable:
+#            return None
+#        query = (
+#            meta.session.query(AssetSterilized)
+#                .filter(AssetSterilized.asset_id == self.id)
+#                .filter(AssetSterilized.appointment_id.is_(None))
+#                .filter(AssetSterilized.expiration_date >
+#                                                        func.current_date())
+#                .one_or_none()
+#            )
+#        return query
+                        
 class Device(Asset):
     """
         * lifetime expected ; 0 if forever
@@ -249,3 +263,16 @@ class AssetKit(Base):
                                                            default=None)
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
+    sterilization = relationship('AssetSterilized')
+
+#    def is_sterilized(self):
+#        query = (
+#            meta.session.query(traceability.AssetSterilized)
+#                .filter(AssetSterilized.kit_id == self.id)
+#                .filter(AssetSterilized.appointment_id.is_(None))
+#                .filter(AssetSterilized.expiration_date >
+#                                                        func.current_date())
+#                .one_or_none()
+#            )
+#        return query
+ 

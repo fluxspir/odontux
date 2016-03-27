@@ -92,8 +92,11 @@ class AssetSterilized(Base):
     sterilization_cycle_id = Column(Integer, ForeignKey(SterilizationCycle.id),
                                                                 nullable=False)
     asset_id = Column(Integer, ForeignKey(assets.Asset.id), default=None)
+    asset = relationship("assets.Asset")
     kit_id = Column(Integer, ForeignKey(assets.AssetKit.id), default=None)
+    kit = relationship("assets.AssetKit")
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id), 
                                                                 default=None)
+    appointment = relationship("schedule.Appointment")
     expiration_date = Column(Date, nullable=False)
 

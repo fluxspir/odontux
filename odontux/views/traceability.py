@@ -664,6 +664,57 @@ def list_sterilization_cycle():
     return render_template('list_sterilization_cycle.html',
                                             ste_cycles=ste_cycles)
 
+@app.route('/view/sterilization/cycle?id=<int:ste_cycle_id>')
+def view_sterilization_cycle(ste_cycle_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+ 
+    ste_cycle = (
+        meta.session.query(traceability.SterilizationCycle)
+            .filter(traceability.SterilizationCycle.id == ste_cycle_id)
+            .one()
+        )
+
+    query = (
+        meta.session.query(traceability.AssetSterilized)
+            .filter(traceability.AssetSterilized.sterilization_cycle_id == 
+                                                                ste_cycle.id)
+        )
+    kits = query.filter(traceability.AssetSterilized.kit_id.isnot(None)).all()
+    assets = query.filter(
+                    traceability.AssetSterilized.asset_id.isnot(None)).all()
+    unmarked = (
+            query.filter(traceability.AssetSterilized.asset_id.is_(None),
+                        traceability.AssetSterilized.kit_id.is_(None)
+                        ).all()
+        )
+    return render_template('view_sterilization_cycle.html', 
+                                                        ste_cycle=ste_cycle,
+                                                        kits=kits, 
+                                                        assets=assets,
+                                                        unmarked=unmarked)
+
+@app.route('/print/sterilization_stickers?id=int<ste_cycle_id>')
+def print_sterilization_stickers(ste_cycle_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+ 
+    ste_cycle = (
+        meta.session.query(traceability.SterilizationCycle)
+            .filter(traceability.SterilizationCycle.id == ste_cycle_id)
+            .one()
+     
+
 @app.route('/update/sterilization_cycle?id=<int:ste_cycle_id>', 
                                                     methods=['GET', 'POST'])
 def update_sterilization_cycle(ste_cycle_id):

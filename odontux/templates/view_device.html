@@ -4,9 +4,22 @@
   <a href="{{ url_for('add_asset') }}">Add new asset</a>
 {% endif %}
 <br />
-    {{ asset.id }} ({{ asset.asset_category.id }}) --   {{ asset.asset_category.brand }}  -- {{ asset.asset_category.commercial_name }} <br />
+    {{ asset.id }} ({{ asset.asset_category.id }}) -- 
+    {{ asset.asset_category.brand }}  -- 
+    {{ asset.asset_category.commercial_name }} <br />
   Description : {{ asset.asset_category.description }} <br />
-  Sterilizable : {{ asset.is_sterilizable() }} <br />
+  {% if asset.is_sterilizable() %}
+    Sterilization valid until :{% if asset.sterilizations[-1] %} 
+                {% if not asset.sterilizations[-1].appointment_id 
+                    and asset.sterilizations[-1].expiration_date > today %}
+                  {{ asset.sterilizations[-1].expiration_date }}
+                {% else %}
+                  Item to sterilize
+                {% endif %}
+              {% else %}
+                Item never sterilized
+              {% endif %}
+  {% endif %}<br />
   Element of kit : {{ asset.element_of_kit() }} <br />
   Asset provider : {{ asset.provider.name }} <br />
   Acquisition Date : {{ asset.acquisition_date }} <br />

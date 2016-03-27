@@ -725,7 +725,8 @@ def view_asset(asset_id):
 def view_device(asset_id):
     asset = meta.session.query(assets.Asset).filter(
                                 assets.Asset.id == asset_id).one()
-    return render_template('view_device.html', asset=asset)
+    return render_template('view_device.html', asset=asset, 
+                                                today=datetime.date.today())
 
 @app.route('/view/material&id=<int:asset_id>')
 def view_material(asset_id):
