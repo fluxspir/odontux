@@ -9,10 +9,10 @@ Required :
 	* postgresql : that may be change to sqlite or others, in model/__init__.py
 	* python-flask python-wtforms
 	* python-bcrypt
+	* python-reportlab
 
 Recommanded :
 	* gnucash, python-gnucash, libdbd-pgsql
-	* python-reportlab
 
 What will it need :
 	* gimp
