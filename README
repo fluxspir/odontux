@@ -12,6 +12,7 @@ Required :
 
 Recommanded :
 	* gnucash, python-gnucash, libdbd-pgsql
+	* python-reportlab
 
 What will it need :
 	* gimp
