@@ -9,7 +9,8 @@ import pdb
 import datetime
 import os
 
-from flask import session, render_template, request, redirect, url_for, jsonify
+from flask import ( session, render_template, request, redirect, url_for, 
+                    jsonify, make_response )
 import sqlalchemy
 from sqlalchemy import and_, or_, desc
 from gettext import gettext as _
@@ -23,6 +24,12 @@ from odontux.models import meta, traceability, assets, users, act
 from odontux.odonweb import app
 from odontux.views import forms
 from odontux.views.log import index
+
+from reportlab.graphics.barcode import code128
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
+
 
 class SterilizationCycleTypeForm(Form):
     id = HiddenField(_('id'))
@@ -699,6 +706,110 @@ def view_sterilization_cycle(ste_cycle_id):
                                                         assets=assets,
                                                         unmarked=unmarked)
 
+def create_barcodes_a4_65(items, actual_position, draw=False):
+    """
+        items = list of assets
+    """
+    LAST = 64
+    def _draw_table(draw=False):
+        # For verification purpose ; won't appear in final
+        if draw:
+            c.setLineWidth(.3)
+            cell_width = 38.2 * mm
+            cell_height = 21 * mm
+            h_s_b_c = 2.5 * mm  # Horizontal Space Between Cells
+
+            c.line( hori_start, vert_start, hori_stop, vert_start) 
+            c.line( hori_start, vert_stop, hori_stop, vert_stop)
+            c.line( hori_start, vert_start, hori_start, vert_stop)
+            c.line( hori_stop, vert_start, hori_stop, vert_stop)
+            i = 1
+            while i < 5:
+                c.line( 
+                    (hori_start + (i * cell_width) + ((i - 1) * h_s_b_c)), 
+                    vert_start, 
+                    (hori_start + i * cell_width + ( (i - 1) * h_s_b_c)), 
+                    vert_stop 
+                    )
+                c.line( 
+                    (hori_start + (i * cell_width) + ((i - 1 + 1) * h_s_b_c)),
+                    vert_start, 
+                    (hori_start + (i * cell_width) + ((i - 1 + 1 ) * h_s_b_c)), 
+                    vert_stop )
+                i += 1
+
+            i = 1
+            while i < 13:
+                c.line( 
+                    hori_start, 
+                    (vert_start + (i * cell_height)), 
+                    hori_stop, 
+                    (vert_start + i * (cell_height) ) 
+                    )
+                i += 1
+
+    def _get_cell_coordonate(actual_loc):
+        if actual_loc < 0:
+            raise ValueError("Actual Location can't be negative")
+        while actual_loc > LAST:
+            actual_loc -= (LAST +1)
+        return ( (actual_loc / 5), (actual_loc % 5) )
+
+    c = canvas.Canvas("odontux/static/barcode.pdf")
+    c.setPageSize(A4)
+   
+    lmarg = rmarg = 4.5 * mm
+    tmarg = bmarg = 10.5 * mm
+    width_paper = 210 * mm
+    height_paper = 297 * mm
+    cell_width = 38.2 * mm
+    cell_height = 21.2 * mm
+    space_between_cell_horizontal = 2.5 * mm
+
+    hori_start = lmarg
+    hori_stop = width_paper - rmarg
+    vert_start = bmarg
+    vert_stop = height_paper - tmarg
+    _draw_table(draw)
+
+
+    for item in items:
+        ( row, col) = _get_cell_coordonate(actual_position)
+        cell_x = ( (col * cell_width) + 
+                    lmarg + 
+                    ( (col - 1) * ( space_between_cell_horizontal) )
+                )
+        cell_y = ( (row * cell_height) + bmarg )
+
+        barcode = code128.Code128(str(item.id).zfill(10))
+        barcode.drawOn( c,
+                        (cell_x - (1.5 * mm) ),
+                        (cell_y + (15 * mm) )
+                    )
+        c.setFont('Helvetica', 10)
+        c.drawString ( cell_x + (10 * mm),
+                        cell_y + (5 * mm),
+                        str(item.expiration_date)
+                    )
+        c.setFont('Helvetica', 6)
+        if item.asset:
+            item_name = str(item.asset.id) + item.asset.asset_category.commercial_name
+        elif item.kit:
+            item_name = str(item.kit.id) + item.kit.asset_kit_structure.name
+        else:
+            item_name = "Item without a name"
+        c.drawString (cell_x + (5 * mm),
+                        cell_y + (2 * mm),
+                        item_name
+                    )
+
+        actual_position += 1
+        if actual_position == (LAST + 1): actual_position = 0
+
+    c.showPage()
+    c.save()
+    return actual_position
+
 @app.route('/print/sterilization_stickers?id=int<ste_cycle_id>')
 def print_sterilization_stickers(ste_cycle_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
@@ -709,15 +820,22 @@ def print_sterilization_stickers(ste_cycle_id):
     checks.quit_patient_file()
     checks.quit_appointment()
  
-    ste_cycle = (
-        meta.session.query(traceability.SterilizationCycle)
-            .filter(traceability.SterilizationCycle.id == ste_cycle_id)
-            .one()
-     
+    assets = (
+        meta.session.query(traceability.AssetSterilized)
+            .filter(traceability.AssetSterilized.sterilization_cycle_id.in_(
+                meta.session.query(traceability.SterilizationCycle.id)
+                    .filter(traceability.SterilizationCycle.id == ste_cycle_id)
+                )
+            ).all()
+        )
+
+    actual_position = 0
+    create_barcodes_a4_65(assets, actual_position, True)
+
+    return redirect(url_for('static', filename="barcode.pdf"))
+
 
 @app.route('/update/sterilization_cycle?id=<int:ste_cycle_id>', 
                                                     methods=['GET', 'POST'])
 def update_sterilization_cycle(ste_cycle_id):
     return redirect(url_for('list_sterilization_cycle'))
-
-
