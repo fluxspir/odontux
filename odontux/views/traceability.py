@@ -10,7 +10,7 @@ import datetime
 import os
 
 from flask import ( session, render_template, request, redirect, url_for, 
-                    jsonify, make_response )
+                    jsonify, send_file, make_response )
 import sqlalchemy
 from sqlalchemy import and_, or_, desc
 from gettext import gettext as _
@@ -366,7 +366,7 @@ def get_assets_list_for_sterilization_cycle():
                 )
 
             # Asset may be a "device"
-            #.filter(assets.Asset.type == "device") # MAYBE UPDATE TO NOT SO DEVICE
+            #.filter(assets.Asset.type == "device") #MAYBE UPDATE TO ASSET
 
             # the asset is something "sterilizable"
             #.filter(assets.Asset.is_sterilizable() == True)    # NOT WORKING
@@ -734,7 +734,7 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
                 c.line( 
                     (hori_start + (i * cell_width) + ((i - 1 + 1) * h_s_b_c)),
                     vert_start, 
-                    (hori_start + (i * cell_width) + ((i - 1 + 1 ) * h_s_b_c)), 
+                    (hori_start + (i * cell_width) + ((i - 1 + 1 ) * h_s_b_c)),
                     vert_stop )
                 i += 1
 
@@ -755,7 +755,11 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
             actual_loc -= (LAST +1)
         return ( (actual_loc / 5), (actual_loc % 5) )
 
-    c = canvas.Canvas("odontux/static/barcode.pdf")
+    import cStringIO
+    output = cStringIO.StringIO()
+
+    c = canvas.Canvas(output)
+    #c = canvas.Canvas("odontux/static/barcode.pdf")
     c.setPageSize(A4)
    
     lmarg = rmarg = 4.5 * mm
@@ -783,9 +787,13 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
 
         barcode = code128.Code128(str(item.id).zfill(10))
         barcode.drawOn( c,
-                        (cell_x - (1.5 * mm) ),
-                        (cell_y + (15 * mm) )
+                        cell_x ,
+                        (cell_y + (12 * mm) )
                     )
+        c.setFont('Helvetica', 8)
+        c.drawString ( (cell_x + (8 * mm)),
+                        (cell_y + (9 * mm)),
+                        str(item.id).zfill(10) )
         c.setFont('Helvetica', 10)
         c.drawString ( cell_x + (10 * mm),
                         cell_y + (5 * mm),
@@ -793,9 +801,11 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
                     )
         c.setFont('Helvetica', 6)
         if item.asset:
-            item_name = str(item.asset.id) + item.asset.asset_category.commercial_name
+            item_name = ( str(item.asset.id) + " : " + 
+                            item.asset.asset_category.commercial_name[:30] )
         elif item.kit:
-            item_name = str(item.kit.id) + item.kit.asset_kit_structure.name
+            item_name = ( str(item.kit.id ) + " : " +
+                                    item.kit.asset_kit_structure.name[:30] )
         else:
             item_name = "Item without a name"
         c.drawString (cell_x + (5 * mm),
@@ -808,7 +818,10 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
 
     c.showPage()
     c.save()
-    return actual_position
+    pdf_out = output.getvalue()
+    output.close()
+
+    return (pdf_out, actual_position)
 
 @app.route('/print/sterilization_stickers?id=int<ste_cycle_id>')
 def print_sterilization_stickers(ste_cycle_id):
@@ -830,9 +843,16 @@ def print_sterilization_stickers(ste_cycle_id):
         )
 
     actual_position = 0
-    create_barcodes_a4_65(assets, actual_position, True)
+    (pdf, actual_position) = create_barcodes_a4_65(assets, actual_position, 
+                                                                        True)
 
-    return redirect(url_for('static', filename="barcode.pdf"))
+    response = make_response(pdf)
+    #response.headers['Content-Disposition'] =\
+    #                                        "attachment; filename='barcode.pdf"
+    response.mimetype = 'application/pdf'
+    return response
+    #return send_file(url_for('static', filename='barcode.pdf'))
+    #return redirect(url_for('static', filename="barcode.pdf"))
 
 
 @app.route('/update/sterilization_cycle?id=<int:ste_cycle_id>', 
