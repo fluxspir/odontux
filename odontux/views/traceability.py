@@ -8,6 +8,7 @@
 import pdb
 import datetime
 import os
+import cStringIO
 
 from flask import ( session, render_template, request, redirect, url_for, 
                     jsonify, send_file, make_response )
@@ -77,6 +78,12 @@ class UncategorizedAssetSterilizedForm(Form):
                                                     default=0)
     validity = IntegerField(_('Validity in days'), [validators.Required()],
                                 default=90)
+
+class StickerForm(Form):
+    position = IntegerField(_('Position of the sticker ; Between 0 and 64'),
+                                [validators.NumberRange(min=0, max=64, 
+                                    message=_('Position between 0 and 64'))]
+                                    )
 
 def get_sterilization_cycle_mode_field_list():
     return [ "name", "heat_type", "temperature", "pressure", "comment" ]
@@ -558,6 +565,16 @@ def create_sterilization_list():
 
 @app.route('/add/sterilization_cycle/', methods=["GET", "POST"])
 def add_sterilization_cycle():
+    """
+    session['assets_to_sterilize'] = list of asset_to_sterilize
+        asset_to_sterilize = ( type, {asset,kit}_id, validity_in_days )
+        type = "a" ou "k" ou None
+        asset_id = id of the asset/kit ; or None
+        validity in days
+
+    session['uncategorized_assets_sterilization'] = 
+        tuple( number_of_assets, validity_in days)
+    """
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
@@ -568,14 +585,7 @@ def add_sterilization_cycle():
     
     ste_cycle_form = SterilizationCycleForm(request.form)
     if not 'assets_to_sterilize' in session:
-        # session['assets_to_sterilize'] = list of asset_to_sterilize
-        # asset_to_sterilize = ( type, {asset,kit}_id, validity_in_days )
-        # type = "a" ou "k" ou None
-        # asset_id = id of the asset/kit ; or None
-        # validity in days
         session['assets_to_sterilize'] = []
-        # session['uncategorized_assets_sterilization'] = 
-        # tuple( number_of_assets, validity_in days)
         session['uncategorized_assets_sterilization'] = ( 0, 90 )
         return redirect(url_for('create_sterilization_list'))
 
@@ -700,11 +710,46 @@ def view_sterilization_cycle(ste_cycle_id):
                         traceability.AssetSterilized.kit_id.is_(None)
                         ).all()
         )
+    sticker_position = (
+        meta.session.query(users.Settings)
+            .filter(users.Settings.key == "sticker_position")
+            .one()
+            .value
+        )
     return render_template('view_sterilization_cycle.html', 
-                                                        ste_cycle=ste_cycle,
-                                                        kits=kits, 
-                                                        assets=assets,
-                                                        unmarked=unmarked)
+                                            ste_cycle=ste_cycle,
+                                            kits=kits, 
+                                            assets=assets,
+                                            unmarked=unmarked,
+                                            sticker_position=sticker_position)
+
+@app.route('/update/sticker_position?id=<int:ste_cycle_id>', 
+                                                    methods=['GET', 'POST'])
+def update_sticker_position(ste_cycle_id):
+    """ ste_cycle_id to go back from where we came """
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    
+    sticker_position = ( meta.session.query(users.Settings)
+            .filter(users.Settings.key == "sticker_position")
+            .one() )
+    sticker_form = StickerForm(request.form)
+    
+    if request.method == 'POST' and sticker_form.validate():
+        sticker_position.value = sticker_form.position.data
+        meta.session.commit()
+        return redirect(url_for('view_sterilization_cycle', 
+                                                    ste_cycle_id=ste_cycle_id))
+
+    sticker_form.position.data = sticker_position.value
+    return render_template('update_sticker_position.html', 
+                                                    sticker_form=sticker_form,
+                                                    ste_cycle_id=ste_cycle_id)
 
 def create_barcodes_a4_65(items, actual_position, draw=False):
     """
@@ -755,7 +800,6 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
             actual_loc -= (LAST +1)
         return ( (actual_loc / 5), (actual_loc % 5) )
 
-    import cStringIO
     output = cStringIO.StringIO()
 
     c = canvas.Canvas(output)
@@ -788,15 +832,15 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
         barcode = code128.Code128(str(item.id).zfill(10))
         barcode.drawOn( c,
                         cell_x ,
-                        (cell_y + (12 * mm) )
+                        (cell_y + (11 * mm) )
                     )
         c.setFont('Helvetica', 8)
         c.drawString ( (cell_x + (8 * mm)),
-                        (cell_y + (9 * mm)),
+                        (cell_y + (8 * mm)),
                         str(item.id).zfill(10) )
         c.setFont('Helvetica', 10)
         c.drawString ( cell_x + (10 * mm),
-                        cell_y + (5 * mm),
+                        cell_y + (4 * mm),
                         str(item.expiration_date)
                     )
         c.setFont('Helvetica', 6)
@@ -809,12 +853,14 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
         else:
             item_name = "Item without a name"
         c.drawString (cell_x + (5 * mm),
-                        cell_y + (2 * mm),
+                        cell_y + (1.5 * mm),
                         item_name
                     )
 
         actual_position += 1
-        if actual_position == (LAST + 1): actual_position = 0
+        if actual_position == (LAST + 1): 
+            actual_position = 0
+            c.showPage()
 
     c.showPage()
     c.save()
@@ -842,17 +888,21 @@ def print_sterilization_stickers(ste_cycle_id):
             ).all()
         )
 
-    actual_position = 0
-    (pdf, actual_position) = create_barcodes_a4_65(assets, actual_position, 
-                                                                        True)
+    sticker_setting = (
+        meta.session.query(users.Settings)
+            .filter(users.Settings.key == "sticker_position")
+            .one()
+        )
+    actual_position = int(sticker_setting.value)
+    (pdf, new_position) = create_barcodes_a4_65(assets, actual_position, False)
+    sticker_setting.value = str(new_position)
+    meta.session.commit()
 
     response = make_response(pdf)
     #response.headers['Content-Disposition'] =\
-    #                                        "attachment; filename='barcode.pdf"
+    #                                   "attachment; filename='barcode.pdf"
     response.mimetype = 'application/pdf'
     return response
-    #return send_file(url_for('static', filename='barcode.pdf'))
-    #return redirect(url_for('static', filename="barcode.pdf"))
 
 
 @app.route('/update/sterilization_cycle?id=<int:ste_cycle_id>', 
