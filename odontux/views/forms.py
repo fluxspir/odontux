@@ -19,11 +19,13 @@ from odontux.models import (meta,
                             administration,
                             md,
                             users,
+                            assets
                             )
 
-address_fields = ["street", "building", "city", "postal_code", "county", 
-                  "country" ]
-phone_fields = [ ("phonename", "name"), ("phonenum", "number") ]
+address_fields = ["street", "building", "complement", "city", "zip_code", 
+                    "county", "country" ]
+phone_fields = [ ("phonename", "name"), ("phoneindicatif", "indicatif"), 
+                ("phoneareacode", "area_code"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
 
 def get_title_choice_list():
@@ -100,31 +102,35 @@ class TimeField(Field):
 
 # Generic Forms
 class PhoneForm(Form):
-    phonename = TextField('phonename', validators=[validators.Optional()])
-    phonenum = TextField('phonenum', [validators.Optional()])
+    phonename = TextField(_('phonename'), validators=[validators.Optional()])
+    phoneindicatif = TextField(_('country\' indicatif'),
+                                [validators.Optional()])
+    phoneareacode = TextField(_('area_code'), [validators.Optional()])
+    phonenum = TextField(_('phonenum'), [validators.Optional()])
 
 class AddressForm(Form):
     address_id = TextField('address_id')
-    street = TextField('street', validators=[validators.Optional(),
-                                 validators.Length(max=50, message=_("""Number
-                                 and street must be less than 50 characters 
+    street = TextField(_('street'), validators=[validators.Optional(),
+                                 validators.Length(max=100, message=_("""Number
+                                 and street must be less than 100 characters 
                                  please"""))])
-    building = TextField('building', validators=[validators.Optional(), 
+    complement = TextField(_('complement'), [validators.Optional()])
+    building = TextField(_('building'), validators=[validators.Optional(), 
                                      validators.Length(max=50)])
-    city = TextField('city', validators=[validators.Optional(),
+    city = TextField(_('city'), validators=[validators.Optional(),
                              validators.Length(max=25,
                              message=_("City's name"))], 
                              filters=[title_field])
-    postal_code = TextField('postal_code')
-    county = TextField('county', validators=[validators.Optional(), 
+    zip_code = TextField(_('zip_code'))
+    county = TextField(_('county'), validators=[validators.Optional(), 
                                   validators.Length(max=15)], 
                                  filters=[title_field])
-    country = TextField('country', validators=[validators.Optional(),
+    country = TextField(_('country'), validators=[validators.Optional(),
                                    validators.Length(max=15)],
                                    filters=[title_field])
 
 class MailForm(Form):
-    email = TextField('email', validators=[validators.Optional(),
+    email = TextField(_('email'), validators=[validators.Optional(),
                                       validators.Email()],
                                       filters=[lower_field])
 
@@ -151,6 +157,9 @@ def _check_body_perm(body, body_type):
     elif body_type == 'patient':
         if session['role'] == constants.ROLE_ADMIN:
             return False
+    elif body_type == 'provider':
+        if session['role'] == constants.ROLE_ADMIN:
+            return False
     else:
         raise Exception(_("Unknown body type"))
         return False
@@ -174,6 +183,9 @@ def _get_body(body_id, body_type):
     elif body_type == "dental_office":
         body = meta.session.query(users.DentalOffice).filter\
             (users.DentalOffice.id == body_id).one()
+    elif body_type == "provider":
+        body = meta.session.query(assets.AssetProvider).filter(
+            assets.AssetProvider.id == body_id).one()
     else:
         raise Exception(_("please specify known body_type"))
     return body

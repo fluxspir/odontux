@@ -39,7 +39,11 @@ class Tooth(Base):
     surveillance = Column(Boolean, default=False)
 
 class Event(Base):
-    """ """
+    """
+        event_location : see "constants.py" ; EVENT_LOCATION_TOOTH : 0 = tooth
+                                                                     1 = crown
+                                                                     2 = root
+    """
     __tablename__ = "event"
     id = Column(Integer, primary_key=True)
     tooth_id = Column(Integer, ForeignKey(Tooth.id), nullable=False)

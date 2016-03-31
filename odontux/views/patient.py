@@ -15,9 +15,47 @@ from odontux.views.log import index
 
 import pdb
 
+@app.route('/patient_appointment/')
+def patient_appointment(appointment_id):
+    """
+    This method must be rewritten with the one below 
+     "enter_patient_appointment" to make one "big" method who will
+     work "always".
+     # TODO bug 10001
+    """
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    appointment = (
+            meta.session.query(schedule.Appointment)
+                .filter(schedule.Appointment.id == appointment_id)
+                .one()
+            )
+    patient = checks.get_patient(appointment.patient_id)
+    # Stock information about patient and appointment in session
+    session['patient_id'] = patient.id
+    session['appointment_id'] = appointment.id
+
+    # Verify if this patient is really the one who have this appointment
+    # because if it isn't, things could get very nasty after...
+    # This function should be frequently used.
+    if not checks.is_patient_self_appointment():
+        session.pop('appointment_id', None)
+        return redirect(url_for('enter_patient_file',
+                        body_id=session['patient_id']))
+    
+    acts = checks.get_patient_acts(patient.id, appointment.id,
+                [ act.AppointmentActReference.tooth_id ]
+                )
+    return render_template("patient_appointment.html",
+                            patient=patient,
+                            appointment=appointment,
+                            acts=acts)
+
 @app.route('/patient/appointment/', methods=['GET', 'POST'])
 def enter_patient_appointment():
     """ 
+    # TODO bug 10001   ;  voir "patient_appointment()"
     We are entering in this function in a specific appointment
     that was made for a reason,
     where was established a diagnostic,
@@ -42,7 +80,7 @@ def enter_patient_appointment():
         if session['role'] != constants.ROLE_DENTIST:
             return redirect(url_for('index'))
     except KeyError:
-        return redirect(url_for('index'))
+        return redirect(url_for('logout'))
 
     if request.method == 'POST':
         # First at all, we need to quit old patient, and old appointment.
@@ -54,9 +92,12 @@ def enter_patient_appointment():
         # previous_appointment function )
         if request.form['appointment_id']:
             # feel in the new session variables with current appointment.
-            appointment = meta.session.query(schedule.Appointment)\
-                .filter(schedule.Appointment.id == 
-                        request.form['appointment_id']).one()
+            appointment = (
+                    meta.session.query(schedule.Appointment)
+                        .filter(schedule.Appointment.id == 
+                                request.form['appointment_id'])
+                        .one()
+                    )
             patient = checks.get_patient(appointment.patient_id)
 
         # Case probably rare, but if we want to go in last appointment of 

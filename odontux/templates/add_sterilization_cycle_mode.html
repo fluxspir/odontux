@@ -1,0 +1,20 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+Add a Sterilization Cycle Mode
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_field, render_hidden_field, render_field_js_onchange %}
+<form method="post" action={{ url_for('add_sterilization_cycle_mode') }}>
+    {{ render_field(ste_cycle_mode_form.name, autofocus="autofocus") }}
+    {{ render_field(ste_cycle_mode_form.heat_type) }}
+    {{ render_field(ste_cycle_mode_form.temperature) }}
+    {{ render_field(ste_cycle_mode_form.pressure) }}
+    {{ render_field(ste_cycle_mode_form.sterilization_duration) }}
+    {{ render_field(ste_cycle_mode_form.comment) }}
+
+  <p><input type="submit" value="Add">
+</form>
+
+{% endblock %}
+
+

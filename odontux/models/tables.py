@@ -7,7 +7,7 @@
 
 from meta import Base
 
-from sqlalchemy import Table, Column, Integer
+from sqlalchemy import Table, Column, Integer, Numeric, Date
 from sqlalchemy import ForeignKey, MetaData
 
 
@@ -77,4 +77,41 @@ medecine_doctor_phone_table = Table('medecine_doctor_phone', Base.metadata,
 Column('medecine_doctor_id', Integer, ForeignKey('medecine_doctor.id')),
 Column('phone_id', Integer, ForeignKey('phone.id'))
 )
+
+# assets.py / administration.py
+asset_provider_address_table = Table("asset_provider_address", Base.metadata,
+Column("asset_provider_id", Integer, ForeignKey("asset_provider.id")),
+Column("address_id", Integer, ForeignKey("address.id"))
+)
+
+asset_provider_phone_table = Table("asset_provider_phone", Base.metadata,
+Column("asset_provider_id", Integer, ForeignKey("asset_provider.id")),
+Column("phone_id", Integer, ForeignKey("phone.id"))
+)
+
+asset_provider_mail_table = Table("asset_provider_mail", Base.metadata,
+Column("asset_provider_id", Integer, ForeignKey("asset_provider.id")),
+Column("mail_id", Integer, ForeignKey("mail.id"))
+)
+
+# assets.py
+kit_asset_table = Table("kit_asset", Base.metadata,
+Column("kit_id", Integer, ForeignKey("asset_kit.id")),
+Column("asset_id", Integer, ForeignKey("asset.id"))
+)
+
+kitstructure_assetcategory_table = Table("kit_structure_asset_category", 
+                                                                Base.metadata,
+Column("kit_structure_id", Integer, ForeignKey("asset_kit_structure.id")),
+Column("asset_category_id", Integer, ForeignKey("asset_category.id"))
+)
+
+# assets.py / appointment.py
+material_appointment_table = Table("material_appointment", Base.metadata,
+Column('id', Integer, primary_key=True),
+Column('material_id', Integer, ForeignKey('material.id')),
+Column("appointment_id", Integer, ForeignKey("appointment.id")),
+Column("quantity_used", Numeric)
+)
+
 

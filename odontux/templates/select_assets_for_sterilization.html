@@ -1,0 +1,81 @@
+{% from "_formhelpers.html" import render_simple_hidden_field, render_simple_field_line %}
+{% extends "header.html" %}
+{% block main %}
+{% if session.role != session.ROLE_ADMIN %}
+  <a href="{{ url_for('add_sterilization_cycle') }}">
+                                              Return to sterilization cycle</a>
+{% endif %}
+<br /><br />
+  <form method="post" action="{{ url_for('update_number_uncategorized') }}">
+Items that are going to be sterilized but without linking it to an asset :<br />
+  {{ render_simple_field_line(uncategorized_form.number) }} || 
+  {{ render_simple_field_line(uncategorized_form.validity) }} 
+  <input type="submit" value="Update"><br />
+  </form>
+  <div id="searchresult">
+  {% block searchresult %}
+    <strong>Kits to sterilize</strong>: {{ sterilize_assets_list['kits']|length }}<br />
+    <strong>Assets to sterilize</strong>: {{ sterilize_assets_list['assets']|length }}<br />
+    {{ session['uncategorized_assets_sterilization'][0] }}<br />
+    <strong>Total to sterilize</strong>:{{ sterilize_assets_list['kits']|length +
+                                          sterilize_assets_list['assets']|length +
+                                          session['uncategorized_assets_sterilization'][0] }} 
+    <br /><br />
+    {% for kit in sterilize_assets_list['kits'] %}
+      <form method="post" action="{{ url_for('remove_asset_from_sterilization') }}">
+        <a href="{{ url_for('view_kit', kit_id=kit[0].id) }}">  
+          {{ kit[0].id }} -- 
+          {{ kit[0].asset_kit_structure.name }}</a>
+          {{ render_simple_hidden_field(kit[1].item_id) }} 
+          {{ render_simple_hidden_field(kit[1].item_type) }} 
+          {{ render_simple_field_line(kit[1].validity) }} 
+        <input type="submit" value="Remove"><br />
+      </form>
+    {% endfor %}
+    {% for asset in sterilize_assets_list['assets'] %}
+      <form method="post" action="{{ url_for('remove_asset_from_sterilization') }}">
+        <a href="{{ url_for('view_asset', asset_id=asset[0].id) }}">
+          {{ asset[0].id }} -- {{ asset[0].asset_category.brand }} 
+          {{ asset[0].asset_category.commercial_name }} -- 
+          {{ asset[0].asset_category.description }} -- 
+          {{ asset[0].expiration_date }}</a>
+          {{ render_simple_hidden_field(asset[1].item_id) }} 
+          {{ render_simple_hidden_field(asset[1].item_type) }} 
+          {{ render_simple_field_line(asset[1].validity) }} 
+          <input type="submit" value="Remove"><br />
+      </form>
+    {% endfor %}
+    <br /><br />
+    <strong>Kits</strong> : {{ assets_list['kits']|length }}<br />
+    {% for kit in assets_list['kits'] %}
+      <form method="post" action="{{ url_for('create_sterilization_list') }}">
+        <a href="{{ url_for('view_kit', kit_id=kit[0].id) }}">{{ kit[0].id }} -- 
+        {{ kit[0].asset_kit_structure.name }}</a>
+        {{ render_simple_hidden_field(kit[1].item_id) }} 
+        {{ render_simple_hidden_field(kit[1].item_type) }} 
+        {{ render_simple_field_line(kit[1].validity) }} 
+        <input type="submit" value="Add">
+          <br />
+      </form>
+    {% endfor %}
+    <strong>Assets</strong> : {{ assets_list['assets']|length }} <br />
+    {% for asset in assets_list['assets'] %}
+      <form method="post" action="{{ url_for('create_sterilization_list') }}">
+        <a href="{{ url_for('view_asset', asset_id=asset[0].id) }}">{{ asset[0].id }} -- 
+        {{ asset[0].asset_category.brand }} 
+        {{ asset[0].asset_category.commercial_name }} -- 
+        {{ asset[0].asset_category.description }} -- 
+        {{ asset[0].expiration_date }}</a> ||| 
+        {{ asset[0].asset_category.asset_specialty.name }} 
+        {{ render_simple_hidden_field(asset[1].item_id) }} 
+        {{ render_simple_hidden_field(asset[1].item_type) }} 
+        {{ render_simple_field_line(asset[1].validity) }} 
+        <input type="submit" value="Add"><br />
+      </form>
+    {% endfor %}
+  {% endblock %}
+  </div>
+
+{% endblock %}
+
+

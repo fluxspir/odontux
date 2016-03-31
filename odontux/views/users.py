@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 # Franck Labadille
-# 2012/11/05
-# v0.5
+# 2016/02/06
+# v0.6
 # Licence BSD
 #
+
+import scrypt
+from base64 import b64encode
+import os
 
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
@@ -44,10 +48,10 @@ class OdontuxUserGeneralInfoAdminForm(Form):
                                     validators.Length(min=1, max=20)],
                                      filters=[forms.lower_field])
     role = SelectField(_('role'), coerce=int)
-    status = BooleanField(_('status'))
+    active = BooleanField(_('active'))
     comments = TextAreaField(_('comments'))
     modified_by = IntegerField(_('modified_by'), [validators.Optional()])
-    time_stamp = forms.DateField(_("time_stamp"))
+    creation_date = forms.DateField(_("creation_date"))
 
 class DentistSpecificForm(Form):
     registration = TextField(_('registration'))
@@ -56,11 +60,19 @@ class DentistSpecificAdminForm(Form):
     gnucash_url = TextField(_("gnucash_url"))
 
 class OdontuxUserPasswordForm(Form):
-    password = PasswordField(_('password'), [validators.Required(),
+    password = PasswordField(_('Password'), [validators.Required(),
                         validators.Length(min=4), 
                         validators.EqualTo('confirm', message="Password must\
                         match")])
     confirm = PasswordField(_('Repeat Password'))
+
+class OdontuxUserNewPasswordForm(Form):
+    old_password = PasswordField(_('Old Password'), [validators.Required()])
+    new_password = PasswordField(_('New Password'), [validators.Required(),
+                        validators.Length(min=4), 
+                        validators.EqualTo('confirm', message="Password must\
+                        match")])
+    confirm = PasswordField(_('Repeat New Password'))
 
 
 class DentalOfficeForm(Form):
@@ -76,8 +88,8 @@ def get_gen_info_field_list():
              "correspondence_name", "sex", "dob", "avatar_id" ]
 
 def get_gen_info_admin_field_list():
-    return [ "username", "role" , "status", "comments", "modified_by", 
-             "time_stamp" ]
+    return [ "username", "role" , "active", "comments", "modified_by", 
+             "creation_date" ]
 
 def get_dentist_specific_field_list():
     return [ "registration" ]
@@ -148,7 +160,9 @@ def add_user():
         for f in get_gen_info_admin_field_list():
             values[f] = getattr(gen_info_admin_form, f).data
         for f in get_password_field_list():
-            values[f] = getattr(password_form, f).data
+            values[f] = b64encode(scrypt.encrypt(os.urandom(64), 
+                            getattr(password_form, f).data.encode("utf_8"), 
+                            maxtime=0.5))
         for f in get_dentist_specific_field_list():
             values[f] = getattr(dentist_specific_form, f).data
         for f in get_dentist_specific_admin_field_list():
@@ -173,14 +187,14 @@ def add_user():
         return redirect(url_for('list_users'))
 
     return render_template('/add_user.html/', 
-                        gen_info_form=gen_info_form,
-                        gen_info_admin_form=gen_info_admin_form,
-                        address_form=address_form,
-                        phone_form=phone_form,
-                        mail_form=mail_form,
-                        password_form=password_form,
-                       dentist_specific_form=dentist_specific_form,
-                       dentist_specific_admin_form=dentist_specific_admin_form)
+                    gen_info_form=gen_info_form,
+                    gen_info_admin_form=gen_info_admin_form,
+                    address_form=address_form,
+                    phone_form=phone_form,
+                    mail_form=mail_form,
+                    password_form=password_form,
+                    dentist_specific_form=dentist_specific_form,
+                    dentist_specific_admin_form=dentist_specific_admin_form)
 
 @app.route('/dental_office/add/', methods=['GET', 'POST'])
 def add_dental_office():
@@ -313,8 +327,8 @@ def update_dental_office(body_id, form_to_display):
     if not session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 
-    dental_office = meta.session.query(users.DentalOffice)\
-            .filter(users.DentalOffice.id == body_id).one()
+    dental_office = meta.session.query(users.DentalOffice).filter(
+                                        users.DentalOffice.id == body_id).one()
 
     dental_office_form = DentalOfficeForm(request.form)
     if request.method == 'POST' and dental_office_form.validate():
@@ -347,7 +361,9 @@ def update_user_password(body_id, form_to_display):
     password_form = OdontuxUserPasswordForm(request.form)
     if request.method == 'POST' and password_form.validate():
         for f in get_password_field_list():
-            setattr(user, f, getattr(password_form, f).data)
+            setattr(user, f, b64encode(scrypt.encrypt(os.urandom(64),
+                            getattr(password_form, f).data.encode("utf_8"), 
+                            maxtime=0.5)))
         meta.session.commit()
         return redirect(url_for('update_user', 
                                  body_id=body_id,
@@ -498,3 +514,16 @@ def delete_user_mail(body_id, form_to_display):
         return redirect(url_for("update_user", body_id=body_id,
                                  form_to_display="mail"))
     return redirect(url_for('list_users'))
+
+@app.route('/delete/dental_office?id=<int:body_id>')
+def delete_dental_office(body_id):
+    if session['role'] != constants.ROLE_ADMIN:
+        return redirect(url_for('list_dental_offices'))
+   
+    dental_office = meta.session.query(users.DentalOffice).filter(
+                        users.DentalOffice.id == body_id).one_or_none()
+    meta.session.delete(dental_office)
+    meta.session.commit()
+    return redirect(url_for('list_dental_offices'))
+
+

@@ -4,11 +4,12 @@
 # v0.5
 # Licence BSD
 #
-
+import pdb
 from flask import render_template, request, redirect, url_for
 import sqlalchemy
 from sqlalchemy import or_
-from odontux.models import meta, act, administration, md, users, medication
+from odontux.models import (meta, act, administration, md, users, medication, 
+                            assets )
 from odontux.odonweb import app
 from gettext import gettext as _
 from odontux import constants
@@ -75,6 +76,25 @@ def find():
                 medication.DrugPrescribed.molecule.ilike(keyword)
                 ))
         return render_template('list_drugs.html', drugs=query.all())
+
+    if request.form["database"] == "asset":
+        keywords = request.form["keywords"].encode("utf_8").split()
+        query = meta.session.query(assets.Asset).join(
+                                    assets.AssetCategory
+                                    ).filter(
+                                    assets.Asset.end_of_use == None
+                                    ).filter( 
+                                    assets.Asset.end_use_reason == 0
+                                    )
+
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query = query.filter(or_(
+                    assets.AssetCategory.brand.ilike(keyword),
+                    assets.AssetCategory.commercial_name.ilike(keyword),
+                    assets.AssetCategory.description.ilike(keyword)
+                    ))
+        return render_template('list_assets.html', assets_list=query.all())
 
 @app.route('/search/user')
 def find_user():

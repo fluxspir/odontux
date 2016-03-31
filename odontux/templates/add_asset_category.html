@@ -1,0 +1,45 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+Add a new assets' provider
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_field, render_hidden_field, render_field_js_onchange %}
+<form method="post" action={{ url_for('add_asset_category') }}>
+    {{ render_field(asset_form.barcode, autofocus="autofocus") }}
+
+    {{ render_field_js_onchange(asset_form.type) }}
+
+  <dl>
+    <th>brand</th>
+    {{ render_table_field(asset_form.brand) }}
+    <th>Commercial Name</th>
+    {{ render_table_field(asset_form.commercial_name) }}
+    <th>Description</th>
+    {{ render_table_field(asset_form.description) }}
+  </dl>
+  <div id="device_category" style="display:block">
+    <dl>
+      <th>Sterilizable</th>
+      {{ render_table_field(device_form.sterilizable) }}
+    </dl>
+  </div>
+  <div id="material_category" style="display:none">
+    <dl>
+      <th>Material Type</th>
+      {{ render_table_field(material_form.material_type) }}
+      {{ render_table_field(material_form.unity) }}
+      <th>Initial Quantity</th>
+      {{ render_table_field(material_form.initial_quantity) }}
+      <th>Automatic Decrease</th>
+      {{ render_table_field(material_form.automatic_decrease) }}
+      <th>Order Threshold</th>
+      {{ render_table_field(material_form.order_threshold) }}
+    </dl>
+   </div>
+  <p><input type="submit" value="Add">
+</form>
+
+<script type="text/javascript" src="/static/js/select_field.js"></script>
+{% endblock %}
+
+<!---->

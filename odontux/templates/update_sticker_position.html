@@ -1,0 +1,11 @@
+{% extends 'header.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="{{ url_for('update_sticker_position', 
+                                                ste_cycle_id=ste_cycle_id) }}">
+  <dl>
+    {{ render_field(sticker_form.position) }}
+  </dl>
+  <p><input type="submit" value="Update">
+</form>
+{% endblock %}

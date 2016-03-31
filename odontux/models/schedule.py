@@ -6,17 +6,15 @@
 #
 
 from meta import Base
+from tables import material_appointment_table
 import users, administration
 import sqlalchemy
 import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
-
-
-now = datetime.datetime.now()
-today = datetime.date.today()
 
 
 class Appointment(Base):
@@ -38,13 +36,17 @@ class Appointment(Base):
     absent = Column(Boolean, default=False)
     excuse = Column(String, default="")
     administrative_acts = relationship("AppointmentActReference",
-                                       backref="appointment")
+                                       backref="appointment",
+                                       cascade="all, delete, delete-orphan")
     ordonnance = relationship("Prescription", backref="appointment",
                               cascade="all, delete, delete-orphan")
     memo = relationship("AppointmentMemo", backref="appointment",
                          cascade="all, delete, delete-orphan")
-    events = relationship("Event", backref="appointment")
-
+    events = relationship("Event", backref="appointment",
+                        cascade="all, delete, delete-orphan")
+    materiovigilance = relationship("Material", 
+                                    secondary=material_appointment_table,
+                                    backref="appointments")
 
 class Agenda(Base):
     __tablename__ = 'agenda'
@@ -60,6 +62,6 @@ class AppointmentMemo(Base):
     patient_id = Column(Integer, ForeignKey(administration.Patient.id))
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
     appointment_id = Column(Integer, ForeignKey(Appointment.id))
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
     memo = Column(String, default="")
 

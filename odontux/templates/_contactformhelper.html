@@ -7,14 +7,17 @@
 
 {% macro add_phone_form_fields(phone_form) %}
   {{ render_simple_field(phone_form.phonename) }}
+  {{ render_simple_field(phone_form.phoneindicatif) }}
+  {{ render_simple_field(phone_form.phoneareacode) }}
   {{ render_simple_field(phone_form.phonenum) }}
 {% endmacro %}
 
 {% macro add_address_form_fields(address_form) %}
   {{ render_simple_field(address_form.street) }}
   {{ render_simple_field(address_form.building) }}
+  {{ render_simple_field(address_form.complement) }}
   {{ render_simple_field(address_form.city) }}
-  {{ render_simple_field(address_form.postal_code) }}
+  {{ render_simple_field(address_form.zip_code) }}
   {{ render_simple_field(address_form.county) }}
   {{ render_simple_field(address_form.country) }}
 {% endmacro %}
@@ -31,6 +34,8 @@
       <tr>
         <th class="hidden">index</th>
         <th>name</th>
+        <th>indicatif</th>
+        <th>area_code</th>
         <th>number</th>
         <th>action</th>
       </tr>
@@ -39,6 +44,8 @@
         <form method="post" action="{{ url_for(url_update, body_id=body.id, form_to_display='phone') }}">
           <td class="hidden"><input type="text" name="phone_index" value="{{ loop.index0 }}" /></td>
           {{ render_table_field(phone_form.phonename, value=phone.name) }}
+          {{ render_table_field(phone_form.phoneindicatif, value=phone.indicatif) }}
+          {{ render_table_field(phone_form.phoneareacode, value=phone.area_code) }}
           {{ render_table_field(phone_form.phonenum, value=phone.number) }}
           <td><input type="submit" value="Update" /></td>
         </form>
@@ -52,6 +59,8 @@
         <form method="post" action={{ url_for(url_add, body_id=body.id, form_to_display='phone') }}>
           <td class="hidden"></td>
           {{ render_table_field(phone_form.phonename) }}
+          {{ render_table_field(phone_form.phoneindicatif) }}
+          {{ render_table_field(phone_form.phoneareacode) }}
           {{ render_table_field(phone_form.phonenum) }}
           <td><input type="submit" value="Add new phone" /></td>
         </form>
@@ -67,8 +76,9 @@
         <th class="hidden">id</th>
         <th>street</th>
         <th>building</th>
+        <th>complement</th>
         <th>city</th>
-        <th>postal_code</th>
+        <th>zip_code</th>
         <th>county</th>
         <th>country</th>
         <th></th>
@@ -79,8 +89,9 @@
           <td class="hidden"><input type="text" name="address_index" value="{{ loop.index0 }}" /></td>
           {{ render_table_field(address_form.street, value=address.street) }}
           {{ render_table_field(address_form.building, value=address.building) }}
+          {{ render_table_field(address_form.complement, value=address.complement) }}
           {{ render_table_field(address_form.city, value=address.city) }}
-          {{ render_table_field(address_form.postal_code, value=address.postal_code) }}
+          {{ render_table_field(address_form.zip_code, value=address.zip_code) }}
           {{ render_table_field(address_form.county, value=address.county) }}
           {{ render_table_field(address_form.country, value=address.country) }}
           <td><input type=submit value="Update" /></td>
@@ -96,8 +107,9 @@
           <td class="hidden"></td>
           {{ render_table_field(address_form.street) }}
           {{ render_table_field(address_form.building) }}
+          {{ render_table_field(address_form.complement) }}
           {{ render_table_field(address_form.city) }}
-          {{ render_table_field(address_form.postal_code) }}
+          {{ render_table_field(address_form.zip_code) }}
           {{ render_table_field(address_form.county) }}
           {{ render_table_field(address_form.country) }}
           <td><input type=submit value="Add new address" /></td>

@@ -1,0 +1,38 @@
+{% from "_formhelpers.html" import render_field, render_hidden_field %}
+{% from "_formhelpers.html" import render_table_field, render_table_hidden_field %}
+{% from "_contactformhelper.html" import update_phone_form %}
+{% from "_contactformhelper.html" import update_address_form %}
+{% from "_contactformhelper.html" import update_mail_form %}
+
+{% extends 'update.html' %}
+{% block main %}
+<nav id="update_choices">
+  <ul>
+    <li onclick='display_form("gen_info")'>general_infos</li>
+    <li onclick='display_form("address")'>address</li>
+    <li onclick='display_form("phone")'>phone</li>
+    <li onclick='display_form("mail")'>mail</li>
+  </ul>
+</nav>
+<div id="update_provider">
+  <div id="gen_info">
+    <form method="post" action={{ url_for('update_provider', body_id=provider.id, form_to_display="general_form" ) }}>
+      <dl>
+      {{ render_field(general_form.name, autofocus="autofocus") }}
+        {{ render_field(general_form.active) }}
+      <input type=submit value="Update" />
+     </dl>
+    </form>
+  </div>
+
+  {{ update_phone_form(phone_form, provider, "update_provider_phone", "delete_provider_phone", "add_provider_phone") }}
+  {{ update_address_form(address_form, provider, provider.addresses, "update_provider_address", "delete_provider_address", "add_provider_address") }}
+  {{ update_mail_form(mail_form, provider, "update_provider_mail", "delete_provider_mail", "add_provider_mail") }}
+
+</div>
+{% if form_to_display %}
+  <script> 
+    display_form({{ form_to_display }}) ;
+  </script>
+{% endif %}
+{% endblock %}

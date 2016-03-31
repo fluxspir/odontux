@@ -60,9 +60,9 @@ class MedecineDoctorParser(BaseCommand):
                         help="name of the city",
                         dest="city")
 
-        parser.add_option("--postal_code", action="store", type="string",
-                        help="postal code of the city",
-                        dest="postal_code")
+        parser.add_option("--zip_code", action="store", type="string",
+                        help="zip code of the city",
+                        dest="zip_code")
 
         parser.add_option("--county", action="store", type="string",
                         help="county's name",
@@ -105,8 +105,8 @@ class AddMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
             options.street = options.street.decode("utf_8")
         if options.building:
             options.building = options.building.decode("utf_8")
-        if options.postal_code:
-            options.postal_code = options.postal_code.decode("utf_8")
+        if options.zip_code:
+            options.zip_code = options.zip_code.decode("utf_8")
         if options.city:
             options.city = options.city.decode("utf_8").title()
         if options.county:
@@ -132,7 +132,7 @@ class AddMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
                             street = options.street,
                             building = options.building,
                             city = options.city,
-                            postal_code = options.postal_code,
+                            zip_code = options.zip_code,
                             county = options.county,
                             country = options.country,
                             update_date = options.update_date
@@ -220,8 +220,8 @@ class UpdateMedecineDoctorCommand(BaseCommand, MedecineDoctorParser):
             doc.addresses[-1].building = options.building.decode("utf_8").title()
         if options.city:
             doc.addresses[-1].city = options.city.decode("utf_8").title()
-        if options.postal_code:
-            doc.addresses[-1].postal_code = options.postal_code.decode("utf_8").title()
+        if options.zip_code:
+            doc.addresses[-1].zip_code = options.zip_code.decode("utf_8").title()
         if options.county:
             doc.addresses[-1].county = options.county.decode("utf_8").title()
         if options.country:

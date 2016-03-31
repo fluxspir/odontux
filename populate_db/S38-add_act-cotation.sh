@@ -27,6 +27,8 @@ cotid=$(odontux add_cotationfr -k 3 -m 17 --exceeding_adult_normal 179.03)
 odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en métal" -a "inlay 3 faces métal" -c IN3fmet -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 17 --exceeding_adult_normal 303.03)
 odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en céramique" -a "Inlay 3 faces ceramique" -c IN3fceram -s 3 --cotation $cotid
+cotid=$(odontux add_cotationfr -k 3 -m 17 --exceeding_adult_normal 259)
+odontux add_acttype -n "Obturation coronaire, 3 faces par une technique indirecte de laboratoire en composite" -a "Inlay 3 faces composite" -c IN3fcompo -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 9 --kid_multiplicator 9)
 odontux add_acttype -n "Scellement prophylactique des puits, sillons et fissures, par dent (valable avant 14 ans, sur les x6 et x7)" -a "Sealant" -c seal -s 3 --cotation $cotid
 cotid=$(odontux add_cotationfr -k 3 -m 7 --kid_multiplicator 10)

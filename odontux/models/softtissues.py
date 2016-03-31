@@ -12,11 +12,7 @@ import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
-
-
-now = datetime.datetime.now()
-today = datetime.date.today()
-
+from sqlalchemy import func
 
 class SuperiorLip(Base):
     __tablename__ = 'superior_lip'
@@ -24,7 +20,7 @@ class SuperiorLip(Base):
     mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
 
 
 class InferiorLip(Base):
@@ -33,7 +29,7 @@ class InferiorLip(Base):
     mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
 
 
 class LeftCheek(Base):
@@ -42,7 +38,7 @@ class LeftCheek(Base):
     mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
 
 
 class RightCheek(Base):
@@ -51,7 +47,7 @@ class RightCheek(Base):
     mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
 
 
 class HardPalate(Base):
@@ -60,7 +56,7 @@ class HardPalate(Base):
     mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
 
 
 class SoftPalate(Base):
@@ -69,7 +65,7 @@ class SoftPalate(Base):
     mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
 
 
 class Tongue(Base):
@@ -78,7 +74,7 @@ class Tongue(Base):
     mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
 
 
 class MouthBase(Base):
@@ -87,5 +83,5 @@ class MouthBase(Base):
     mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=now)
+    time_stamp = Column(DateTime, default=func.now())
 

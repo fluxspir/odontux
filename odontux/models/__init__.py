@@ -14,7 +14,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from zope.sqlalchemy import ZopeTransactionExtension
 
-from users import OdontuxUser, DentalOffice
+from users import OdontuxUser, DentalOffice, Settings
 from md import MedecineDoctor
 from administration import (Address, Mail, Phone, SocialSecurityFr, Payer, 
                             Family, Patient)
@@ -30,13 +30,16 @@ from teeth import Tooth, Event, ToothEvent, CrownEvent, RootEvent
 from act import Specialty, ActType, AppointmentActReference
 from cotation import NgapKeyFr, CmuKeyFr, MajorationFr, CotationFr
 from compta import PaymentType, Payment
-
+from assets import (AssetProvider, AssetCategory, MaterialCategory,
+                    Asset, Device, Material, AssetKitStructure, AssetKit)
+from traceability import (SterilizationCycleType, SterilizationCycleMode,
+                            SterilizationCycle, AssetSterilized)
 
 def init():
     parser = ConfigParser.ConfigParser()
     home = os.path.expanduser("~")
     parser.read(os.path.join(home, ".odontuxrc"))
-    db_url = parser.get("db", "url")
+    db_url = parser.get("dbtest", "url")
 
     engine = create_engine(db_url, echo=False, convert_unicode=True)
 #    Session = sessionmaker(bind=engine)

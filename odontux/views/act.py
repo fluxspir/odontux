@@ -133,7 +133,7 @@ def list_specialty(ordering=[]):
     specialties = query.all()
     return render_template('list_specialty.html', specialties=specialties)
 
-@app.route('/specialty/add/', methods=['GET', 'POST'])
+@app.route('/add/specialty/', methods=['GET', 'POST'])
 def add_specialty():
     form = SpecialtyForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -165,12 +165,20 @@ def update_specialty(specialty_id):
     return render_template('update_specialty.html', form=form, 
                             specialty=specialty)
 
+@app.route('/delete/specialty?id=<int:specialty_id>')
+def delete_specialty(specialty_id):
+    specialty = meta.session.query(act.Specialty).filter(
+                    act.Specialty.id == specialty_id).one()
+    meta.session.delete(specialty)
+    meta.session.commit()
+    return redirect(url_for('list_specialty'))
+        
 
 #####
 # Acts
 #####
 
-@app.route('/acttype?keywords=<keywords>&ordering=<ordering>')
+@app.route('/list/acttype?keywords=<keywords>&ordering=<ordering>')
 def list_acttype(keywords="", ordering=""):
     """ The target is too display dentist's gesture, describing it, its values.
     Looking in ActType table, we may decide to print only 
@@ -241,6 +249,8 @@ def add_acttype():
     """ """
     # TODO  BECAUSE DIFFICULT TO MAKE IT "PERFECT"
     form = ActTypeForm(request.form)
+    form.specialty_id.choices = get_specialty_choice_list()
+    form.cotationfr_id.choices = get_cotationfr_choice_list()
     if request.method == 'POST' and form.validate():
         values = {}
         values['specialty_id'] = form.specialty_id.data
@@ -252,7 +262,8 @@ def add_acttype():
         new_acttype = act.ActType(**values)
         meta.session.add(new_acttype)
         meta.session.commit()
-        return redirect(url_for('list_acttype'))
+        return redirect(url_for('list_acttype', keywords="", 
+                                                ordering=""))
     return render_template('/add_act.html', form=form)
 
 @app.route('/act/update_acttype=<int:acttype_id>/', methods=['GET', 'POST'])

@@ -15,11 +15,8 @@ from tables import (odontux_user_address_table, odontux_user_mail_table,
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
-
-
-now = datetime.datetime.now()
-today = datetime.date.today()
 
 
 class DentalOffice(Base):
@@ -28,6 +25,7 @@ class DentalOffice(Base):
     office_name = Column(String, default="")
     owner_lastname = Column(String, default="")
     owner_firstname = Column(String, default="")
+    active = Column(Boolean, default=True)
     url = Column(String, default="")
     addresses = relationship("Address", secondary=dental_office_address_table,
                            backref="dental_office")
@@ -53,8 +51,8 @@ class OdontuxUser(Base):
     addresses = relationship("Address", secondary=odontux_user_address_table,
                            backref="odontux_user")
     sex = Column(String, default="f")
-    dob = Column(Date, default="1970-01-01")
-    status = Column(Boolean, default=True)
+    dob = Column(Date, default=datetime.date(1970, 1, 1))
+    active = Column(Boolean, default=True)
     comments = Column(String, default="")
     mails = relationship("Mail", secondary=odontux_user_mail_table,
                         backref="odontux_user")
@@ -63,7 +61,12 @@ class OdontuxUser(Base):
     avatar_id = Column(Integer, default=None)
     display_order = Column(Integer, default=None)
     modified_by = Column(Integer, default=None)
-    time_stamp = Column(Date, default=today)
+    creation_date = Column(Date, default=func.current_date())
     gnucash_url = Column(String, default="")
     patients = relationship("Patient", backref="user")
 
+class Settings(Base):
+    __tablename__ = 'settings'
+    id = Column(Integer, primary_key=True)
+    key = Column(String, nullable=False)
+    value = Column(String)

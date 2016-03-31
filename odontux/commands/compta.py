@@ -6,6 +6,8 @@
 #
 #
 
+import pdb
+
 from base import BaseCommand
 from models import meta, compta, administration, act, schedule, tables
 

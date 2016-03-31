@@ -12,6 +12,7 @@ import sys
 import commands
 import tools
 import models
+import sqlalchemy
 
 def get_command(command_name):
     """Find the command class.
@@ -68,8 +69,15 @@ if CommandClass is None:
     if ToolClass is None:
         # TODO: call usage/help
         raise ValueError("Unknown command/tool '{}'.".format(tool_name))
-    tool = ToolClass()
-    tool.run(args)
+    try:
+        tool = ToolClass()
+        tool.run(args)
+    except AttributeError:
+        # on sqlite database
+        pass
+    except sqlalchemy.exc.ProgrammingError:
+        # on postgresql database
+        pass
     sys.exit(0)
 
 cmd = CommandClass()

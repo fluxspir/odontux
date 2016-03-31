@@ -63,3 +63,18 @@ from patient import (
 from teeth import (
                     list_teeth,
                   )
+from assets import (
+                    my_assets, add_provider, list_providers, list_assets, 
+                    add_asset, add_kit_type
+                    )
+from traceability import (
+                    traceability_portal, add_sterilization_cycle_type,
+                    list_sterilization_cycle_type,
+                    update_sterilization_cycle_type,
+                    add_sterilization_complement, 
+                    list_sterilization_complement,
+                    update_sterilization_complement,
+                    add_sterilization_cycle_mode,
+                    list_sterilization_cycle_mode,
+                    update_sterilization_cycle_mode
+                    )

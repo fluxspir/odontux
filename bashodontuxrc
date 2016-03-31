@@ -3,7 +3,6 @@
 # go to odontux dir, and add it to PATH
 cd ~/odontux
 PATH=~/odontux/odontux:~/bin:"${PATH}"
-
 _odontux() 
 {
     local cur prev opts

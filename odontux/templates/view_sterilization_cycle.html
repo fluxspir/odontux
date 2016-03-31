@@ -1,0 +1,103 @@
+{% extends "header.html" %}
+{% block main %}
+{% if session.role != session.ROLE_ADMIN %}
+    Sticker Position is 
+    <a href="{{ url_for('update_sticker_position', 
+                    ste_cycle_id=ste_cycle.id) }}">
+            {{ sticker_position }}</a>
+  <br />
+  <h3>
+    <a href="{{ url_for('print_sterilization_stickers', 
+                        ste_cycle_id=ste_cycle.id ) }}">
+      Print sterilization cycle {{ ste_cycle.id }}.</a>
+  </h3>
+{% endif %}
+  <table>
+    <caption> Sterilization made by 
+              <strong>{{ ste_cycle.user.username }}</strong>
+              on <strong>{{ ste_cycle.cycle_date }}</strong>
+    </caption>
+    <tr></tr>
+    <tr>
+      <th>Sterilizer</th>
+      <th>Cycle Type</th>
+      <th>Cycle Complement</th>
+      <th>Cycle Mode</th>
+      <th>Reference</th>
+      <th>Document</th>
+    </tr>
+    <tr>
+      <td><a href="{{ url_for('view_asset', 
+                              asset_id=ste_cycle.sterilizer.id) }}">
+                    {{ ste_cycle.sterilizer.asset_category.commercial_name }}
+          </a></td>
+      <td>{{ ste_cycle.cycle_type.name }}</td>
+      <td>{{ ste_cycle.cycle_complement.complement }}</td>
+      <td>{{ ste_cycle.cycle_mode.name }}</td>
+      <td>{{ ste_cycle.reference }}</td>
+      <td>{{ ste_cycle.document }}</td>
+    </tr>
+</table>
+<br />
+  <table>
+    <caption>Assets sterilized</caption>
+    <tr>
+      <th>Kits in this sterilization : </th>
+      <th>Assets in this sterilization : </th>
+      <th>Unmarked assets :</th>
+    </tr>
+    <tr>
+      <td>{{ kits|length }}</td>
+      <td>{{ assets|length }}</td>
+      <td> {{ unmarked|length }}</td>
+    </tr>
+    <tr>
+      <td>
+        <table>
+          {% for kit in kits %}
+          <tr>
+            <td>{{ kit.kit.id }}</td>
+            <td><a href="{{ url_for('view_kit', kit_id=kit.kit.id) }}">
+                              {{ kit.kit.asset_kit_structure.name }}
+                </a></td>
+            <td>
+              {% if kit.appointment_id %}
+                  <a href="{{ url_for('patient_appointment', 
+                                      appointment_id=kit.appointment_id) }}">
+                          {{ kit.appointment_id }}
+                  </a>
+              {% else %}
+                  {{ kit.appointment_id }}
+              {% endif %}
+              </td>
+            <td>{{ kit.expiration_date }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </td>
+      <td>
+        <table>
+          {% for asset in assets %}
+          <tr>
+            <td>{{ asset.asset.id }}</td>
+            <td><a href="{{ url_for('view_asset', asset_id=asset.asset.id) }}">
+                  {{ asset.asset.asset_category.brand }} - 
+                  {{ asset.asset.asset_category.commercial_name }}
+                </a></td>
+            <td>
+              {% if asset.appointment_id %}
+                <a href="{{ url_for('patient_appointment',
+                                    appointment_id=asset.appointment_id) }}">
+                            {{ asset.appointment_id }}
+                </a>
+              {% else %}
+                {{ asset.appointment_id }}
+              {% endif %}
+              </td>
+            <td>{{ asset.expiration_date }}</td>
+          </tr>
+          {% endfor %}
+        <table>
+  </table>
+
+{% endblock %}

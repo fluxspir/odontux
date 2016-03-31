@@ -6,6 +6,7 @@
 
 from flask import Flask
 from flask import Blueprint, g
+#from flask.ext.assets import Environment, Bundle
 import models
 
 from gettext import gettext as _
@@ -27,6 +28,10 @@ DEBUG = False
 
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+#assets = Environment(app)
+#pdf = Bundle('barcode.pdf')
+#assets.register('pdf_all', pdf)
 
 bp = Blueprint('frontend', __name__, url_prefix='/<lang_code>')
 

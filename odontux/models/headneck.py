@@ -14,10 +14,6 @@ from sqlalchemy import MetaData, ForeignKey
 from sqlalchemy.orm import relationship, backref
 
 
-now = datetime.datetime.now()
-today = datetime.date.today()
-
-
 class Head(Base):
     __tablename__ = 'head'
     id = Column(Integer, primary_key=True)

@@ -1,0 +1,15 @@
+{% extends 'header.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action={{ url_for('update_sterilization_cycle_mode', ste_cycle_mode_id=ste_cycle_mode.id) }}>
+  <dl>
+    {{ render_field(ste_cycle_mode_form.name, value=ste_cycle_mode.name) }}
+    {{ render_field(ste_cycle_mode_form.heat_type, value=ste_cycle_mode.heat_type) }}
+    {{ render_field(ste_cycle_mode_form.temperature, value=ste_cycle_mode.temperature) }}
+    {{ render_field(ste_cycle_mode_form.pressure, value=ste_cycle_mode.pressure) }}
+    {{ render_field(ste_cycle_mode_form.sterilization_duration, value=ste_cycle_mode.sterilization_duration) }}
+    {{ render_field(ste_cycle_mode_form.comment, value=ste_cycle_mode.comment) }}
+  </dl>
+  <p><input type="submit" value="Update">
+</form>
+{% endblock %}

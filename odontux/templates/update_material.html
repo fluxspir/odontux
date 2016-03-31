@@ -1,0 +1,24 @@
+{% extends 'header.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_field, render_hidden_field %}
+{{ asset.id }} -- {{ asset.asset_category.brand }} || {{ asset.asset_category.commercial_name }}
+<form method="post" action="{{ url_for('update_asset', asset_id=asset.id) }}">
+  <dl>
+    {{ render_hidden_field(asset_form.id) }}
+    {{ render_field(asset_form.provider_id) }}
+    {{ render_field(asset_form.acquisition_date) }}
+    {{ render_field(asset_form.acquisition_price) }}
+    {{ render_field(asset_form.new) }}
+    {{ render_field(asset_form.user_id) }}
+    {{ render_field(asset_form.office_id) }}
+    {{ render_field(asset_form.start_of_use) }}
+    {{ render_field(asset_form.end_of_use) }}
+    {{ render_field(asset_form.end_use_reason) }}
+    {{ render_field(material_form.expiration_date) }}
+    {{ render_field(material_form.actual_quantity) }}
+    {{ render_field(material_form.expiration_alert) }}
+    {{ render_field(material_form.batch_number) }}
+  </dl>
+  <p><input type="submit" value="Update">
+</form>
+{% endblock %}

@@ -38,7 +38,7 @@
       {% endif %}
 
       {% if session.role == session.ROLE_ADMIN %}
-        {{ render_field(gen_info_admin_form.status) }}
+        {{ render_field(gen_info_admin_form.active) }}
         {{ render_field(gen_info_admin_form.role) }}
         {{ render_field(gen_info_admin_form.comments) }}
         {{ render_field(gen_info_admin_form.modified_by) }}

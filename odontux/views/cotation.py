@@ -164,8 +164,8 @@ def update_ngap(ngap_id):
     if not session['role'] == constants.ROLE_DENTIST:
         return redirect(url_for('show_ngap'))
 
-    ngap = meta.session.query(cotation.NgapKeyFr)\
-            .filter(cotation.NgapKeyFr.id == ngap_id).one()
+    ngap = meta.session.query(cotation.NgapKeyFr).filter(
+                                    cotation.NgapKeyFr.id == ngap_id).one()
     form = NgapKeyFrForm(request.form)
 
     if request.method == 'POST' and form.validate():

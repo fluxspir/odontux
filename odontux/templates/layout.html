@@ -15,6 +15,7 @@
       	<link rel="stylesheet" type="text/css" href="/static/header.css">
       	<link rel="stylesheet" type="text/css" href="/static/main.css">
       	<link rel="stylesheet" type="text/css" href="/static/footer.css">
+      	<link rel="stylesheet" type="text/css" href="/static/table.css">
 	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
       {% block css %} 
       {% endblock %}
@@ -66,6 +67,8 @@
         <a href="{{ url_for('show_ngap') }}">Ngap</a>
       	<a href="{{ url_for('list_users') }}">Users</a>
         <a href="{{ url_for('list_dental_offices') }}">Dental Offices</a>
+        <a href="{{ url_for('my_assets') }}">Assets</a>
+        <a href="{{ url_for('traceability_portal') }}">Traceability</a>
         <div id="search">
         {% block search %}
           <form action="/search/" method="post" autocomplete="on">
@@ -77,6 +80,7 @@
 	            <option value="odontuxuser">User</option>
 	            <option value="doctor">Doctor</option>
               <option value="drug">Drug</option>
+              <option value="asset">Asset</option>
  	          </select>
 	          <input type="submit" value="Find" />
 	        </form>
@@ -106,8 +110,8 @@
 
     <footer>
       {% block footer %}
-      &copy; Copyright 2012-2013 by <a class="footer" href="mailto:franck@kernlog.net">Franck Labadille</a>.
-      BTC : 12X27E9ZeApwLrbEphnQNgPM9DvRRKiUYq
+      &copy; Copyright 2012-2016 by <a class="footer" href="mailto:franck@kernlog.net">Franck Labadille</a>.
+      <!--BTC : 12X27E9ZeApwLrbEphnQNgPM9DvRRKiUYq-->
       {% endblock %}
     </footer>
   </body>

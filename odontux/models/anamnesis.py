@@ -11,11 +11,8 @@ import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 from sqlalchemy.orm import relationship
-
-
-now = datetime.datetime.now()
-today = datetime.date.today()
 
 
 class MedicalHistory(Base):
@@ -28,7 +25,7 @@ class MedicalHistory(Base):
     disorder = Column(String, default="")
     habitus = Column(String, default="")
     treatment = Column(String, default="")
-    time_stamp = Column(Date, default=today)
+    time_stamp = Column(Date, default=func.current_date())
 
 
 class PastSurgeries(Base):
@@ -39,7 +36,7 @@ class PastSurgeries(Base):
     surgery_type = Column(String, default="")
     problem = Column(String, default="")
     complication = Column(String, default="")
-    time_stamp = Column(Date, default=today)
+    time_stamp = Column(Date, default=func.current_date())
 
 
 class Allergies(Base):
@@ -52,5 +49,5 @@ class Allergies(Base):
     food = Column(String, default="")
     other = Column(String, default="")
     reaction = Column(String, default="")
-    time_stamp = Column(Date, default=today)
+    time_stamp = Column(Date, default=func.current_date())
 

@@ -21,6 +21,7 @@ from odontux.models import (
                             teeth,
                             md,
                             users,
+                            assets
                            )
 
 def in_patient_file():
@@ -195,6 +196,14 @@ def is_body_already_in_database(data, body_type="patient"):
             return body
         except sqlalchemy.orm.exc.NoResultFound:
             return False
-    
+   
+    elif body_type == "provider":
+        try:
+            body = meta.session.query(assets.AssetProvider).filter(
+                    assets.AssetProvider.name == data.name.data).one()
+            return body
+        except sqlalchemy.orm.exc.NoResultFound:
+            return False
+
     else:
         return False

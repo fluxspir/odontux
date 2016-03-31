@@ -12,9 +12,9 @@ import datetime
 
 from sqlalchemy import (Table, Column, Integer, String, Boolean, Numeric, Date)
 from sqlalchemy import ForeignKey
+from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
 
-today = datetime.date.today()
 
 
 class PaymentType(Base):
@@ -47,7 +47,7 @@ class Payment(Base):
     amount = Column(Numeric, nullable=False)
     advance = Column(Boolean, default=False, nullable=False)
     comments = Column(String, default="")
-    cashin_date = Column(Date, default=today)
+    cashin_date = Column(Date, default=func.current_date())
     acts = relationship("AppointmentActReference",
                           secondary=payment_act_table,
                           backref="payments")
