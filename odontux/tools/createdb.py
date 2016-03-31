@@ -47,4 +47,15 @@ class CreateOdontuxDatabaseTool():
             new_admin = users.OdontuxUser(**admin_user)
             meta.session.add(new_admin)
             meta.session.commit()
-            
+    
+        query = meta.session.query(users.Settings)
+        query = query.all()
+        if not query:
+            print('creating key-value for barcode_position')
+            values = { 
+                "key": "barcode_position",
+                "value": "0"
+                }
+            new_setting = users.Settings(**values)
+            meta.session.add(new_setting)
+            meta.session.commit()
