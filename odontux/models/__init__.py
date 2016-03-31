@@ -14,7 +14,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from zope.sqlalchemy import ZopeTransactionExtension
 
-from users import OdontuxUser, DentalOffice
+from users import OdontuxUser, DentalOffice, Settings
 from md import MedecineDoctor
 from administration import (Address, Mail, Phone, SocialSecurityFr, Payer, 
                             Family, Patient)

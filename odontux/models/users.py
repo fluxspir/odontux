@@ -65,3 +65,8 @@ class OdontuxUser(Base):
     gnucash_url = Column(String, default="")
     patients = relationship("Patient", backref="user")
 
+class Settings(Base):
+    __tablename__ = 'settings'
+    id = Column(Integer, primary_key=True)
+    key = Column(String, nullable=False)
+    value = Column(String)
