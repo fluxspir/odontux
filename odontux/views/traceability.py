@@ -28,7 +28,7 @@ from odontux.views.log import index
 
 from reportlab.graphics.barcode import code128
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm
+from reportlab.lib.units import mm, inch
 from reportlab.pdfgen import canvas
 
 
@@ -354,16 +354,22 @@ def get_assets_list_for_sterilization_cycle():
                     assets.AssetKit.end_use_reason ==
                                         constants.END_USE_REASON_IN_USE_STOCK,
                     assets.AssetKit.appointment_id.is_(None)
-            ).join(assets.AssetKitStructure)
-                .order_by(
+                )
+            .filter(~assets.AssetKit.id.in_(
+                meta.session.query(traceability.AssetSterilized.kit_id)
+                    .filter(traceability.AssetSterilized.kit_id.isnot(None))
+                )
+            )
+            .join(assets.AssetKitStructure)
+            .order_by(
                 assets.AssetKitStructure.name,
                 assets.AssetKit.id
                 )
         )
-
+    
     query_assets = (
         meta.session.query(assets.Asset)
-            # the asset hasn't a thow_away date : it's probably in service
+            # the asset hasn't a throw_away date : it's probably in service
             # the asset is still marked : in use or in stock
             # Asset is in use, not in stock
             .filter(assets.Asset.end_of_use.is_(None),
@@ -403,6 +409,7 @@ def get_assets_list_for_sterilization_cycle():
                 # The asset never was Sterilized
                 ~assets.Asset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
+                        .filter(traceability.AssetSterilized.asset_id.isnot(None))
                     ),
                 # the asset doesn't exist in the sterilized environment without
                 # an appointment_id correlation, which means it could be 
@@ -413,7 +420,8 @@ def get_assets_list_for_sterilization_cycle():
                                                                         (None))
                         )
                     )
-                ).join(assets.AssetCategory, act.Specialty)
+               )
+                .join(assets.AssetCategory, act.Specialty)
                     .order_by(
                         act.Specialty.name,
                         assets.AssetCategory.brand,
@@ -829,7 +837,7 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
                 )
         cell_y = ( (row * cell_height) + bmarg )
 
-        barcode = code128.Code128(str(item.id).zfill(10))
+        barcode = code128.Code128(str(item.id).zfill(10), barWidth=(inch*0.01))
         barcode.drawOn( c,
                         cell_x ,
                         (cell_y + (11 * mm) )
