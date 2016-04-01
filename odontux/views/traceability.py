@@ -837,8 +837,8 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
                     ( (col - 1) * ( space_between_cell_horizontal) )
                 )
         cell_y = ( (row * cell_height) + bmarg )
-
-        barcode = code128.Code128(str(item.id).zfill(10), barWidth=(inch*0.01))
+        
+        barcode = code128.Code128(str(item.id).zfill(10), barWidth=(mm*0.33))  
         barcode.drawOn( c,
                         cell_x ,
                         (cell_y + (11 * mm) )
@@ -903,7 +903,7 @@ def print_sterilization_stickers(ste_cycle_id):
             .one()
         )
     actual_position = int(sticker_setting.value)
-    (pdf, new_position) = create_barcodes_a4_65(assets, actual_position, False)
+    (pdf, new_position) = create_barcodes_a4_65(assets, actual_position, True)
     sticker_setting.value = str(new_position)
     meta.session.commit()
 
