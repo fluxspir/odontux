@@ -400,10 +400,10 @@ def get_assets_list_for_sterilization_cycle():
                 # appointment and its sterilization expiration date is passed. 
                 assets.Asset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
-                        .filter(traceability.AssetSterilized.appointment_id.is_
-                                                                        (None))
-                        .filter(traceability.AssetSterilized.expiration_date <=
-                                                        datetime.date.today()
+                        .filter(traceability.AssetSterilized.asset_id.isnot(None),
+                            traceability.AssetSterilized.appointment_id.is_(None),
+                            traceability.AssetSterilized.expiration_date <=
+                                                            datetime.date.today()
                                 )
                         ),
                 # The asset never was Sterilized
@@ -416,6 +416,7 @@ def get_assets_list_for_sterilization_cycle():
                 # sterilized
                 ~assets.Asset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
+                        .filter(traceability.AssetSterilized.asset_id.isnot(None))
                         .filter(traceability.AssetSterilized.appointment_id.is_
                                                                         (None))
                         )
