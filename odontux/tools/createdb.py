@@ -51,9 +51,9 @@ class CreateOdontuxDatabaseTool():
         query = meta.session.query(users.Settings)
         query = query.all()
         if not query:
-            print('creating key-value for barcode_position')
+            print('creating key-value for sticker_position')
             values = { 
-                "key": "barcode_position",
+                "key": "sticker_position",
                 "value": "0"
                 }
             new_setting = users.Settings(**values)
