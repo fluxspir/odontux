@@ -99,4 +99,4 @@ class AssetSterilized(Base):
                                                                 default=None)
     appointment = relationship("schedule.Appointment")
     expiration_date = Column(Date, nullable=False)
-
+    sealed = Column(Boolean, nullable=False, default=True)

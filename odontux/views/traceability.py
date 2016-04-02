@@ -270,14 +270,15 @@ def update_sterilization_cycle_mode(ste_cycle_mode_id):
         for f in get_sterilization_cycle_mode_field_list():
             setattr(ste_cycle_mode, f, getattr(ste_cycle_mode_form, f).data)
         ste_cycle_mode.sterilization_duration = \
-            datetime.timedelta(
+            datetime.timedelta(0,
                     ste_cycle_mode_form.sterilization_duration.data * 60)
         meta.session.commit()
         return redirect(url_for('list_sterilization_cycle_mode'))
     
     return render_template('/update_sterilization_cycle_mode.html',
                             ste_cycle_mode=ste_cycle_mode,
-                            ste_cycle_mode_form=ste_cycle_mode_form)
+                            ste_cycle_mode_form=ste_cycle_mode_form,
+                            int=int)
  
 
 @app.route('/list/sterilization_cycle_mode/', methods=["GET"])
@@ -350,13 +351,19 @@ def get_assets_list_for_sterilization_cycle():
 
     query_kits = (
         meta.session.query(assets.AssetKit)
+            # The kit hasn't a throw away date : it's probably in service
+            # The kit is still marked "in use or in stock"
+            # The kit isn't linked to an appointment, which would mean it has
+            # been use.
             .filter(assets.AssetKit.end_of_use.is_(None),
                     assets.AssetKit.end_use_reason ==
                                         constants.END_USE_REASON_IN_USE_STOCK,
                     assets.AssetKit.appointment_id.is_(None)
                 )
-            .filter(~assets.AssetKit.id.in_(
-                meta.session.query(traceability.AssetSterilized.kit_id)
+            .filter(
+                # The kit was never sterilized
+                ~assets.AssetKit.id.in_(
+                    meta.session.query(traceability.AssetSterilized.kit_id)
                     .filter(traceability.AssetSterilized.kit_id.isnot(None))
                 )
             )
@@ -400,24 +407,35 @@ def get_assets_list_for_sterilization_cycle():
                 # appointment and its sterilization expiration date is passed. 
                 assets.Asset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
-                        .filter(traceability.AssetSterilized.asset_id.isnot(None),
-                            traceability.AssetSterilized.appointment_id.is_(None),
-                            traceability.AssetSterilized.expiration_date <=
-                                                            datetime.date.today()
+                    .filter(traceability.AssetSterilized.asset_id.isnot(None),
+                        traceability.AssetSterilized.appointment_id.is_(None),
+                        traceability.AssetSterilized.expiration_date <=
+                                                        datetime.date.today()
                                 )
                         ),
+                # The asset has been used out of an appointment ; the seal is
+                # broken.
+                assets.Asset.id.in_(
+                    meta.session.query(traceability.AssetSterilized.asset_id)
+                    .filter(traceability.AssetSterilized.asset_id.isnot(None),
+                        traceability.AssetSterilized.appointment_id.is_(None),
+                        traceability.AssetSterilized.expiration_date >=
+                                                        datetime.date.today(),
+                        traceability.AssetSterilized.sealed == False
+                        )
+                    ),
                 # The asset never was Sterilized
                 ~assets.Asset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
-                        .filter(traceability.AssetSterilized.asset_id.isnot(None))
+                    .filter(traceability.AssetSterilized.asset_id.isnot(None))
                     ),
                 # the asset doesn't exist in the sterilized environment without
                 # an appointment_id correlation, which means it could be 
                 # sterilized
                 ~assets.Asset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
-                        .filter(traceability.AssetSterilized.asset_id.isnot(None))
-                        .filter(traceability.AssetSterilized.appointment_id.is_
+                    .filter(traceability.AssetSterilized.asset_id.isnot(None))
+                    .filter(traceability.AssetSterilized.appointment_id.is_
                                                                         (None))
                         )
                     )
@@ -684,6 +702,7 @@ def list_sterilization_cycle():
     ste_cycles = (
         meta.session.query(traceability.SterilizationCycle)
         .order_by(traceability.SterilizationCycle.cycle_date.desc())
+        .order_by(traceability.SterilizationCycle.id.desc())
         .all()
         )
     
@@ -903,7 +922,7 @@ def print_sterilization_stickers(ste_cycle_id):
             .one()
         )
     actual_position = int(sticker_setting.value)
-    (pdf, new_position) = create_barcodes_a4_65(assets, actual_position, True)
+    (pdf, new_position) = create_barcodes_a4_65(assets, actual_position, False)
     sticker_setting.value = str(new_position)
     meta.session.commit()
 

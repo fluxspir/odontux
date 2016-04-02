@@ -6,7 +6,9 @@
   <div id="searchresult">
   {% block searchresult %}
     {% for kit_type in kit_types %}
-      {{ kit_type.name }} || <a href={{ url_for('update_kit_type', kit_type_id=kit_type.id) }}>Update</a> 
+      {{ kit_type.name }} || 
+      <a href={{ url_for('update_kit_type', kit_type_id=kit_type.id) }}>Update
+      </a><br />
     {% endfor %}
   {% endblock %}
   </div>

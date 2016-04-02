@@ -7,7 +7,7 @@
     {{ render_field(ste_cycle_mode_form.heat_type, value=ste_cycle_mode.heat_type) }}
     {{ render_field(ste_cycle_mode_form.temperature, value=ste_cycle_mode.temperature) }}
     {{ render_field(ste_cycle_mode_form.pressure, value=ste_cycle_mode.pressure) }}
-    {{ render_field(ste_cycle_mode_form.sterilization_duration, value=ste_cycle_mode.sterilization_duration) }}
+    {{ render_field(ste_cycle_mode_form.sterilization_duration, value=int(ste_cycle_mode.sterilization_duration.total_seconds() /60))  }}
     {{ render_field(ste_cycle_mode_form.comment, value=ste_cycle_mode.comment) }}
   </dl>
   <p><input type="submit" value="Update">

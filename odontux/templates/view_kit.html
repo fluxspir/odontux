@@ -4,9 +4,25 @@
   <a href="{{ url_for('add_kit') }}">Add new kit</a>
 {% endif %}
 <br />
-    {{ kit.id }}  --   {{ kit.asset_kit_structure.name }}  -- {{ kit.creation_date }} <br />
+    {{ kit.id }}  ( {{ kit.asset_kit_structure.id }}) -- 
+        {{ kit.asset_kit_structure.name }}  -- {{ kit.creation_date }} <br />
+    {% if kit.sterilization %}
+      Kit was sterilized on 
+      <a href="{{ url_for('view_sterilization_cycle', 
+                ste_cycle_id=kit.sterilization[-1].sterilization_cycle_id) }}">
+        sterilization cycle id : 
+                          {{ kit.sterilization[-1].sterilization_cycle_id }}
+      </a> ; validity of sterilization : 
+        {{ kit.sterilization[-1].expiration_date }}<br />
+    {% else %}
+      Kit isn't sterilized yet
+    {% endif %}
+    Content :<br />
     {% for asset in kit.assets %}
-      {{ asset.asset_category.brand }} -- {{ asset.asset_category.commercial_name }} </br />
+      <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+        {{ asset.id }} -- {{ asset.asset_category.brand }} -- 
+                          {{ asset.asset_category.commercial_name }}
+      </a></br />
     {% endfor %}
   
   <a href="{{ url_for('update_kit', kit_id=kit.id) }}">Update</a>
