@@ -9,7 +9,8 @@ from meta import Base
 import meta
 from tables import (asset_provider_address_table, asset_provider_phone_table, 
                     asset_provider_mail_table, kit_asset_table,
-                    kitstructure_assetcategory_table)
+                    kitstructure_assetcategory_table,
+                    superasset_asset_table)
 import users, act, schedule 
 import sqlalchemy
 import datetime
@@ -42,13 +43,6 @@ type of Asset.
 
 """
 
-#class BarcodeType(Base):
-#    __tablename__ = "barcode_type"
-#    id = Column(Integer, primary_key=True)
-#    dimension = Column(Integer(1), nullable=False)
-#    name = Column(String(15), nullable=False)
-#
-
 class AssetProvider(Base):
     """ 
         status : if True, we work we
@@ -66,13 +60,11 @@ class AssetProvider(Base):
 
 class AssetCategory(Base):
     """ 
-        * odontux_code : pourrait = id ; ou être plus explicite ; à voir.
         * brand : The manufacturer of the product
         * commercial name of the product
         * description... indispensable ?
         * barcode : pour scanner les produits entrant en stock.
         * asset_type : Famille du bien ; permet des recherches plus ciblées
-                    
     """
     __tablename__ = "asset_category"
     id = Column(Integer, primary_key=True)
@@ -127,6 +119,12 @@ class MaterialCategory(AssetCategory):
         'polymorphic_identity': 'material'
     }
 
+class SuperAssetCategory(Base):
+    """ """
+    __tablename__ = "super_asset_category"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
 class Asset(Base):
     """
         * provider_id : from whom it was bought
@@ -146,13 +144,12 @@ class Asset(Base):
     """
     __tablename__ = "asset"
     id = Column(Integer, primary_key=True)
-    provider_id = Column(Integer, ForeignKey(AssetProvider.id), nullable=False)
+    provider_id = Column(Integer, ForeignKey(AssetProvider.id))
     provider = relationship('AssetProvider')
-    asset_category_id = Column(Integer, ForeignKey(AssetCategory.id), 
-                                                                nullable=False)
+    asset_category_id = Column(Integer, ForeignKey(AssetCategory.id))
     asset_category = relationship('AssetCategory')
     acquisition_date = Column(Date, default=func.current_date())
-    acquisition_price = Column(Numeric, default=0)
+    acquisition_price = Column(Numeric, default=0, nullable=True)
     new = Column(Boolean, default=True)
     user_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
     user = relationship('users.OdontuxUser')
@@ -202,7 +199,7 @@ class Asset(Base):
 #                .one_or_none()
 #            )
 #        return query
-                        
+
 class Device(Asset):
     """
         * lifetime expected ; 0 if forever
@@ -230,6 +227,19 @@ class Material(Asset):
     __mapper_args__ = {
         'polymorphic_identity': 'material',
     }
+
+class SuperAsset(Asset):
+    """
+        a super_asset is an asset made by addition of various assets
+    """
+    __tablename__ = "super_asset"
+    id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
+    super_asset_category_id = Column(Integer, 
+                                            ForeignKey(SuperAssetCategory.id),
+                                            nullable=False)
+    super_asset_category = relationship("SuperAssetCategory")
+    assets_composing = relationship("Asset", secondary=superasset_asset_table,
+                                            backref="super_asset")
 
 class AssetKitStructure(Base):
     """
