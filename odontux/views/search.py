@@ -79,22 +79,39 @@ def find():
 
     if request.form["database"] == "asset":
         keywords = request.form["keywords"].encode("utf_8").split()
-        query = meta.session.query(assets.Asset).join(
-                                    assets.AssetCategory
-                                    ).filter(
-                                    assets.Asset.end_of_use == None
-                                    ).filter( 
-                                    assets.Asset.end_use_reason == 0
-                                    )
+        query_asset = (
+            meta.session.query(assets.Asset)
+                .join(assets.AssetCategory)
+                .filter(assets.Asset.end_of_use == None,
+                        assets.Asset.end_use_reason == 
+                            constants.END_USE_REASON_IN_USE_STOCK
+                )
+            )
+        query_superasset = (
+            meta.session.query(assets.SuperAsset)
+                .join(assets.SuperAssetCategory)
+                .filter(assets.Asset.end_of_use == None,
+                        assets.Asset.end_use_reason ==
+                            constants.END_USE_REASON_IN_USE_STOCK
+                )
+            )
 
         for keyword in keywords:
             keyword = '%{}%'.format(keyword)
-            query = query.filter(or_(
+            query_asset = query_asset.filter(or_(
                     assets.AssetCategory.brand.ilike(keyword),
                     assets.AssetCategory.commercial_name.ilike(keyword),
-                    assets.AssetCategory.description.ilike(keyword)
+                    assets.AssetCategory.description.ilike(keyword),
                     ))
-        return render_template('list_assets.html', assets_list=query.all())
+            query_superasset = query_superasset.filter(
+                    assets.SuperAssetCategory.name.ilike(keyword)
+                    )
+        assets_list = []
+        for asset in query_asset.all():
+            assets_list.append(asset)
+        for superasset in query_superasset.all():
+            assets_list.append(superasset)
+        return render_template('list_assets.html', assets_list=assets_list)
 
 @app.route('/search/user')
 def find_user():
