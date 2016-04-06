@@ -12,6 +12,7 @@ from tables import (asset_provider_address_table, asset_provider_phone_table,
                     kitstructure_assetcategory_table,
                     superassetcategory_assetcategory_table,
                     superasset_asset_table)
+from odontux import constants
 import users, act, schedule 
 import sqlalchemy
 import datetime
