@@ -95,6 +95,13 @@ Column("mail_id", Integer, ForeignKey("mail.id"))
 )
 
 # assets.py
+superassetcategory_assetcategory_table = Table(
+                    'superassetcategory_assetcategory_table', Base.metadata,
+Column("superassetcategory_id", Integer, 
+                                ForeignKey("super_asset_category.id")),
+Column("assetcategory_id", Integer, ForeignKey("asset_category.id"))
+)
+
 superasset_asset_table = Table("superasset_asset", Base.metadata,
 Column("superasset_id", Integer, ForeignKey("super_asset.id")),
 Column("asset_id", Integer, ForeignKey("asset.id"))

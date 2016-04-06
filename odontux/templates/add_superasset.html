@@ -1,0 +1,16 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+Add a new superasset
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_simple_field %}
+<form method="post" action={{ url_for('add_superasset') }}>
+    {{ render_simple_field(superasset_form.superasset_category_id) }}
+    {{ render_simple_field(superasset_form.assets) }}
+
+  <p><input type="submit" value="Add">
+</form>
+
+{% endblock %}
+
+

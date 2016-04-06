@@ -56,7 +56,7 @@
         <table>
           {% for kit in kits %}
           <tr>
-            <td>{{ kit.kit.id }}</td>
+            <td>{{ kit.kit.id }} - {{ kit.id }}</td>
             <td><a href="{{ url_for('view_kit', kit_id=kit.kit.id) }}">
                               {{ kit.kit.asset_kit_structure.name }}
                 </a></td>
@@ -79,7 +79,7 @@
         <table>
           {% for asset in assets %}
           <tr>
-            <td>{{ asset.asset.id }}</td>
+            <td>{{ asset.asset.id }} - {{ asset.id }}</td>
             <td><a href="{{ url_for('view_asset', asset_id=asset.asset.id) }}">
                   {{ asset.asset.asset_category.brand }} - 
                   {{ asset.asset.asset_category.commercial_name }}

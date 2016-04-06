@@ -10,6 +10,7 @@ import meta
 from tables import (asset_provider_address_table, asset_provider_phone_table, 
                     asset_provider_mail_table, kit_asset_table,
                     kitstructure_assetcategory_table,
+                    superassetcategory_assetcategory_table,
                     superasset_asset_table)
 import users, act, schedule 
 import sqlalchemy
@@ -124,7 +125,9 @@ class SuperAssetCategory(Base):
     __tablename__ = "super_asset_category"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-
+    type_of_assets = relationship("AssetCategory", 
+                            secondary=superassetcategory_assetcategory_table,
+                            backref="superasset_categories")
 class Asset(Base):
     """
         * provider_id : from whom it was bought
@@ -234,12 +237,15 @@ class SuperAsset(Asset):
     """
     __tablename__ = "super_asset"
     id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
-    super_asset_category_id = Column(Integer, 
-                                            ForeignKey(SuperAssetCategory.id),
-                                            nullable=False)
-    super_asset_category = relationship("SuperAssetCategory")
-    assets_composing = relationship("Asset", secondary=superasset_asset_table,
-                                            backref="super_asset")
+    superasset_category_id = Column(Integer, ForeignKey(SuperAssetCategory.id),
+                                                                nullable=False)
+    superasset_category = relationship("SuperAssetCategory")
+    assets = relationship("Asset", secondary=superasset_asset_table,
+                                            backref="superassets")
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'superasset'
+    }
 
 class AssetKitStructure(Base):
     """

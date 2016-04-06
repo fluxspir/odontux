@@ -119,6 +119,18 @@ class MaterialForm(Form):
                                                     [validators.Optional()])
     batch_number = TextField(_('Batch number'), [validators.Optional()])
 
+class SuperAssetCategoryForm(Form):
+    id = HiddenField(_('id'))
+    name = TextField(_('Name'), [validators.Required(
+                                    message=_('Name of superasset required'))])
+    assets_category_list = SelectMultipleField(_('Type of Assets'), coerce=int)
+
+class SuperAssetForm(Form):
+    id = HiddenField(_('id'))
+    superasset_category_id = SelectField(_('Type of SuperAsset'), coerce=int)
+    assets = SelectMultipleField(_('Assets elements of the Super Asset'), 
+                                                                coerce=int)
+
 class AssetKitStructureForm(Form):
     id = HiddenField(_('id'))
     name = TextField(_('Name of new kind of Kit'), [validators.Required(
@@ -145,6 +157,13 @@ def get_kit_structure_assets_choices():
         return [ (0, "") ]
     return [ (r.id, r.brand + " || " + r.commercial_name) 
                                                     for r in assets_category ]
+
+def get_superasset_category_choices():
+    assets_category = meta.session.query(assets.DeviceCategory).all()
+    if not assets_category:
+        return [ (0, "") ]
+    return [ (r.id, r.brand + " " + r.commercial_name) for r in assets_category
+            ]
 
 def get_assets_in_kit_choices():
     # Asset, to be added in a kit must :
@@ -773,6 +792,122 @@ def test_barcode():
 
         raise ValueError('The asset type in database neither is "device" nor "material"')
     return jsonify(success=False)
+
+@app.route('/add/superasset_category/', methods=['GET', 'POST'])
+def add_superasset_category():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    superasset_category_form = SuperAssetCategoryForm(request.form)  
+    superasset_category_form.assets_category_list.choices = \
+                                    get_superasset_category_choices()
+
+    if request.method == 'POST' and superasset_category_form.validate():
+        new_superasset_category = assets.SuperAssetCategory(
+                                    name = superasset_category_form.name.data)
+        meta.session.add(new_superasset_category)
+
+        for val in superasset_category_form.assets_category_list.data:
+            asset = ( meta.session.query(assets.AssetCategory)
+                        .filter(assets.AssetCategory.id == val).one()
+                    )
+            new_superasset_category.type_of_assets.append(asset)
+        meta.session.commit()
+        return redirect(url_for('add_superasset', 
+                            superasset_category_id=new_superasset_category.id))
+
+    return render_template('add_superasset_category.html',
+                            superasset_category_form=superasset_category_form)
+
+def get_assets_in_superasset(return_id=False):
+    if return_id:
+        query = meta.session.query(assets.Asset.id)
+    else:
+        query = meta.session.query(assets.Asset)
+
+    query = (
+        query.filter(assets.Asset.superassets.any(
+                assets.SuperAsset.id.in_(
+                    meta.session.query(assets.SuperAsset.id)
+                        .filter(assets.SuperAsset.end_of_use.is_(None),
+                                assets.SuperAsset.start_of_use.isnot(None),
+                                assets.SuperAsset.end_use_reason == 
+                                        constants.END_USE_REASON_IN_USE_STOCK
+                                )
+                    )
+                )
+            ).all()
+        )
+    return query
+
+@app.route('/add/superasset/', methods=['GET', 'POST'])
+@app.route('/add/superasset/id=<int:superasset_category_id>/', 
+                                                    methods=['GET', 'POST'])
+def add_superasset(superasset_category_id=None):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    superasset_form = SuperAssetForm(request.form)
+    superasset_form.superasset_category_id.choices = [ (asset.id, asset.name) 
+        for asset in meta.session.query(assets.SuperAssetCategory).all() ]
+    if superasset_category_id:
+        superasset_category = (
+                meta.session.query(assets.SuperAssetCategory)
+                    .filter(assets.SuperAssetCategory.id == 
+                            superasset_category_id)
+                    .one()
+                )
+        assets_categories = []
+        for asset_category in superasset_category.type_of_assets:
+            asset_cat = ( meta.session.query(assets.AssetCategory.id)
+                        .filter(assets.AssetCategory.id == asset_category.id)
+                        .one()
+                    )
+            assets_categories.append(asset_cat)
+            # assets in superasset actif
+            assets_id_in_superasset = get_assets_in_superasset(return_id=True)
+            assets_to_display = (
+                meta.session.query(assets.Asset)
+                    .filter(assets.Asset.asset_category_id.in_(assets_categories))
+                    .filter(assets.Asset.type != "superasset")
+                    .filter(~assets.Asset.id.in_(assets_id_in_superasset))
+                    .all()
+                    )
+        superasset_form.assets.choices = [ 
+                        (asset.id, str(asset.id) + " " + asset.asset_category.brand
+                        + " " + asset.asset_category.commercial_name)
+                        for asset in assets_to_display ]
+    else:
+        superasset_form.assets.choices = [
+                                (asset.id,
+                                str(asset.id) + " " +
+                                asset.asset_category.brand + " " +
+                                asset.asset_category.commercial_name)
+            for asset in ( meta.session.query(assets.Asset)
+                                .filter(assets.Asset.type != "superasset")
+                                .all() ) ]
+
+    if request.method == 'POST' and superasset_form.validate():
+        values = {
+            "superasset_category_id": superasset_form.superasset_category_id.data,
+            "start_of_use": datetime.date.today()
+        }
+        new_superasset = assets.SuperAsset(**values)
+        meta.session.add(new_superasset)
+        for val in superasset_form.assets.data:
+            asset = ( meta.session.query(assets.Asset)
+                        .filter(assets.Asset.id == val).one() )
+            new_superasset.assets.append(asset)
+        meta.session.commit()
+
+    if superasset_category_id:
+        superasset_form.superasset_category_id.data = superasset_category_id
+
+    return render_template('add_superasset.html',
+                            superasset_form=superasset_form)
 
 @app.route('/add/kit_type/', methods=['GET', 'POST'])
 def add_kit_type():

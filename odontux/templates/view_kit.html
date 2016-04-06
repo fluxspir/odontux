@@ -15,7 +15,7 @@
       </a> ; validity of sterilization : 
         {{ kit.sterilization[-1].expiration_date }}<br />
     {% else %}
-      Kit isn't sterilized yet
+      Kit isn't sterilized yet<br />
     {% endif %}
     Content :<br />
     {% for asset in kit.assets %}

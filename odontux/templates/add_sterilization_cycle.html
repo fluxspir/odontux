@@ -38,12 +38,15 @@ Add a Sterilization Cycle
     <tr>
       <td>
         {% for kit in kits_to_sterilize %}
-          {{ kit.id }} - {{ kit.asset_kit_structure.name }}<br />
+         <a href="{{ url_for('view_kit', kit_id=kit.id) }}">
+          {{ kit.id }} - {{ kit.asset_kit_structure.name }}</a><br />
         {% endfor %}
       </td>
       <td>
         {% for asset in assets_to_sterilize %}
-          {{ asset.id}} - {{ asset.asset_category.brand }}<br />
+          <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+          {{ asset.id}} - {{ asset.asset_category.brand }} 
+                          {{asset.asset_category.commercial_name }}</a><br />
         {% endfor %}
       </td>
       <td></td>

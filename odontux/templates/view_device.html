@@ -8,17 +8,19 @@
     {{ asset.asset_category.brand }}  -- 
     {{ asset.asset_category.commercial_name }} <br />
   Description : {{ asset.asset_category.description }} <br />
-  {% if asset.is_sterilizable() %}
-    Sterilization valid until :{% if asset.sterilizations[-1] %} 
-                {% if not asset.sterilizations[-1].appointment_id 
-                    and asset.sterilizations[-1].expiration_date > today %}
-                  {{ asset.sterilizations[-1].expiration_date }}
-                {% else %}
-                  Item to sterilize
-                {% endif %}
-              {% else %}
-                Item never sterilized
-              {% endif %}
+  {% if asset.is_sterilizable() and asset.sterilizations[-1] %}
+      The <a href="{{ url_for('view_sterilization_cycle', 
+          ste_cycle_id=asset.sterilizations[-1].sterilization_cycle_id ) }}">
+          Sterilization {{ asset.sterilizations[-1].sterilization_cycle_id }}
+        </a> is valid until :
+      {% if not asset.sterilizations[-1].appointment_id 
+         and asset.sterilizations[-1].expiration_date > today %}
+            {{ asset.sterilizations[-1].expiration_date }}
+      {% else %}
+        Item to sterilize
+      {% endif %}
+  {% else %}
+    Item was never sterilized
   {% endif %}<br />
   Element of kit : {{ asset.element_of_kit() }} <br />
   Asset provider : {{ asset.provider.name }} <br />
