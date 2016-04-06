@@ -518,12 +518,17 @@ def remove_asset_from_sterilization():
             session['assets_to_sterilize'] = [
                 (t, a_id, v) for (t, a_id, v) in session['assets_to_sterilize']
                 if t == "k" and a_id != int(form.item_id.data)
-                or t == "a" ]
+                or t == "a" or t == "s" ]
         if form.item_type.data == "asset":
             session['assets_to_sterilize'] = [
                 (t, a_id, v) for (t, a_id, v) in session['assets_to_sterilize']
                 if t == "a" and not a_id == int(form.item_id.data) 
-                or t == "k" ]
+                or t == "k" or t == "s" ]
+        if form.item_type.data == "superasset":
+            session['assets_to_sterilize'] = [
+                (t, a_id, v) for (t, a_id, v) in session['assets_to_sterilize']
+                if t == "s" and not a_id == int(form.item_id.data)
+                or t == "a" or t == "k" ]
 
     return redirect(url_for('create_sterilization_list'))
 
@@ -654,7 +659,6 @@ def create_sterilization_list():
                         int(session['uncategorized_assets_sterilization'][0])
         uncategorized_form.validity.data =\
                         int(session['uncategorized_assets_sterilization'][1])
-
     return render_template('select_assets_for_sterilization.html',
                                 uncategorized_form=uncategorized_form,
                                 assets_list=assets_form_list,
@@ -716,6 +720,8 @@ def add_sterilization_cycle():
                 values['asset_id'] = asset[1]
             elif asset[0] == "k":
                 values['kit_id'] = asset[1]
+            elif asset[0] == "s":
+                values['superasset_id'] = asset[1]
             else:
                 pass
             new_asset_sterilized = traceability.AssetSterilized(**values)
@@ -745,6 +751,7 @@ def add_sterilization_cycle():
     # those informations.
     assets_to_sterilize = []
     kits_to_sterilize = []
+    superassets_to_sterilize = []
     for (t, a_id, v) in session['assets_to_sterilize']:
         if t == "k":
             kits_to_sterilize.append( meta.session.query(assets.AssetKit)
@@ -752,12 +759,17 @@ def add_sterilization_cycle():
         if t == "a":
             assets_to_sterilize.append( meta.session.query(assets.Asset)
                                 .filter(assets.Asset.id == a_id).one() )
+        if t == "s":
+            superassets_to_sterilize.append( 
+                        meta.session.query(assets.SuperAsset)
+                            .filter(assets.SuperAsset.id == a_id).one() )
            
     ste_cycle_form.cycle_date.data = datetime.date.today()
     return render_template('add_sterilization_cycle.html',
                         ste_cycle_form=ste_cycle_form,
                         assets_to_sterilize=assets_to_sterilize,
-                        kits_to_sterilize=kits_to_sterilize)
+                        kits_to_sterilize=kits_to_sterilize,
+                        superassets_to_sterilize=superassets_to_sterilize)
 
 @app.route('/list/sterilization_cycle/', methods=['GET', 'POST'])
 def list_sterilization_cycle():
@@ -803,9 +815,12 @@ def view_sterilization_cycle(ste_cycle_id):
     kits = query.filter(traceability.AssetSterilized.kit_id.isnot(None)).all()
     assets = query.filter(
                     traceability.AssetSterilized.asset_id.isnot(None)).all()
+    superassets = query.filter(
+                traceability.AssetSterilized.superasset_id.isnot(None)).all()
     unmarked = (
             query.filter(traceability.AssetSterilized.asset_id.is_(None),
-                        traceability.AssetSterilized.kit_id.is_(None)
+                        traceability.AssetSterilized.kit_id.is_(None),
+                        traceability.AssetSterilized.superasset_id.is_(None)
                         ).all()
         )
     sticker_position = (
@@ -814,9 +829,11 @@ def view_sterilization_cycle(ste_cycle_id):
             .one()
             .value
         )
+    pdb.set_trace()
     return render_template('view_sterilization_cycle.html', 
                                             ste_cycle=ste_cycle,
-                                            kits=kits, 
+                                            kits=kits,
+                                            superassets=superassets,
                                             assets=assets,
                                             unmarked=unmarked,
                                             sticker_position=sticker_position)

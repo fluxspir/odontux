@@ -12,12 +12,15 @@ Items that are going to be sterilized but without linking it to an asset :<br />
   {{ render_simple_field_line(uncategorized_form.validity) }} 
   <input type="submit" value="Update"><br />
   </form>
+  
   <div id="searchresult">
   {% block searchresult %}
     <strong>Kits to sterilize</strong>: {{ sterilize_assets_list['kits']|length }}<br />
+    <strong>SuperAssets to sterilize</strong>: {{ sterilize_assets_list['superassets']|length }}<br />
     <strong>Assets to sterilize</strong>: {{ sterilize_assets_list['assets']|length }}<br />
-    {{ session['uncategorized_assets_sterilization'][0] }}<br />
+                                {{ session['uncategorized_assets_sterilization'][0] }}<br />
     <strong>Total to sterilize</strong>:{{ sterilize_assets_list['kits']|length +
+                                          sterilize_assets_list['superassets']| length +
                                           sterilize_assets_list['assets']|length +
                                           session['uncategorized_assets_sterilization'][0] }} 
     <br /><br />
@@ -30,6 +33,16 @@ Items that are going to be sterilized but without linking it to an asset :<br />
           {{ render_simple_hidden_field(kit[1].item_type) }} 
           {{ render_simple_field_line(kit[1].validity) }} 
         <input type="submit" value="Remove"><br />
+      </form>
+    {% endfor %}
+    {% for superasset in sterilize_assets_list['superassets'] %}
+      <form method="post" action="{{ url_for('remove_asset_from_sterilization') }}">
+        <a href="{{ url_for('view_asset', asset_id=superasset[0].id) }}">
+          {{ superasset[0].id }} -- {{ superasset[0].superasset_category.name }}</a>
+          {{ render_simple_hidden_field(superasset[1].item_id) }}
+          {{ render_simple_hidden_field(superasset[1].item_type) }}
+          {{ render_simple_field_line(superasset[1].validity) }}
+          <input type="submit" value="Remove"></br />
       </form>
     {% endfor %}
     {% for asset in sterilize_assets_list['assets'] %}
@@ -56,6 +69,17 @@ Items that are going to be sterilized but without linking it to an asset :<br />
         {{ render_simple_field_line(kit[1].validity) }} 
         <input type="submit" value="Add">
           <br />
+      </form>
+    {% endfor %}
+    <strong>SuperAssets</strong> : {{ assets_list['superassets']|length }}</br />
+    {% for superasset in assets_list['superassets'] %}
+      <form method="post" action="{{ url_for('create_sterilization_list') }}">
+        <a href="{{ url_for('view_asset', asset_id=superasset[0].id) }}">
+          {{ superasset[0].id }} -- {{ superasset[0].superasset_category.name }}</a>
+          {{ render_simple_hidden_field(superasset[1].item_id) }}
+          {{ render_simple_hidden_field(superasset[1].item_type) }}
+          {{ render_simple_field_line(superasset[1].validity) }}
+        <input type="submit" value='Add'><br />
       </form>
     {% endfor %}
     <strong>Assets</strong> : {{ assets_list['assets']|length }} <br />

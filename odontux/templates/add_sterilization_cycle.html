@@ -27,11 +27,13 @@ Add a Sterilization Cycle
     <caption>Resume of Assets to be sterilized</caption>
     <tr>
       <th>Kits in this sterilization : </th>
+      <th>SuperAssets in this sterilization:</th>
       <th>Assets in this sterilization : </th>
       <th>Unmarked assets :</th>
     </tr>
     <tr>
       <td>{{ kits_to_sterilize|length }}</td>
+      <td>{{ superassets_to_sterilize|length }}</td>
       <td>{{ assets_to_sterilize|length }}</td>
       <td> {{ session['uncategorized_assets_sterilization'][0] }}</td>
     </tr>
@@ -42,6 +44,12 @@ Add a Sterilization Cycle
           {{ kit.id }} - {{ kit.asset_kit_structure.name }}</a><br />
         {% endfor %}
       </td>
+      <td>
+        {% for superasset in superassets_to_sterilize %}
+          <a href="{{ url_for('view_asset', asset_id=superasset.id) }}">
+          {{ superasset.id }} -- {{ superasset.superasset_category.name }}
+          </a><br />
+        {% endfor %}
       <td>
         {% for asset in assets_to_sterilize %}
           <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
