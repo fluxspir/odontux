@@ -470,19 +470,21 @@ def list_assets(asset_type="all"):
     checks.quit_appointment()
     
     if asset_type == "device":
-        last_assets_list = meta.session.query(assets.Device).order_by(
-                                        assets.Device.acquisition_date.desc()
-                                        ).limit(100).all()
+        query = meta.session.query(assets.Device)
     elif asset_type == "material":
-        last_assets_list = meta.session.query(assets.Material).order_by(
-                                        assets.Asset.acquisition_date.desc()
-                                        ).limit(100).all()
+        query = meta.session.query(assets.Material)
+    elif asset_type == "superasset":
+        query = meta.session.query(assets.SuperAsset)
     else:
-        last_assets_list = meta.session.query(assets.Asset).order_by(
-                                        assets.Asset.acquisition_date.desc()
-                                        ).limit(100).all()
+        query = meta.session.query(assets.Asset)
+        
+    query = ( query.order_by(assets.Asset.acquisition_date.desc())
+                    .limit(100)
+                    .all()
+            )
+
     return render_template('list_assets.html', 
-                            assets_list=last_assets_list)
+                            assets_list=query)
 
 @app.route('/add/asset/', methods=['POST', 'GET'])
 def add_asset():
@@ -737,6 +739,8 @@ def view_asset(asset_id):
         return redirect(url_for('view_device', asset_id=asset_id))
     elif asset.type == "material":
         return redirect(url_for('view_material', asset_id=asset_id))
+    elif asset.type == "superasset":
+        return redirect(url_for('view_superasset', asset_id=asset_id))
     else:
         return redirect(url_for('index'))
 
@@ -752,6 +756,12 @@ def view_material(asset_id):
     asset = meta.session.query(assets.Asset).filter(
                                 assets.Asset.id == asset_id).one()
     return render_template('view_material.html', asset=asset)
+
+@app.route('/view/superasset&id=<int:asset_id>')
+def view_superasset(asset_id):
+    asset = meta.session.query(assets.Asset).filter(
+                                assets.Asset.id == asset_id).one()
+    return render_template('view_superasset.html', asset=asset)
 
 @app.route('/test_barcode/')
 def test_barcode():
@@ -842,7 +852,7 @@ def get_assets_in_superasset(return_id=False):
     return query
 
 @app.route('/add/superasset/', methods=['GET', 'POST'])
-@app.route('/add/superasset/id=<int:superasset_category_id>/', 
+@app.route('/add/superasset?id=<int:superasset_category_id>/', 
                                                     methods=['GET', 'POST'])
 def add_superasset(superasset_category_id=None):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 

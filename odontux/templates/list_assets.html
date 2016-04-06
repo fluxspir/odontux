@@ -7,8 +7,18 @@
   <div id="searchresult">
   {% block searchresult %}
     {% for asset in assets_list %}
-        <a href="{{ url_for('view_asset', asset_id=asset.id) }}">{{ asset.id }} -- {{ asset.asset_category.brand }} {{ asset.asset_category.commercial_name }} -- {{ asset.asset_category.description }} -- {{ asset.expiration_date }}</a><br/>
-        {% endfor %}
+      {% if asset.type == "superasset" %}
+        <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+                            {{ asset.id }} -- 
+                            {{ asset.superasset_category.name }}</a><br />
+      {% else %}
+        <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+                            {{ asset.id }} -- {{ asset.asset_category.brand }} 
+                            {{ asset.asset_category.commercial_name }} -- 
+                            {{ asset.asset_category.description }} -- 
+                            {{ asset.expiration_date }}</a><br />
+      {% endif %}
+    {% endfor %}
   {% endblock %}
   </div>
 

@@ -24,6 +24,7 @@ from odontux import constants, checks
 from odontux.models import meta, traceability, assets, users, act
 from odontux.odonweb import app
 from odontux.views import forms
+from odontux.views.assets import get_assets_in_superasset
 from odontux.views.log import index
 
 from reportlab.graphics.barcode import code128
@@ -346,7 +347,8 @@ def get_assets_list_for_sterilization_cycle():
 
     assets_list = {
         "assets": [],
-        "kits": []
+        "kits": [],
+        "superassets": []
         }
 
     query_kits = (
@@ -373,7 +375,45 @@ def get_assets_list_for_sterilization_cycle():
                 assets.AssetKit.id
                 )
         )
+    query_superassets = (
+        meta.session.query(assets.SuperAsset)
+            .filter(
+                # The superasset wasn't already throw away
+                assets.SuperAsset.end_of_use.is_(None),
+                # the superasset still in use or stock
+                assets.SuperAsset.end_use_reason ==
+                    constants.END_USE_REASON_IN_USE_STOCK,
+                # the superasset already in use
+                assets.SuperAsset.start_of_use.isnot(None),
+                # The superasset isn't sterilized
+                ~assets.SuperAsset.id.in_(
+                    meta.session.query(traceability.AssetSterilized.asset_id)
+                    .filter(traceability.AssetSterilized.asset_id.isnot(None))
+                )
+            )
+            .join(assets.SuperAssetCategory)
+            .order_by(
+                assets.SuperAssetCategory.name,
+                assets.SuperAsset.id
+                )
+        )
     
+    assets_id_in_superasset = get_assets_in_superasset(return_id=True)
+    assets_id_in_kit = (
+        meta.session.query(assets.Asset.id)
+            .filter(assets.Asset.kits.any(
+                assets.AssetKit.id.in_(
+                    meta.session.query(assets.AssetKit.id)
+                        .filter(assets.AssetKit.end_of_use.is_(None),
+                                assets.AssetKit.appointment_id.is_(None),
+                                assets.AssetKit.end_use_reason ==
+                                    constants.END_USE_REASON_IN_USE_STOCK
+                                )
+                            )
+                        )
+                    )
+                .all()
+                )
     query_assets = (
         meta.session.query(assets.Asset)
             # the asset hasn't a throw_away date : it's probably in service
@@ -384,7 +424,6 @@ def get_assets_list_for_sterilization_cycle():
                                         constants.END_USE_REASON_IN_USE_STOCK,
                     assets.Asset.start_of_use.isnot(None)
                 )
-
             # Asset may be a "device"
             #.filter(assets.Asset.type == "device") #MAYBE UPDATE TO ASSET
 
@@ -395,11 +434,15 @@ def get_assets_list_for_sterilization_cycle():
                     .filter(assets.DeviceCategory.sterilizable == True)
                     )
                 )
-
             # The asset isn't element of a kit.
-            #.filter(assets.Asset.element_of_kit() == False)    # NOT WORKING
-            # WILL BE DONE AFTER THE QUERY.
-
+            .filter(~assets.Asset.id.in_(assets_id_in_kit))
+            # We don't want assets in a superasset to appear.
+            .filter(~assets.Asset.id.in_(assets_id_in_superasset))
+            # SuperAsset are not considered assets this way
+            .filter(~assets.Asset.id.in_(
+                        meta.session.query(assets.SuperAsset.id).all()
+                    )
+                )
             # Below, we are eliminating assets already sterilized that don't 
             # need immediate sterilization
             .filter(or_(
@@ -454,9 +497,9 @@ def get_assets_list_for_sterilization_cycle():
     for kit in query_kits.all():
         assets_list['kits'].append(kit)
     for asset in query_assets.all():
-        if not asset.element_of_kit():
-            assets_list['assets'].append(asset)
-
+        assets_list['assets'].append(asset)
+    for superasset in query_superassets.all():
+        assets_list['superassets'].append(superasset)
     return assets_list
 
 @app.route('/remove/asset_from_sterilization', methods=["POST"])
@@ -508,7 +551,7 @@ def create_sterilization_list():
         return redirect(url_for('add_sterilization_cycle'))
     # create list of asset to sterilize with their own form,
     # and own datas
-    sterilize_assets_list = { "kits": [], "assets": [] }
+    sterilize_assets_list = { "kits": [], "assets": [], "superassets": [] }
     for ( t, a_id, v) in session['assets_to_sterilize']:
         form = AssetSterilizedForm(request.form)
         form.item_id.data = a_id
@@ -523,6 +566,11 @@ def create_sterilization_list():
                         .filter(assets.AssetKit.id == a_id).one() )
             form.item_type.data = "kit"
             sterilize_assets_list['kits'].append( (kit, form) )
+        if t == "s":
+            superasset = (meta.session.query(assets.SuperAsset)
+                        .filter(assets.SuperAsset.id == a_id).one() )
+            form.item_type.data = "superasset"
+            sterilize_assets_list['superassets'].append( (superasset, form) )
 
     form = AssetSterilizedForm(request.form)
     if request.method == 'POST' and form.validate(): 
@@ -543,6 +591,15 @@ def create_sterilization_list():
             session['assets_to_sterilize'].append(
                                     ("a", asset.id, int(form.validity.data)))
             sterilize_assets_list['assets'].append( (asset, form) )
+        if form.item_type.data == "superasset":
+            superasset = ( meta.session.query(assets.SuperAsset)
+                        .filter(assets.SuperAsset.id == form.item_id.data)
+                        .one()
+                    )
+            session['assets_to_sterilize'].append(
+                                    ("s", superasset.id, 
+                                        int(form.validity.data)))
+            sterilize_assets_list['superassets'].append( (superasset, form) )
 
         return redirect(url_for('create_sterilization_list'))
 
@@ -550,15 +607,18 @@ def create_sterilization_list():
     assets_list = get_assets_list_for_sterilization_cycle()
     # each asset has his own form, with own datas.
     # creation of a new  with asset and form.
-    assets_form_list = { "kits": [], "assets": [] }
+    assets_form_list = { "kits": [], "assets": [], "superassets": [] }
 
     # list des kit_id to sterilize and asset_id
     ste_kit_id_list = []
     ste_asset_id_list = []
+    ste_superasset_id_list = []
     for item in sterilize_assets_list['kits']:
         ste_kit_id_list.append(item[0].id)
     for item in sterilize_assets_list['assets']:
         ste_asset_id_list.append(item[0].id)
+    for item in sterilize_assets_list['superassets']:
+        ste_superasset_id_list.append(item[0].id)
     # creation of the kits' forms.
     for kit in assets_list['kits']:
         if kit.id not in ste_kit_id_list:
@@ -577,7 +637,17 @@ def create_sterilization_list():
             form.validity.data = int(
                     asset.asset_category.validity.total_seconds() / 86400)
             assets_form_list['assets'].append((asset, form))
-            
+    # creation of the superassets' forms.
+    for superasset in assets_list['superassets']:
+        if superasset.id not in ste_superasset_id_list:
+            form = AssetSterilizedForm(request.form)
+            form.item_id.data = superasset.id
+            form.item_type.data = "superasset"
+            form.validity.data = int(
+                    superasset.superasset_category.validity.total_seconds() / 
+                    86400)
+            assets_form_list['superassets'].append((superasset, form))
+
     uncategorized_form = UncategorizedAssetSterilizedForm(request.form)
     if 'uncategorized_assets_sterilization' in session:
         uncategorized_form.number.data =\

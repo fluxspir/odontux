@@ -125,6 +125,8 @@ class SuperAssetCategory(Base):
     __tablename__ = "super_asset_category"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    sterilizable = Column(Boolean, nullable=False)
+    validity = Column(Interval, default=datetime.timedelta(90))
     type_of_assets = relationship("AssetCategory", 
                             secondary=superassetcategory_assetcategory_table,
                             backref="superasset_categories")
@@ -181,7 +183,8 @@ class Asset(Base):
         query = (
             meta.session.query(AssetKit)
                 .filter(AssetKit.end_of_use.is_(None))
-                .filter(AssetKit.end_use_reason == 0)
+                .filter(AssetKit.end_use_reason == 
+                                constants.END_USE_REASON_IN_USE_STOCK)
                 .filter(AssetKit.appointment_id.is_(None))
                 ).all()
         for q in query:

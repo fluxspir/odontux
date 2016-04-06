@@ -1,0 +1,25 @@
+{% extends "header.html" %}
+{% block main %}
+{% if session.role != session.ROLE_ADMIN %}
+  <a href="{{ url_for('add_superasset', superasset_category_id=asset.superasset_category.id) }}">Add new superasset of type {{ asset.superasset_category.name }}</a>
+  or 
+   <a href="{{ url_for('add_superasset') }}">Add new superasset of any type </a>
+<br /><br />
+{% endif %}
+<br />
+    {{ asset.id }} {{ asset.superasset_category.name }}<br />
+  Assets composing the superasset:<br />
+  {% for a in asset.assets %}
+    <a href="{{ url_for('view_asset', asset_id=a.id) }}">
+      {{ a.id }} : {{ a.asset_category.brand }} - 
+                    {{ a.asset_category.commercial_name }}
+    <br />
+    </a>
+
+  {% endfor %}
+  Start of use : {{ asset.start_of_use }} <br />
+  End of use : {{ asset.end_of_use }} <br />
+  <br />
+  <a href="{{ url_for('update_asset', asset_id=asset.id) }}">Update</a>
+
+{% endblock %}

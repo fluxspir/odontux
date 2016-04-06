@@ -8,6 +8,28 @@
     {{ asset.asset_category.brand }}  -- 
     {{ asset.asset_category.commercial_name }} <br />
   Description : {{ asset.asset_category.description }} <br />
+  {% if asset.superassets[-1] 
+      and asset.superassets[-1].end_use_reason == session['in_use_stock'] 
+      and not asset.superassets[-1].end_of_use %}
+      Asset is element of 
+      <a href="{{ url_for('view_asset', asset_id=asset.superassets[-1].id) }}">
+      SuperAsset {{ asset.superassets[-1].id }} - 
+                  {{ asset.superassets[-1].superasset_category.name }}
+      </a><br />
+      {% if asset.superassets[-1].superasset_category.sterilizable %}
+        This super asset was sterilized 
+        <a href="{{ url_for('view_sterilization_cycle', 
+        ste_cycle_id=asset.superassets[-1].sterilizations[-1].sterilization_cycle_id }}">
+        on sterilization cycle {{ asset.superassets[-1].sterilizations[-1].sterilization_cycle_id }}
+        </a> which is valid until :
+        {% if not asset.superassets[-1].sterilizations[-1].appointment_id 
+          and asset.superassets[-1].sterilizations[-1].expiration_date > today %}
+            {{ asset.superassets[-1].sterilizations[-1].expiration_date }}
+        {% else %}
+          SuperAsset to sterilize
+        {% endif %}
+      {% endif %}
+  {% endif %}
   {% if asset.is_sterilizable() and asset.sterilizations[-1] %}
       The <a href="{{ url_for('view_sterilization_cycle', 
           ste_cycle_id=asset.sterilizations[-1].sterilization_cycle_id ) }}">
