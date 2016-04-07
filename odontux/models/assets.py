@@ -12,7 +12,6 @@ from tables import (asset_provider_address_table, asset_provider_phone_table,
                     kitstructure_assetcategory_table,
                     superassetcategory_assetcategory_table,
                     superasset_asset_table)
-from odontux import constants
 import users, act, schedule 
 import sqlalchemy
 import datetime
@@ -176,8 +175,7 @@ class Asset(Base):
         query = (
             meta.session.query(AssetKit)
                 .filter(AssetKit.end_of_use.is_(None))
-                .filter(AssetKit.end_use_reason == 
-                                constants.END_USE_REASON_IN_USE_STOCK)
+                .filter(AssetKit.end_use_reason == 0)
                 .filter(AssetKit.appointment_id.is_(None))
                 ).all()
         for q in query:
@@ -240,7 +238,7 @@ class SuperAssetCategory(Base):
                             secondary=superassetcategory_assetcategory_table,
                             backref="superasset_categories")
 
-class SuperAsset(Asset):
+class SuperAsset(Base):
     """
         a super_asset is an asset made by addition of various assets
     """
