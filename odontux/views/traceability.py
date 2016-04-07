@@ -388,7 +388,7 @@ def get_assets_list_for_sterilization_cycle():
                 # The superasset isn't sterilized
                 ~assets.SuperAsset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
-                    .filter(traceability.AssetSterilized.asset_id.isnot(None))
+                    .filter(traceability.AssetSterilized.superasset_id.isnot(None))
                 )
             )
             .join(assets.SuperAssetCategory)
@@ -730,17 +730,17 @@ def add_sterilization_cycle():
         else:
             session.pop('assets_to_sterilize')
         
-        while session['uncategorized_assets_sterilization'][0]:
+        i = session['uncategorized_assets_sterilization'][0]
+        while i:
             values= {}
             values['sterilization_cycle_id'] = new_sterilization_cycle.id
-            values['expiration_date'] = datetime.date(
-                            new_sterilization_cycle.cycle_date +
-                            datetime.timedelta(
-                            session['uncategorized_assets_sterilization'][1]
-                            ) )
+            values['expiration_date'] = ( new_sterilization_cycle.cycle_date +
+                datetime.timedelta(session['uncategorized_assets_sterilization'][1])
+                )
             new_uncat_asset_sterilized = traceability.AssetSterilized(**values)
-            meta.session.add(new_asset_sterilized)
+            meta.session.add(new_uncat_asset_sterilized)
             meta.session.commit()
+            i -= 1
         else:
             session.pop('uncategorized_assets_sterilization')
     
@@ -963,7 +963,10 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
                             item.asset.asset_category.commercial_name[:30] )
         elif item.kit:
             item_name = ( str(item.kit.id ) + " : " +
-                                    item.kit.asset_kit_structure.name[:30] )
+                            item.kit.asset_kit_structure.name[:30] )
+        elif item.superasset:
+            item_name = ( str(item.superasset.id) + " : " +
+                            item.superasset.superasset_category.name[:30] )
         else:
             item_name = "Item without a name"
         c.drawString (cell_x + (5 * mm),
