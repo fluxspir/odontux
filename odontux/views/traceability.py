@@ -829,7 +829,6 @@ def view_sterilization_cycle(ste_cycle_id):
             .one()
             .value
         )
-    pdb.set_trace()
     return render_template('view_sterilization_cycle.html', 
                                             ste_cycle=ste_cycle,
                                             kits=kits,

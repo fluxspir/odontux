@@ -92,12 +92,14 @@ class AssetSterilized(Base):
     sterilization_cycle_id = Column(Integer, ForeignKey(SterilizationCycle.id),
                                                                 nullable=False)
     asset_id = Column(Integer, ForeignKey(assets.Asset.id), default=None)
+    asset = relationship("assets.Asset")
     kit_id = Column(Integer, ForeignKey(assets.AssetKit.id), default=None)
     kit = relationship("assets.AssetKit")
     superasset_id = Column(Integer, ForeignKey(assets.SuperAsset.id), 
                                                             default=None)
-    asset = relationship("assets.Asset")
-#    superasset = relationship("assets.SuperAsset") # not working, but
+    superasset = relationship("assets.SuperAsset", 
+                            foreign_keys='AssetSterilized.superasset_id')
+                                                    # not working, but
                                                     # superasset callable by
                                                     # asset
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id), 

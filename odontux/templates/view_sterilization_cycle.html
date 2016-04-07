@@ -81,9 +81,9 @@
         <table>
           {% for superasset in superassets %}
             <tr>
-              <td>{{ superasset.asset.id }} - {{ superasset.id }}</td>
-              <td><a href="{{ url_for('view_asset', asset_id=superasset.asset.id) }}">
-                      {{ superasset.asset.superasset_category.name }}
+              <td>{{ superasset.superasset.id }} - {{ superasset.id }}</td>
+              <td><a href="{{ url_for('view_asset', asset_id=superasset.superasset.id) }}">
+                      {{ superasset.superasset.superasset_category.name }}
                   </a></td>
               <td>
                 {% if superasset.appointment_id %}
