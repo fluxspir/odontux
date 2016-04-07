@@ -234,8 +234,8 @@ class SuperAssetCategory(Base):
     name = Column(String, nullable=False)
     sterilizable = Column(Boolean, nullable=False)
     validity = Column(Interval, default=datetime.timedelta(90))
-    asset_specialty_id = Column(Integer, ForeignKey(act.Specialty.id))
-    superasset_specilty = relationship("act.Specialty")
+    superasset_specialty_id = Column(Integer, ForeignKey(act.Specialty.id))
+    superasset_specialty = relationship("act.Specialty")
     type_of_assets = relationship("AssetCategory", 
                             secondary=superassetcategory_assetcategory_table,
                             backref="superasset_categories")
@@ -251,9 +251,16 @@ class SuperAsset(Asset):
     superasset_category = relationship("SuperAssetCategory")
     assets = relationship("Asset", secondary=superasset_asset_table,
                                             backref="superassets")
-    start_of_use = Column(Date, default=None)
+    creation_date = Column(Date, default=func.current_date())
+    start_of_use = Column(Date, default=func.current_date())
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
+    user_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
+    user = relationship('users.OdontuxUser')
+    office_id = Column(Integer, ForeignKey(users.DentalOffice.id))
+    office = relationship('users.DentalOffice')
+    start_of_use = Column(Date, default=None)
+    sterilizations  = relationship('AssetSterilized')
 
 class AssetKitStructure(Base):
     """
