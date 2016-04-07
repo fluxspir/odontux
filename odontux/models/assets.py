@@ -40,6 +40,8 @@ the "price" we paid that special day for it...
 "Material" is a type of asset that owns general data. We use for that data a 
 subclass of "AssetCategory" : the "MaterialCategory".
 
+"SuperAsset" is an Asset made by the fusion durable of various Asset.
+
 "Kit" is a groupment of, generally, "Device". But a "Kit" may contain any 
 type of Asset.
 
@@ -121,16 +123,6 @@ class MaterialCategory(AssetCategory):
         'polymorphic_identity': 'material'
     }
 
-class SuperAssetCategory(Base):
-    """ """
-    __tablename__ = "super_asset_category"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    sterilizable = Column(Boolean, nullable=False)
-    validity = Column(Interval, default=datetime.timedelta(90))
-    type_of_assets = relationship("AssetCategory", 
-                            secondary=superassetcategory_assetcategory_table,
-                            backref="superasset_categories")
 class Asset(Base):
     """
         * provider_id : from whom it was bought
@@ -235,21 +227,33 @@ class Material(Asset):
         'polymorphic_identity': 'material',
     }
 
+class SuperAssetCategory(Base):
+    """ """
+    __tablename__ = "super_asset_category"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    sterilizable = Column(Boolean, nullable=False)
+    validity = Column(Interval, default=datetime.timedelta(90))
+    asset_specialty_id = Column(Integer, ForeignKey(act.Specialty.id))
+    superasset_specilty = relationship("act.Specialty")
+    type_of_assets = relationship("AssetCategory", 
+                            secondary=superassetcategory_assetcategory_table,
+                            backref="superasset_categories")
+
 class SuperAsset(Asset):
     """
         a super_asset is an asset made by addition of various assets
     """
     __tablename__ = "super_asset"
-    id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
+    id = Column(Integer, primary_key=True)
     superasset_category_id = Column(Integer, ForeignKey(SuperAssetCategory.id),
                                                                 nullable=False)
     superasset_category = relationship("SuperAssetCategory")
     assets = relationship("Asset", secondary=superasset_asset_table,
                                             backref="superassets")
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'superasset'
-    }
+    start_of_use = Column(Date, default=None)
+    end_of_use = Column(Date, default=None)
+    end_use_reason = Column(Integer, default=0)
 
 class AssetKitStructure(Base):
     """
