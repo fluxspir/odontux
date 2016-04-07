@@ -12,7 +12,6 @@ from tables import (asset_provider_address_table, asset_provider_phone_table,
                     kitstructure_assetcategory_table,
                     superassetcategory_assetcategory_table,
                     superasset_asset_table)
-from odontux import constants
 import users, act, schedule 
 import sqlalchemy
 import datetime
@@ -126,7 +125,7 @@ class SuperAssetCategory(Base):
     __tablename__ = "super_asset_category"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    sterilizable = Column(Boolean, nullable=False)
+    sterilizable = Column(Boolean, nullable=False, default=True)
     validity = Column(Interval, default=datetime.timedelta(90))
     type_of_assets = relationship("AssetCategory", 
                             secondary=superassetcategory_assetcategory_table,
@@ -184,8 +183,7 @@ class Asset(Base):
         query = (
             meta.session.query(AssetKit)
                 .filter(AssetKit.end_of_use.is_(None))
-                .filter(AssetKit.end_use_reason == 
-                                constants.END_USE_REASON_IN_USE_STOCK)
+                .filter(AssetKit.end_use_reason == 0)
                 .filter(AssetKit.appointment_id.is_(None))
                 ).all()
         for q in query:

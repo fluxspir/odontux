@@ -123,6 +123,7 @@ class SuperAssetCategoryForm(Form):
     id = HiddenField(_('id'))
     name = TextField(_('Name'), [validators.Required(
                                     message=_('Name of superasset required'))])
+    sterilizable = BooleanField(_('Sterilizable'))
     assets_category_list = SelectMultipleField(_('Type of Assets'), coerce=int)
 
 class SuperAssetForm(Form):
@@ -814,8 +815,11 @@ def add_superasset_category():
                                     get_superasset_category_choices()
 
     if request.method == 'POST' and superasset_category_form.validate():
-        new_superasset_category = assets.SuperAssetCategory(
-                                    name = superasset_category_form.name.data)
+        values = {
+            'name': superasset_category_form.name.data,
+            'sterilizable': superasset_category_form.sterilizable.data,
+        }
+        new_superasset_category = assets.SuperAssetCategory(**values)
         meta.session.add(new_superasset_category)
 
         for val in superasset_category_form.assets_category_list.data:
@@ -852,7 +856,7 @@ def get_assets_in_superasset(return_id=False):
     return query
 
 @app.route('/add/superasset/', methods=['GET', 'POST'])
-@app.route('/add/superasset?id=<int:superasset_category_id>/', 
+@app.route('/add/superasset&id=<int:superasset_category_id>/', 
                                                     methods=['GET', 'POST'])
 def add_superasset(superasset_category_id=None):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
