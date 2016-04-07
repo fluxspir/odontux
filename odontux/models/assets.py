@@ -141,9 +141,11 @@ class Asset(Base):
     """
     __tablename__ = "asset"
     id = Column(Integer, primary_key=True)
-    provider_id = Column(Integer, ForeignKey(AssetProvider.id))
+    provider_id = Column(Integer, ForeignKey(AssetProvider.id),
+                                                        nullable=False)
     provider = relationship('AssetProvider')
-    asset_category_id = Column(Integer, ForeignKey(AssetCategory.id))
+    asset_category_id = Column(Integer, ForeignKey(AssetCategory.id), 
+                                                        nullable=False)
     asset_category = relationship('AssetCategory')
     acquisition_date = Column(Date, default=func.current_date())
     acquisition_price = Column(Numeric, default=0, nullable=True)
