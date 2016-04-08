@@ -126,6 +126,9 @@ class SuperAssetCategoryForm(Form):
     sterilizable = BooleanField(_('Sterilizable'))
     assets_category_list = SelectMultipleField(_('Type of Assets'), coerce=int)
 
+class UniqueAssetCategoryForm(Form):
+    item_id = HiddenField(_('id'))
+
 class SuperAssetForm(Form):
     id = HiddenField(_('id'))
     superasset_category_id = SelectField(_('Type of SuperAsset'), coerce=int)
@@ -834,6 +837,76 @@ def add_superasset_category():
     return render_template('add_superasset_category.html',
                             superasset_category_form=superasset_category_form)
 
+@app.route('/list/superasset_category/')
+def list_superasset_category():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    superasset_categories = (
+        meta.session.query(assets.SuperAssetCategory).all()
+        )
+    return render_template('list_superasset_category.html',
+                        superasset_categories=superasset_categories)
+
+@app.route('/add/asset_category_in_superasset_category&sac=<int:superasset_category_id>&ac=<int:asset_category_id>')
+def add_asset_category_in_superasset_category(superasset_category_id,
+                                                        asset_category_id):
+    superasset_category = ( 
+        meta.session.query(assets.SuperAssetCategory)
+            .filter(assets.SuperAssetCategory.id == superasset_category_id)
+            .one()
+        )
+    asset_category = (
+        meta.session.query(assets.AssetCategory)
+            .filter(assets.AssetCategory.id == asset_category_id).one()
+        )
+    superasset_category.type_of_assets.append(asset_category)
+    meta.session.commit()
+    return redirect(url_for('update_assets_in_superasset_category',
+                            superasset_category_id=superasset_category_id))
+
+@app.route('/remove/asset_category_in_superasset_category&sac=<int:superasset_category_id>&ac=<int:asset_category_id>')
+def remove_asset_category_in_superasset_category(superasset_category_id,
+                                                        asset_category_id):
+    superasset_category = ( 
+        meta.session.query(assets.SuperAssetCategory)
+            .filter(assets.SuperAssetCategory.id == superasset_category_id)
+            .one()
+        )
+    asset_category = (
+        meta.session.query(assets.AssetCategory)
+            .filter(assets.AssetCategory.id == asset_category_id).one()
+        )
+    superasset_category.type_of_assets.remove(asset_category)
+    meta.session.commit()
+    return redirect(url_for('update_assets_in_superasset_category',
+                            superasset_category_id=superasset_category_id))
+
+   
+@app.route('/update/superasset_category&id=<int:superasset_category_id>')
+def update_assets_in_superasset_category(superasset_category_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    superasset_category = (
+        meta.session.query(assets.SuperAssetCategory)
+            .filter(assets.SuperAssetCategory.id == superasset_category_id)
+            .one()
+        )
+    assets_in_superasset = [ asset_category.id 
+                    for asset_category in superasset_category.type_of_assets ]
+    assets_categories = (
+        meta.session.query(assets.AssetCategory)
+            .filter(~assets.AssetCategory.id.in_(assets_in_superasset))
+            .all()
+        )
+
+    return render_template('update_superasset_category.html',
+                                    superasset_category=superasset_category,
+                                    assets_categories=assets_categories)
+
 def get_assets_in_superasset(return_id=False):
     if return_id:
         query = meta.session.query(assets.Asset.id)
@@ -848,7 +921,7 @@ def get_assets_in_superasset(return_id=False):
                                 assets.SuperAsset.start_of_use.isnot(None),
                                 assets.SuperAsset.end_use_reason == 
                                         constants.END_USE_REASON_IN_USE_STOCK
-                                )
+                        )
                     )
                 )
             ).all()

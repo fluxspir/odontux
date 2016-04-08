@@ -130,6 +130,7 @@ class SuperAssetCategory(Base):
     type_of_assets = relationship("AssetCategory", 
                             secondary=superassetcategory_assetcategory_table,
                             backref="superasset_categories")
+
 class Asset(Base):
     """
         * provider_id : from whom it was bought

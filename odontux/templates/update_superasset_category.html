@@ -1,0 +1,24 @@
+{% extends 'header.html' %}
+{% block main %}
+Update superasset category {{ superasset_category.id }} -- {{ superasset_category.name }}
+<br /><br />
+Items in superasset :<br />
+  {% for asset_category in superasset_category.type_of_assets %}
+    {{ asset_category.id }} -- {{ asset_category.brand }} 
+                              {{ asset_category.commercial_name }} ;
+    <a href="{{ url_for('remove_asset_category_in_superasset_category',
+                    superasset_category_id=superasset_category.id,
+                    asset_category_id=asset_category.id) }}">
+                    Remove</a><br />
+  {% endfor %}
+  <br />
+Items not in superasset :<br />
+  {% for asset_category in assets_categories %}
+    {{ asset_category.id }} -- {{ asset_category.brand }}
+                          {{ asset_category.commercial_name }} ;
+    <a href="{{ url_for('add_asset_category_in_superasset_category',
+                    superasset_category_id=superasset_category.id,
+                    asset_category_id=asset_category.id ) }}">
+                    Add</a><br />
+  {% endfor %}
+{% endblock %}
