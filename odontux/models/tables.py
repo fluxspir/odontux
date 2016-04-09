@@ -118,6 +118,12 @@ Column("kit_structure_id", Integer, ForeignKey("asset_kit_structure.id")),
 Column("asset_category_id", Integer, ForeignKey("asset_category.id"))
 )
 
+kitstructure_superassetcategory_table = Table("kit_structure_superasset_category",
+                                                            Base.metadata,
+Column("kit_structure_id", Integer, ForeignKey("asset_kit_structure.id")),
+Column("superasset_category_id", Integer, ForeignKey("super_asset_category.id"))
+)
+
 # assets.py / appointment.py
 material_appointment_table = Table("material_appointment", Base.metadata,
 Column('id', Integer, primary_key=True),

@@ -10,6 +10,7 @@ import meta
 from tables import (asset_provider_address_table, asset_provider_phone_table, 
                     asset_provider_mail_table, kit_asset_table,
                     kitstructure_assetcategory_table,
+                    kitstructure_superassetcategory_table,
                     superassetcategory_assetcategory_table,
                     superasset_asset_table)
 import users, act, schedule 
@@ -263,6 +264,9 @@ class AssetKitStructure(Base):
     type_of_assets = relationship("AssetCategory", 
                                 secondary=kitstructure_assetcategory_table,
                                 backref="kits_structure")
+    type_of_superassets = relationship("SuperAssetCategory",
+                            secondary=kitstructure_superassetcategory_table,
+                            backref="kits_structure")
     validity = Column(Interval, default=datetime.timedelta(90))
     active = Column(Boolean, default=True)
 

@@ -19,10 +19,17 @@
     {% endif %}
     Content :<br />
     {% for asset in kit.assets %}
-      <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
-        {{ asset.id }} -- {{ asset.asset_category.brand }} -- 
+      {% if asset.type == 'superasset' %}
+        <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+          {{ asset.id }} -- {{ asset.superasset_category.name }}
+        </a><br />
+
+      {% else %}
+        <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+          {{ asset.id }} -- {{ asset.asset_category.brand }} -- 
                           {{ asset.asset_category.commercial_name }}
-      </a></br />
+        </a></br />
+      {% endif %}
     {% endfor %}
 <br />
   {% if not kit.sterilization %}

@@ -1,0 +1,48 @@
+{% extends 'header.html' %}
+{% block main %}
+Update kit structure {{ kit_structure.id }} -- {{ kit_structure.name }}
+<br /><br />
+SuperAssets' categories in kit structure {{ kit_structure.name }} :<br />
+  {% for superasset_cat in kit_structure.type_of_superassets %}
+    {{ superasset_cat.id }} -- {{ superasset_cat.name }} ;
+    <a href="{{ url_for('remove_asset_category_from_kit_structure',
+                    kit_structure_id=kit_structure.id,
+                    asset_cat_id=superasset_cat.id,
+                    asset_type='superasset') }}">
+                    Remove</a><br />
+  {% endfor %}
+  <br />
+Assets' categories in kit structure {{ kit_structure.name }} :<br />
+  {% for asset_cat in kit_structure.type_of_assets %}
+    {{ asset_cat.id }} -- {{ asset_cat.brand }} 
+                              {{ asset_cat.commercial_name }} ;
+    <a href="{{ url_for('remove_asset_category_from_kit_structure',
+                    kit_structure_id=kit_structure.id,
+                    asset_cat_id=asset_cat.id,
+                    asset_type='asset') }}">
+                    Remove</a><br />
+  {% endfor %}
+  <br />
+
+SuperAssets not in kit :<br />
+  {% for superasset_cat in superassets_categories %}
+    {{ superasset_cat.id }} -- {{ superasset_cat.name }} ;
+    <a href="{{ url_for('add_asset_category_in_kit_structure', 
+                            kit_structure_id=kit_structure.id, 
+                            asset_cat_id=superasset_cat.id,
+                            asset_type='superasset' ) }}">
+                    Add</a><br />
+  {% endfor %}
+<br />
+Assets not in kit :<br />
+  {% for asset_cat in assets_categories %}
+    {{ asset_cat.id }} -- {{ asset_cat.brand }}
+                          {{ asset_cat.commercial_name }} ;
+    <a href="{{ url_for('add_asset_category_in_kit_structure', 
+                            kit_structure_id=kit_structure.id, 
+                            asset_cat_id=asset_cat.id,
+                            asset_type='asset') }}">
+                    Add</a><br />
+  {% endfor %}
+<br />
+{% endblock %}

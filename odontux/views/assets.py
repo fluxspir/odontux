@@ -164,7 +164,6 @@ class AssetKitStructureForm(Form):
                         validators.Length(max=30, 
                         message=_('Max : 30 characters'))],
                         filters=[forms.title_field])
-    assets_category_list = SelectMultipleField(_('Type of Assets'), coerce=int)
     active = BooleanField(_('active'))
 
 class AssetKitForm(Form):
@@ -182,6 +181,16 @@ def get_kit_structure_assets_choices():
         return [ (0, "") ]
     return [ (r.id, r.brand + " || " + r.commercial_name) 
                                                     for r in assets_category ]
+
+def get_kit_structure_superassets_choices():
+    superassets_category = (
+        meta.session.query(assets.SuperAssetCategory)
+            .filter(assets.SuperAssetCategory.sterilizable == True)
+            .all()
+        )
+    if not superassets_category:
+        return[ (0, "") ]
+    return [ (r.id, r.name) for r in superassets_category ]
 
 def get_superasset_category_choices():
     assets_category = meta.session.query(assets.DeviceCategory).all()
@@ -982,66 +991,154 @@ def add_kit_type():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     kit_structure_form = AssetKitStructureForm(request.form)
-    kit_structure_form.assets_category_list.choices = \
-                                        get_kit_structure_assets_choices()
-
+#    kit_structure_form.assets_category_list.choices = \
+#                                        get_kit_structure_assets_choices()
+#
     if request.method == 'POST' and kit_structure_form.validate():
         new_asset_kit = assets.AssetKitStructure(
                                         name=kit_structure_form.name.data)
         meta.session.add(new_asset_kit)
-        for val in kit_structure_form.assets_category_list.data:
-            asset = meta.session.query(assets.AssetCategory).filter(
-                                assets.AssetCategory.id == val).one()
-            new_asset_kit.type_of_assets.append(asset)
-
+#        for val in kit_structure_form.assets_category_list.data:
+#            asset = meta.session.query(assets.AssetCategory).filter(
+#                                assets.AssetCategory.id == val).one()
+#            new_asset_kit.type_of_assets.append(asset)
+#
         meta.session.commit()
-        return redirect(url_for('my_assets'))
+        return redirect(url_for('update_kit_type', 
+                                kit_type_id=new_asset_kit.id))
 
     return render_template('add_kit_type.html',
                                 kit_structure_form=kit_structure_form)
 
 @app.route('/update/kit_type?id=<kit_type_id>', methods=['GET', 'POST'])
 def update_kit_type(kit_type_id):
-
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     
     kit_structure_form = AssetKitStructureForm(request.form)
-    kit_structure_form.assets_category_list.choices = \
-                                        get_kit_structure_assets_choices()
+#    kit_structure_form.assets_category_list.choices = \
+#                                        get_kit_structure_assets_choices()
     kit_structure = meta.session.query(assets.AssetKitStructure).filter(
                 assets.AssetKitStructure.id == kit_type_id).one_or_none()
     if not kit_structure:
         return render_template('list_kit_type')
-    asset_list = [ asset.id for asset in kit_structure.type_of_assets ]
+#    asset_list = [ asset.id for asset in kit_structure.type_of_assets ]
 
     if request.method == 'POST' and kit_structure_form.validate():
         for f in [ "name", "active" ]:
             setattr(kit_structure, f, getattr(kit_structure_form, f).data)
 
-        for val in set(kit_structure_form.assets_category_list.data) \
-                                                            - set(asset_list):
-            asset = meta.session.query(assets.AssetCategory).filter(
-                                assets.AssetCategory.id == val).one()
-            kit_structure.type_of_assets.append(asset)
-        for val in set(asset_list) - \
-                        set(kit_structure_form.assets_category_list.data):
-            asset = meta.session.query(assets.AssetCategory).filter(
-                                assets.AssetCategory.id == val).one()
-            kit_structure.type_of_assets.remove(asset)
+#        for val in set(kit_structure_form.assets_category_list.data) \
+#                                                            - set(asset_list):
+#            asset = meta.session.query(assets.AssetCategory).filter(
+#                                assets.AssetCategory.id == val).one()
+#            kit_structure.type_of_assets.append(asset)
+#        for val in set(asset_list) - \
+#                        set(kit_structure_form.assets_category_list.data):
+#            asset = meta.session.query(assets.AssetCategory).filter(
+#                                assets.AssetCategory.id == val).one()
+#            kit_structure.type_of_assets.remove(asset)
         meta.session.commit()
-        return redirect(url_for('list_kit_type'))
+        return redirect(url_for('update_assets_categories_in_kit_structure',
+                                    kit_structure_id=kit_structure.id))
 
-    kit_structure_form.assets_category_list.data = asset_list
+#    kit_structure_form.assets_category_list.data = asset_list
     kit_structure_form.active.data = kit_structure.active
     return render_template('update_kit_type.html',
                                 kit_structure_form=kit_structure_form,
-                                kit_structure=kit_structure,
-                                asset_list=asset_list)
+                                kit_structure=kit_structure)
 
-   
+@app.route('/add/asset_category_in_kit_structure&kit_structure=<int:kit_structure_id>&asset_cat=<int:asset_cat_id>&asset_type=<asset_type>')
+def add_asset_category_in_kit_structure(kit_structure_id, asset_cat_id, 
+                                                                asset_type):
+    kit_structure = ( 
+        meta.session.query(assets.AssetKitStructure)
+            .filter(assets.AssetKitStructure.id == kit_structure_id)
+            .one()
+        )
+    if asset_type == "asset":
+        asset_cat = (
+            meta.session.query(assets.AssetCategory)
+                .filter(assets.AssetCategory.id == asset_cat_id).one()
+            )
+        kit_structure.type_of_assets.append(asset_cat)
+    elif asset_type == "superasset":
+        superasset_cat = (
+            meta.session.query(assets.SuperAssetCategory)
+                .filter(assets.SuperAssetCategory.id == asset_cat_id).one()
+            )
+        kit_structure.type_of_superassets.append(superasset_cat)
+    else:
+        pass
+    meta.session.commit()
+    return redirect(url_for('update_assets_categories_in_kit_structure', 
+                                            kit_structure_id=kit_structure_id))
+
+@app.route('/remove/asset_category_from_kit_structure&kit_structure=<int:kit_structure_id>&asset_cat=<int:asset_cat_id>&asset_type=<asset_type>')
+def remove_asset_category_from_kit_structure(kit_structure_id, asset_cat_id,
+                                                                asset_type):
+    kit_structure = ( 
+        meta.session.query(assets.AssetKitStructure)
+            .filter(assets.AssetKitStructure.id == kit_structure_id)
+            .one()
+        )
+    if asset_type == "asset":
+        asset_cat = (
+            meta.session.query(assets.AssetCatergory)
+                .filter(assets.AssetCategory.id == asset_cat_id).one()
+            )
+        kit_structure.type_ofassets.remove(asset_cat)
+    elif asset_type == "superasset":
+        superasset_cat = (
+            meta.session.query(assets.SuperAssetCategory)
+                .filter(assets.SuperAssetCategory.id == asset_cat_id).one()
+            )
+        kit_structure.type_of_superassets.remove(superasset_cat)
+    else:
+        pass
+    meta.session.commit()
+    return redirect(url_for('update_assets_categories_in_kit_structure', 
+                                            kit_structure_id=kit_structure_id))
+
+@app.route('/update/assets_categories_in_kit_structure?id=<int:kit_structure_id>')
+def update_assets_categories_in_kit_structure(kit_structure_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    
+    kit_structure = (
+        meta.session.query(assets.AssetKitStructure)
+            .filter(assets.AssetKitStructure.id == kit_structure_id)
+            .one()
+        )
+    assets_categories_in_this_kit = [ asset_cat.id 
+                        for asset_cat in kit_structure.type_of_assets ]
+    superassets_categories_in_this_kit = [superasset_cat.id
+                    for superasset_cat in kit_structure.type_of_superassets ]
+    assets_categories_to_display = (
+        meta.session.query(assets.AssetCategory)
+            .filter(
+                # Asset category not already in this kit
+                ~assets.AssetCategory.id.in_(assets_categories_in_this_kit)
+            )
+            .all()
+        )
+    superassets_categories_to_display = (
+        meta.session.query(assets.SuperAssetCategory)
+            .filter(
+                ~assets.SuperAssetCategory.id.in_(
+                                superassets_categories_in_this_kit)
+            )
+            .all()
+        )
+    
+    return render_template('update_assets_categories_in_kit_structure.html',
+                    kit_structure=kit_structure,
+                    assets_categories=assets_categories_to_display,
+                    superassets_categories=superassets_categories_to_display)
 
 @app.route('/list/kit_type/')
 def list_kit_type():
@@ -1050,14 +1147,22 @@ def list_kit_type():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    kit_types = meta.session.query(assets.AssetKitStructure).all()
-
+    kit_types = (
+        meta.session.query(assets.AssetKitStructure)
+            .filter(assets.AssetKitStructure.active == True)
+            .all()
+        )
+    unactive_kit_types = (
+        meta.session.query(assets.AssetKitStructure)
+            .filter(assets.AssetKitStructure.active == False)
+            .all()
+        )
     return render_template('list_kit_type.html', kit_types=kit_types)
    
 
 @app.route('/list/kits/', methods=['GET'])
-@app.route('/list/kits/?kit_types=<kit_types>', methods=['GET'])
-def list_kits(kit_types=""):
+@app.route('/list/kits?kit_type=<int:kit_types>', methods=['GET'])
+def list_kits(kit_types=0):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
     checks.quit_patient_file()
@@ -1096,7 +1201,8 @@ def view_kit(kit_id):
     return render_template("view_kit.html", kit=kit)
 
 @app.route('/add/kit/', methods=['GET', 'POST'])
-def add_kit():
+@app.route('/add/kit?kit_type=<int:kit_type_id>', methods=['GET', 'POST'])
+def add_kit(kit_type_id=0):
     def _get_asset_kit_field_list():
         return [ "asset_kit_structure_id", "creation_date" ]
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
@@ -1106,6 +1212,8 @@ def add_kit():
     
     kit_form = AssetKitForm(request.form)
     kit_form.asset_kit_structure_id.choices = get_kit_structure_id_choices()
+    if kit_type_id:
+        kit_form.asset_kit_structure_id.data = kit_type_id
     kit_form.end_use_reason.choices = get_end_use_reason_choices()
     
     if request.method == "POST" and kit_form.validate():
@@ -1181,7 +1289,6 @@ def update_kit(kit_id):
                 .one()
             )
         assets_categories_in_kit_structure.append(asset_cat)
-    assets_in_these_categories = []
     
     assets_to_display = (
         meta.session.query(assets.Asset)
@@ -1190,18 +1297,43 @@ def update_kit(kit_id):
                 assets.Asset.end_of_use.is_(None),
                 assets.Asset.end_use_reason ==
                         constants.END_USE_REASON_IN_USE_STOCK,
-                # Asset is sterilizable
-                assets.DeviceCategory.sterilizable == True,
+#                # Asset is sterilizable
+#                assets.DeviceCategory.sterilizable == True,
                 # Asset element of asset_categories listed by kit_structure
                 assets.Asset.asset_category_id.in_(
                     assets_categories_in_kit_structure),
                 # Asset not element of an active kit
                 ~assets.Asset.id.in_(assets_id_in_others_kits),
-                # Asset not marked in this kit
-                ~assets.Asset.id.in_(assets_already_in_this_kit)
+                # Asset not marked in this kit ; not necessary.
+                #~assets.Asset.id.in_(assets_already_in_this_kit)
             )
+            .all()
+        )
+    superassets_categories_in_kit_structure = []
+    for superasset_category in kit.asset_kit_structure.type_of_superassets:
+        superasset_cat = (
+            meta.session.query(assets.SuperAssetCategory.id)
+                .filter(assets.SuperAssetCategory.id == superasset_category.id)
+                .one()
+            )
+        superassets_categories_in_kit_structure.append(superasset_cat)
+
+    superassets_to_display = (
+        meta.session.query(assets.SuperAsset)
+            .filter(
+                # SuperAsset already in use
+                assets.SuperAsset.end_of_use.is_(None),
+                assets.SuperAsset.end_use_reason ==
+                    constants.END_USE_REASON_IN_USE_STOCK,
+                # SuperAsset element of superasset_categories listed by 
+                # kit_structure
+                assets.SuperAsset.superasset_category_id.in_(
+                    superassets_categories_in_kit_structure),
+                # not element of active kit
+                ~assets.SuperAsset.id.in_(assets_id_in_others_kits)
+               )
             .all()
         )
 
     return render_template('update_kit.html', assets=assets_to_display, 
-                                                kit=kit)
+                    superassets=superassets_to_display, kit=kit)

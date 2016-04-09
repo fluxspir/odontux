@@ -1,18 +1,32 @@
 {% extends 'header.html' %}
 {% block main %}
-Update Kit {{ kit.id }} -- {{ kit.name }}
+{% if not kit.sterilization %}
+Update Kit {{ kit.id }} -- {{ kit.asset_kit_structure.name }}
 <br /><br />
-Items in kit :<br />
+Assets in kit :<br />
   {% for asset in kit.assets %}
+    {% if asset.type == 'superasset' %}
+      {{ asset.id }} -- {{ asset.superasset_category.name }} ;
+    {% else %}
     {{ asset.id }} -- {{ asset.asset_category.brand }} 
                               {{ asset.asset_category.commercial_name }} ;
+    {% endif %}
     <a href="{{ url_for('remove_asset_from_kit',
                     kit_id=kit.id,
                     asset_id=asset.id) }}">
                     Remove</a><br />
   {% endfor %}
   <br />
-Items not in kit :<br />
+
+SuperAssets not in kit :<br />
+  {% for superasset in superassets %}
+    {{ superasset.id }} -- {{ superasset.superasset_category.name }} ;
+    <a href="{{ url_for('add_asset_in_kit',
+                          kit_id=kit.id, asset_id=superasset.id) }}">
+                    Add</a><br />
+  {% endfor %}
+
+Assets not in kit :<br />
   {% for asset in assets %}
     {{ asset.id }} -- {{ asset.asset_category.brand }}
                           {{ asset.asset_category.commercial_name }} ;
@@ -20,4 +34,8 @@ Items not in kit :<br />
                             kit_id=kit.id, asset_id=asset.id ) }}">
                     Add</a><br />
   {% endfor %}
+{% else %}
+Kit sterilized ; not updatable<br />
+<a href="{{ url_for('list_kits') }}">Return to list kit</a>
+{% endif %}
 {% endblock %}

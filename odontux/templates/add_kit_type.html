@@ -7,7 +7,6 @@ Add a new kit type
 <form method="post" action={{ url_for('add_kit_type') }}>
   <dl>
       {{ render_simple_field(kit_structure_form.name) }}
-      {{ render_simple_field(kit_structure_form.assets_category_list) }}
       {{ render_simple_field(kit_structure_form.active, default=True) }}
   </dl>
   <p><input type="submit" value="Add">
