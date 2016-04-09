@@ -25,6 +25,28 @@ from odontux.views import forms
 #from odontux.views.forms import DateField
 from odontux.views.log import index
 
+def get_assets_in_superasset(return_id=False):
+    """ this method is exported, for exemple in views.traceability """
+    if return_id:
+        query = meta.session.query(assets.Asset.id)
+    else:
+        query = meta.session.query(assets.Asset)
+
+    query = (
+        query.filter(assets.Asset.superassets.any(
+                assets.SuperAsset.id.in_(
+                    meta.session.query(assets.SuperAsset.id)
+                        .filter(assets.SuperAsset.end_of_use.is_(None),
+                                assets.SuperAsset.start_of_use.isnot(None),
+                                assets.SuperAsset.end_use_reason == 
+                                        constants.END_USE_REASON_IN_USE_STOCK
+                        )
+                    )
+                )
+            ).all()
+        )
+    return query
+
 def last_user_asset():
     try:
         return meta.session.query(assets.Asset).order_by(
@@ -148,7 +170,6 @@ class AssetKitStructureForm(Form):
 class AssetKitForm(Form):
     id = HiddenField(_('id'))
     asset_kit_structure_id = SelectField(_('Type of kit'), coerce=int)
-    assets = SelectMultipleField(_('Assets in the Kit'), coerce=int)
     creation_date = DateField(_('Creation Date of the Kit'), format='%Y-%m-%d')
     end_of_use = DateField(_('End of Use'), [validators.Optional()])
     end_use_reason = SelectField(_('Reason to end of use'), coerce=int ) 
@@ -168,27 +189,6 @@ def get_superasset_category_choices():
         return [ (0, "") ]
     return [ (r.id, r.brand + " " + r.commercial_name) for r in assets_category
             ]
-
-def get_assets_in_kit_choices():
-    # Asset, to be added in a kit must :
-    #   * Be in usable state
-    #   * be sterilizable
-    #   * Not be in a kit sterilized ready to use
-    assets_list = []
-    query = (
-            meta.session.query(assets.Asset).join(assets.DeviceCategory)
-            .filter(assets.Asset.end_of_use == None)
-            .filter(assets.Asset.end_use_reason ==
-                                        constants.END_USE_REASON_IN_USE_STOCK)
-            .filter(assets.DeviceCategory.sterilizable == True)
-            .all()
-        )
-
-    for asset in query:
-        if not asset.element_of_kit():
-            assets_list.append( (asset.id, (asset.asset_category.brand + " " +
-                                    asset.asset_category.commercial_name) ) )
-    return assets_list
 
 def get_asset_provider_field_list():
     return [ "name", "active" ]
@@ -907,27 +907,6 @@ def update_assets_in_superasset_category(superasset_category_id):
                                     superasset_category=superasset_category,
                                     assets_categories=assets_categories)
 
-def get_assets_in_superasset(return_id=False):
-    if return_id:
-        query = meta.session.query(assets.Asset.id)
-    else:
-        query = meta.session.query(assets.Asset)
-
-    query = (
-        query.filter(assets.Asset.superassets.any(
-                assets.SuperAsset.id.in_(
-                    meta.session.query(assets.SuperAsset.id)
-                        .filter(assets.SuperAsset.end_of_use.is_(None),
-                                assets.SuperAsset.start_of_use.isnot(None),
-                                assets.SuperAsset.end_use_reason == 
-                                        constants.END_USE_REASON_IN_USE_STOCK
-                        )
-                    )
-                )
-            ).all()
-        )
-    return query
-
 @app.route('/add/superasset/', methods=['GET', 'POST'])
 @app.route('/add/superasset&id=<int:superasset_category_id>/', 
                                                     methods=['GET', 'POST'])
@@ -1127,7 +1106,6 @@ def add_kit():
     
     kit_form = AssetKitForm(request.form)
     kit_form.asset_kit_structure_id.choices = get_kit_structure_id_choices()
-    kit_form.assets.choices = get_assets_in_kit_choices()
     kit_form.end_use_reason.choices = get_end_use_reason_choices()
     
     if request.method == "POST" and kit_form.validate():
@@ -1135,17 +1113,95 @@ def add_kit():
             for f in _get_asset_kit_field_list() }
         new_kit = assets.AssetKit(**values)
         meta.session.add(new_kit)
-        for asset_id in kit_form.assets.data:
-            asset = meta.session.query(assets.Asset).filter(
-                                assets.Asset.id == asset_id).one()
-            new_kit.assets.append(asset)
         meta.session.commit()
-        return redirect(url_for('list_kits'))
+        return redirect(url_for('update_kit', kit_id=new_kit.id))
 
     kit_form.creation_date.data = datetime.date.today()
     return render_template('add_kit.html',
                             kit_form=kit_form)
 
-@app.route('/update/kit?id=<int:kit_id>', methods=['GET', 'POST'])
+@app.route('/add/asset_in_kit&kit=<int:kit_id>&asset=<int:asset_id>')
+def add_asset_in_kit(kit_id, asset_id):
+    kit = ( 
+        meta.session.query(assets.AssetKit)
+            .filter(assets.AssetKit.id == kit_id)
+            .one()
+        )
+    asset = (
+        meta.session.query(assets.Asset)
+            .filter(assets.Asset.id == asset_id).one()
+        )
+    kit.assets.append(asset)
+    meta.session.commit()
+    return redirect(url_for('update_kit', kit_id=kit_id))
+
+@app.route('/remove/asset_from_kit&kit=<int:kit_id>&asset=<int:asset_id>')
+def remove_asset_from_kit(kit_id, asset_id):
+    kit = ( 
+        meta.session.query(assets.AssetKit)
+            .filter(assets.AssetKit.id == kit_id)
+            .one()
+        )
+    asset = (
+        meta.session.query(assets.Asset)
+            .filter(assets.Asset.id == asset_id).one()
+        )
+    kit.assets.remove(asset)
+    meta.session.commit()
+    return redirect(url_for('update_kit', kit_id=kit_id))
+
+@app.route('/update/kit&id=<int:kit_id>')
 def update_kit(kit_id):
-    pass
+
+    kit = ( meta.session.query(assets.AssetKit)
+                .filter(assets.AssetKit.id == kit_id)
+                .one()
+        )
+    assets_already_in_this_kit = [ asset.id for asset in kit.assets ]
+    assets_id_in_others_kits = (
+        meta.session.query(assets.Asset.id)
+            .filter(assets.Asset.kits.any(
+                assets.AssetKit.id.in_(
+                    meta.session.query(assets.AssetKit.id)
+                        .filter(
+                            assets.AssetKit.end_of_use.is_(None),
+                            assets.AssetKit.appointment_id.is_(None),
+                            assets.AssetKit.end_use_reason ==
+                                constants.END_USE_REASON_IN_USE_STOCK
+                            )
+                        )
+                    )
+                )
+            )
+    assets_categories_in_kit_structure = []
+    for asset_category in kit.asset_kit_structure.type_of_assets:
+        asset_cat = (
+            meta.session.query(assets.AssetCategory.id)
+                .filter(assets.AssetCategory.id == asset_category.id)
+                .one()
+            )
+        assets_categories_in_kit_structure.append(asset_cat)
+    assets_in_these_categories = []
+    
+    assets_to_display = (
+        meta.session.query(assets.Asset)
+            .filter(
+                # Asset is in use
+                assets.Asset.end_of_use.is_(None),
+                assets.Asset.end_use_reason ==
+                        constants.END_USE_REASON_IN_USE_STOCK,
+                # Asset is sterilizable
+                assets.DeviceCategory.sterilizable == True,
+                # Asset element of asset_categories listed by kit_structure
+                assets.Asset.asset_category_id.in_(
+                    assets_categories_in_kit_structure),
+                # Asset not element of an active kit
+                ~assets.Asset.id.in_(assets_id_in_others_kits),
+                # Asset not marked in this kit
+                ~assets.Asset.id.in_(assets_already_in_this_kit)
+            )
+            .all()
+        )
+
+    return render_template('update_kit.html', assets=assets_to_display, 
+                                                kit=kit)

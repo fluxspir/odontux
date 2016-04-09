@@ -24,7 +24,8 @@
                           {{ asset.asset_category.commercial_name }}
       </a></br />
     {% endfor %}
-  
-  <a href="{{ url_for('update_kit', kit_id=kit.id) }}">Update</a>
-
+<br />
+  {% if not kit.sterilization %}
+  <a href="{{ url_for('update_kit', kit_id=kit.id) }}">Update this kit </a>
+  {% endif %}
 {% endblock %}

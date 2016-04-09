@@ -1,0 +1,23 @@
+{% extends 'header.html' %}
+{% block main %}
+Update Kit {{ kit.id }} -- {{ kit.name }}
+<br /><br />
+Items in kit :<br />
+  {% for asset in kit.assets %}
+    {{ asset.id }} -- {{ asset.asset_category.brand }} 
+                              {{ asset.asset_category.commercial_name }} ;
+    <a href="{{ url_for('remove_asset_from_kit',
+                    kit_id=kit.id,
+                    asset_id=asset.id) }}">
+                    Remove</a><br />
+  {% endfor %}
+  <br />
+Items not in kit :<br />
+  {% for asset in assets %}
+    {{ asset.id }} -- {{ asset.asset_category.brand }}
+                          {{ asset.asset_category.commercial_name }} ;
+    <a href="{{ url_for('add_asset_in_kit', 
+                            kit_id=kit.id, asset_id=asset.id ) }}">
+                    Add</a><br />
+  {% endfor %}
+{% endblock %}
