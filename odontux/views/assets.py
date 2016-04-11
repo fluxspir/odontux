@@ -148,9 +148,6 @@ class SuperAssetCategoryForm(Form):
     sterilizable = BooleanField(_('Sterilizable'))
     assets_category_list = SelectMultipleField(_('Type of Assets'), coerce=int)
 
-class UniqueAssetCategoryForm(Form):
-    item_id = HiddenField(_('id'))
-
 class SuperAssetForm(Form):
     id = HiddenField(_('id'))
     superasset_category_id = SelectField(_('Type of SuperAsset'), coerce=int)
@@ -1086,10 +1083,10 @@ def remove_asset_category_from_kit_structure(kit_structure_id, asset_cat_id,
         )
     if asset_type == "asset":
         asset_cat = (
-            meta.session.query(assets.AssetCatergory)
+            meta.session.query(assets.AssetCategory)
                 .filter(assets.AssetCategory.id == asset_cat_id).one()
             )
-        kit_structure.type_ofassets.remove(asset_cat)
+        kit_structure.type_of_assets.remove(asset_cat)
     elif asset_type == "superasset":
         superasset_cat = (
             meta.session.query(assets.SuperAssetCategory)

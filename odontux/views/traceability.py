@@ -1026,3 +1026,33 @@ def print_sterilization_stickers(ste_cycle_id):
                                                     methods=['GET', 'POST'])
 def update_sterilization_cycle(ste_cycle_id):
     return redirect(url_for('list_sterilization_cycle'))
+
+@app.route('/unseal/asset?id=<int:asset_sterilized_id>')
+def unseal_asset(asset_sterilized_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    asset_sterilized = (
+        meta.session.query(traceability.AssetSterilized)
+            .filter(traceability.AssetSterilized.id == asset_sterilized_id)
+            .one()
+        )
+
+    if 'appointment_id' in session:
+        asset_sterilized.appointment_id = session.appointment_id
+    asset_sterilized.sealed = False
+    meta.session.commit()
+    if asset_sterilized.asset_id:
+        return redirect(url_for('view_asset',
+                                asset_id=asset_sterilized.asset_id))
+    elif asset_sterilized.superasset_id:
+        return redirect(url_for('view_asset',
+                                asset_id=asset_sterilized.superasset_id))
+    elif asset_sterilized.kit_id:
+        return redirect(url_for('view_kit',
+                                kit_id=asset_sterilized.kit_id))
+    else:
+        return redirect(url_for('view_sterilization_cycle',
+                        ste_cycle_id=asset_sterilized.sterilization_cycle_id))

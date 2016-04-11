@@ -30,7 +30,8 @@
         {% endif %}
       {% endif %}
   {% endif %}
-  {% if asset.is_sterilizable() and asset.sterilizations[-1] %}
+  {% if asset.is_sterilizable() and asset.sterilizations[-1]%}
+    {% if asset.sterilizations[-1].sealed %}
       The <a href="{{ url_for('view_sterilization_cycle', 
           ste_cycle_id=asset.sterilizations[-1].sterilization_cycle_id ) }}">
           Sterilization {{ asset.sterilizations[-1].sterilization_cycle_id }}
@@ -38,9 +39,16 @@
       {% if not asset.sterilizations[-1].appointment_id 
          and asset.sterilizations[-1].expiration_date > today %}
             {{ asset.sterilizations[-1].expiration_date }}
+        <br />
+        You may <a href="{{ url_for('unseal_asset', 
+                          asset_sterilized_id=asset.sterilizations[-1].id) }}">
+          unseal</a> this asset.<br />
       {% else %}
         Item to sterilize
       {% endif %}
+    {% else %}
+      Item to sterilize 
+    {% endif %}
   {% else %}
     Item was never sterilized
   {% endif %}<br />

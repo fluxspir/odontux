@@ -9,7 +9,7 @@ from flask import render_template, request, redirect, url_for
 import sqlalchemy
 from sqlalchemy import or_
 from odontux.models import (meta, act, administration, md, users, medication, 
-                            assets )
+                            assets, traceability )
 from odontux.odonweb import app
 from gettext import gettext as _
 from odontux import constants
@@ -112,6 +112,26 @@ def find():
         for superasset in query_superasset.all():
             assets_list.append(superasset)
         return render_template('list_assets.html', assets_list=assets_list)
+        
+    if request.form['database'] == 'sterilized_asset':
+        sterilized_id = int(request.form['keywords'])
+        sterilized_asset = (
+            meta.session.query(traceability.AssetSterilized)
+                .filter(traceability.AssetSterilized.id == sterilized_id)
+                .one_or_none()
+                )
+        if sterilized_asset.asset_id:
+            return redirect(url_for('view_asset', 
+                                    asset_id=sterilized_asset.asset_id))
+        elif sterilized_asset.superasset_id:
+            return redirect(url_for('view_asset',
+                                    asset_id=sterilized_asset.superasset_id))
+        elif sterilized_asset.kit_id:
+            return redirect(url_for('view_kit',
+                                    kit_id=sterilized_asset.kit_id))
+        else:
+            return redirect(url_for('view_sterilization_cycle',
+                        ste_cycle_id=sterilized_asset.sterilization_cycle_id))
 
 @app.route('/search/user')
 def find_user():

@@ -6,10 +6,14 @@ Update Kit {{ kit.id }} -- {{ kit.asset_kit_structure.name }}
 Assets in kit :<br />
   {% for asset in kit.assets %}
     {% if asset.type == 'superasset' %}
-      {{ asset.id }} -- {{ asset.superasset_category.name }} ;
+    <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+      {{ asset.id }} -- {{ asset.superasset_category.name }}
+    </a> ;
     {% else %}
+    <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
     {{ asset.id }} -- {{ asset.asset_category.brand }} 
-                              {{ asset.asset_category.commercial_name }} ;
+                              {{ asset.asset_category.commercial_name }}
+    </a> ;
     {% endif %}
     <a href="{{ url_for('remove_asset_from_kit',
                     kit_id=kit.id,
@@ -20,7 +24,10 @@ Assets in kit :<br />
 
 SuperAssets not in kit :<br />
   {% for superasset in superassets %}
-    {{ superasset.id }} -- {{ superasset.superasset_category.name }} ;
+    <a href="{{ url_for('view_asset', asset_id=superasset.id) }}">
+    {{ superasset.id }} -- {{ superasset.superasset_category.name }}
+    </a>
+     ; 
     <a href="{{ url_for('add_asset_in_kit',
                           kit_id=kit.id, asset_id=superasset.id) }}">
                     Add</a><br />
@@ -28,8 +35,10 @@ SuperAssets not in kit :<br />
 
 Assets not in kit :<br />
   {% for asset in assets %}
+    <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
     {{ asset.id }} -- {{ asset.asset_category.brand }}
-                          {{ asset.asset_category.commercial_name }} ;
+                          {{ asset.asset_category.commercial_name }}
+    </a> ; 
     <a href="{{ url_for('add_asset_in_kit', 
                             kit_id=kit.id, asset_id=asset.id ) }}">
                     Add</a><br />

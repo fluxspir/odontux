@@ -287,15 +287,3 @@ class AssetKit(Base):
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
     sterilization = relationship('AssetSterilized')
-
-#    def is_sterilized(self):
-#        query = (
-#            meta.session.query(traceability.AssetSterilized)
-#                .filter(AssetSterilized.kit_id == self.id)
-#                .filter(AssetSterilized.appointment_id.is_(None))
-#                .filter(AssetSterilized.expiration_date >
-#                                                        func.current_date())
-#                .one_or_none()
-#            )
-#        return query
- 
