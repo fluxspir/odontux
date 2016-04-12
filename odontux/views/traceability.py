@@ -402,6 +402,19 @@ def get_assets_list_for_sterilization_cycle():
                     )
                 )
             ))   
+            # We are eliminating here all superassets that are ready to be use
+            .filter(
+                ~assets.SuperAsset.id.in_(
+                    meta.session.query(
+                                    traceability.AssetSterilized.superasset_id)
+                    .filter(
+                        traceability.AssetSterilized.superasset_id.isnot(None),
+                        traceability.AssetSterilized.appointment_id.is_(None),
+                        traceability.AssetSterilized.expiration_date > 
+                                                        datetime.date.today(),
+                        traceability.AssetSterilized.sealed == True)
+                        )
+                    )
             # Here we're gonna eliminate superassets already sterilized
             .filter(or_(
                 # expiration's date of sterilization expired :
@@ -468,6 +481,15 @@ def get_assets_list_for_sterilization_cycle():
                     )
                 .all()
                 )
+    test = (
+        meta.session.query(traceability.AssetSterilized.asset_id)
+        .filter(traceability.AssetSterilized.asset_id.isnot(None),
+            traceability.AssetSterilized.appointment_id.is_(None),
+            traceability.AssetSterilized.expiration_date <=
+                                            datetime.date.today()
+                    ).all()
+     )
+
     query_assets = (
         meta.session.query(assets.Asset)
             # the asset hasn't a throw_away date : it's probably in service
@@ -497,6 +519,18 @@ def get_assets_list_for_sterilization_cycle():
                         meta.session.query(assets.SuperAsset.id).all()
                     )
                 )
+
+            # We are eliminating here all assets that are ready to be use
+            .filter(
+                ~assets.Asset.id.in_(
+                    meta.session.query(traceability.AssetSterilized.asset_id)
+                    .filter(traceability.AssetSterilized.asset_id.isnot(None),
+                        traceability.AssetSterilized.appointment_id.is_(None),
+                        traceability.AssetSterilized.expiration_date > 
+                                                        datetime.date.today(),
+                        traceability.AssetSterilized.sealed == True)
+                        )
+                    )
             # Below, we are eliminating assets already sterilized that don't 
             # need immediate sterilization
             .filter(or_(
