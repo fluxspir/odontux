@@ -384,11 +384,65 @@ def get_assets_list_for_sterilization_cycle():
                 assets.SuperAsset.end_use_reason ==
                     constants.END_USE_REASON_IN_USE_STOCK,
                 # the superasset already in use
-                assets.SuperAsset.start_of_use.isnot(None),
-                # The superasset isn't sterilized
+                assets.SuperAsset.start_of_use.isnot(None)
+            )
+            # SuperAsset isn't element of kit
+            .filter(~assets.SuperAsset.id.in_(
+                meta.session.query(assets.SuperAsset.id)
+                .filter(assets.SuperAsset.kits.any(
+                assets.AssetKit.id.in_(
+                    meta.session.query(assets.AssetKit.id)
+                    .filter(
+                        assets.AssetKit.end_of_use.is_(None),
+                        assets.AssetKit.appointment_id.is_(None),
+                        assets.AssetKit.end_use_reason ==
+                            constants.END_USE_REASON_IN_USE_STOCK
+                            )
+                        )
+                    )
+                )
+            ))   
+            # Here we're gonna eliminate superassets already sterilized
+            .filter(or_(
+                # expiration's date of sterilization expired :
+                assets.SuperAsset.id.in_(
+                    meta.session.query(
+                                    traceability.AssetSterilized.superasset_id)
+                    .filter(
+                        traceability.AssetSterilized.superasset_id.isnot(None),
+                        traceability.AssetSterilized.appointment_id.is_(None),
+                        traceability.AssetSterilized.expiration_date <=
+                                                        datetime.date.today()
+                            )
+                        ),
+                # The superasset has been used out of an appointment: broken seal
+                assets.SuperAsset.id.in_(
+                    meta.session.query(
+                                    traceability.AssetSterilized.superasset_id)
+                    .filter(
+                        traceability.AssetSterilized.superasset_id.isnot(None),
+                        traceability.AssetSterilized.appointment_id.is_(None),
+                        traceability.AssetSterilized.expiration_date >=
+                                                        datetime.date.today(),
+                        traceability.AssetSterilized.sealed == False)
+                        ),
+                # The superasset never was sterilized
                 ~assets.SuperAsset.id.in_(
-                    meta.session.query(traceability.AssetSterilized.asset_id)
-                    .filter(traceability.AssetSterilized.superasset_id.isnot(None))
+                    meta.session.query(
+                                    traceability.AssetSterilized.superasset_id)
+                    .filter(
+                        traceability.AssetSterilized.superasset_id.isnot(None))
+                    ),
+                # The superasset doesn't exist in the sterilized environment 
+                # without appointment_id correlation. It must be sterilized.
+                ~assets.SuperAsset.id.in_(
+                    meta.session.query(
+                                    traceability.AssetSterilized.superasset_id)
+                    .filter(
+                        traceability.AssetSterilized.superasset_id.isnot(None),
+                        traceability.AssetSterilized.appointment_id.is_(None)
+                        )
+                    )
                 )
             )
             .join(assets.SuperAssetCategory)
