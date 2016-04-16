@@ -68,3 +68,13 @@ END_USE_REASON = [ (END_USE_REASON_IN_USE_STOCK, _('In stock or in use') ),
                     ( END_USE_REASON_LOST, _('Lost') ) 
                 ]
 
+UNITY_PIECE = 0
+UNITY_VOLUME = 1
+UNITY_WEIGHT = 2
+UNITY_LENGTH = 3
+UNITY = [ ( UNITY_PIECE, _("pieces/items") ), 
+            ( UNITY_VOLUME, _("volume in mL") ), 
+            ( UNITY_WEIGHT, _("weight in gr") ), 
+            ( UNITY_LENGTH, _('length in m') ) 
+        ]
+
