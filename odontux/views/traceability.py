@@ -362,11 +362,16 @@ def get_assets_list_for_sterilization_cycle():
                                         constants.END_USE_REASON_IN_USE_STOCK,
                     assets.AssetKit.appointment_id.is_(None)
                 )
+
+            # Elimination of all kits that don't need sterilizations
             .filter(
-                # The kit was never sterilized
                 ~assets.AssetKit.id.in_(
                     meta.session.query(traceability.AssetSterilized.kit_id)
                     .filter(traceability.AssetSterilized.kit_id.isnot(None))
+                    .filter(
+                        traceability.AssetSterilized.expiration_date >
+                                                        datetime.date.today()
+                    )
                 )
             )
             .join(assets.AssetKitStructure)
@@ -375,6 +380,7 @@ def get_assets_list_for_sterilization_cycle():
                 assets.AssetKit.id
                 )
         )
+
     query_superassets = (
         meta.session.query(assets.SuperAsset)
             .filter(
@@ -481,15 +487,7 @@ def get_assets_list_for_sterilization_cycle():
                     )
                 .all()
                 )
-    test = (
-        meta.session.query(traceability.AssetSterilized.asset_id)
-        .filter(traceability.AssetSterilized.asset_id.isnot(None),
-            traceability.AssetSterilized.appointment_id.is_(None),
-            traceability.AssetSterilized.expiration_date <=
-                                            datetime.date.today()
-                    ).all()
-     )
-
+    
     query_assets = (
         meta.session.query(assets.Asset)
             # the asset hasn't a throw_away date : it's probably in service

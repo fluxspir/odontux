@@ -697,9 +697,9 @@ def update_device_category(device_category_id):
             setattr(asset_category, f, getattr(device_category_form, f).data)
         asset_category.validity = datetime.timedelta(
                                             device_category_form.validity.data)
+        meta.session.commit()
         return redirect(url_for('view_asset_category', 
                                         asset_category_id=device_category_id))
-    
     for f in get_asset_cat_field_list():
         getattr(asset_category_form, f).data = getattr(asset_category, f)
     asset_category_form.asset_specialty_id.data =\
@@ -742,9 +742,9 @@ def update_material_category(material_category_id):
                                     asset_category_form.asset_specialty_id.data
         for f in get_material_cat_field_list():
             setattr(asset_category, f, getattr(material_category_form, f).data)
+        meta.session.commit() 
         return redirect(url_for('view_asset_category', 
                                     asset_category_id=material_category_id))
-    
     for f in get_asset_cat_field_list():
         getattr(asset_category_form, f).data = getattr(asset_category, f)
     asset_category_form.asset_specialty_id.data =\
