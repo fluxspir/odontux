@@ -1,0 +1,31 @@
+{% extends "header.html" %}
+{% block main %}
+{% if session.role != session.ROLE_ADMIN %}
+{% endif %}
+<br />
+    {{ asset_category.id }} -- 
+    Brand : {{ asset_category.brand }} -- 
+    Commercial name : {{ asset_category.commercial_name }}<br />
+    Initial quantity: {{ asset_category.initial_quantity }} 
+    in {{ session['unity'][asset_category.unity][1] }} --
+    Automatic decrease : {{ asset_category.automatic_decrease }} --
+    Order threshold : {{ asset_category.order_threshold }}<br />
+  <a href="{{ url_for('update_asset_category', 
+                        asset_category_id=asset_category.id) }}">
+    Update this asset category</a>
+  <br /><br />
+
+  {% for a in asset_category.assets %}
+    <a href="{{ url_for('view_asset', asset_id=a.id) }}">
+      {{ a.id }} : {{ a.acquisition_date }} - 
+                   Price: {{ a.acquisition_price }} -
+                   Start using {{ a.start_of_use }} <br />
+      State {{ session['end_use_reason'][a.end_use_reason][1] }} --
+      {% if a.end_use_reaon %} End of use : {{ session.end_of_use }}
+      {% endif %}
+    </a><br />
+
+  {% endfor %}
+  <br />
+
+{% endblock %}

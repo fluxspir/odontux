@@ -3,6 +3,11 @@
 {% if session.role != session.ROLE_ADMIN %}
   <a href="{{ url_for('add_asset') }}">Add new asset</a>
 {% endif %}
+<a href="{{ url_for('view_asset_category', 
+                    asset_category_id=asset.asset_category_id) }}">
+  View this asset's category
+</a>
+
 <br />
     {{ asset.id }} ({{ asset.asset_category.id}} --   {{ asset.asset_category.brand }}  -- {{ asset.asset_category.commercial_name }} <br />
   Description : {{ asset.asset_category.description }} <br />

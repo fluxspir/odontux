@@ -93,6 +93,8 @@ class DeviceCategoryForm(Form):
     id = HiddenField(_('id'))
     sterilizable = BooleanField(_('Sterilizable'))
     sterilizer = BooleanField(_('This device is an Autoclave/Sterilizer ?'))
+    validity = IntegerField(_('Validity in days'), 
+                                        validators=[validators.Optional()])
 
 class MaterialCategoryForm(Form):
     id = HiddenField(_('id'))
@@ -204,8 +206,9 @@ def get_asset_type_choices():
             ( "material", _("Material") ) ]
 
 def get_material_cat_unity_choices():
-    return [ ( 0, _("pieces/items") ), ( 1, _("volume in mL") ), 
-                (2, _("weight in gr") ), (3, _('length in m') ) ]
+    return constants.UNITY
+#    return [ ( 0, _("pieces/items") ), ( 1, _("volume in mL") ), 
+#                (2, _("weight in gr") ), (3, _('length in m') ) ]
 
 def get_end_use_reason_choices():
     return constants.END_USE_REASON
@@ -649,9 +652,139 @@ def add_asset():
                             material_form=material_form,
                             clear_form=clear_form)
 
-@app.route('/update/asset_category?id=<int:asset_category_id>', methods=['GET', 'POST'])
+@app.route('/update/asset_category?id=<int:asset_category_id>')
 def update_asset_category(asset_category_id):
-    pass
+    asset_cat = (
+        meta.session.query(assets.AssetCategory)
+            .filter(assets.AssetCategory.id == asset_category_id)
+            .one()
+        )
+    if asset_cat.type == "device":
+        return redirect(url_for('update_device_category', 
+                                device_category_id=asset_category_id))
+    elif asset_cat.type == "material":
+        return redirect(url_for('update_material_category',
+                                material_category_id=asset_category_id))
+    else:
+        pass
+
+@app.route('/update/device_category?id=<int:device_category_id>',
+                                            methods=['GET', 'POST'])
+def update_device_category(device_category_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    asset_category = (
+        meta.session.query(assets.DeviceCategory)
+            .filter(assets.DeviceCategory.id == device_category_id)
+            .one()
+        )
+    asset_category_form = AssetCategoryForm(request.form)
+    device_category_form = DeviceCategoryForm(request.form)
+    asset_category_form.asset_specialty_id.choices =\
+                                                get_asset_specialty_choices()
+    asset_category_form.type.choices = get_asset_type_choices()
+    asset_category_form.type.data = asset_category.type
+    if ( request.method == 'POST' and asset_category_form.validate()
+                                and device_category_form.validate() ):
+        for f in get_asset_cat_field_list():
+            setattr(asset_category, f, getattr(asset_category_form, f).data)
+        asset_category.barcode = asset_category_form.barcode.data
+        asset_category.asset_specialty_id =\
+                                    asset_category_form.asset_specialty_id.data
+        for f in get_device_cat_field_list():
+            setattr(asset_category, f, getattr(device_category_form, f).data)
+        asset_category.validity = datetime.timedelta(
+                                            device_category_form.validity.data)
+        return redirect(url_for('view_asset_category', 
+                                        asset_category_id=device_category_id))
+    
+    for f in get_asset_cat_field_list():
+        getattr(asset_category_form, f).data = getattr(asset_category, f)
+    asset_category_form.asset_specialty_id.data =\
+                                            asset_category.asset_specialty_id
+    asset_category_form.barcode.data = asset_category.barcode
+    for f in get_device_cat_field_list():
+        getattr(device_category_form, f).data = getattr(asset_category, f)
+    device_category_form.validity.data =\
+                        int(asset_category.validity.total_seconds() / 86400)
+    return render_template('update_device_category.html',
+                                asset_category=asset_category,
+                                asset_category_form=asset_category_form,
+                                device_category_form=device_category_form)
+
+@app.route('/update/material_category?id=<int:material_category_id>',
+                                            methods=['GET', 'POST'])
+def update_material_category(material_category_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    asset_category = (
+        meta.session.query(assets.MaterialCategory)
+            .filter(assets.MaterialCategory.id == material_category_id)
+            .one()
+        )
+    asset_category_form = AssetCategoryForm(request.form)
+    material_category_form = MaterialCategoryForm(request.form)
+    asset_category_form.asset_specialty_id.choices =\
+                                                get_asset_specialty_choices()
+    asset_category_form.type.choices = get_asset_type_choices()
+    asset_category_form.type.data = asset_category.type
+    material_category_form.unity.choices = get_material_cat_unity_choices()
+    if ( request.method == 'POST' and asset_category_form.validate()
+                                and material_category_form.validate() ):
+        for f in get_asset_cat_field_list():
+            setattr(asset_category, f, getattr(asset_category_form, f).data)
+        asset_category.barcode = asset_category_form.barcode.data
+        asset_category.asset_specialty_id =\
+                                    asset_category_form.asset_specialty_id.data
+        for f in get_material_cat_field_list():
+            setattr(asset_category, f, getattr(material_category_form, f).data)
+        return redirect(url_for('view_asset_category', 
+                                    asset_category_id=material_category_id))
+    
+    for f in get_asset_cat_field_list():
+        getattr(asset_category_form, f).data = getattr(asset_category, f)
+    asset_category_form.asset_specialty_id.data =\
+                                            asset_category.asset_specialty_id
+    asset_category_form.barcode.data = asset_category.barcode
+
+    for f in get_material_cat_field_list():
+        getattr(material_category_form, f).data = getattr(asset_category, f)
+ 
+    return render_template('update_material_category.html',
+                                asset_category=asset_category,
+                                asset_category_form=asset_category_form,
+                                material_category_form=material_category_form)
+
+@app.route('/view/asset_category?id=<int:asset_category_id>')
+def view_asset_category(asset_category_id):
+    asset_category = (
+        meta.session.query(assets.AssetCategory)
+            .filter(assets.AssetCategory.id == asset_category_id)
+            .one_or_none()
+        )
+    if not asset_category:
+        asset_category = (
+            meta.session.query(assets.MaterialCategory)
+                .filter(assets.MaterialCategory.id == asset_category_id)
+                .one_or_none()
+            )
+     
+    if asset_category.type == "device":
+#        return redirect(url_for('view_device_category',
+#                                    device_category_id=asset_category_id))
+        return render_template('view_device_category.html',
+                                        asset_category=asset_category)
+    elif asset_category.type == "material":
+#        return redirect(url_for('view_material_category',
+#                                    material_category_id=asset_category_id))
+        return render_template('view_material_category.html',
+                                        asset_category=asset_category)
+    else:
+        return redirect(url_for('index'))
 
 @app.route('/update/asset?id=<int:asset_id>', methods=['GET', 'POST'])
 def update_asset(asset_id):
@@ -726,7 +859,7 @@ def update_asset(asset_id):
                             asset=asset,
                             clear_form=clear_form)
 
-    else:
+    elif asset.type == "material":
         for f in update_asset_field_list:
             getattr(asset_form, f).data = getattr(asset, f)
         for f in update_material_field_list:
@@ -740,6 +873,8 @@ def update_asset(asset_id):
                             material_form=material_form,
                             asset=asset,
                             clear_form=clear_form)
+    else:
+        pass
 
 @app.route('/view/asset&id=<int:asset_id>')
 def view_asset(asset_id):

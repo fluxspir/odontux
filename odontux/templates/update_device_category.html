@@ -1,0 +1,18 @@
+{% extends 'header.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_simple_field %}
+<form method="post" action="{{ url_for( 'update_device_category',
+                                  device_category_id=asset_category.id) }}">
+  <dl>
+    {{ render_simple_field(asset_category_form.barcode) }}
+    {{ render_simple_field(asset_category_form.brand) }}
+    {{ render_simple_field(asset_category_form.commercial_name) }}
+    {{ render_simple_field(asset_category_form.description) }}
+    {{ render_simple_field(asset_category_form.asset_specialty_id) }}
+    {{ render_simple_field(device_category_form.sterilizable) }}
+    {{ render_simple_field(device_category_form.validity) }}
+    {{ render_simple_field(device_category_form.sterilizer) }}
+  </dl>
+  <p><input type="submit" value="Update">
+</form>
+{% endblock %}

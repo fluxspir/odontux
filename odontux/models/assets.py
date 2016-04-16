@@ -154,7 +154,7 @@ class Asset(Base):
     provider_id = Column(Integer, ForeignKey(AssetProvider.id))
     provider = relationship('AssetProvider')
     asset_category_id = Column(Integer, ForeignKey(AssetCategory.id))
-    asset_category = relationship('AssetCategory')
+    asset_category = relationship('AssetCategory', backref="assets")
     acquisition_date = Column(Date, default=func.current_date())
     acquisition_price = Column(Numeric, default=0, nullable=True)
     new = Column(Boolean, default=True)

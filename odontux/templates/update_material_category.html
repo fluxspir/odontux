@@ -1,0 +1,19 @@
+{% extends 'header.html' %}
+{% block main %}
+{% from "_formhelpers.html" import render_simple_field %}
+<form method="post" action="{{ url_for( 'update_material_category',
+                                  material_category_id=asset_category.id) }}">
+  <dl>
+    {{ render_simple_field(asset_category_form.barcode) }}
+    {{ render_simple_field(asset_category_form.brand) }}
+    {{ render_simple_field(asset_category_form.commercial_name) }}
+    {{ render_simple_field(asset_category_form.description) }}
+    {{ render_simple_field(asset_category_form.asset_specialty_id) }}
+    {{ render_simple_field(material_category_form.initial_quantity) }}
+    {{ render_simple_field(material_category_form.unity) }}
+    {{ render_simple_field(material_category_form.automatic_decrease) }}
+    {{ render_simple_field(material_category_form.order_threshold) }}
+  </dl>
+  <p><input type="submit" value="Update">
+</form>
+{% endblock %}
