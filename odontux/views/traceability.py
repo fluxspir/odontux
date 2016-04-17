@@ -1022,6 +1022,18 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
 
 
     for item in items:
+        if item.asset:
+            item_id = str(item.asset.id)
+            item_name = item.asset.asset_category.commercial_name[:40]
+        elif item.kit:
+            item_id = str(item.kit.id)
+            item_name = item.kit.asset_kit_structure.name[:40]
+        elif item.superasset:
+            item_id = str(item.superasset.id)
+            item_name = item.superasset.superasset_category.name[:40]
+        else:
+            item_name = "Item without a name"
+
         ( row, col) = _get_cell_coordonate(actual_position)
         cell_x = ( (col * cell_width) + 
                     lmarg + 
@@ -1037,24 +1049,14 @@ def create_barcodes_a4_65(items, actual_position, draw=False):
         c.setFont('Helvetica', 8)
         c.drawString ( (cell_x + (8 * mm)),
                         (cell_y + (8 * mm)),
-                        str(item.id).zfill(10) )
+                        str(item.id).zfill(10) + "  /  " + item_id )
         c.setFont('Helvetica', 10)
         c.drawString ( cell_x + (10 * mm),
                         cell_y + (4 * mm),
                         str(item.expiration_date)
                     )
         c.setFont('Helvetica', 6)
-        if item.asset:
-            item_name = ( str(item.asset.id) + " : " + 
-                            item.asset.asset_category.commercial_name[:30] )
-        elif item.kit:
-            item_name = ( str(item.kit.id ) + " : " +
-                            item.kit.asset_kit_structure.name[:30] )
-        elif item.superasset:
-            item_name = ( str(item.superasset.id) + " : " +
-                            item.superasset.superasset_category.name[:30] )
-        else:
-            item_name = "Item without a name"
+        
         c.drawString (cell_x + (5 * mm),
                         cell_y + (1.5 * mm),
                         item_name
