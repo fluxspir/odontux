@@ -16,8 +16,7 @@ from zope.sqlalchemy import ZopeTransactionExtension
 
 from users import OdontuxUser, DentalOffice, Settings
 from md import MedecineDoctor
-from administration import (Address, Mail, Phone, SocialSecurityFr, Payer, 
-                            Family, Patient)
+from administration import (Address, Mail, Phone, Payer, Family, Patient)
 from anamnesis import MedicalHistory, PastSurgeries, Allergies
 from headneck import Head, Neck, Mouth
 from medication import DrugPrescribed, Prescription, PrescribedDrugReference
@@ -28,7 +27,7 @@ from periodonte import (SuperiorGum, InferiorGum, SuperiorAlveolarBone,
                         InferiorAlveolarBone)
 from teeth import Tooth, Event, ToothEvent, CrownEvent, RootEvent
 from act import Specialty, ActType, AppointmentActReference
-from cotation import NgapKeyFr, CmuKeyFr, MajorationFr, CotationFr
+from cotation import PlanName, Cotation 
 from compta import PaymentType, Payment
 from assets import (AssetProvider, AssetCategory, MaterialCategory,
                     Asset, Device, Material, AssetKitStructure, AssetKit,

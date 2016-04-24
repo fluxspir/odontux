@@ -22,9 +22,9 @@ import gnucash_handler
 today = datetime.date.today()
 
 
-locale = "fr"
-socialsecuritylocale = "SocialSecurity" + locale.title()
-SocialSecurityLocale = getattr(administration, socialsecuritylocale)
+#locale = "fr"
+#socialsecuritylocale = "SocialSecurity" + locale.title()
+#SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 
 class ActTypeParser(BaseCommand):

@@ -16,8 +16,8 @@ from odontux import constants
 from odontux.odonweb import app
 from odontux.models import meta, cotation, act
 
-cotationlocale = "Cotation" + constants.LOCALE.title()
-CotationLocale = getattr(cotation, cotationlocale)
+#cotationlocale = "Cotation" + constants.LOCALE.title()
+#CotationLocale = getattr(cotation, cotationlocale)
 
 class NgapKeyFrForm(Form):
     ngapkeyfr_id = HiddenField(_("ID"))
@@ -107,7 +107,7 @@ def list_cotations(keywords="", ordering=""):
         for o in ordering:
             acttypes = acttypes.order_by(o)
 
-    cotations = meta.session.query(CotationLocale).all()
+#    cotations = meta.session.query(CotationLocale).all()
 
     cotat_list = []
     for cotat in cotations:

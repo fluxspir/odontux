@@ -22,11 +22,11 @@ from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      validators)
 from odontux.views.forms import ColorField
 
-cotationlocale = "Cotation" + constants.LOCALE.title()
-CotationLocale = getattr(cotation, cotationlocale)
+#cotationlocale = "Cotation" + constants.LOCALE.title()
+#CotationLocale = getattr(cotation, cotationlocale)
 
-socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
-SocialSecurityLocale = getattr(administration, socialsecuritylocale)
+#socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
+#SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 class SpecialtyForm(Form):
     name = TextField('name', [validators.Required(), 
@@ -62,26 +62,26 @@ def get_specialty_choice_list():
     return [ (choice.id, choice.name) for choice in 
                                     meta.session.query(act.Specialty).all() ]
 
-def get_cotationfr_choice_list():
-    """ returns [ ( "cotation_id", "SC12 price" ), ] """
-
-    cotationfr_choices = meta.session.query(CotationLocale)\
-        .order_by(CotationLocale.key_id)\
-        .order_by(CotationLocale.adult_multiplicator)\
-        .all()
-    cotats = []
-    for cotat_choice in cotationfr_choices:
-        ngap = meta.session.query(cotation.NgapKeyFr)\
-            .filter(cotation.NgapKeyFr.id == cotat_choice.key_id)\
-            .one()
-        cotats.append( (cotat_choice, ngap ) )
-
-    return [ (cotat.id, ngap.key + str(cotat.adult_multiplicator) + " " + 
-              str(cotat.get_price(cotat.adult_multiplicator, 
-                                  cotat.exceeding_adult_normal))
-             ) for cotat, ngap in cotats 
-           ]
-
+#def get_cotationfr_choice_list():
+#    """ returns [ ( "cotation_id", "SC12 price" ), ] """
+#
+#    cotationfr_choices = meta.session.query(CotationLocale)\
+#        .order_by(CotationLocale.key_id)\
+#        .order_by(CotationLocale.adult_multiplicator)\
+#        .all()
+#    cotats = []
+#    for cotat_choice in cotationfr_choices:
+#        ngap = meta.session.query(cotation.NgapKeyFr)\
+#            .filter(cotation.NgapKeyFr.id == cotat_choice.key_id)\
+#            .one()
+#        cotats.append( (cotat_choice, ngap ) )
+#
+#    return [ (cotat.id, ngap.key + str(cotat.adult_multiplicator) + " " + 
+#              str(cotat.get_price(cotat.adult_multiplicator, 
+#                                  cotat.exceeding_adult_normal))
+#             ) for cotat, ngap in cotats 
+#           ]
+#
 def get_appointment_choice_list(patient_id):
     appointment_list = []
     appointments = meta.session.query(schedule.Appointment).filter(
@@ -180,14 +180,14 @@ def delete_specialty(specialty_id):
 
 @app.route('/list/acttype?keywords=<keywords>&ordering=<ordering>')
 def list_acttype(keywords="", ordering=""):
-    """ The target is too display dentist's gesture, describing it, its values.
+    """ The target is to display dentist's gesture, describing it, its values.
     Looking in ActType table, we may decide to print only 
         acts from one specialty
         then filter by keyword
         ordering the printing
     
     The result will be a list of tuples :
-     ( gesture, specialty, cotat, ngap )
+     ( gesture, specialty, cotat, plan )
     """
     keywords = keywords.encode("utf_8").split()
     ordering = ordering.split()
@@ -233,13 +233,24 @@ def list_acttype(keywords="", ordering=""):
                 .one()
         except sqlalchemy.orm.exc.NoResultFound:
             specialty = ""
-        cotat = meta.session.query(CotationLocale)\
-            .filter(CotationLocale.id == gesture.cotationfr_id)\
-            .one()
-        ngap = meta.session.query(cotation.NgapKeyFr)\
-            .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
+#        cotat = meta.session.query(CotationLocale)\
+#            .filter(CotationLocale.id == gesture.cotationfr_id)\
+#            .one()
+#        ngap = meta.session.query(cotation.NgapKeyFr)\
+#            .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
+        cotat = (
+            meta.session.query(cotation.Cotation)
+                .filter(cotation.Cotation.id == gesture.cotation_id)
+                .one()
+            )
+        plan = (
+            meta.session.query(cotation.PlanName)
+                .filter(cotation.PlanName.id == gesture.plan_id)
+                .one()
+            )
 
-        gestures_list.append( (gesture, specialty, cotat, ngap) )
+
+        gestures_list.append( (gesture, specialty, cotat, plan) )
     return render_template('list_act.html', 
                             gestures_list=gestures_list)
 

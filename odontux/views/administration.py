@@ -22,8 +22,8 @@ from odontux.models import meta, administration, users
 
 
 # variable to call in database the right table, which should be locale related.
-socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
-SocialSecurityLocale = getattr(administration, socialsecuritylocale)
+#socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
+#SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 # Fields too use in treatment of forms
 def get_gen_info_field_list():

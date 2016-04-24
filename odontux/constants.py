@@ -5,8 +5,13 @@
 # Licence BSD
 
 from gettext import gettext as _
+import ConfigParser
+import os
 
-LOCALE = "fr"
+parser = ConfigParser.ConfigParser()
+home = os.path.expanduser("~")
+parser.read(os.path.join(home, ".odontuxrc"))
+LOCALE = parser.get("environment", "locale").title()
 
 ROLE_DENTIST = 0
 ROLE_NURSE = 1

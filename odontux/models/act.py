@@ -7,16 +7,12 @@
 
 from meta import Base
 from tables import payment_act_table
-import cotation, schedule, headneck, teeth
+import schedule, headneck, teeth
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, Numeric, Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 
-
-locale = "fr"
-cotationlocale = "Cotation" + locale.title()
-CotationLocale = getattr(cotation, cotationlocale)
 
 class Specialty(Base):
     __tablename__ = 'specialty'
@@ -29,7 +25,6 @@ class ActType(Base):
     __tablename__ = 'act_type'
     id = Column(Integer, primary_key=True)
     specialty_id = Column(Integer, ForeignKey(Specialty.id), default=None)
-    cotationfr_id = Column(Integer, ForeignKey(CotationLocale.id))
     name = Column(String, nullable=False)
     alias = Column(String, default="")
     code = Column(String, unique=True)

@@ -17,9 +17,9 @@ import sys
 
 import gnucash_handler
 
-locale = "fr"
-socialsecuritylocale = "SocialSecurity" + locale.title()
-SocialSecurityLocale = getattr(administration, socialsecuritylocale)
+#locale = "fr"
+#socialsecuritylocale = "SocialSecurity" + locale.title()
+#SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 
 class PatientParser(BaseCommand):
