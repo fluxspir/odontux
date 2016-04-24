@@ -4,10 +4,9 @@ Adding new act
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
-<form method="post" action="/act/add/">
+<form method="post" action="{{ url_for('add_acttype') }}">
   <dl>
     {{ render_field(form.specialty_id) }}
-    {{ render_field(form.cotationfr_id) }}
     {{ render_field(form.code) }}
     {{ render_field(form.alias) }}
     {{ render_field(form.name) }}

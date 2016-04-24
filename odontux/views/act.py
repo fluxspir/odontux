@@ -36,10 +36,9 @@ class SpecialtyForm(Form):
 
 class ActTypeForm(Form):
     specialty_id = SelectField('specialty', coerce=int)
-    cotationfr_id = SelectField('cotationfr_id', coerce=int)
     code = TextField('code')
-    alias = TextAreaField('alias')
-    name = TextAreaField('name')
+    alias = TextField('alias')
+    name = TextField('name')
     color = ColorField('color')
 
 class AppointmentActReferenceForm(Form):
@@ -53,7 +52,7 @@ def get_specialty_field_list():
     return [ "name", "color" ]
 
 def get_acttype_field_list():
-    return [ "specialty_id", "cotationfr_id", "code", "alias", 
+    return [ "specialty_id", "code", "alias", 
              "name", "color" ]
 def get_appointmentactreference_field_list():
     return [ "appointment_id", "act_code", "act_id", "tooth_id", "majoration" ]
@@ -62,26 +61,6 @@ def get_specialty_choice_list():
     return [ (choice.id, choice.name) for choice in 
                                     meta.session.query(act.Specialty).all() ]
 
-#def get_cotationfr_choice_list():
-#    """ returns [ ( "cotation_id", "SC12 price" ), ] """
-#
-#    cotationfr_choices = meta.session.query(CotationLocale)\
-#        .order_by(CotationLocale.key_id)\
-#        .order_by(CotationLocale.adult_multiplicator)\
-#        .all()
-#    cotats = []
-#    for cotat_choice in cotationfr_choices:
-#        ngap = meta.session.query(cotation.NgapKeyFr)\
-#            .filter(cotation.NgapKeyFr.id == cotat_choice.key_id)\
-#            .one()
-#        cotats.append( (cotat_choice, ngap ) )
-#
-#    return [ (cotat.id, ngap.key + str(cotat.adult_multiplicator) + " " + 
-#              str(cotat.get_price(cotat.adult_multiplicator, 
-#                                  cotat.exceeding_adult_normal))
-#             ) for cotat, ngap in cotats 
-#           ]
-#
 def get_appointment_choice_list(patient_id):
     appointment_list = []
     appointments = meta.session.query(schedule.Appointment).filter(
@@ -103,12 +82,6 @@ def get_act_choice_list():
     for gesture in acts:
         acts_list.append((gesture.id, gesture.alias))
     return acts_list
-
-def get_majoration_choice_list():
-    return [ (maj.id, maj.name) 
-             for maj in meta.session.query(cotation.MajorationFr).order_by(
-                        cotation.MajorationFr.price).all()
-           ]
 
 def get_appointment_act_reference_choice_lists(patient_id):
     """ """
@@ -224,8 +197,6 @@ def list_acttype(keywords="", ordering=""):
     gestures = query.all()
 
     gestures_list = []
-    # We now need to know what the "cotationfr_id" correspond to
-    # TODO : "cotation_locale_id" 
     for gesture in gestures:
         try:
             specialty = meta.session.query(act.Specialty)\
@@ -233,24 +204,7 @@ def list_acttype(keywords="", ordering=""):
                 .one()
         except sqlalchemy.orm.exc.NoResultFound:
             specialty = ""
-#        cotat = meta.session.query(CotationLocale)\
-#            .filter(CotationLocale.id == gesture.cotationfr_id)\
-#            .one()
-#        ngap = meta.session.query(cotation.NgapKeyFr)\
-#            .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
-        cotat = (
-            meta.session.query(cotation.Cotation)
-                .filter(cotation.Cotation.id == gesture.cotation_id)
-                .one()
-            )
-        plan = (
-            meta.session.query(cotation.PlanName)
-                .filter(cotation.PlanName.id == gesture.plan_id)
-                .one()
-            )
-
-
-        gestures_list.append( (gesture, specialty, cotat, plan) )
+        gestures_list.append( (gesture, specialty) )
     return render_template('list_act.html', 
                             gestures_list=gestures_list)
 
@@ -261,11 +215,9 @@ def add_acttype():
     # TODO  BECAUSE DIFFICULT TO MAKE IT "PERFECT"
     form = ActTypeForm(request.form)
     form.specialty_id.choices = get_specialty_choice_list()
-    form.cotationfr_id.choices = get_cotationfr_choice_list()
     if request.method == 'POST' and form.validate():
         values = {}
         values['specialty_id'] = form.specialty_id.data
-        values['cotationfr_id'] = form.cotationfr_id.data
         values['code'] = form.code.data
         values['alias'] = form.alias.data
         values['name'] = form.name.data
@@ -288,15 +240,14 @@ def update_acttype(acttype_id):
                 .filter(act.Specialty.id == acttype.specialty_id).one()
     except sqlalchemy.orm.exc.NoResultFound:
         specialty=""
-    cotat = meta.session.query(CotationLocale)\
-                .filter(CotationLocale.id == acttype.cotationfr_id).one()
-    ngap = meta.session.query(cotation.NgapKeyFr)\
-                .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
-
+#    cotat = meta.session.query(CotationLocale)\
+#                .filter(CotationLocale.id == acttype.cotationfr_id).one()
+#    ngap = meta.session.query(cotation.NgapKeyFr)\
+#                .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
+#
 
     acttype_form = ActTypeForm(request.form)
     acttype_form.specialty_id.choices = get_specialty_choice_list()
-    acttype_form.cotationfr_id.choices = get_cotationfr_choice_list()
     
     #TODO (130202 : je me demande ce que je voulais faire à ce todo qui date 
     # d'on ne sait quand...
@@ -304,7 +255,6 @@ def update_acttype(acttype_id):
     if request.method == 'POST' and acttype_form.validate():
         for f in get_acttype_field_list():
             setattr(acttype, f, getattr(acttype_form, f).data)
-            #getattr(acttype, f) = getattr(acttype_form, f).data
         meta.session.commit()
         return redirect(url_for('list_acttype', 
                                 keywords=acttype_form.name.data, 
@@ -315,11 +265,9 @@ def update_acttype(acttype_id):
         getattr(acttype_form, f).data = getattr(acttype, f)
 
     specialty_form = SpecialtyForm(request.form)
-    cotat_form = views_cotation.CotationFrForm(request.form)
     return render_template('/update_act.html', 
                             acttype_form=acttype_form, 
                             specialty_form=specialty_form,
-                            cotat_form=cotat_form,
                             acttype=acttype
                             )
 
@@ -334,9 +282,6 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
         raise Exception(_("Need the appointment_id"))
 
     # Get the majoration, if any...
-    if majoration_id:
-        majoration_price = meta.session.query(cotation.MajorationFr).filter(
-                       cotation.MajorationFr.id == majoration_id).one().price
 
     gesture = meta.session.query(act.ActType).filter(
               act.ActType.id == act_id).one()
@@ -346,20 +291,20 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
                 cotation.CotationFr.id == gesture.cotationfr_id).one()
     patient = meta.session.query(administration.Patient).filter(
               administration.Patient.id == session['patient_id']).one()
-    if patient.age() < constants.KID_AGE:
-        multiplicator = execution.kid_multiplicator
-        exceeding = execution.exceeding_kid_normal
-    else:
-        multiplicator = execution.adult_multiplicator
-        exceeding = execution.exceeding_adult_normal
-
-    # For some acts, patient under state medical care (CMU) get special prices
-    # (paid directly by the state).
-    patient_right = meta.session.query(SocialSecurityLocale).filter(
-                    SocialSecurityLocale.id == patient.socialsecurity_id).one()
-    key = meta.session.query(cotation.NgapKeyFr).filter(
-          cotation.NgapKeyFr.id == execution.key_id).one()
-
+#    if patient.age() < constants.KID_AGE:
+#        multiplicator = execution.kid_multiplicator
+#        exceeding = execution.exceeding_kid_normal
+#    else:
+#        multiplicator = execution.adult_multiplicator
+#        exceeding = execution.exceeding_adult_normal
+#
+#    # For some acts, patient under state medical care (CMU) get special prices
+#    # (paid directly by the state).
+#    patient_right = meta.session.query(SocialSecurityLocale).filter(
+#                    SocialSecurityLocale.id == patient.socialsecurity_id).one()
+#    key = meta.session.query(cotation.NgapKeyFr).filter(
+#          cotation.NgapKeyFr.id == execution.key_id).one()
+#
     # In the appointment_act_reference table, we'll store
     # appointment, act, and if any, the tooth
     values['appointment_id'] = appointment_id

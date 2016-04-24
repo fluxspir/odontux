@@ -17,6 +17,13 @@ Column('act_id', Integer, ForeignKey('appointment_act_reference.id')),
 Column('payment_id', Integer, ForeignKey('payment.id'))
 )
 
+# act.py
+healthcareplan_acttype_table = Table('heathcareplan_acttype_table', 
+                                                            Base.metadata,
+Column('act_id', Integer, ForeignKey('act_type.id')),
+Column('healthcare_plan_id', Integer, ForeignKey('healthcare_plan.id'))
+)
+
 # administration.py
 family_address_table = Table('family_address', Base.metadata,
 Column('family_id', Integer, ForeignKey('family.id')),
@@ -36,6 +43,12 @@ Column('phone_id', Integer, ForeignKey('phone.id'))
 family_payer_table = Table('family_payer', Base.metadata,
 Column('family_id', Integer, ForeignKey('family.id')),
 Column('payer_id', Integer, ForeignKey('payer.id'))
+)
+
+# administration.py / cotation.py
+patient_plan_name_table = Table('patient_plan_name', Base.metadata,
+Column('patient_id', Integer, ForeignKey('patient.id')),
+Column('plan_name_id', Integer, ForeignKey('plan_name.id'))
 )
 
 # user.py / administration.py

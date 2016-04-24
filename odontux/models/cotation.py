@@ -21,72 +21,13 @@ class PlanName(Base):
     name = Column(String, nullable=False, unique=True)
 #    acts = relationship("act.ActType", backref="plan_names")
 
-class Cotation(Base):
-    __tablename__ = "cotation"
-    id = Column(Integer, primary_key=True)
-    plan_name_id = Column(Integer, ForeignKey(PlanName.id))
-    plan_name = relationship("PlanName", backref="cotations")
-    act_type_id = Column(Integer, ForeignKey(act.ActType.id))
-    act_type = relationship("act.ActType", backref="cotations")
-    code = Column(String, nullable=False, unique=True)
-    price = Column(Numeric, default=0)
-#
-#class NgapKeyFr(Base):
-#    __tablename__ = 'ngap_key_fr'
+#class Cotation(Base):
+#    __tablename__ = "cotation"
 #    id = Column(Integer, primary_key=True)
-#    name = Column(String, default="")
-#    key = Column(String, nullable=False)
-#    unit_price = Column(Numeric, nullable=False)
+#    plan_name_id = Column(Integer, ForeignKey(PlanName.id))
+#    plan_name = relationship("PlanName", backref="cotations")
+#    act_type_id = Column(Integer, ForeignKey(act.ActType.id))
+#    act_type = relationship("act.ActType", backref="cotations")
+##    code = Column(String, nullable=False)
+#    price = Column(Numeric, default=0)
 #
-#    def get_price(self, multiplicator):
-#        return multiplicator * self.unit_price
-#
-#
-#class CmuKeyFr(Base):
-#    __tablename__ = 'cmu_key_fr'
-#    id = Column(Integer, primary_key=True)
-#    name = Column(String, default="")
-#    key = Column(String, nullable=False)
-#
-#
-#class MajorationFr(Base):
-#    __tablename__ = 'majoration_fr'
-#    id = Column(Integer, primary_key=True)
-#    name = Column(String, nullable=False)
-#    price = Column(Numeric, nullable=False)
-#
-#
-#class CotationFr(Base):
-#    __tablename__ = 'cotation_fr'
-#    id = Column(Integer, primary_key=True)
-#    acts = relationship("ActType", backref="cotation")
-#    key_id = Column(Integer, ForeignKey(NgapKeyFr.id), nullable=False)
-#    key_cmu_id = Column(Integer, ForeignKey(CmuKeyFr.id), default=None)
-#    adult_multiplicator = Column(Integer, default=0)
-#    kid_multiplicator = Column(Integer, default=0)
-#    adult_cmu_num = Column(Integer, default=0)
-#    kid_cmu_num =Column(Integer, default=0)
-#    exceeding_adult_normal = Column(Numeric, default=0)
-#    exceeding_kid_normal = Column(Numeric, default=0)
-#    exceeding_adult_cmu = Column(Numeric, default=0)
-#    exceeding_kid_cmu = Column(Numeric, default=0)
-#
-#    def get_price(self, multiplicator, exceeding=0, majoration=0):
-#        ngap = (
-#            meta.session.query(NgapKeyFr)
-#                   .filter(NgapKeyFr.id == self.key_id)
-#        ).one()
-#
-#        return ngap.get_price(multiplicator) + exceeding + majoration
-#
-#    def security_social(self, price):
-#        return price * 0.7
-#
-#    def reste_a_charge(self, price):
-#        return price * 0.3
-#
-#
-#class CotationBr(Base):
-#    __tablename__ = 'cotation_br'
-#    id = Column(Integer, primary_key=True)
-##    acts = relationship("ActType", backref="cotation")

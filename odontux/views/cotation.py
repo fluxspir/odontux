@@ -8,81 +8,24 @@
 from flask import session, render_template, request, redirect, url_for
 from gettext import gettext as _
 from wtforms import ( Form, TextField, HiddenField, SelectField, IntegerField,
-                    validators )
+                    DecimalField, validators )
 import sqlalchemy
 from sqlalchemy import or_, and_
 
-from odontux import constants
+from odontux import constants, checks
 from odontux.odonweb import app
 from odontux.models import meta, cotation, act
 
-#cotationlocale = "Cotation" + constants.LOCALE.title()
-#CotationLocale = getattr(cotation, cotationlocale)
+class PlanNameForm(Form):
+    plan_name_id = HiddenField(_('id'))
+    name = TextField(_('name'), [validators.Required()])
 
-class NgapKeyFrForm(Form):
-    ngapkeyfr_id = HiddenField(_("ID"))
-    name = TextField(_('name'), [validators.Required(
-                      message=_("Please give a name"))])
-    key = TextField(_('key'), [validators.Required(
-                     message=_("Specify a key-code")),
-                        validators.Length(min=1, max=5,
-                     message=_("key must be between 1 and 5 letters"))])
-    unit_price = TextField(_('unit_price'), [validators.Required(
-                            message=_("please write a unit_price"))])
-
-class CmuKeyFrForm(Form):
-    cmukeyfr_id = HiddenField(_("ID"))
-    key = TextField(_('key'), [validators.Required(
-                        message=_("Please enter a key")),
-                        validators.Length(min=1, max=5,
-                        message=_("key between 1 and 5 letters"))])
-    name = TextField(_('name'), [validators.Required(
-                        message=_("Please name the use of key"))])
-
-class MajorationFrForm(Form):
-    majorationfr_id = HiddenField(_("ID"))
-    name = TextField(_('name'), [validators.Required(
-                        message=_("Please specify the majoration reason"))])
-    price = TextField(_('price'), [validators.Required(
-                        message=_("Give the price of the majoration"))])
-
-class CotationFrForm(Form):
-    cotationfr_id = HiddenField(_('ID'))
-    key_id = SelectField(_('key_id'), [validators.Required(
-                            message=_("Must provide a ngap key"))])
-    key_cmu_id = SelectField(_('key_cmu_id'), [validators.Optional()])
-    adult_multiplicator = TextField(_('adult_multiplicator'))
-    kid_multiplicator = TextField(_('kid_multiplicator'))
-    adult_cmu_num = TextField(_('adult_cmu_num'))
-    kid_cmu_num = TextField(_('kid_cmu_num'))
-    exceeding_adult_normal = TextField(_('exceeding_adult_normal'))
-    exceeding_kid_normal = TextField(_('exceeding_kid_normal'))
-    exceeding_adult_cmu = TextField(_('exceeding_adult_cmu'))
-    exceeding_kid_cmu = TextField(_('exceeding_kid_cmu'))
-
-def get_ngap_choice_list():
-    return [ (ngap.id, ngap.key + "-" + ngap.name) 
-                    for ngap in meta.session.query(cotation.NgapKeyFr).all() ]
-
-def get_cmu_choice_list():
-    return [ (cmu.id, cmu.key + "-" + cmu.name) 
-                    for cmu in meta.session.query(cotation.CmuKeyFr).all() ]
-
-def get_ngapkeyfr_field_list():
-    return [ "name", "key", "unit_price" ]
-
-def get_cmukeyfr_field_list():
-    return [ "key", "name" ]
-
-def get_majorationfr_field_list():
-    return [ "name", "price" ]
-
-def get_cotationfr_field_list():
-    return [ "key_id", "key_cmu_id", "adult_multiplicator", 
-                     "kid_multiplicator", "adult_cmu_num", "kid_cmu_num",
-                     "exceeding_adult_normal", "exceeding_kid_normal",
-                     "exceeding_adult_cmu", "exceeding_kid_cmu" ]
-
+class CotationForm(Form):
+    cotation_id = HiddenField(_('ID'))
+    plan_name_id = SelectField(_('plan_name_id'), coerce=int)
+    act_type_id = SelectField(_('act id'), coerce=int)
+    code = TextField(_('code'), [validators.Required()])
+    price = DecimalField(_('price'), [validators.Optional()])
 
 @app.route('/cotation?keywords=<keywords>&ordering=<ordering>')
 def list_cotations(keywords="", ordering=""):
@@ -107,180 +50,67 @@ def list_cotations(keywords="", ordering=""):
         for o in ordering:
             acttypes = acttypes.order_by(o)
 
-#    cotations = meta.session.query(CotationLocale).all()
+    cotations = meta.session.query(cotation.Cotation).all()
 
-    cotat_list = []
-    for cotat in cotations:
-        # Get all the gesture (acttype) that user is looking for :
-        all_gestures = acttypes.filter(act.ActType.cotationfr_id == 
-                                                           cotat.id).all()
-        gestures = []
-        if all_gestures:
-            for gesture in all_gestures:
-                # We want to know this gesture is in what kind of specialty
-                # creating a tuple (gesture, specialty)
-                try:
-                    specialty = meta.session.query(act.Specialty)\
-                        .filter(act.Specialty.id == gesture.specialty_id)\
+    return render_template('list_cotations.html', cotations=cotations)
+
+@app.route('/add/plan_name', methods=['GET', 'POST'])
+def add_plan_name():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    plan_name_form = PlanNameForm(request.form)
+
+    if request.method == 'POST' and plan_name_form.validate():
+        values = { 
+            'name': plan_name_form.name.data
+        }
+        new_plan_name = cotation.PlanName(**values)
+        meta.session.add(new_plan_name)
+        meta.session.commit()
+
+        return redirect(url_for('list_plan_name'))
+
+    return render_template('add_plan_name.html', 
+                                plan_name_form=plan_name_form)
+
+@app.route('/list/plan_name')
+def list_plan_name():
+    plan_names = meta.session.query(cotation.PlanName).all()
+    return render_template('list_plan_name.html', plan_names=plan_names)
+
+@app.route('/update/plan_name?id=<int:plan_name_id>', methods=['GET', 'POST'])
+def update_plan_name(plan_name_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    
+    plan_name = ( meta.session.query(cotation.PlanName)
+                        .filter(cotation.PlanName.id == plan_name_id)
                         .one()
-                except sqlalchemy.orm.exc.NoResultFound:
-                    specialty = ""
-                gestures.append( (gesture, specialty) )
+                )
 
-            ngap = meta.session.query(cotation.NgapKeyFr)\
-                .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
-            try:
-                cmu = meta.session.query(cotation.CmuKeyFr)\
-                    .filter(cotation.CmuKeyFr.id == cotat.key_cmu_id).one()
-            except sqlalchemy.orm.exc.NoResultFound:
-                cmu = ""
-            cotat_list.append( (gestures, cotat, ngap, cmu) )
+    plan_name_form = PlanNameForm(request.form)
 
-    return render_template('list_cotations.html', cotat_list=cotat_list)
-
-
-@app.route('/cotation/show_ngap/')
-def show_ngap():
-    query_ngap = meta.session.query(cotation.NgapKeyFr)\
-            .order_by(cotation.NgapKeyFr.id).all()
-    ngap_form = NgapKeyFrForm(request.form)
-    query_cmu = meta.session.query(cotation.CmuKeyFr)\
-            .order_by(cotation.CmuKeyFr.id).all()
-    cmu_form = CmuKeyFrForm(request.form)
-    query_majoration = meta.session.query(cotation.MajorationFr)\
-            .order_by(cotation.MajorationFr.id).all()
-    majoration_form = MajorationFrForm(request.form)
-    return render_template('/show_ngap.html', query_ngap=query_ngap,
-                            query_cmu=query_cmu, 
-                            query_majoration=query_majoration,
-                            ngap_form=ngap_form,
-                            cmu_form=cmu_form,
-                            majoration_form=majoration_form,
-                            role_dentist=constants.ROLE_DENTIST)
-
-
-@app.route('/cotation/update_ngap/id=<int:ngap_id>', methods=['POST'])
-def update_ngap(ngap_id):
-    if not session['role'] == constants.ROLE_DENTIST:
-        return redirect(url_for('show_ngap'))
-
-    ngap = meta.session.query(cotation.NgapKeyFr).filter(
-                                    cotation.NgapKeyFr.id == ngap_id).one()
-    form = NgapKeyFrForm(request.form)
-
-    if request.method == 'POST' and form.validate():
-        for f in get_ngapkeyfr_field_list():
-            setattr(ngap, f, getattr(form, f).data)
+    if request.method == 'POST' and plan_name_form.validate():
+        plan_name.name = plan_name_form.name.data
         meta.session.commit()
-        return redirect(url_for('show_ngap'))
+        return redirect(url_for('list_plan_name'))
 
-@app.route('/cotation/add_ngap', methods=['POST'])
-def add_ngap():
-    if not session['role'] == constants.ROLE_DENTIST:
-        return redirect(url_for('show_ngap'))
-    form = NgapKeyFrForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in get_ngapkeyfr_field_list()}
-        new_ngapkeyfr = cotation.NgapKeyFr(**args)
-        meta.session.add(new_ngapkeyfr)
-        meta.session.commit()
-        return redirect(url_for('show_ngap'))
+    plan_name_form.name.data = plan_name.name
 
-@app.route('/cotation/delete_ngap/id=<int:ngap_id>', methods=['POST'])
-def delete_ngap(ngap_id):
-    if not session['role'] == constants.ROLE_DENTIST:
-        return redirect(url_for('show_ngap'))
-    if request.method == 'POST':
-        try:
-            ngap = meta.session.query(cotation.NgapKeyFr)\
-                    .filter(cotation.NgapKeyFr.id == ngap_id).one()
-            meta.session.delete(ngap)
-            meta.session.commit()
-            return redirect(url_for('show_ngap'))
-        except:
-            raise Exception(_("Ngap deleting problem"))
+    return render_template('update_plan_name',
+                                plan_name_form=plan_name_form,
+                                plan_name=plan_name)
 
-@app.route('/cotation/update_cmu/id=<int:cmu_id>', methods=['POST'])
-def update_cmu(cmu_id):
-    if not session['role'] == constants.ROLE_DENTIST:
-        return redirect(url_for('show_ngap'))
-
-    cmu = meta.session.query(cotation.CmuKeyFr)\
-            .filter(cotation.CmuKeyFr.id == cmu_id).one()
-    form = CmuKeyFrForm(request.form)
-
-    if request.method == 'POST' and form.validate():
-        for f in get_cmukeyfr_field_list():
-            setattr(cmu, f, getattr(form, f).data)
-        meta.session.commit()
-        return redirect(url_for('show_ngap'))
-
-@app.route('/cotation/add_cmu', methods=['POST'])
-def add_cmu():
-    if not session['role'] == constants.ROLE_DENTIST:
-        return redirect(url_for('show_ngap'))
-    form = CmuKeyFrForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in get_cmukeyfr_field_list()}
-        new_cmukeyfr = cotation.CmuKeyFr(**args)
-        meta.session.add(new_cmukeyfr)
-        meta.session.commit()
-        return redirect(url_for('show_ngap'))
-
-@app.route('/cotation/delete_cmu/id=<int:cmu_id>', methods=['POST'])
-def delete_cmu(cmu_id):
-    if not session['role'] == constants.ROLE_DENTIST:
-        return redirect(url_for('show_ngap'))
-    if request.method == 'POST':
-        try:
-            cmu = meta.session.query(cotation.CmuKeyFr)\
-                    .filter(cotation.CmuKeyFr.id == cmu_id).one()
-            meta.session.delete(cmu)
-            meta.session.commit()
-            return redirect(url_for('show_ngap'))
-        except:
-            raise Exception(_("CMU deleting problem"))
-
-@app.route('/cotation/update_majoration/id=<int:majoration_id>', 
-            methods=['POST'])
-def update_majoration(majoration_id):
-    if not session['role'] == constants.ROLE_DENTIST:
-        return redirect(url_for('show_ngap'))
-
-    majoration = meta.session.query(cotation.MajorationFr)\
-            .filter(cotation.MajorationFr.id == majoration_id).one()
-    form = MajorationFrForm(request.form)
-
-    if request.method == 'POST' and form.validate():
-        for f in get_majorationfr_field_list():
-            setattr(majoration, f, getattr(form, f).data)
-        meta.session.commit()
-        return redirect(url_for('show_ngap'))
-
-@app.route('/cotation/add_majoration', methods=['POST'])
-def add_majoration():
-    if not session['role'] == constants.ROLE_DENTIST:
-        return redirect(url_for('show_ngap'))
-    form = MajorationFrForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data 
-                        for f in get_majorationfr_field_list()}
-        new_majorationfr = cotation.MajorationFr(**args)
-        meta.session.add(new_majorationfr)
-        meta.session.commit()
-        return redirect(url_for('show_ngap'))
-
-@app.route('/cotation/delete_majoration/id=<int:majoration_id>', 
-            methods=['POST'])
-def delete_majoration(majoration_id):
-    if not session['role'] == constants.ROLE_DENTIST:
-        return redirect(url_for('show_ngap'))
-    if request.method == 'POST':
-        try:
-            majoration = meta.session.query(cotation.MajorationFr)\
-                    .filter(cotation.MajorationFr.id == majoration_id).one()
-            meta.session.delete(majoration)
-            meta.session.commit()
-            return redirect(url_for('show_ngap'))
-        except:
-            raise Exception(_("Majoration deleting problem"))
+@app.route('/add/cotation', methods=['GET','POST'])
+def add_cotation():
+    pass

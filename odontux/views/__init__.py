@@ -36,9 +36,6 @@ from users import (
                 update_user_phone, add_user_phone, delete_user_phone,
                 update_user_mail, add_user_mail, delete_user_mail,
                 )
-from cotation import (
-                     show_ngap 
-                     )
 from anamnesis import (
                     list_anamnesis,
                     update_medical_history, delete_medical_history, 

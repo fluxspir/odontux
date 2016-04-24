@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-from tables import payment_act_table
+from tables import payment_act_table, healthcareplan_acttype_table
 import schedule, headneck, teeth
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, Numeric, Boolean
@@ -20,6 +20,12 @@ class Specialty(Base):
     name = Column(String, nullable=False)
     color = Column(String, default="#000000")
 
+class HealthCarePlan(Base):
+    __tablename__ = "healthcare_plan"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
+    acts = relationship("ActType", secondary=healthcareplan_acttype_table,
+                                    backref="healthcare_plans")
 
 class ActType(Base):
     __tablename__ = 'act_type'

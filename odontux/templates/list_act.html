@@ -10,21 +10,17 @@
       <th>Alias</th>
       <th>Name</th>
       <th>Color</th>
-      <th>Cotation</th>
-      <th>Price</th>
       {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
         <th>Modify</th>
       {% endif %}
     </tr>
-  {% for gesture, specialty, cotat, ngap in gestures_list %}
+  {% for gesture, specialty in gestures_list %}
     <tr>
       <td style="background-color:{{specialty.color}};">{{ specialty.name }}</td>
       <td>{{ gesture.code }}</td>
       <td>{{ gesture.alias }}</td>
       <td>{{ gesture.name }}</td>
       <td style="background-color:{{ gesture.color }};"></td>
-      <td>{{ ngap.key }}{{ cotat.adult_multiplicator }}</td>
-      <td>{{ cotat.get_price(cotat.adult_multiplicator, cotat.exceeding_adult_normal, 0) }}</td>
       {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
         <td><a href="/act/update_acttype={{ gesture.id }}/">Update</a>
       {% endif %}
