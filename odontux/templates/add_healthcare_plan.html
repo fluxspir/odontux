@@ -4,9 +4,9 @@ Adding new plan name
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
-<form method="post" action="{{ url_for('add_plan_name') }}">
+<form method="post" action="{{ url_for('add_healthcare_plan') }}">
   <dl>
-    {{ render_field(plan_name_form.name) }}
+    {{ render_field(healthcare_plan_form.name) }}
   </dl>
   <p><input type="submit" value="Add"></p>
 </form>

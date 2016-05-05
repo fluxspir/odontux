@@ -7,20 +7,20 @@
     <tr>
       <th class="hidden">Id</th>
       <th>Acte</th>
-      <th><a href="{{ url_for('list_plan_name') }}">Plan Name</a></th>
-      <th>Code</th>
+      <th><a href="{{ url_for('list_healthcare_plan') }}">Healthcare Plan Name</a></th>
       <th>Price</th>
+      <th>Active</th>
     </tr>
     {% for cotation in cotations %}
       <tr>
         <td class="hidden">{{ cotation.id }}</td>
         <td>
-            <span style="background-color:{{cotation.acte_type.color}};">
-                                  {{ cotation.acte_type.name }}</span><br />
+            <span style="background-color:{{cotation.acttype.color}};">
+                                  {{ cotation.acttype.name }}</span><br />
         </td>
-        <td>{{ cotation.plan_name.name }}</td>
-        <td>{{ cotation.code }}</td>
+        <td>{{ cotation.healthcare_plan.name }}</td>
         <td>{{ cotation.price }}</td>
+        <td>{{ cotation.active }}</td>
       </tr>
     {% endfor %}
   </table>

@@ -7,7 +7,7 @@
 
 from meta import Base
 
-from sqlalchemy import Table, Column, Integer, Numeric, Date
+from sqlalchemy import Table, Column, Integer, Numeric, Date, Boolean
 from sqlalchemy import ForeignKey, MetaData
 
 
@@ -15,13 +15,6 @@ from sqlalchemy import ForeignKey, MetaData
 payment_act_table = Table('payment_act', Base.metadata,
 Column('act_id', Integer, ForeignKey('appointment_act_reference.id')),
 Column('payment_id', Integer, ForeignKey('payment.id'))
-)
-
-# act.py
-healthcareplan_acttype_table = Table('heathcareplan_acttype_table', 
-                                                            Base.metadata,
-Column('act_id', Integer, ForeignKey('act_type.id')),
-Column('healthcare_plan_id', Integer, ForeignKey('healthcare_plan.id'))
 )
 
 # administration.py
@@ -145,4 +138,11 @@ Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("quantity_used", Numeric)
 )
 
-
+## cotations
+#cotation_table = Table("cotation", Base.metadata,
+#Column('id', Integer, primary_key=True),
+#Column('acttype_id', Integer, ForeignKey('act_type.id')),
+#Column('healthcare_plan_id', Integer, ForeignKey('healthcare_plan.id')),
+#Column('price', Numeric),
+#Column('active', Boolean)
+#)

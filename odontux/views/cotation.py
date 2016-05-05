@@ -5,10 +5,11 @@
 # Licence BSD
 #
 
+import pdb
 from flask import session, render_template, request, redirect, url_for
 from gettext import gettext as _
 from wtforms import ( Form, TextField, HiddenField, SelectField, IntegerField,
-                    DecimalField, validators )
+                    DecimalField, BooleanField, validators )
 import sqlalchemy
 from sqlalchemy import or_, and_
 
@@ -16,16 +17,16 @@ from odontux import constants, checks
 from odontux.odonweb import app
 from odontux.models import meta, cotation, act
 
-class PlanNameForm(Form):
-    plan_name_id = HiddenField(_('id'))
+class HealthCarePlanForm(Form):
+    healthcare_plan_id = HiddenField(_('id'))
     name = TextField(_('name'), [validators.Required()])
 
 class CotationForm(Form):
     cotation_id = HiddenField(_('ID'))
-    plan_name_id = SelectField(_('plan_name_id'), coerce=int)
-    act_type_id = SelectField(_('act id'), coerce=int)
-    code = TextField(_('code'), [validators.Required()])
+    healthcare_plan_id = SelectField(_('healthcare_plan_name'), coerce=int)
+    act_type_id = SelectField(_('act type id'), coerce=int)
     price = DecimalField(_('price'), [validators.Optional()])
+    active = BooleanField(_('active'))
 
 @app.route('/cotation?keywords=<keywords>&ordering=<ordering>')
 def list_cotations(keywords="", ordering=""):
@@ -50,12 +51,12 @@ def list_cotations(keywords="", ordering=""):
         for o in ordering:
             acttypes = acttypes.order_by(o)
 
-    cotations = meta.session.query(cotation.Cotation).all()
+    cotations = meta.session.query(act.Cotation).all()
 
     return render_template('list_cotations.html', cotations=cotations)
 
 @app.route('/add/plan_name', methods=['GET', 'POST'])
-def add_plan_name():
+def add_healthcare_plan():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
     if session['role'] not in authorized_roles:
@@ -63,28 +64,30 @@ def add_plan_name():
 
     checks.quit_patient_file()
     checks.quit_appointment()
-    plan_name_form = PlanNameForm(request.form)
+    healthcare_plan_form = HealthCarePlanForm(request.form)
 
-    if request.method == 'POST' and plan_name_form.validate():
+    if request.method == 'POST' and healthcare_plan_form.validate():
         values = { 
-            'name': plan_name_form.name.data
+            'name': healthcare_plan_form.name.data
         }
-        new_plan_name = cotation.PlanName(**values)
-        meta.session.add(new_plan_name)
+        new_healthcare_plan = act.HealthCarePlan(**values)
+        meta.session.add(new_healthcare_plan)
         meta.session.commit()
 
-        return redirect(url_for('list_plan_name'))
+        return redirect(url_for('list_healthcare_plan'))
 
-    return render_template('add_plan_name.html', 
-                                plan_name_form=plan_name_form)
+    return render_template('add_healthcare_plan.html', 
+                                healthcare_plan_form=healthcare_plan_form)
 
-@app.route('/list/plan_name')
-def list_plan_name():
-    plan_names = meta.session.query(cotation.PlanName).all()
-    return render_template('list_plan_name.html', plan_names=plan_names)
+@app.route('/list/healthcare_plan')
+def list_healthcare_plan():
+    healthcare_plans = meta.session.query(act.HealthCarePlan).all()
+    return render_template('list_healthcare_plan.html', 
+                                            healthcare_plans=healthcare_plans)
 
-@app.route('/update/plan_name?id=<int:plan_name_id>', methods=['GET', 'POST'])
-def update_plan_name(plan_name_id):
+@app.route('/update/healthcare_plan?id=<int:healthcare_plan_id>', 
+                                                    methods=['GET', 'POST'])
+def update_healthcare_plan(healthcare_plan_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
     if session['role'] not in authorized_roles:
@@ -93,23 +96,39 @@ def update_plan_name(plan_name_id):
     checks.quit_patient_file()
     checks.quit_appointment()
     
-    plan_name = ( meta.session.query(cotation.PlanName)
-                        .filter(cotation.PlanName.id == plan_name_id)
+    healthcare_plan = ( meta.session.query(act.HealthCarePlan)
+                        .filter(act.HealthCarePlan.id == healthcare_plan_id)
                         .one()
                 )
 
-    plan_name_form = PlanNameForm(request.form)
+    healthcare_plan_form = HealthCarePlanForm(request.form)
 
-    if request.method == 'POST' and plan_name_form.validate():
-        plan_name.name = plan_name_form.name.data
+    if request.method == 'POST' and healthcare_plan_form.validate():
+        healthcare_plan.name = healthcare_plan_form.name.data
         meta.session.commit()
-        return redirect(url_for('list_plan_name'))
+        return redirect(url_for('view_healthcare_plan'))
 
-    plan_name_form.name.data = plan_name.name
+    healthcare_plan_form.name.data = healthcare_plan.name
 
-    return render_template('update_plan_name',
-                                plan_name_form=plan_name_form,
-                                plan_name=plan_name)
+    return render_template('update_healthcare_plan.html',
+                                healthcare_plan_form=healthcare_plan_form,
+                                healthcare_plan=healthcare_plan)
+
+@app.route('/view/healthcare_plan?id=<int:healthcare_plan_id>')
+def view_healthcare_plan(healthcare_plan_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    checks.quit_patient_file()
+    checks.quit_appointment()
+    healthcare_plan = ( meta.session.query(act.HealthCarePlan)
+                        .filter(act.HealthCarePlan.id == healthcare_plan_id)
+                        .one()
+                    )
+    return render_template('view_healthcare_plan.html', 
+                                healthcare_plan=healthcare_plan)
 
 @app.route('/add/cotation', methods=['GET','POST'])
 def add_cotation():

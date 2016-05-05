@@ -1,0 +1,13 @@
+{% extends "header.html" %}
+{% block main %}
+<br />
+
+{% for act_type in healthcare_plan.act_types %}
+  {{ act_type.price }} -- {{act_type.active }} || {{ act_type.specialty.name }}
+
+{% endfor %}
+
+  <a href="{{ url_for('update_healthcare_plan', 
+                  healthcare_plan_id=healthcare_plan.id) }}">Update</a>
+
+{% endblock %}

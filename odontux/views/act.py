@@ -5,6 +5,7 @@
 # licence BSD
 #
 
+import pdb
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
 from sqlalchemy import or_, and_, desc
@@ -19,14 +20,8 @@ from odontux.views.log import index
 from odontux.views.patient import list_acts
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
-                     validators)
+                     DecimalField, HiddenField, validators)
 from odontux.views.forms import ColorField
-
-#cotationlocale = "Cotation" + constants.LOCALE.title()
-#CotationLocale = getattr(cotation, cotationlocale)
-
-#socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
-#SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 class SpecialtyForm(Form):
     name = TextField('name', [validators.Required(), 
@@ -47,6 +42,11 @@ class AppointmentActReferenceForm(Form):
     act_id = SelectField(_('Choose act in list'), coerce=int)
     tooth_id = SelectField(_('Choose tooth  in list'), coerce=int)
     majoration = SelectField(_('Majoration'), coerce=int)
+
+class PriceForm(Form):
+    acttype_id = HiddenField(_('acttype_id'))
+    healthcare_plan_id = HiddenField(_('healthcare_plan_id'))
+    price = DecimalField(_('Price'), [validators.Optional()])
 
 def get_specialty_field_list():
     return [ "name", "color" ]
@@ -240,25 +240,20 @@ def update_acttype(acttype_id):
                 .filter(act.Specialty.id == acttype.specialty_id).one()
     except sqlalchemy.orm.exc.NoResultFound:
         specialty=""
-#    cotat = meta.session.query(CotationLocale)\
-#                .filter(CotationLocale.id == acttype.cotationfr_id).one()
-#    ngap = meta.session.query(cotation.NgapKeyFr)\
-#                .filter(cotation.NgapKeyFr.id == cotat.key_id).one()
-#
 
     acttype_form = ActTypeForm(request.form)
     acttype_form.specialty_id.choices = get_specialty_choice_list()
     
     #TODO (130202 : je me demande ce que je voulais faire à ce todo qui date 
     # d'on ne sait quand...
+    # (update 160504 : toujours pas d'idée)
     
     if request.method == 'POST' and acttype_form.validate():
         for f in get_acttype_field_list():
             setattr(acttype, f, getattr(acttype_form, f).data)
         meta.session.commit()
-        return redirect(url_for('list_acttype', 
-                                keywords=acttype_form.name.data, 
-                                ordering=" "))
+        return redirect(url_for('view_acttype', 
+                                    acttype_id=acttype_id))
 
     # For the GET method
     for f in get_acttype_field_list():
@@ -271,6 +266,96 @@ def update_acttype(acttype_id):
                             acttype=acttype
                             )
 
+@app.route('/view/acttype?id=<int:acttype_id>')
+def view_acttype(acttype_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    acttype = ( meta.session.query(act.ActType)
+                    .filter(act.ActType.id == acttype_id)
+                    .one() )
+
+    price_forms = []
+    for cotation in acttype.cotations:
+        form = PriceForm(request.form)
+        form.acttype_id.data = acttype.id
+        form.healthcare_plan_id.data = cotation.healthcare_plan_id
+        
+        if cotation.price:
+            form.price.data = cotation.price
+        else:
+            form.price.data = 0
+        price_forms.append((cotation, form))
+    healthcare_plans_not_in_acttype = (
+        meta.session.query(act.HealthCarePlan)
+            .filter(~act.HealthCarePlan.cotations.any(
+                act.ActType.id == acttype.id
+                )
+            ).all()
+        )
+    
+    return render_template('view_acttype.html', acttype=acttype,
+            price_forms=price_forms,
+            healthcare_plans_not_in_acttype=healthcare_plans_not_in_acttype)
+
+@app.route('/add/healthcare_plan_to_acttype?AT=<int:acttype_id>&HP=<int:healthcare_plan_id>')
+def add_healthcare_plan_to_acttype(acttype_id, healthcare_plan_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    values = {
+        'acttype_id': acttype_id,
+        'healthcare_plan_id': healthcare_plan_id
+    }
+    
+    new_cotation = act.Cotation(**values)
+    meta.session.add(new_cotation)
+    meta.session.commit()
+    return redirect(url_for('view_acttype', acttype_id=acttype_id))
+
+@app.route('/remove/healthcare_plan_to_acttype?AT=<int:acttype_id>&HP=<int:healthcare_plan_id>')
+def remove_healthcare_plan_to_acttype(acttype_id, healthcare_plan_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    cotation = ( 
+        meta.session.query(act.Cotation)
+            .filter(act.Cotation.acttype_id == acttype_id,
+                    act.Cotation.healthcare_plan_id == healthcare_plan_id
+                )
+            .one()
+        )
+    meta.session.delete(cotation)
+    meta.session.commit()
+    return redirect(url_for('view_acttype',acttype_id=acttype_id))
+
+@app.route('/update/cotation', methods=['POST'])
+def update_cotation():
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    
+    price_form = PriceForm(request.form)
+
+    if price_form.validate():
+        cotation = (
+            meta.session.query(act.Cotation)
+                .filter(act.Cotation.acttype_id== price_form.acttype_id.data,
+                        act.Cotation.healthcare_plan_id ==
+                                        price_form.healthcare_plan_id.data
+                    )
+                .one()
+            )
+        cotation.price = price_form.price.data
+        meta.session.commit()
+        
+    return redirect(url_for('view_acttype', 
+                            acttype_id=price_form.acttype_id.data))
 
 def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
     """ """

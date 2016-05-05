@@ -1,0 +1,24 @@
+{% extends 'header.html' %}
+{% block main %}
+<a href="{{ url_for('add_healthcare_plan') }}">Add new healthcare plan</a><br />
+<table border=1>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    {% if session.role != session.ROLE_ADMIN or session.role != session.ROLE_PATIENT%}
+      <th>Modify</th>
+    {% endif %}
+{% for healthcare_plan in healthcare_plans %}
+  <tr>
+    <td>{{ healthcare_plan.id }}</td>
+    <td><a href="{{ url_for('view_healthcare_plan', 
+                        healthcare_plan_id=healthcare_plan.id) }}">
+          {{ healthcare_plan.name }}</a></td>
+    {% if session.role != session.ROLE_ADMIN or session.role != session.ROLE_PATIENT %}
+      <td><a href="{{ url_for('update_healthcare_plan', 
+            healthcare_plan_id=healthcare_plan.id) }}">Update</a></td>
+    {% endif %}
+  </tr>
+</div>
+{% endfor %}
+{% endblock %}

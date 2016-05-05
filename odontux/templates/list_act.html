@@ -19,7 +19,8 @@
       <td style="background-color:{{specialty.color}};">{{ specialty.name }}</td>
       <td>{{ gesture.code }}</td>
       <td>{{ gesture.alias }}</td>
-      <td>{{ gesture.name }}</td>
+      <td><a href="{{ url_for('view_acttype', acttype_id=gesture.id) }}">
+                      {{ gesture.name }}</a></td>
       <td style="background-color:{{ gesture.color }};"></td>
       {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
         <td><a href="/act/update_acttype={{ gesture.id }}/">Update</a>

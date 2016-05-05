@@ -26,8 +26,8 @@ from softtissues import (SuperiorLip, InferiorLip, LeftCheek, RightCheek,
 from periodonte import (SuperiorGum, InferiorGum, SuperiorAlveolarBone,
                         InferiorAlveolarBone)
 from teeth import Tooth, Event, ToothEvent, CrownEvent, RootEvent
-from act import Specialty, ActType, AppointmentActReference
-from cotation import PlanName, Cotation 
+from act import ( Specialty, HealthCarePlan, ActType, Cotation, 
+                AppointmentActReference )
 from compta import PaymentType, Payment
 from assets import (AssetProvider, AssetCategory, MaterialCategory,
                     Asset, Device, Material, AssetKitStructure, AssetKit,

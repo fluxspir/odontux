@@ -690,6 +690,8 @@ def update_device_category(device_category_id):
                                 and device_category_form.validate() ):
         for f in get_asset_cat_field_list():
             setattr(asset_category, f, getattr(asset_category_form, f).data)
+        if not asset_category_form.barcode.data:
+            asset_category_form.barcode.data = None
         asset_category.barcode = asset_category_form.barcode.data
         asset_category.asset_specialty_id =\
                                     asset_category_form.asset_specialty_id.data
@@ -737,6 +739,8 @@ def update_material_category(material_category_id):
                                 and material_category_form.validate() ):
         for f in get_asset_cat_field_list():
             setattr(asset_category, f, getattr(asset_category_form, f).data)
+        if not asset_category_form.barcode.data:
+            asset_category_form.barcode.data = None
         asset_category.barcode = asset_category_form.barcode.data
         asset_category.asset_specialty_id =\
                                     asset_category_form.asset_specialty_id.data

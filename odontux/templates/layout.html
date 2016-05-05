@@ -63,7 +63,7 @@
       	<a href="{{ url_for('list_md') }}">MD</a>
       	<a href="{{ url_for('list_acttype', keywords=" ", ordering=" ") }}">Acts</a>
       	<a href="{{ url_for('list_specialty') }}">Specialties</a>
-        <a href="{{ url_for('list_cotations', keywords=" ", ordering=" ") }}">Cotations</a>
+        <a href="{{ url_for('list_healthcare_plan', keywords=" ", ordering=" ") }}">Healthcare</a>
       	<a href="{{ url_for('list_users') }}">Users</a>
         <a href="{{ url_for('list_dental_offices') }}">Dental Offices</a>
         <a href="{{ url_for('my_assets') }}">Assets</a>
@@ -75,7 +75,6 @@
 	          <select name="database" id="dbtable">
 	            <option value="patient">Patient</option>
 	            <option value="act">Act</option>
-              <option value="cotation">Cotation</option>
 	            <option value="odontuxuser">User</option>
 	            <option value="doctor">Doctor</option>
               <option value="drug">Drug</option>

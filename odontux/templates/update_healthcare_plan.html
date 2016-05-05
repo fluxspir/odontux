@@ -1,0 +1,14 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+Update the healthcare plan
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="{{ url_for('update_healthcare_plan', 
+                                    healthcare_plan_id=healthcare_plan.id) }}">
+  <dl>
+    {{ render_field(healthcare_plan_form.name) }}
+  </dl>
+  <p><input type="submit" value="Update"></p>
+</form>
+{% endblock %}
