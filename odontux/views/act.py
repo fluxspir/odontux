@@ -274,10 +274,13 @@ def view_acttype(acttype_id):
         return redirect(url_for('index'))
     acttype = ( meta.session.query(act.ActType)
                     .filter(act.ActType.id == acttype_id)
-                    .one() )
+                    .one() 
+            )
 
     price_forms = []
     for cotation in acttype.cotations:
+        if cotation.active == False:
+            continue
         form = PriceForm(request.form)
         form.acttype_id.data = acttype.id
         form.healthcare_plan_id.data = cotation.healthcare_plan_id
@@ -287,10 +290,16 @@ def view_acttype(acttype_id):
         else:
             form.price.data = 0
         price_forms.append((cotation, form))
+
     healthcare_plans_not_in_acttype = (
         meta.session.query(act.HealthCarePlan)
-            .filter(~act.HealthCarePlan.cotations.any(
-                act.ActType.id == acttype.id
+            .filter(or_(
+                ~act.HealthCarePlan.cotations.any(
+                    act.ActType.id == acttype.id
+                    ),
+                act.HealthCarePlan.cotations.any(
+                    act.Cotation.active == False
+                    )
                 )
             ).all()
         )
@@ -306,13 +315,23 @@ def add_healthcare_plan_to_acttype(acttype_id, healthcare_plan_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    values = {
-        'acttype_id': acttype_id,
-        'healthcare_plan_id': healthcare_plan_id
-    }
+    cotation = (
+        meta.session.query(act.Cotation)
+            .filter(act.Cotation.acttype_id == acttype_id,
+                    act.Cotation.healthcare_plan_id == healthcare_plan_id
+                )
+            .one_or_none()
+        )
+    if cotation:
+        cotation.active = True
+    else:
+        values = {
+            'acttype_id': acttype_id,
+            'healthcare_plan_id': healthcare_plan_id
+        }
     
-    new_cotation = act.Cotation(**values)
-    meta.session.add(new_cotation)
+        new_cotation = act.Cotation(**values)
+        meta.session.add(new_cotation)
     meta.session.commit()
     return redirect(url_for('view_acttype', acttype_id=acttype_id))
 
@@ -330,7 +349,7 @@ def remove_healthcare_plan_to_acttype(acttype_id, healthcare_plan_id):
                 )
             .one()
         )
-    meta.session.delete(cotation)
+    cotation.active = False
     meta.session.commit()
     return redirect(url_for('view_acttype',acttype_id=acttype_id))
 
