@@ -27,7 +27,6 @@ class MedicalHistory(Base):
     treatment = Column(String, default="")
     time_stamp = Column(Date, default=func.current_date())
 
-
 class PastSurgeries(Base):
     __tablename__ = 'past_surgeries'
     id = Column(Integer, primary_key=True)
@@ -37,7 +36,6 @@ class PastSurgeries(Base):
     problem = Column(String, default="")
     complication = Column(String, default="")
     time_stamp = Column(Date, default=func.current_date())
-
 
 class Allergies(Base):
     __tablename__ = 'allergies'
@@ -50,4 +48,3 @@ class Allergies(Base):
     other = Column(String, default="")
     reaction = Column(String, default="")
     time_stamp = Column(Date, default=func.current_date())
-

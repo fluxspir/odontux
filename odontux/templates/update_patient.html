@@ -13,7 +13,6 @@
     <li onclick='display_form("address")'>address</li>
     <li onclick='display_form("phone")'>phone</li>
     <li onclick='display_form("mail")'>mail</li>
-    <li onclick='display_form("SSN")'>social security</li>
   </ul>
 </nav>
 {% if session.role != session.ROLE_ADMIN %}
@@ -34,7 +33,6 @@
         {{ render_field(gen_info_form.family_id) }}
         {{ render_field(gen_info_form.office_id) }}
         {{ render_field(gen_info_form.dentist_id) }}
-        {{ render_field(gen_info_form.socialsecurity_id) }}
         {{ render_field(gen_info_form.payer) }}
         <input type=submit value="Update" />
       </dl>
@@ -46,21 +44,6 @@
   {{ update_address_form(address_form, body, body.family.addresses, "update_patient_address", "delete_patient_address", "add_patient_address") }}
   {{ update_mail_form(mail_form, body, "update_patient_mail", "delete_patient_mail", "add_patient_mail") }}
 
-<!-- Add a trick for body.socialsecurity_id  or the next div -->
-  <div id="SSN">
-    <form method="post" action={{ url_for('update_patient_SSN', body_id=body.id, form_to_display='SSN') }}>
-      <dl>
-        {{ render_field(SSN_form.SSN) }}
-        {% if body.socialsecurity.cmu == True %}
-          {{ render_field(SSN_form.cmu, checked="checked") }}
-        {% else %}
-          {{ render_field(SSN_form.cmu) }}
-        {% endif %}
-        {{ render_field(SSN_form.insurance) }}
-      </dl>
-      <input type="submit" value="Update SSN" />
-    </form>
-  </div>
 </div>
 {% endif %}
 {% endblock %}

@@ -181,8 +181,6 @@ def is_body_already_in_database(data, body_type="patient"):
                 .filter(administration.Patient.firstname == 
                         data.firstname.data)\
                 .filter(administration.Patient.dob == data.dob.data)\
-                .filter(administration.Patient.socialsecurity_id ==
-                        data.socialsecurity_id.data)\
                 .one()
             return patient
         except sqlalchemy.orm.exc.NoResultFound:

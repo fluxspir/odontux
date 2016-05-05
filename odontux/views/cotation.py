@@ -15,7 +15,7 @@ from sqlalchemy import or_, and_
 
 from odontux import constants, checks
 from odontux.odonweb import app
-from odontux.models import meta, cotation, act
+from odontux.models import meta, act
 
 class HealthCarePlanForm(Form):
     healthcare_plan_id = HiddenField(_('id'))

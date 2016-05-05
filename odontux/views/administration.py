@@ -29,15 +29,11 @@ from odontux.models import meta, administration, users
 def get_gen_info_field_list():
     return [ "title", "lastname", "firstname", "qualifications", 
                     "preferred_name", "correspondence_name", "sex", "dob", 
-                    "job", "inactive", "time_stamp", "socialsecurity_id",
+                    "job", "inactive", "time_stamp",
                     "office_id", "dentist_id" ]
 
 def get_family_field_list():
     return [ "family_id" ]
-
-def get_SSN_field_list():
-    return [ ("SSN", "number"), ("cmu", "cmu"), ("insurance", "insurance") ]
-
 
 class PatientGeneralInfoForm(Form):
     title = SelectField(_('title'))
@@ -67,15 +63,8 @@ class PatientGeneralInfoForm(Form):
     dentist_id = SelectField(_('Dentist_id'), [validators.Required(
                                 message=_("Please specify dentist_id"))],
                                 coerce=int)
-    socialsecurity_id = IntegerField(_('socialsecurity_id'), 
-                                     [validators.Optional()])
     payer = BooleanField(_('is payer'))
     time_stamp = forms.DateField(_("Time_stamp"))
-
-class SocialSecurityForm(Form):
-    SSN = TextField(_('Social Security Number'))
-    cmu = BooleanField(_('CMU fr'))
-    insurance = TextField(_('Insurance'))
 
 
 @app.route('/patients/')
@@ -121,14 +110,14 @@ def add_patient():
                 users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
                 users.OdontuxUser.lastname).all() ]
 
-    SSN_form = SocialSecurityForm(request.form)
+    #SSN_form = SocialSecurityForm(request.form)
     # three are used for odontux_users and medecine doctors, too
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
 
     if (request.method == 'POST' and gen_info_form.validate()
-        and SSN_form.validate() and address_form.validate()
+        and address_form.validate()
         and phone_form.validate() and mail_form.validate() ):
 
         # Verify patient isn't already in database
@@ -187,43 +176,43 @@ def add_patient():
         new_patient.mails.append(administration.Mail(**mail_args))
         meta.session.commit()
 
-        ##################################
-        # The Social Security Number : SSN
-        ##################################
-        # The social security info may have been entered via the 
-        # socialsecurity_id, encountered in gen_info_form, and which
-        # is used usually while insering children of already known patients
-        # in database.
-        if SSN_form.SSN.data:
-            # Verify if number already in database, for example children who
-            # are under parent's social security.
-            try:
-                SSN_id = meta.session.query(SocialSecurityLocale)\
-                    .filter(SocialSecurityLocale.number\
-                            == SSN_form.SSN.data).one().id
-
-            # If the number is new to database :
-            except sqlalchemy.orm.exc.NoResultFound:
-                SSN_args = {g: getattr(SSN_form, f).data 
-                                    for f,g in get_SSN_field_list() }
-                new_SSN = SocialSecurityLocale(**SSN_args)
-                meta.session.add(new_SSN)
-                meta.session.commit()
-                SSN_id = new_SSN.id
-        
-        else:
-            # If there weren't any SSNumber given, try anyway to add "cmu"
-            # and insurance hypothetic values into database
-            SSN_args = {g: getattr(SSN_form, f).data 
-                                    for f,g in get_SSN_field_list() }
-            new_SSN = SocialSecurityLocale(**SSN_args)
-            meta.session.add(new_SSN)
-            meta.session.commit()
-            SSN_id = new_SSN.id
-
-        # Tell Patient class the SSN he is related to.
-        new_patient.socialsecurity_id = SSN_id
-        meta.session.commit()
+#        ##################################
+#        # The Social Security Number : SSN
+#        ##################################
+#        # The social security info may have been entered via the 
+#        # socialsecurity_id, encountered in gen_info_form, and which
+#        # is used usually while insering children of already known patients
+#        # in database.
+#        if SSN_form.SSN.data:
+#            # Verify if number already in database, for example children who
+#            # are under parent's social security.
+#            try:
+#                SSN_id = meta.session.query(SocialSecurityLocale)\
+#                    .filter(SocialSecurityLocale.number\
+#                            == SSN_form.SSN.data).one().id
+#
+#            # If the number is new to database :
+#            except sqlalchemy.orm.exc.NoResultFound:
+#                SSN_args = {g: getattr(SSN_form, f).data 
+#                                    for f,g in get_SSN_field_list() }
+#                new_SSN = SocialSecurityLocale(**SSN_args)
+#                meta.session.add(new_SSN)
+#                meta.session.commit()
+#                SSN_id = new_SSN.id
+#        
+#        else:
+#            # If there weren't any SSNumber given, try anyway to add "cmu"
+#            # and insurance hypothetic values into database
+#            SSN_args = {g: getattr(SSN_form, f).data 
+#                                    for f,g in get_SSN_field_list() }
+#            new_SSN = SocialSecurityLocale(**SSN_args)
+#            meta.session.add(new_SSN)
+#            meta.session.commit()
+#            SSN_id = new_SSN.id
+#
+#        # Tell Patient class the SSN he is related to.
+#        new_patient.socialsecurity_id = SSN_id
+#        meta.session.commit()
 
         #Add the new patient to gnucash !
         comptability = gnucash_handler.GnuCashCustomer(new_patient.id, 
@@ -234,7 +223,6 @@ def add_patient():
 
     return render_template("/add_patient.html",
                             gen_info_form=gen_info_form,
-                            SSN_form=SSN_form,
                             address_form=address_form,
                             phone_form=phone_form,
                             mail_form=mail_form)
@@ -295,7 +283,6 @@ def update_patient(body_id, form_to_display):
             gen_info_form.payer.data = True
     gen_info_form.family_id.data = patient.family.id
     
-    SSN_form = SocialSecurityForm(request.form)
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
@@ -305,59 +292,58 @@ def update_patient(body_id, form_to_display):
     return render_template('/update_patient.html', body=patient,
                             patient=patient,
                             gen_info_form=gen_info_form,
-                            SSN_form=SSN_form,
                             address_form=address_form,
                             phone_form=phone_form,
                             mail_form=mail_form,
                             role_admin=constants.ROLE_ADMIN)
 
-@app.route('/patient/update_patient_SSN?id=<int:body_id>'
-           '&form_to_display=<form_to_display>', methods=['POST'])
-def update_patient_SSN(body_id, form_to_display):
-    patient = forms._get_body(body_id, "patient")
-    if not forms._check_body_perm(patient, "patient"):
-        return redirect(url_for('list_patients', body_id=body_id))
-    SSN_form = SocialSecurityForm(request.form)
-    if request.method == "POST" and SSN_form.validate():
-        if SSN_form.SSN.data:
-            # Verify if number already in database, for example children who
-            # are under parent's social security.
-            try:
-                SSN = meta.session.query(SocialSecurityLocale)\
-                    .filter(SocialSecurityLocale.number\
-                            == SSN_form.SSN.data).one()
-                # The SSN already exists, the patient will enter under this SSN
-                # and we are now going to update the cmu and insurance.
-                for f,g in get_SSN_field_list():
-                    setattr(SSN, g, getattr(SSN_form, f).data)
-                meta.session.commit()
-                SSN_id = SSN.id
-
-            # If the number is new to database :
-            except sqlalchemy.orm.exc.NoResultFound:
-                SSN_args = {g: getattr(SSN_form, f).data 
-                                            for f,g in get_SSN_field_list() }
-                new_SSN = SocialSecurityLocale(**SSN_args)
-                meta.session.add(new_SSN)
-                meta.session.commit()
-                SSN_id = new_SSN.id
-        
-        else:
-            # If there weren't any SSNumber given, try anyway to add "cmu"
-            # and insurance hypothetic values into database
-            SSN_args = {g: getattr(SSN_form, f).data 
-                                            for f,g in get_SSN_field_list() }
-            new_SSN = SocialSecurityLocale(**SSN_args)
-            meta.session.add(new_SSN)
-            meta.session.commit()
-            SSN_id = new_SSN.id
-
-        # Tell Patient class the SSN he is related to.
-        patient.socialsecurity_id = SSN_id
-        meta.session.commit()
-        return redirect(url_for('update_patient', body_id=body_id,
-                                form_to_display="SSN"))
-
+#@app.route('/patient/update_patient_SSN?id=<int:body_id>'
+#           '&form_to_display=<form_to_display>', methods=['POST'])
+#def update_patient_SSN(body_id, form_to_display):
+#    patient = forms._get_body(body_id, "patient")
+#    if not forms._check_body_perm(patient, "patient"):
+#        return redirect(url_for('list_patients', body_id=body_id))
+#    SSN_form = SocialSecurityForm(request.form)
+#    if request.method == "POST" and SSN_form.validate():
+#        if SSN_form.SSN.data:
+#            # Verify if number already in database, for example children who
+#            # are under parent's social security.
+#            try:
+#                SSN = meta.session.query(SocialSecurityLocale)\
+#                    .filter(SocialSecurityLocale.number\
+#                            == SSN_form.SSN.data).one()
+#                # The SSN already exists, the patient will enter under this SSN
+#                # and we are now going to update the cmu and insurance.
+#                for f,g in get_SSN_field_list():
+#                    setattr(SSN, g, getattr(SSN_form, f).data)
+#                meta.session.commit()
+#                SSN_id = SSN.id
+#
+#            # If the number is new to database :
+#            except sqlalchemy.orm.exc.NoResultFound:
+#                SSN_args = {g: getattr(SSN_form, f).data 
+#                                            for f,g in get_SSN_field_list() }
+#                new_SSN = SocialSecurityLocale(**SSN_args)
+#                meta.session.add(new_SSN)
+#                meta.session.commit()
+#                SSN_id = new_SSN.id
+#        
+#        else:
+#            # If there weren't any SSNumber given, try anyway to add "cmu"
+#            # and insurance hypothetic values into database
+#            SSN_args = {g: getattr(SSN_form, f).data 
+#                                            for f,g in get_SSN_field_list() }
+#            new_SSN = SocialSecurityLocale(**SSN_args)
+#            meta.session.add(new_SSN)
+#            meta.session.commit()
+#            SSN_id = new_SSN.id
+#
+#        # Tell Patient class the SSN he is related to.
+#        patient.socialsecurity_id = SSN_id
+#        meta.session.commit()
+#        return redirect(url_for('update_patient', body_id=body_id,
+#                                form_to_display="SSN"))
+#
 @app.route('/patient/update_patient_address?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_patient_address(body_id, form_to_display):

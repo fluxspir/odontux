@@ -12,7 +12,7 @@ import datetime
 
 from tables import (family_address_table, patient_mail_table, 
                     patient_phone_table, family_payer_table,
-                    patient_plan_name_table)
+                    patient_healthcare_plan_table)
                     
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
@@ -63,8 +63,6 @@ class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
     family_id = Column(Integer, ForeignKey(Family.id))
-    cotation_plans = relationship("PlanName", 
-                        secondary=patient_plan_name_table,backref="patients")
     title = Column(String, default="Mr")
     lastname = Column(String, nullable=False)
     firstname = Column(String, default="")
@@ -94,6 +92,9 @@ class Patient(Base):
                         cascade="all, delete, delete-orphan")
     payer = relationship("Payer", backref="patient",
                         cascade="all, delete, delete-orphan")
+    healthcare_plans = relationship("HealthCarePlan", 
+                        secondary=patient_healthcare_plan_table,
+                        backref="patients")
 
     def age(self):
         return (

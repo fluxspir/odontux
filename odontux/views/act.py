@@ -13,7 +13,7 @@ from gettext import gettext as _
 
 from odontux.odonweb import app
 from odontux import constants, checks, gnucash_handler
-from odontux.models import meta, act, cotation, schedule, administration
+from odontux.models import meta, act, schedule, administration
 from odontux.views import cotation as views_cotation
 from odontux.views import teeth
 from odontux.views.log import index
@@ -376,39 +376,25 @@ def update_cotation():
     return redirect(url_for('view_acttype', 
                             acttype_id=price_form.acttype_id.data))
 
-def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
+def _add_administrativact(act_id, appointment_id, tooth_id=0):
     """ """
     values = {}
-    majoration_price = 0
-    if not act_id:
-        raise Exception(_("Need the act_id"))
-    if not appointment_id:
-        raise Exception(_("Need the appointment_id"))
-
-    # Get the majoration, if any...
-
     gesture = meta.session.query(act.ActType).filter(
               act.ActType.id == act_id).one()
-    # Get data to evaluate the price for this act ; for this, we need to know
-    # the age of the patient, and if it's the state that is going to pay (cmu).
-    execution = meta.session.query(cotation.CotationFr).filter(
-                cotation.CotationFr.id == gesture.cotationfr_id).one()
-    patient = meta.session.query(administration.Patient).filter(
-              administration.Patient.id == session['patient_id']).one()
-#    if patient.age() < constants.KID_AGE:
-#        multiplicator = execution.kid_multiplicator
-#        exceeding = execution.exceeding_kid_normal
-#    else:
-#        multiplicator = execution.adult_multiplicator
-#        exceeding = execution.exceeding_adult_normal
-#
-#    # For some acts, patient under state medical care (CMU) get special prices
-#    # (paid directly by the state).
-#    patient_right = meta.session.query(SocialSecurityLocale).filter(
-#                    SocialSecurityLocale.id == patient.socialsecurity_id).one()
-#    key = meta.session.query(cotation.NgapKeyFr).filter(
-#          cotation.NgapKeyFr.id == execution.key_id).one()
-#
+
+#    execution = meta.session.query(cotation.CotationFr).filter(
+#                cotation.CotationFr.id == gesture.cotationfr_id).one()
+
+    patient = (
+        meta.session.query(administration.Patient)
+            .filter(administration.Patient.id == session['patient_id'])
+            .one()
+        )
+#    cotation = (
+#        meta.session.query(act.Cotation)
+#            .filter(act.Cotation.id.in_(
+#                patient.healthcare_plans.
+#    
     # In the appointment_act_reference table, we'll store
     # appointment, act, and if any, the tooth
     values['appointment_id'] = appointment_id
@@ -416,22 +402,6 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
     if tooth_id:
         values['tooth_id'] = tooth_id
     # the act code
-    if patient_right.cmu:
-        if execution.key_cmu_id:
-            cmu_key = meta.session.query(cotation.CmuKeyFr)\
-                        .filter(cotation.CmuKeyFr.id ==
-                                execution.key_cmu_id).one().key
-            values["code"] = cmu_key + str(execution.adult_cmu_num)
-            exceeding = execution.exceeding_adult_cmu
-            if patient.age() < constants.KID_AGE:
-                exceeding = execution.exceeding_kid_cmu
-        else:
-            values["code"] = key.key + str(multiplicator)
-    else:
-        values["code"] = key.key + str(multiplicator)
-    # the price to pay by the patient.
-    values['price'] = execution.get_price(multiplicator, exceeding, 
-                                          majoration_price)
 
     new_act = act.AppointmentActReference(**values)
     meta.session.add(new_act)
@@ -452,11 +422,9 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0, majoration_id=0):
 @app.route('/gesture/add?patient_id=<int:patient_id>'
            '&appointment_id=<int:appointment_id>', methods=['GET', 'POST'])
 def add_administrativact(patient_id, appointment_id):
-    if not patient_id or not appointment_id:
-        raise Exception(_("Need a patient and an appointment to add an act"))
-
-    if (session['role'] == constants.ROLE_ADMIN 
-        or session['role'] == constants.ROLE_SECRETARY):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
+                        constants.ROLE_NURSE ]
+    if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
     # Prepare the formulary dealing with the act of adding an administrativ
@@ -481,10 +449,9 @@ def add_administrativact(patient_id, appointment_id):
         else:
             return redirect(url_for("list_acts"))
 
-    # Case in GET method :
     admin_act_form.appointment_id.data = appointment_id
 
-    return render_template("/add_administrativ_act.html",
+    return render_template("add_administrativ_act.html",
                             patient=patient,
                             appointment=appointment,
                             admin_act_form = admin_act_form)
@@ -494,8 +461,11 @@ def add_administrativact(patient_id, appointment_id):
            '&code=<code>')
 def remove_administrativact(patient_id, appointment_id, act_id, code):
     """ """
-    if session['role'] != constants.ROLE_DENTIST:
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
+                        constants.ROLE_NURSE ]
+    if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
+    
     patient = checks.get_patient(patient_id)
     gesture = meta.session.query(act.AppointmentActReference).filter(
             act.AppointmentActReference.id == act_id).one()

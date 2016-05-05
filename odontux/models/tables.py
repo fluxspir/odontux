@@ -39,9 +39,9 @@ Column('payer_id', Integer, ForeignKey('payer.id'))
 )
 
 # administration.py / cotation.py
-patient_plan_name_table = Table('patient_plan_name', Base.metadata,
+patient_healthcare_plan_table = Table('patient_healthcare_plan', Base.metadata,
 Column('patient_id', Integer, ForeignKey('patient.id')),
-Column('plan_name_id', Integer, ForeignKey('plan_name.id'))
+Column('healthcare_plan_id', Integer, ForeignKey('healthcare_plan.id'))
 )
 
 # user.py / administration.py
@@ -137,12 +137,3 @@ Column('material_id', Integer, ForeignKey('material.id')),
 Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("quantity_used", Numeric)
 )
-
-## cotations
-#cotation_table = Table("cotation", Base.metadata,
-#Column('id', Integer, primary_key=True),
-#Column('acttype_id', Integer, ForeignKey('act_type.id')),
-#Column('healthcare_plan_id', Integer, ForeignKey('healthcare_plan.id')),
-#Column('price', Numeric),
-#Column('active', Boolean)
-#)
