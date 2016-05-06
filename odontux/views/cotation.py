@@ -55,7 +55,7 @@ def list_cotations(keywords="", ordering=""):
 
     return render_template('list_cotations.html', cotations=cotations)
 
-@app.route('/add/plan_name', methods=['GET', 'POST'])
+@app.route('/add/healthcare_plan', methods=['GET', 'POST'])
 def add_healthcare_plan():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]

@@ -4,11 +4,11 @@
 # v0.5
 # licence BSD
 #
-
+import pdb
 from flask import session, render_template, request, redirect, url_for
 from wtforms import (Form, 
                      IntegerField, SelectField, TextField, BooleanField, 
-                     RadioField, validators)
+                     RadioField, SelectMultipleField, validators)
 import sqlalchemy
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
@@ -16,14 +16,10 @@ from gettext import gettext as _
 
 from odontux import constants, checks
 from odontux import gnucash_handler
-from odontux.views import forms
+from odontux.views import forms, cotation
 from odontux.views.log import index
-from odontux.models import meta, administration, users
+from odontux.models import meta, administration, users, act
 
-
-# variable to call in database the right table, which should be locale related.
-#socialsecuritylocale = "SocialSecurity" + constants.LOCALE.title()
-#SocialSecurityLocale = getattr(administration, socialsecuritylocale)
 
 # Fields too use in treatment of forms
 def get_gen_info_field_list():
@@ -48,14 +44,15 @@ class PatientGeneralInfoForm(Form):
     preferred_name = TextField(_('preferred_name'), [validators.Length(max=30,
                                 message=_("preferred name too long"))])
     correspondence_name = TextField(_('correspondence_name'),
-                                    [validators.Length(max=30, message=\
-                                    _("correspondence name too long"))])
+                                [validators.Length(max=30, 
+                                message=_("correspondence name too long"))])
     sex = RadioField(_('Sex'), choices=[("m", _("Male")), ("f", _("Female"))])
     dob = forms.DateField(_('Date of Birth'))
     job = TextField(_('Job'))
     inactive = BooleanField(_('Inactive'))
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
+    healthcare_plans_id = SelectMultipleField(_('Healthcare plan'), coerce=int)
     family_id = IntegerField(_('family_id'), [validators.Optional()])
     office_id = SelectField(_('Office_id'), [validators.Required(
                                message=_("Please specify office_id"))], 
@@ -65,7 +62,7 @@ class PatientGeneralInfoForm(Form):
                                 coerce=int)
     payer = BooleanField(_('is payer'))
     time_stamp = forms.DateField(_("Time_stamp"))
-
+    
 
 @app.route('/patients/')
 def allpatients():
@@ -109,8 +106,11 @@ def add_patient():
                 for dentist in meta.session.query(users.OdontuxUser).filter(
                 users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
                 users.OdontuxUser.lastname).all() ]
+    gen_info_form.healthcare_plans_id.choices = [ (hc.id, hc.name) 
+                for hc in meta.session.query(act.HealthCarePlan).all() ]
+    if not gen_info_form.healthcare_plans_id.choices:
+        return redirect(url_for('cotation.add_healthcare_plan'))
 
-    #SSN_form = SocialSecurityForm(request.form)
     # three are used for odontux_users and medecine doctors, too
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
@@ -131,6 +131,10 @@ def add_patient():
                         for f in get_gen_info_field_list()}
         new_patient = administration.Patient(**values)
         meta.session.add(new_patient)
+        meta.session.commit()
+
+        for healthcare_plan_id in gen_info_form.healthcare_plans_id:
+            new_patient.healthcare_plans_id.append(healthcare_plan_id)
         meta.session.commit()
 
         # A family is define in odontux mostly by the fact that

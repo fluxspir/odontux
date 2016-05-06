@@ -19,6 +19,7 @@ from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
 from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.associationproxy import association_proxy
 
 
 class Address(Base):
@@ -92,9 +93,11 @@ class Patient(Base):
                         cascade="all, delete, delete-orphan")
     payer = relationship("Payer", backref="patient",
                         cascade="all, delete, delete-orphan")
-    healthcare_plans = relationship("HealthCarePlan", 
+    hcs = relationship("HealthCarePlan", 
                         secondary=patient_healthcare_plan_table,
                         backref="patients")
+    healthcare_plans_id = association_proxy('hcs', 'id')
+    healthcare_plans = association_proxy('hcs', 'name')
 
     def age(self):
         return (
