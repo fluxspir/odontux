@@ -10,6 +10,7 @@
 <nav id="update_choices">
   <ul>
     <li onclick='display_form("gen_info")'>general_infos</li>
+    <li onclick='display_form("healthcare_plans")'>healthcare_plans</li>
     <li onclick='display_form("address")'>address</li>
     <li onclick='display_form("phone")'>phone</li>
     <li onclick='display_form("mail")'>mail</li>
@@ -18,7 +19,8 @@
 {% if session.role != session.ROLE_ADMIN %}
 <div id="update_patient">
   <div id="gen_info">
-    <form method="post" action={{ url_for('update_patient', body_id=body.id, form_to_display='gen_info') }}>
+    <form method="post" action={{ url_for('update_patient', body_id=body.id, 
+                                              form_to_display='gen_info') }}>
       <dl>
         {{ render_field(gen_info_form.title) }}
         {{ render_field(gen_info_form.lastname) }}
@@ -38,7 +40,46 @@
       </dl>
     </form>
   </div>
-
+  <div id="healthcare_plans">
+    <table>
+      <tr>
+        <td>
+          <table>
+            <th>
+              Patient's Healthcare plans
+            </th>
+            {% for hc in patient.hcs %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('remove_patient_from_healthcare_plan',
+                                      patient_id=patient.id,
+                                      healthcare_plan_id=hc.id) }}">
+                        {{ hc.name }}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        </td>
+        <td>
+          <table>
+            <th>
+              Others Heathcare Plans 
+            </th>
+            {% for hc in other_healthcare_plans %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('add_patient_to_healthcare_plan',
+                                        patient_id=patient.id,
+                                        healthcare_plan_id=hc.id) }}">
+                          {{ hc.name }}</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
   {{ update_phone_form(phone_form, body, "update_patient_phone", "delete_patient_phone", "add_patient_phone") }}
 <!-- Add a trick for body.family_id or update_address_form -->
   {{ update_address_form(address_form, body, body.family.addresses, "update_patient_address", "delete_patient_address", "add_patient_address") }}

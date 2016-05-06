@@ -17,7 +17,7 @@ from sqlalchemy import and_, or_, desc
 from gettext import gettext as _
 from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
                     SelectField, BooleanField, TextAreaField, DecimalField,
-                    DateField, SelectMultipleField,
+                    DateField,
                     validators)
 
 from odontux import constants, checks

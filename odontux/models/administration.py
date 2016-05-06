@@ -13,8 +13,6 @@ import datetime
 from tables import (family_address_table, patient_mail_table, 
                     patient_phone_table, family_payer_table,
                     patient_healthcare_plan_table)
-                    
-
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
 from sqlalchemy import func
@@ -96,7 +94,6 @@ class Patient(Base):
     hcs = relationship("HealthCarePlan", 
                         secondary=patient_healthcare_plan_table,
                         backref="patients")
-    healthcare_plans_id = association_proxy('hcs', 'id')
     healthcare_plans = association_proxy('hcs', 'name')
 
     def age(self):

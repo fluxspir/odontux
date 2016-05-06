@@ -53,7 +53,6 @@ class PatientGeneralInfoForm(Form):
     inactive = BooleanField(_('Inactive'))
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
-    healthcare_plans_id = SelectMultipleField(_('Healthcare plan'), coerce=int)
     family_id = IntegerField(_('family_id'), [validators.Optional()])
     office_id = SelectField(_('Office_id'), [validators.Required(
                                message=_("Please specify office_id"))], 
@@ -63,7 +62,9 @@ class PatientGeneralInfoForm(Form):
                                 coerce=int)
     payer = BooleanField(_('is payer'))
     time_stamp = DateField(_("Time_stamp"), [validators.Optional()])
-    
+   
+class HealthCarePlanPatientForm(Form):
+    healthcare_plans_id = SelectMultipleField(_('Healthcare plan'), coerce=int)
 
 @app.route('/patients/')
 def allpatients():
@@ -107,9 +108,11 @@ def add_patient():
                 for dentist in meta.session.query(users.OdontuxUser).filter(
                 users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
                 users.OdontuxUser.lastname).all() ]
-    gen_info_form.healthcare_plans_id.choices = [ (hc.id, hc.name) 
+
+    hcp_patient_form = HealthCarePlanPatientForm(request.form)
+    hcp_patient_form.healthcare_plans_id.choices = [ (hc.id, hc.name) 
                 for hc in meta.session.query(act.HealthCarePlan).all() ]
-    if not gen_info_form.healthcare_plans_id.choices:
+    if not hcp_patient_form.healthcare_plans_id.choices:
         return redirect(url_for('cotation.add_healthcare_plan'))
 
     # three are used for odontux_users and medecine doctors, too
@@ -133,9 +136,13 @@ def add_patient():
         new_patient = administration.Patient(**values)
         meta.session.add(new_patient)
         meta.session.commit()
-
-        for healthcare_plan_id in gen_info_form.healthcare_plans_id:
-            new_patient.healthcare_plans_id.append(healthcare_plan_id)
+        
+        for healthcare_plan_id in hcp_patient_form.healthcare_plans_id.data:
+            hcp = ( meta.session.query(act.HealthCarePlan)
+                        .filter(act.HealthCarePlan.id == healthcare_plan_id)
+                        .one()
+                )
+            new_patient.hcs.append(hcp)
         meta.session.commit()
 
         # A family is define in odontux mostly by the fact that
@@ -226,7 +233,7 @@ def add_patient():
         
         return redirect(url_for('enter_patient_file', body_id=new_patient.id))
 
-    return render_template("/add_patient.html",
+    return render_template("add_patient.html",
                             gen_info_form=gen_info_form,
                             address_form=address_form,
                             phone_form=phone_form,
@@ -282,6 +289,7 @@ def update_patient(body_id, form_to_display):
     # the gen_info and SSN_form from here
     for f in get_gen_info_field_list():
         getattr(gen_info_form, f).data = getattr(patient, f)
+
     # payer
     for payer in patient.family.payers:
         if patient.id == payer.id:
@@ -294,13 +302,56 @@ def update_patient(body_id, form_to_display):
     # need to return patient both as "patient" AND "body" :
     # as "patient" for the header pagetitle,
     # as "body" for the updating form.
+    other_healthcare_plans = (
+        meta.session.query(act.HealthCarePlan)
+            .filter(
+                ~act.HealthCarePlan.patients.any(
+                    administration.Patient.id == patient.id)
+            )
+            .all()
+        )
     return render_template('/update_patient.html', body=patient,
                             patient=patient,
                             gen_info_form=gen_info_form,
                             address_form=address_form,
                             phone_form=phone_form,
                             mail_form=mail_form,
-                            role_admin=constants.ROLE_ADMIN)
+                            other_healthcare_plans=other_healthcare_plans)
+
+@app.route('/add/patient_to_healthcare_plan?pid=<int:patient_id>&hcpid=<int:healthcare_plan_id>')
+def add_patient_to_healthcare_plan(patient_id, healthcare_plan_id):
+    patient = (
+        meta.session.query(administration.Patient)
+            .filter(administration.Patient.id == patient_id)
+            .one()
+        )
+    healthcare_plan = (
+        meta.session.query(act.HealthCarePlan)
+            .filter(act.HealthCarePlan.id == healthcare_plan_id)
+            .one()
+        )
+    patient.hcs.append(healthcare_plan)
+    meta.session.commit()
+    return redirect(url_for('update_patient', body_id=patient_id,
+                                form_to_display='healthcare_plans'))
+
+@app.route('/remove/patient_from_healthcare_plan?pid=<int:patient_id>&hcpid=<int:healthcare_plan_id>')
+def remove_patient_from_healthcare_plan(patient_id, healthcare_plan_id):
+    patient = (
+        meta.session.query(administration.Patient)
+            .filter(administration.Patient.id == patient_id)
+            .one()
+        )
+    healthcare_plan = (
+        meta.session.query(act.HealthCarePlan)
+            .filter(act.HealthCarePlan.id == healthcare_plan_id)
+            .one()
+        )
+    patient.hcs.remove(healthcare_plan)
+    meta.session.commit()
+    return redirect(url_for('update_patient', body_id=patient_id,
+                                form_to_display='healthcare_plans'))
+
 
 #@app.route('/patient/update_patient_SSN?id=<int:body_id>'
 #           '&form_to_display=<form_to_display>', methods=['POST'])
@@ -349,6 +400,7 @@ def update_patient(body_id, form_to_display):
 #        return redirect(url_for('update_patient', body_id=body_id,
 #                                form_to_display="SSN"))
 #
+
 @app.route('/patient/update_patient_address?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_patient_address(body_id, form_to_display):
