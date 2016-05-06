@@ -65,6 +65,12 @@ class GnuCash():
         professionnalaccounting_url = ( meta.session.query(users.OdontuxUser)
             .filter(users.OdontuxUser.id == dentist_id).one().gnucash_url
             .encode("utf_8") )
+        if profissionnalaccounting_url.split(".")[-1] == "xml":
+            gnucashtype = "xml"
+        elif "postgresql" in profissionnalaccounting_url.split("://"):
+            gnucashtype = "postgresql"
+        else:
+            gnucashtype = None
         assets = self.parser.get("gnucashdb", "assets")
         receivables = self.parser.get("gnucashdb", "receivables")
         dentalfund = self.parser.get("gnucashdb", "dentalfund")
@@ -155,7 +161,8 @@ class GnuCashCustomer(GnuCash):
                + self.patient.firstname
         new_customer = Customer(self.book, self.gcpatient_id, self.currency, 
                                 name.encode("utf_8"))
-#        self.gcsession.save()
+        if gnucashtype == "xml":
+            self.gcsession.save()
         return new_customer, name
 
     def _update_name(self):
@@ -164,7 +171,8 @@ class GnuCashCustomer(GnuCash):
                + self.patient.firstname
         customer = self.book.CustomerLookupByID(self.gcpatient_id)
         customer.SetName(name.encode("utf_8"))
-#        self.gcsession.save()
+        if gnucashtype == "xml":
+            self.gcsession.save()
         return customer, name
 
     def _set_address(self, customer, patientname):
@@ -204,28 +212,30 @@ class GnuCashCustomer(GnuCash):
 
         address = customer.GetAddr()
         address.SetName(payername.encode("utf_8"))
-        if self.patient.family.addresses[-1].street:
-            address.SetAddr1(self.patient.family.addresses[-1]
-                             .street.encode("utf_8"))
-        if self.patient.family.addresses[-1].building:
-            address.SetAddr2(self.patient.family.addresses[-1]
-                             .building.encode("utf_8"))
-        zip_code = ""
-        city = ""
-        if self.patient.family.addresses[-1].zip_code:
-            zip_code = self.patient.family.addresses[-1]\
-                          .zip_code.encode("utf_8")
-        if self.patient.family.addresses[-1].city:
-            city = self.patient.family.addresses[-1].city.encode("utf_8")
-        address.SetAddr3(zip_code  + " " + city)
-        county = ""
-        country = ""
-        if self.patient.family.addresses[-1].county:
-            county = self.patient.family.addresses[-1].county.encode("utf_8")
-        if self.patient.family.addresses[-1].country:
-            country = self.patient.family.addresses[-1].country.encode("utf_8")
-        address.SetAddr4(county + " " + country)
-#        self.gcsession.save()
+        if self.patient.family.addresses:
+            if self.patient.family.addresses[-1].street:
+                address.SetAddr1(self.patient.family.addresses[-1]
+                                .street.encode("utf_8"))
+            if self.patient.family.addresses[-1].building:
+                address.SetAddr2(self.patient.family.addresses[-1]
+                                .building.encode("utf_8"))
+            zip_code = ""
+            city = ""
+            if self.patient.family.addresses[-1].zip_code:
+                zip_code = self.patient.family.addresses[-1]\
+                            .zip_code.encode("utf_8")
+            if self.patient.family.addresses[-1].city:
+                city = self.patient.family.addresses[-1].city.encode("utf_8")
+            address.SetAddr3(zip_code  + " " + city)
+            county = ""
+            country = ""
+            if self.patient.family.addresses[-1].county:
+                county = self.patient.family.addresses[-1].county.encode("utf_8")
+            if self.patient.family.addresses[-1].country:
+                country = self.patient.family.addresses[-1].country.encode("utf_8")
+            address.SetAddr4(county + " " + country)
+        if gnucashtype == "xml":
+            self.gcsession.save()
 
     def add_customer(self):
         try:
@@ -398,7 +408,8 @@ class GnuCashPayment(GnuCash):
             payer.ApplyPayment(None, None, self.receivables, dest_account, 
                             amount, GncNumeric(1), date, "", "", False)
             
-#            self.gcsession.save()
+            if gnucashtype == "xml":
+                self.gcsession.save()
             self.gcsession.end()
             return True
         except:
