@@ -81,15 +81,6 @@ class TelField(Field):
             return self.data
 
 
-class DateInput(widgets.TextInput):
-    input_type = "date"
-
-class DateField(Field):
-    widget = DateInput()
-    def _value(self):
-        if self.data:
-            return self.data
-
 class TimeInput(widgets.TextInput):
     input_type = "time"
 

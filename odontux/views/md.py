@@ -16,7 +16,7 @@ from odontux.views import forms
 from odontux.views.log import index
 
 from wtforms import (Form, IntegerField, TextField, FormField, HiddenField,
-                    validators)
+                    DateField, validators)
 
 class MedecineDoctorGeneralInfoForm(Form):
     md_id = HiddenField('id')
@@ -24,7 +24,7 @@ class MedecineDoctorGeneralInfoForm(Form):
                          validators.Length(min=1, max=30,
                          message=_("Need to provide MD's lastname"))])
     firstname = TextField('firstname', [validators.Length(max=30)])
-    update_date = forms.DateField("update_date")
+    update_date = DateField(_("update_date"), [validators.Optional()])
 
 def get_gen_info_field_list():
     return ['lastname', "firstname" ]

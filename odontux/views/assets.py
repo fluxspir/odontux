@@ -22,7 +22,6 @@ from odontux import constants, checks
 from odontux.models import meta, assets, administration, users, act, schedule
 from odontux.odonweb import app
 from odontux.views import forms
-#from odontux.views.forms import DateField
 from odontux.views.log import index
 
 def get_assets_in_superasset(return_id=False):

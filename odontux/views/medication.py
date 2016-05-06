@@ -6,14 +6,14 @@
 #
 
 from flask import session, redirect, url_for, request, render_template
-from wtforms import Form, HiddenField, TextField, TextAreaField, validators
+from wtforms import (Form, HiddenField, TextField, TextAreaField, DateField,
+                    validators )
 
 from odontux import constants, checks
 from odontux.views import forms
 from odontux.models import meta, medication
 from odontux.odonweb import app
 from odontux.views.log import index
-from odontux.views.forms import DateField
 
 from gettext import gettext as _
 
@@ -39,7 +39,7 @@ class PrescriptionForm(Form):
                                 "Patient_id must be provide to make a "
                                 "prescription"))])
     appointment_id = HiddenField(_("appointment_id"))
-    time_stamp = DateField(_('time_stamp'))
+    time_stamp = DateField(_('time_stamp'), [validators.Optional()])
 
 class PrescribedDrugReference(Form):
     prescription_id = HiddenField(_('prescription_id'), [validators.Required(_(

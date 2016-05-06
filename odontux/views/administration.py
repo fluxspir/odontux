@@ -8,7 +8,8 @@ import pdb
 from flask import session, render_template, request, redirect, url_for
 from wtforms import (Form, 
                      IntegerField, SelectField, TextField, BooleanField, 
-                     RadioField, SelectMultipleField, validators)
+                     RadioField, SelectMultipleField, DateField,
+                     validators)
 import sqlalchemy
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
@@ -47,7 +48,7 @@ class PatientGeneralInfoForm(Form):
                                 [validators.Length(max=30, 
                                 message=_("correspondence name too long"))])
     sex = RadioField(_('Sex'), choices=[("m", _("Male")), ("f", _("Female"))])
-    dob = forms.DateField(_('Date of Birth'))
+    dob = DateField(_('Date of Birth'), [validators.Optional()])
     job = TextField(_('Job'))
     inactive = BooleanField(_('Inactive'))
     qualifications = TextField(_('qualifications'), 
@@ -61,7 +62,7 @@ class PatientGeneralInfoForm(Form):
                                 message=_("Please specify dentist_id"))],
                                 coerce=int)
     payer = BooleanField(_('is payer'))
-    time_stamp = forms.DateField(_("Time_stamp"))
+    time_stamp = DateField(_("Time_stamp"), [validators.Optional()])
     
 
 @app.route('/patients/')

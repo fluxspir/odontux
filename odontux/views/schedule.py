@@ -8,7 +8,7 @@
 
 from flask import render_template, request, redirect, url_for, session 
 from wtforms import (Form, HiddenField, BooleanField, TextAreaField, TextField,
-                    IntegerField, SelectField, validators)
+                    IntegerField, SelectField, DateField, validators)
 from gettext import gettext as _
 from sqlalchemy import or_
 from sqlalchemy import cast, Date
@@ -17,7 +17,7 @@ import datetime
 from odontux import constants, checks
 from odontux.odonweb import app
 from odontux.models import meta, schedule, administration, users
-from odontux.views.forms import DateField, TimeField
+from odontux.views.forms import TimeField
 from odontux.views.log import index
 
 now = datetime.datetime.now()

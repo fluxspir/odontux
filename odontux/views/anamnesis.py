@@ -8,11 +8,10 @@
 from flask import session, render_template, request, redirect, url_for
 from wtforms import (Form,
                      SelectField, TextField, BooleanField, TextAreaField,
-                     HiddenField,
+                     HiddenField, DateField
                      validators
                      )
 from odontux.views.log import index
-from odontux.views.forms import DateField
 from odontux.models import meta, anamnesis, md
 from odontux.odonweb import app
 from odontux.views import forms
@@ -25,7 +24,7 @@ from odontux import constants, checks
 class GeneralInfoForm(Form):
     patient_id = HiddenField(_('patient_id'), [validators.Required()])
     dentist_id = HiddenField(_('dentist_id'), [validators.Required()])
-    time_stamp = DateField(_('time_stamp'))
+    time_stamp = DateField(_('time_stamp'), [validadors.Optional()])
 
 class MedecineDoctorForm(Form):
     md_id = SelectField(_('Medecine Doctor'), coerce=int)

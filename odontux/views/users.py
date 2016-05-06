@@ -15,7 +15,7 @@ from sqlalchemy import and_, or_
 from gettext import gettext as _
 from wtforms import (Form, IntegerField, TextField, PasswordField,
                     SelectField, BooleanField, TextAreaField, HiddenField,
-                    validators)
+                    DateField, validators)
 
 from odontux import constants, checks
 from odontux.models import meta, users, administration
@@ -38,7 +38,7 @@ class OdontuxUserGeneralInfoForm(Form):
                                     filters=[forms.upper_field])
     sex = SelectField(_('Male'), 
                     choices=[ (_("M"), _("M")), (_("F"), _("F")) ])
-    dob = forms.DateField(_('Date of Birth'))
+    dob = DateField(_('Date of Birth'))
     avatar_id = IntegerField(_('avatar_id'), [validators.Optional()])
     display_order = IntegerField(_('display_order'), [validators.Optional()])
 
@@ -51,7 +51,7 @@ class OdontuxUserGeneralInfoAdminForm(Form):
     active = BooleanField(_('active'))
     comments = TextAreaField(_('comments'))
     modified_by = IntegerField(_('modified_by'), [validators.Optional()])
-    creation_date = forms.DateField(_("creation_date"))
+    creation_date = DateField(_("creation_date"))
 
 class DentistSpecificForm(Form):
     registration = TextField(_('registration'))
