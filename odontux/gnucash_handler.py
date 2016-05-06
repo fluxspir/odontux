@@ -33,9 +33,9 @@ class GnuCash():
     about gnucash.
     
     In order that several dentists may use odontux together, the 
-    "professionnalaccounting_url", which specify the gnucash account place is 
+    "profissionnalaccounting_url", which specify the gnucash account place is 
     store in the user (ROLE_DENTIST) session :
-    "models.users.OdontuxUser.professionnalaccounting_url".
+    "models.users.OdontuxUser.profissionnalaccounting_url".
     
     The inside of gnucash needs at least :
         * assets  ( all of the dentist assets )
@@ -61,16 +61,15 @@ class GnuCash():
         self.parser = ConfigParser.ConfigParser()
         home = os.path.expanduser("~")
         self.parser.read(os.path.join(home, ".odontuxrc"))
-        #professionnalaccounting_url = self.parser.get("gnucashdb", "url")
-        professionnalaccounting_url = ( meta.session.query(users.OdontuxUser)
+        profissionnalaccounting_url = ( meta.session.query(users.OdontuxUser)
             .filter(users.OdontuxUser.id == dentist_id).one().gnucash_url
             .encode("utf_8") )
         if profissionnalaccounting_url.split(".")[-1] == "xml":
-            gnucashtype = "xml"
+            self.gnucashtype = "xml"
         elif "postgresql" in profissionnalaccounting_url.split("://"):
-            gnucashtype = "postgresql"
+            self.gnucashtype = "postgresql"
         else:
-            gnucashtype = None
+            self.gnucashtype = None
         assets = self.parser.get("gnucashdb", "assets")
         receivables = self.parser.get("gnucashdb", "receivables")
         dentalfund = self.parser.get("gnucashdb", "dentalfund")
@@ -85,7 +84,7 @@ class GnuCash():
         # Set the gnucash patient_id
         self.gcpatient_id = "pat_" + str(self.patient_id)
         # Set up the Book for accounting
-        self.gcsession = GCSession(professionnalaccounting_url, True)
+        self.gcsession = GCSession(profissionnalaccounting_url, True)
         self.book = self.gcsession.get_book()
 
         # Set up the root on accounting book
@@ -161,7 +160,7 @@ class GnuCashCustomer(GnuCash):
                + self.patient.firstname
         new_customer = Customer(self.book, self.gcpatient_id, self.currency, 
                                 name.encode("utf_8"))
-        if gnucashtype == "xml":
+        if self.gnucashtype == "xml":
             self.gcsession.save()
         return new_customer, name
 
@@ -171,7 +170,7 @@ class GnuCashCustomer(GnuCash):
                + self.patient.firstname
         customer = self.book.CustomerLookupByID(self.gcpatient_id)
         customer.SetName(name.encode("utf_8"))
-        if gnucashtype == "xml":
+        if self.gnucashtype == "xml":
             self.gcsession.save()
         return customer, name
 
@@ -234,7 +233,7 @@ class GnuCashCustomer(GnuCash):
             if self.patient.family.addresses[-1].country:
                 country = self.patient.family.addresses[-1].country.encode("utf_8")
             address.SetAddr4(county + " " + country)
-        if gnucashtype == "xml":
+        if self.gnucashtype == "xml":
             self.gcsession.save()
 
     def add_customer(self):
@@ -408,7 +407,7 @@ class GnuCashPayment(GnuCash):
             payer.ApplyPayment(None, None, self.receivables, dest_account, 
                             amount, GncNumeric(1), date, "", "", False)
             
-            if gnucashtype == "xml":
+            if self.gnucashtype == "xml":
                 self.gcsession.save()
             self.gcsession.end()
             return True

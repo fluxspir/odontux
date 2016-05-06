@@ -63,6 +63,8 @@ class OdontuxUser(Base):
     modified_by = Column(Integer, default=None)
     creation_date = Column(Date, default=func.current_date())
     gnucash_url = Column(String, default="")
+    dentist_supervisor_id = Column(Integer, ForeignKey('OdontuxUser'),
+                                                            default=None)
     patients = relationship("Patient", backref="user")
 
 class Settings(Base):

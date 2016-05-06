@@ -35,6 +35,10 @@
       {% endif %}
       {% if session.role == session.ROLE_ADMIN and user.role == session.ROLE_DENTIST %}
         {{ render_field(dentist_specific_admin_form.gnucash_url) }}
+      {% elif session.role == session.ROLE_DENTIST %}
+      <br />
+      Gnucash URL: {{ user.gnucash_url }} -- If needed, ask admin to update 
+      <br /><br />
       {% endif %}
 
       {% if session.role == session.ROLE_ADMIN %}
