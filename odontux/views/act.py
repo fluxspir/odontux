@@ -150,6 +150,7 @@ def delete_specialty(specialty_id):
 # Acts
 #####
 
+@app.route('/list/acttype')
 @app.route('/list/acttype?keywords=<keywords>&ordering=<ordering>')
 def list_acttype(keywords="", ordering=""):
     """ The target is to display dentist's gesture, describing it, its values.
@@ -224,8 +225,7 @@ def add_acttype():
         new_acttype = act.ActType(**values)
         meta.session.add(new_acttype)
         meta.session.commit()
-        return redirect(url_for('list_acttype', keywords="", 
-                                                ordering=""))
+        return redirect(url_for('list_acttype'))
     return render_template('/add_act.html', form=form)
 
 @app.route('/act/update_acttype=<int:acttype_id>/', methods=['GET', 'POST'])
