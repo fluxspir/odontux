@@ -87,8 +87,7 @@ def get_appointment_act_reference_choice_lists(patient_id):
     """ """
     return (get_appointment_choice_list(patient_id), 
             get_act_choice_list(),
-            teeth.get_tooth_id_choice_list(patient_id), 
-            get_majoration_choice_list() )
+            teeth.get_tooth_id_choice_list(patient_id))
 
 
 ####
@@ -436,14 +435,21 @@ def add_administrativact(patient_id, appointment_id):
     (admin_act_form.appointment_id.choices, 
         admin_act_form.act_id.choices, 
         admin_act_form.tooth_id.choices, 
-        admin_act_form.majoration.choices
     ) = get_appointment_act_reference_choice_lists(patient_id)
 
     if request.method == 'POST' and admin_act_form.validate():
+        if admin_act_form.act_code.data:
+            act_id = (
+                meta.session.query(act.ActType.id)
+                    .filter(act.ActType.code == admin_act_form.act_code_data)
+                    .one_or_none()
+                )
+            if act_id:
+                admin_act_form.act_id.data = act_id
+        
         new_act_id = _add_administrativact(admin_act_form.act_id.data,
                                             admin_act_form.appointment_id.data,
-                                            admin_act_form.tooth_id.data,
-                                            admin_act_form.majoration.data)
+                                            admin_act_form.tooth_id.data)
         if not new_act_id:
             return redirect(url_for("list_acts"))
         else:

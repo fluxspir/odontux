@@ -5,7 +5,6 @@
 # Licence BSD
 #
 
-
 from flask import render_template, request, redirect, url_for, session 
 from wtforms import (Form, HiddenField, BooleanField, TextAreaField, TextField,
                     IntegerField, SelectField, DateField, validators)
@@ -149,8 +148,8 @@ def agenda_handler(day, starthour=0, startmin=0, durationhour=0, durationmin=0,
     for f in starthour, startmin, durationhour, durationmin, endhour, endmin:
         if f is None:
             f = 0
-    year, month, day = [int(token) for token in day.split("-")]
-    starttime = datetime.datetime(year, month, day, starthour, startmin)
+    starttime = datetime.datetime(day.year, day.month, day.day, 
+                                                        starthour, startmin)
 
     if durationhour or durationmin:
         endtime = starttime + datetime.timedelta(hours=durationhour, 
