@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-import administration
+import administration, schedule
 import sqlalchemy
 import datetime
 
@@ -15,7 +15,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import func
 
 class SuperiorLipEvent(Base):
-    __tablename__ = 'superior_lip'
+    __tablename__ = 'superior_lip_event'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
                                                     nullable=False)
@@ -27,7 +27,7 @@ class SuperiorLipEvent(Base):
 
 
 class InferiorLipEvent(Base):
-    __tablename__ = 'inferior_lip'
+    __tablename__ = 'inferior_lip_event'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
                                                     nullable=False)
@@ -39,7 +39,7 @@ class InferiorLipEvent(Base):
 
 
 class LeftCheekEvent(Base):
-    __tablename__ = 'left_cheek'
+    __tablename__ = 'left_cheek_event'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                                                     nullable=False)
@@ -51,7 +51,7 @@ class LeftCheekEvent(Base):
 
 
 class RightCheekEvent(Base):
-    __tablename__ = 'right_cheek'
+    __tablename__ = 'right_cheek_event'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
                                                     nullable=False)
@@ -63,7 +63,7 @@ class RightCheekEvent(Base):
 
 
 class HardPalateEvent(Base):
-    __tablename__ = 'hard_palate'
+    __tablename__ = 'hard_palate_event'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                                                     nullable=False)
@@ -75,7 +75,7 @@ class HardPalateEvent(Base):
 
 
 class SoftPalateEvent(Base):
-    __tablename__ = 'soft_palate'
+    __tablename__ = 'soft_palate_event'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                                                     nullable=False)
@@ -87,7 +87,7 @@ class SoftPalateEvent(Base):
 
 
 class TongueEvent(Base):
-    __tablename__ = 'tongue'
+    __tablename__ = 'tongue_event'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                                                     nullable=False)
@@ -99,7 +99,7 @@ class TongueEvent(Base):
 
 
 class MouthBaseEvent(Base):
-    __tablename__ = 'mouth_base'
+    __tablename__ = 'mouth_base_event'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                                                     nullable=False)

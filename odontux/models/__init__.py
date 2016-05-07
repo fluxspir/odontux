@@ -18,11 +18,12 @@ from users import OdontuxUser, DentalOffice, Settings
 from md import MedecineDoctor
 from administration import (Address, Mail, Phone, Payer, Family, Patient)
 from anamnesis import MedicalHistory, PastSurgeries, Allergies
-from headneck import Head, Neck, Mouth
+from headneck import HeadEvent, NeckEvent, MouthEvent
 from medication import DrugPrescribed, Prescription, PrescribedDrugReference
 from schedule import Agenda, Appointment, AppointmentMemo
-from softtissues import (SuperiorLip, InferiorLip, LeftCheek, RightCheek,
-                         HardPalate, SoftPalate, Tongue, MouthBase)
+from softtissues import (SuperiorLipEvent, InferiorLipEvent, LeftCheekEvent, 
+                        RightCheekEvent,HardPalateEvent, SoftPalateEvent, 
+                        TongueEvent, MouthBaseEvent)
 from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootEvent,
                     Periodonte, PeriodonteEvent )
 from act import ( Specialty, HealthCarePlan, ActType, Cotation, 

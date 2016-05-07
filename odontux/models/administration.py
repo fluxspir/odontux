@@ -81,12 +81,6 @@ class Patient(Base):
     gen_doc_id = Column(Integer, ForeignKey(md.MedecineDoctor.id))
     time_stamp = Column(Date, default=func.current_date())
     creation_date = Column(Date, default=func.current_date())
-    head = relationship("Head", uselist=False, backref="patient", 
-                        cascade="all, delete, delete-orphan")
-    neck = relationship("Neck", uselist=False, backref="patient",
-                        cascade="all, delete, delete-orphan")
-    mouth = relationship("Mouth", uselist=False, backref="patient", 
-                        cascade="all, delete, delete-orphan")
     appointments = relationship("Appointment", backref="patient",
                         cascade="all, delete, delete-orphan")
     payer = relationship("Payer", backref="patient",

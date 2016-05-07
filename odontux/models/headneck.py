@@ -5,7 +5,7 @@
 # licence BSD
 #
 from meta import Base
-import administration
+import administration, schedule
 import sqlalchemy
 import datetime
 
