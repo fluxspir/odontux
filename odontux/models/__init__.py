@@ -23,9 +23,8 @@ from medication import DrugPrescribed, Prescription, PrescribedDrugReference
 from schedule import Agenda, Appointment, AppointmentMemo
 from softtissues import (SuperiorLip, InferiorLip, LeftCheek, RightCheek,
                          HardPalate, SoftPalate, Tongue, MouthBase)
-from periodonte import (SuperiorGum, InferiorGum, SuperiorAlveolarBone,
-                        InferiorAlveolarBone)
-from teeth import Tooth, Event, ToothEvent, CrownEvent, RootEvent
+from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootEvent,
+                    Periodonte, PeriodonteEvent )
 from act import ( Specialty, HealthCarePlan, ActType, Cotation, 
                 AppointmentActReference )
 from compta import PaymentType, Payment

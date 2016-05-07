@@ -10,6 +10,7 @@ import sqlalchemy
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
+from sqlalchemy.orm import relationship
 
 class Tooth(Base):
     """
@@ -72,6 +73,7 @@ class PeriodonteEvent(Base):
     """
         location : 1 MB, 2 CB, 3 DB, 4 DP 5 CP 6 7 MP
     """
+    __tablename__ = "periodonte_event"
     id = Column(Integer, primary_key=True)
     periodonte_id = Column(Integer, ForeignKey(Periodonte.id), nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),

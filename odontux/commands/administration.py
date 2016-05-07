@@ -5,7 +5,7 @@
 # licence BSD
 #
 
-from models import meta, administration, cotation, md, teeth
+from models import meta, administration, act, md, teeth
 from base import BaseCommand
 
 import sqlalchemy

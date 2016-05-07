@@ -25,7 +25,7 @@ class SuperiorLip(Base):
 
 class InferiorLip(Base):
     __tablename__ = 'inferior_lip'
-    id = Column(Integer, ForeignKey(administration.Patient.id, 
+    id = Column(Integer, ForeignKey(administration.Patient.id), 
                                                     primary_key=True)
     name = Column(String, default="")
     comments = Column(String, default="")

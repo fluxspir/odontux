@@ -5,7 +5,7 @@
 # Licence BSD
 #
 
-from models import meta, cotation
+from models import meta
 from base import BaseTool
 
 
