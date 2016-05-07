@@ -33,16 +33,30 @@ class Tooth(Base):
     """
     __tablename__ = 'tooth'
     id = Column(Integer, primary_key=True)
-    mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id), nullable=False)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                                nullable=False)
     name = Column(String, nullable=False)
     state = Column(String, default="")
     surveillance = Column(Boolean, default=False)
+    patient = relationship('Patient')
+
+class Periodonte(Base):
+    """
+        state : 0 : sane
+                1 : gingivitis
+                2 : parodontitis
+    """
+    __tablename__ = "periodonte"
+    id = Column(Integer, ForeignKey(Tooth.id), primary_key=True)
+    state = Column(Integer, default=0)
+    bleeding = Column(Boolean)
 
 class Event(Base):
     """
         event_location : see "constants.py" ; EVENT_LOCATION_TOOTH : 0 = tooth
                                                                      1 = crown
                                                                      2 = root
+                                                                     3 = periodonte
     """
     __tablename__ = "event"
     id = Column(Integer, primary_key=True)
@@ -52,6 +66,20 @@ class Event(Base):
     location = Column(Integer, nullable=False)
     color = Column(String, default="")
     pic = Column(String, default="")
+    comments = Column(String, default="")
+
+class PeriodonteEvent(Base):
+    """
+        location : 1 MB, 2 CB, 3 DB, 4 DP 5 CP 6 7 MP
+    """
+    id = Column(Integer, primary_key=True)
+    periodonte_id = Column(Integer, ForeignKey(Periodonte.id), nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                nullable=False)
+    location = Column(Integer, nullable=False)
+    furcation = Column(Integer, default=0)
+    recession = Column(Integer, default=0)
+    pocket_depth = Column(Integer, default=0)
     comments = Column(String, default="")
 
 class ToothEvent(Base):

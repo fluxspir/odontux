@@ -47,6 +47,12 @@ TOOTH_STATES = {
             "w": _("without_state"),
            }
 
+PERIODONTE_STATES = {
+            '0': _('sane'),
+            '1': _('gingivitis'),
+            '2': _('parodontitis')
+            }
+
 EVENT_LOCATION_TOOTH = (0, "tooth")
 EVENT_LOCATION_CROWN = (1, "crown")
 EVENT_LOCATION_ROOT = (2, "root")
