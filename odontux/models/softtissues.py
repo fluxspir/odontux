@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-import headneck
+import administration
 import sqlalchemy
 import datetime
 
@@ -16,8 +16,8 @@ from sqlalchemy import func
 
 class SuperiorLip(Base):
     __tablename__ = 'superior_lip'
-    id = Column(Integer, primary_key=True)
-    mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
+    id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                    primary_key=True)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
@@ -25,8 +25,8 @@ class SuperiorLip(Base):
 
 class InferiorLip(Base):
     __tablename__ = 'inferior_lip'
-    id = Column(Integer, primary_key=True)
-    mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
+    id = Column(Integer, ForeignKey(administration.Patient.id, 
+                                                    primary_key=True)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
@@ -34,8 +34,8 @@ class InferiorLip(Base):
 
 class LeftCheek(Base):
     __tablename__ = 'left_cheek'
-    id = Column(Integer, primary_key=True)
-    mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
+    id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    primary_key=True)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
@@ -43,8 +43,8 @@ class LeftCheek(Base):
 
 class RightCheek(Base):
     __tablename__ = 'right_cheek'
-    id = Column(Integer, primary_key=True)
-    mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
+    id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                    primary_key=True)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
@@ -52,8 +52,8 @@ class RightCheek(Base):
 
 class HardPalate(Base):
     __tablename__ = 'hard_palate'
-    id = Column(Integer, primary_key=True)
-    mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
+    id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    primary_key=True)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
@@ -61,8 +61,8 @@ class HardPalate(Base):
 
 class SoftPalate(Base):
     __tablename__ = 'soft_palate'
-    id = Column(Integer, primary_key=True)
-    mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
+    id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    primary_key=True)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
@@ -70,8 +70,8 @@ class SoftPalate(Base):
 
 class Tongue(Base):
     __tablename__ = 'tongue'
-    id = Column(Integer, primary_key=True)
-    mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
+    id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    primary_key=True)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
@@ -79,8 +79,8 @@ class Tongue(Base):
 
 class MouthBase(Base):
     __tablename__ = 'mouth_base'
-    id = Column(Integer, primary_key=True)
-    mouth_id = Column(Integer, ForeignKey(headneck.Mouth.id))
+    id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    primary_key=True)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())

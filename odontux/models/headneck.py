@@ -16,27 +16,21 @@ from sqlalchemy.orm import relationship, backref
 
 class Head(Base):
     __tablename__ = 'head'
-    id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
-                        nullable=False)
+    id = Column(Integer, ForeignKey(administration.Patient.id), primary_key=True)
     comments = Column(String, default="")
     pic = Column(String)
 
 
 class Neck(Base):
     __tablename__ = 'neck'
-    id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
-                        nullable=False)
+    id = Column(Integer, ForeignKey(administration.Patient.id), primary_key=True)
     comments = Column(String, default="")
     pic = Column(String, default="")
 
 
 class Mouth(Base):
     __tablename__ = 'mouth'
-    id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
-                        nullable=False)
+    id = Column(Integer, ForeignKey(administration.Patient.id), primary_key=True)
     superiorlip = relationship("SuperiorLip", uselist=False, backref="mouth",
                                cascade="all, delete, delete-orphan")
     inferiorlip = relationship("InferiorLip", uselist=False, backref="mouth",
