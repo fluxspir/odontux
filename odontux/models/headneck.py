@@ -14,23 +14,36 @@ from sqlalchemy import MetaData, ForeignKey
 from sqlalchemy.orm import relationship, backref
 
 
-class Head(Base):
-    __tablename__ = 'head'
-    id = Column(Integer, ForeignKey(administration.Patient.id), primary_key=True)
+class HeadEvent(Base):
+    __tablename__ = 'head_event'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                                nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     comments = Column(String, default="")
     pic = Column(String)
 
-
-class Neck(Base):
-    __tablename__ = 'neck'
-    id = Column(Integer, ForeignKey(administration.Patient.id), primary_key=True)
+class NeckEvent(Base):
+    __tablename__ = 'neck_event'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                                nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     comments = Column(String, default="")
     pic = Column(String, default="")
 
+class MouthEvent(Base):
+    id = Column(Integer, primary_key=True)
+    __tablename__ = 'mouth_event'
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                                nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
+    comments = Column(String, default="")
+    pic = Column(String, default="")
 
-class Mouth(Base):
-    __tablename__ = 'mouth'
-    id = Column(Integer, ForeignKey(administration.Patient.id), primary_key=True)
 #    superiorlip = relationship("SuperiorLip", uselist=False, backref="mouth",
 #                               cascade="all, delete, delete-orphan")
 #    inferiorlip = relationship("InferiorLip", uselist=False, backref="mouth",

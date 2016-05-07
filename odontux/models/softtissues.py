@@ -14,73 +14,97 @@ from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
 
-class SuperiorLip(Base):
+class SuperiorLipEvent(Base):
     __tablename__ = 'superior_lip'
-    id = Column(Integer, ForeignKey(administration.Patient.id), 
-                                                    primary_key=True)
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                    nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
 
 
-class InferiorLip(Base):
+class InferiorLipEvent(Base):
     __tablename__ = 'inferior_lip'
-    id = Column(Integer, ForeignKey(administration.Patient.id), 
-                                                    primary_key=True)
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                    nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
 
 
-class LeftCheek(Base):
+class LeftCheekEvent(Base):
     __tablename__ = 'left_cheek'
-    id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                    primary_key=True)
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
 
 
-class RightCheek(Base):
+class RightCheekEvent(Base):
     __tablename__ = 'right_cheek'
-    id = Column(Integer, ForeignKey(administration.Patient.id), 
-                                                    primary_key=True)
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                    nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
 
 
-class HardPalate(Base):
+class HardPalateEvent(Base):
     __tablename__ = 'hard_palate'
-    id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                    primary_key=True)
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
 
 
-class SoftPalate(Base):
+class SoftPalateEvent(Base):
     __tablename__ = 'soft_palate'
-    id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                    primary_key=True)
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
 
 
-class Tongue(Base):
+class TongueEvent(Base):
     __tablename__ = 'tongue'
-    id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                    primary_key=True)
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
 
 
-class MouthBase(Base):
+class MouthBaseEvent(Base):
     __tablename__ = 'mouth_base'
-    id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                    primary_key=True)
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())

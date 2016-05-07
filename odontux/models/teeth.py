@@ -10,7 +10,7 @@ import sqlalchemy
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 class Tooth(Base):
     """
@@ -49,6 +49,7 @@ class Periodonte(Base):
     """
     __tablename__ = "periodonte"
     id = Column(Integer, ForeignKey(Tooth.id), primary_key=True)
+    tooth = relationship('Tooth', backref='periodonte')
     state = Column(Integer, default=0)
     bleeding = Column(Boolean)
 
@@ -57,7 +58,6 @@ class Event(Base):
         event_location : see "constants.py" ; EVENT_LOCATION_TOOTH : 0 = tooth
                                                                      1 = crown
                                                                      2 = root
-                                                                     3 = periodonte
     """
     __tablename__ = "event"
     id = Column(Integer, primary_key=True)
@@ -83,6 +83,7 @@ class PeriodonteEvent(Base):
     recession = Column(Integer, default=0)
     pocket_depth = Column(Integer, default=0)
     comments = Column(String, default="")
+    pic = Column(String, default="")
 
 class ToothEvent(Base):
     """

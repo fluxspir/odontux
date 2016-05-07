@@ -19,7 +19,8 @@ from odontux import constants, checks
 from odontux import gnucash_handler
 from odontux.views import forms, cotation
 from odontux.views.log import index
-from odontux.models import meta, administration, users, act
+from odontux.models import ( meta, administration, users, act, headneck, 
+                            softtissues )
 
 
 # Fields too use in treatment of forms
@@ -93,7 +94,9 @@ def add_patient():
     # Secretary (when the patient first call/come, she may create a file
     # Assisant/Nurse to help the dentist
     # The dentist himself
-    if session['role'] == constants.ROLE_ADMIN:
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                    constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
         return redirect(url_for("allpatients"))
    
     checks.quit_patient_file()
