@@ -27,35 +27,35 @@ class CreateOdontuxDatabaseTool():
         models.init()
         meta.Base.metadata.create_all(bind=meta.session.bind.engine)
         
-        query = meta.session.query(users.OdontuxUser)
-        query = query.all()
-        if not query:
-            # create an admin user
-            print("creating first user \"admin\"")
-            print("password : please_change_password")
-            print("Would be a great idea to change the admin password")
-            admin_user = {
-                "username": "admin",
-                "password": b64encode(scrypt.encrypt(os.urandom(64),
-                                        "please_change_password",
-                                        maxtime=0.5)),
-                "role": 4,
-                "lastname": "admin",
-                "firstname": "admin",
-                "title": "M",
-            }
-            new_admin = users.OdontuxUser(**admin_user)
-            meta.session.add(new_admin)
-            meta.session.commit()
-    
-        query = meta.session.query(users.Settings)
-        query = query.all()
-        if not query:
-            print('creating key-value for sticker_position')
-            values = { 
-                "key": "sticker_position",
-                "value": "0"
-                }
-            new_setting = users.Settings(**values)
-            meta.session.add(new_setting)
-            meta.session.commit()
+#        query = meta.session.query(users.OdontuxUser)
+#        query = query.all()
+#        if not query:
+#            # create an admin user
+#            print("creating first user \"admin\"")
+#            print("password : please_change_password")
+#            print("Would be a great idea to change the admin password")
+#            admin_user = {
+#                "username": "admin",
+#                "password": b64encode(scrypt.encrypt(os.urandom(64),
+#                                        "please_change_password",
+#                                        maxtime=0.5)),
+#                "role": 4,
+#                "lastname": "admin",
+#                "firstname": "admin",
+#                "title": "M",
+#            }
+#            new_admin = users.OdontuxUser(**admin_user)
+#            meta.session.add(new_admin)
+#            meta.session.commit()
+#    
+#        query = meta.session.query(users.Settings)
+#        query = query.all()
+#        if not query:
+#            print('creating key-value for sticker_position')
+#            values = { 
+#                "key": "sticker_position",
+#                "value": "0"
+#                }
+#            new_setting = users.Settings(**values)
+#            meta.session.add(new_setting)
+#            meta.session.commit()
