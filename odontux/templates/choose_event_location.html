@@ -1,0 +1,14 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+<br />
+
+<a href="{{ url_for('add_tooth_event') }}">Add tooth event</a>
+<br />
+<a href="{{ url_for('add_periodonte_event') }}">Add periodonte event</a>
+<br />
+<br />
+<a href="{{ url_for('add_softtissues_event') }}">Add bucal mucosa event</a>
+<br />
+<a href="{{ url_for('add_headneck_event') }}">Add headneck event</a>
+
+{% endblock %}

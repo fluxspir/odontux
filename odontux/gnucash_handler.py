@@ -69,7 +69,7 @@ class GnuCash():
         elif "postgresql" in profissionnalaccounting_url.split("://"):
             self.gnucashtype = "postgresql"
         else:
-            self.gnucashtype = None
+            self.gnucashtype = "xml"
         assets = self.parser.get("gnucashdb", "assets")
         receivables = self.parser.get("gnucashdb", "receivables")
         dentalfund = self.parser.get("gnucashdb", "dentalfund")
@@ -233,8 +233,8 @@ class GnuCashCustomer(GnuCash):
             if self.patient.family.addresses[-1].country:
                 country = self.patient.family.addresses[-1].country.encode("utf_8")
             address.SetAddr4(county + " " + country)
-        if self.gnucashtype == "xml":
-            self.gcsession.save()
+            #if self.gnucashtype == "xml":
+            #    self.gcsession.save()
 
     def add_customer(self):
         try:

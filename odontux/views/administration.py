@@ -17,7 +17,7 @@ from gettext import gettext as _
 
 from odontux import constants, checks
 from odontux import gnucash_handler
-from odontux.views import forms, cotation
+from odontux.views import forms
 from odontux.views.log import index
 from odontux.models import ( meta, administration, users, act, headneck, 
                             softtissues )
@@ -116,7 +116,7 @@ def add_patient():
     hcp_patient_form.healthcare_plans_id.choices = [ (hc.id, hc.name) 
                 for hc in meta.session.query(act.HealthCarePlan).all() ]
     if not hcp_patient_form.healthcare_plans_id.choices:
-        return redirect(url_for('cotation.add_healthcare_plan'))
+        return redirect(url_for('add_healthcare_plan'))
 
     # three are used for odontux_users and medecine doctors, too
     address_form = forms.AddressForm(request.form)
@@ -240,7 +240,8 @@ def add_patient():
                             gen_info_form=gen_info_form,
                             address_form=address_form,
                             phone_form=phone_form,
-                            mail_form=mail_form)
+                            mail_form=mail_form,
+                            hcp_patient_form=hcp_patient_form)
 
 @app.route('/delete/patient?id=<int:body_id>')
 def delete_patient(body_id):

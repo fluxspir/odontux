@@ -5,7 +5,6 @@
 # Licence BSD
 #
 
-from actions import (add_generic, update_generic, list_generic)
 from log import (index, login, logout)
 from administration import (
                  allpatients,
@@ -58,7 +57,7 @@ from patient import (
                     enter_patient_appointment,
                     )
 from teeth import (
-                    list_teeth,
+                    list_teeth
                   )
 from assets import (
                     my_assets, add_provider, list_providers, list_assets, 
@@ -74,4 +73,7 @@ from traceability import (
                     add_sterilization_cycle_mode,
                     list_sterilization_cycle_mode,
                     update_sterilization_cycle_mode
+                    )
+from event import (
+                choose_event_location
                     )

@@ -91,28 +91,28 @@ def get_tooth_id_choice_list(patient_id):
     patient = checks.get_patient(patient_id)
     try:
         patient_teeth = meta.session.query(teeth.Tooth).filter(
-            teeth.Tooth.mouth_id == patient.mouth.id).all()
+            teeth.Tooth.patient_id == patient.id).all()
     except AttributeError:
         patient_teeth = ""
 
     if patient_teeth:
         tooth_id_list = [(t.id, t.name) for t in 
                             meta.session.query(teeth.Tooth).filter(
-                            teeth.Tooth.mouth_id == patient.mouth.id).order_by(
+                            teeth.Tooth.patient_id == patient.id).order_by(
                             teeth.Tooth.name).all() ]
     else:
         tooth_id_list = [ ( 0, "") ]
     return tooth_id_list
  
-def add_mouth(patient_id):
-    new_mouth = headneck.Mouth(**{"patient_id": patient_id})
-    meta.session.add(new_mouth)
-    meta.session.commit()
-    return new_mouth.id
-
-def add_tooth(mouth_id, name, state="s", surveillance=False):
+#def add_mouth(patient_id):
+#    new_mouth = headneck.Mouth(**{"patient_id": patient_id})
+#    meta.session.add(new_mouth)
+#    meta.session.commit()
+#    return new_mouth.id
+#
+def add_tooth(patient_id, name, state="s", surveillance=False):
     values = {
-        "mouth_id": mouth_id,
+        "patient_id": patient_id,
         "name": name.decode("utf_8"),
         "state": state,
         "surveillance": surveillance,
@@ -122,12 +122,12 @@ def add_tooth(mouth_id, name, state="s", surveillance=False):
     meta.session.commit()
     return new_tooth.id
 
-def checks_if_mouth_exists(patient_id):
-    patient = checks.get_patient(patient_id)
-    if patient.mouth.id:
-        return True
-    return False
-
+#def checks_if_mouth_exists(patient_id):
+#    patient = checks.get_patient(patient_id)
+#    if patient.mouth.id:
+#        return True
+#    return False
+#
 
 def _set_tooth_state(tooth_id, state):
     """ """
@@ -162,9 +162,9 @@ def list_teeth():
     
     patient = checks.get_patient(session['patient_id'])
     appointment = checks.get_appointment()
-    if patient.mouth and patient.mouth.teeth:
+    if patient.teeth:
         teeth = [(tooth.id, tooth.name, constants.TOOTH_STATES[tooth.state], 
-              tooth.surveillance) for tooth in patient.mouth.teeth ]
+              tooth.surveillance) for tooth in patient.teeth ]
     else:
         teeth = None
     return render_template('list_teeth.html', patient=patient, 
@@ -190,8 +190,8 @@ def show_tooth(tooth_id):
         .filter(teeth.Tooth.id == tooth_id)\
         .one()
 
-    if not tooth in patient.mouth.teeth:
-        return redirect(url_for('index'))
+    if not tooth in patient.teeth:
+        return redirect(url_for('list_teeth'))
     
     events = ( meta.session.query(teeth.Event)
                     .filter(
@@ -328,15 +328,10 @@ def add_event(patient_id, appointment_id):
  
     if request.method == 'POST' and event_form.validate():
 
-        # Verify first if we're dealing with a new mouth, and then new tooth
-        try:
-            mouth_id = patient.mouth.id
-        except:
-            mouth_id = add_mouth(patient_id)
         # if the user want to add new tooth
         if event_form.new_tooth.data:
             event_form.tooth_id.data = \
-            add_tooth(mouth_id, event_form.new_tooth.data)
+            add_tooth(patient_id, event_form.new_tooth.data)
 
         event_values = {}
         for f in get_event_field_list():

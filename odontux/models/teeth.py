@@ -39,7 +39,7 @@ class Tooth(Base):
     name = Column(String, nullable=False)
     state = Column(String, default="")
     surveillance = Column(Boolean, default=False)
-    patient = relationship('Patient')
+    patient = relationship('Patient', backref="teeth")
 
 class Periodonte(Base):
     """

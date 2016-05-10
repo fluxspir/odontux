@@ -145,9 +145,12 @@ def agenda_handler(day, starthour=0, startmin=0, durationhour=0, durationmin=0,
     """
     return 2 datetime object : ( starttime, endtime)
     """
-    for f in starthour, startmin, durationhour, durationmin, endhour, endmin:
-        if f is None:
-            f = 0
+    if not starthour: starthour = 0
+    if not startmin: startmin = 0
+    if not durationhour: durationhour = 0
+    if not durationmin: durationmin = 0
+    if not endhour: endhour = 0
+    if not endmin: endmin = 0
     starttime = datetime.datetime(day.year, day.month, day.day, 
                                                         starthour, startmin)
 
