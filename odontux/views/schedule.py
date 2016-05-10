@@ -5,6 +5,7 @@
 # Licence BSD
 #
 
+import pdb
 from flask import render_template, request, redirect, url_for, session 
 from wtforms import (Form, HiddenField, BooleanField, TextAreaField, TextField,
                     IntegerField, SelectField, DateField, validators)
@@ -18,9 +19,6 @@ from odontux.odonweb import app
 from odontux.models import meta, schedule, administration, users
 from odontux.views.forms import TimeField
 from odontux.views.log import index
-
-now = datetime.datetime.now()
-today = datetime.date.today()
 
 class AppointmentForm(Form):
     patient_id = HiddenField('patient_id')
@@ -48,7 +46,7 @@ class AgendaForm(Form):
     endmin = IntegerField(_('m'), [validators.Optional()])
 
 class SummaryAgendaForm(Form):
-    day = DateField(_('day'))
+    day = DateField(_('day'), format='%Y-%m-%d')
     dentist_id = SelectField(_('Dentist'), coerce=int)
 
 
@@ -66,7 +64,7 @@ def get_time_field_list():
     return [ "starthour", "startmin", "durationhour","durationmin", "endhour",
              "endmin" ]
 
-def get_summary_agenda_form(day=today):
+def get_summary_agenda_form(day=datetime.date.today()):
     """ 
     return summary_agenda_form, to send to summary_agenda in the 
     header_mainsummary
@@ -104,11 +102,10 @@ def display_day(dateday, dentist_id):
     For viewing all appointments occured the day "dateday",
     and create links for "previous_day" and "next_day"
     """
+    dateday = datetime.datetime.strptime(dateday,'%Y-%m-%d').date()
     summary_agenda_form = get_summary_agenda_form(dateday)
     if not dentist_id:
         return redirect(url_for('index'))
-    dateday = datetime.datetime.strptime(dateday.encode("utf_8"),
-                                         '%Y-%m-%d').date()
     nextday = dateday + datetime.timedelta(days=1)
     prevday = dateday - datetime.timedelta(days=1)
     meetings = meta.session.query(schedule.Agenda).filter(or_(
