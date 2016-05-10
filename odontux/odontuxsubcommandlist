@@ -47,7 +47,7 @@ def get_tool(commandlist):
 
 commandlist = []
 commandlist = get_tool(commandlist)
-commandlist = get_command(commandlist)
+#commandlist = get_command(commandlist)
 
 for cmd in commandlist:
     print(cmd)

@@ -56,7 +56,8 @@ models.init()
 command_name = sys.argv[1]
 args = sys.argv[2:]
 
-CommandClass = get_command(command_name)
+#CommandClass = get_command(command_name)
+CommandClass = None
 
 if CommandClass is None:
     # TODO: call usage/help
