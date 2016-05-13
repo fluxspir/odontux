@@ -109,3 +109,14 @@ class MouthBaseEvent(Base):
     comments = Column(String, default="")
     time_stamp = Column(DateTime, default=func.now())
 
+class UvulaEvent(Base):
+    __tablename__ = 'uvula_event'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                    nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
+    name = Column(String, default="")
+    comments = Column(String, default="")
+    time_stamp = Column(DateTime, default=func.now())
+

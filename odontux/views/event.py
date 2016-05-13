@@ -20,7 +20,11 @@ from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      DecimalField, HiddenField, validators)
 
 #class EventForm(Form):
-    
+
+class SoftTissuesEventForm(Form):
+    id = HiddenField(_('id'))
+    name = TextField(_('Name of the event'))
+    comments = TextAreaField(_('Comments about the event'))
 
 @app.route('/choose/event_location?pid=<int:patient_id>&aid=<int:appointment_id>')
 def choose_event_location(patient_id, appointment_id):
@@ -52,7 +56,10 @@ def add_periodonte_event():
 
 @app.route('/add/softtissues_event')
 def add_softtissues_event():
-    pass
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    
 
 @app.route('/add/headneck_event')
 def add_headneck_event():
