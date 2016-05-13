@@ -279,6 +279,7 @@ def add_appointment(body_id):
         meta.session.add(new_schedule)
         meta.session.commit()
 
+        session['appointment_id'] = new_schedule.id
         return redirect(url_for('enter_patient_appointment'))
 
     # the 'GET method' ; 
