@@ -23,8 +23,7 @@ from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
     
 
 @app.route('/choose/event_location?pid=<int:patient_id>&aid=<int:appointment_id>')
-@app.route('/choose/event_location?pid=<int:patient_id>')
-def choose_event_location(patient_id, appointment_id=0):
+def choose_event_location(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
     if not session['role'] in authorized_roles:
@@ -34,14 +33,11 @@ def choose_event_location(patient_id, appointment_id=0):
             .filter(administration.Patient.id == patient_id)
             .one()
         )
-    if appointment_id:
-        appointment = (
-            meta.session.query(schedule.Appointment)
-                .filter(schedule.Appointment.id == appointment_id)
-                .one()
-            )
-    else:
-        appointment = None
+    appointment = (
+        meta.session.query(schedule.Appointment)
+            .filter(schedule.Appointment.id == appointment_id)
+            .one()
+        )
     return render_template('choose_event_location.html',
                                             patient=patient,
                                             appointment=appointment)
