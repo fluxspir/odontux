@@ -288,9 +288,9 @@ def show_tooth(tooth_id):
                                               events_list=events_list)
 
 
-@app.route('/event/add?id=<int:patient_id>&appointment_id=<appointment_id>',
+@app.route('/add/event_tooth_located?pid=<int:patient_id>&aid=<appointment_id>',
             methods=['GET', 'POST'])
-def add_event(patient_id, appointment_id):
+def add_event_tooth_located(patient_id, appointment_id):
     """
     An event is generic and related to more specific : tooth, crown or root,
     which are called in a second time.

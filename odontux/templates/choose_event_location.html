@@ -2,7 +2,9 @@
 {% block main %}
 <br />
 
-<a href="{{ url_for('add_tooth_event') }}">Add tooth event</a>
+<a href="{{ url_for('add_event_tooth_located', patient_id=session['patient_id'],
+                                appointment_id=session['appointment_id']) }}">
+    Add tooth event</a><br />
 <br />
 <a href="{{ url_for('add_periodonte_event') }}">Add periodonte event</a>
 <br />
