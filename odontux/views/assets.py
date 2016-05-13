@@ -119,6 +119,7 @@ class AssetForm(Form):
     #type = SelectField(_('Type'), description='ChangementType()')
     quantity = IntegerField(_('Quantity'), [validators.Optional()], default=1)
     service = BooleanField(_('In service since'), description='InService()')
+    description = TextAreaField(_('Description'), [validators.Optional()])
     start_of_use = DateField(_('Start of Use'), 
                                     format='%Y-%m-%d',
                                     validators=[validators.Optional()])
@@ -130,6 +131,7 @@ class DeviceForm(Form):
     device_id = HiddenField(_('id'))
     lifetime_expected = IntegerField(_('Lifetime expected in years'), 
                                                     [validators.Optional()])
+    serial_number = TextField(_('Serial Number'))
 
 class MaterialForm(Form):
     material_id = HiddenField(_('id'))
@@ -548,6 +550,8 @@ def add_asset():
         if device_form.lifetime_expected.data:
             values['lifetime_expected'] = datetime.timedelta(
                                     365 * device_form.lifetime_expected.data)
+        if device_form.serial_number.data:
+            values['serial_number'] = device_form.serial_number.data
         new_device = assets.Device(**values)
         meta.session.add(new_device)
         meta.session.commit()
@@ -614,7 +618,7 @@ def add_asset():
             asset_cat = _add_material_category(asset_category_form, 
                                             material_category_form)
     add_asset_field_list = [ "provider_id", "acquisition_date", 
-                        "acquisition_price", "new" ]
+                        "acquisition_price", "new", "description" ]
 
     add_material_field_list = [ "used_in_traceability_of", "expiration_date", 
                                 "expiration_alert", "batch_number" ]
@@ -809,9 +813,10 @@ def update_asset(asset_id):
 
     update_asset_field_list = [ "id", "provider_id", "acquisition_date", 
                         "acquisition_price", "new", "user_id", "office_id",
-                        "start_of_use", "end_of_use", "end_use_reason"]
+                        "start_of_use", "end_of_use", "end_use_reason", 
+                        "description"]
 
-    update_device_field_list = [ "lifetime_expected" ]
+    update_device_field_list = [ "lifetime_expected", "serial_number" ]
 
     update_material_field_list = [ "used_in_traceability_of", 
                     "expiration_date", "actual_quantity", "expiration_alert", 
@@ -825,6 +830,8 @@ def update_asset(asset_id):
             if f == "lifetime_expected" and getattr(device_form, f).data:
                 setattr(asset, f, datetime.timedelta(getattr(
                                                 device_form, f).data * 365))
+            else:
+                setattr(asset, f, getattr(device_form, f).data)
         meta.session.commit()
         return redirect(url_for('view_device', asset_id=asset.id))
         

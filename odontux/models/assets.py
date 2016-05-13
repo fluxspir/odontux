@@ -165,8 +165,9 @@ class Asset(Base):
     start_of_use = Column(Date, default=None)
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
-    type = Column(String(20))
     sterilizations = relationship('AssetSterilized')
+    description = Column(String)
+    type = Column(String(20))
 
     __mapper_args__ = {
         'polymorphic_identity': 'asset',
@@ -214,6 +215,7 @@ class Device(Asset):
     __tablename__ = "device"
     id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
     lifetime_expected = Column(Interval, default=None)
+    serial_number = Column(String, default=None)
 
     __mapper_args__ = {
         'polymorphic_identity': 'device',
