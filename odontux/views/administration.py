@@ -20,7 +20,7 @@ from odontux import gnucash_handler
 from odontux.views import forms
 from odontux.views.log import index
 from odontux.models import ( meta, administration, users, act, headneck, 
-                            softtissues )
+                            endobuccal )
 
 
 # Fields too use in treatment of forms

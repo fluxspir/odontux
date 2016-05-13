@@ -21,10 +21,17 @@ from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
 
 #class EventForm(Form):
 
-class SoftTissuesEventForm(Form):
+
+class SelectSTEventForm(Form):
+    soft_tissue = SelectField(_('soft tissue'), coerce=int)
+
+class EndoBuccalEventForm(Form):
     id = HiddenField(_('id'))
-    name = TextField(_('Name of the event'))
+    name = TextField(_('Name of the event'), [validators.Required()])
     comments = TextAreaField(_('Comments about the event'))
+
+class HardPalateEventForm(EndoBuccalEventForm):
+    pass
 
 @app.route('/choose/event_location?pid=<int:patient_id>&aid=<int:appointment_id>')
 def choose_event_location(patient_id, appointment_id):
@@ -55,11 +62,24 @@ def add_periodonte_event():
     pass
 
 @app.route('/add/softtissues_event')
-def add_softtissues_event():
+def add_endo_buccal_event():
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    
+
+    select_soft_form = SelectSTEventForm(request.form)
+    select_soft_form.soft_tissue.choices = []
+    for loc in constants.ANATOMIC_LOCATION.items():
+        if loc[1][2] != "endobuccal":
+            continue
+        select_soft_form.soft_tissue.choices.append(
+            (loc[0], loc[1][0]) 
+        )
+    endo_buccal_event_form = EndoBuccalEventForm(request.form)
+
+    if ( request.method == 'POST' and select_soft_form.validate()
+                                    and endo_buccal_event_form.validate() ):
+        pass
 
 @app.route('/add/headneck_event')
 def add_headneck_event():

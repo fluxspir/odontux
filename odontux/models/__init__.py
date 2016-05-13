@@ -21,9 +21,9 @@ from anamnesis import MedicalHistory, PastSurgeries, Allergies
 from headneck import HeadEvent, NeckEvent, MouthEvent
 from medication import DrugPrescribed, Prescription, PrescribedDrugReference
 from schedule import Agenda, Appointment, AppointmentMemo
-from softtissues import (SuperiorLipEvent, InferiorLipEvent, LeftCheekEvent, 
+from endobuccal import (SuperiorLipEvent, InferiorLipEvent, LeftCheekEvent, 
                         RightCheekEvent,HardPalateEvent, SoftPalateEvent, 
-                        TongueEvent, MouthBaseEvent)
+                        TongueEvent, MouthBaseEvent, UvulaEvent)
 from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootEvent,
                     Periodonte, PeriodonteEvent )
 from act import ( Specialty, HealthCarePlan, ActType, Cotation, 
