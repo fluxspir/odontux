@@ -13,7 +13,7 @@ from gettext import gettext as _
 
 from odontux.odonweb import app
 from odontux import constants, checks
-from odontux.models import meta, administration, schedule
+from odontux.models import meta, administration, schedule, endobuccal, headneck
 from odontux.views.log import index
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
@@ -22,8 +22,8 @@ from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
 #class EventForm(Form):
 
 
-class SelectSTEventForm(Form):
-    soft_tissue = SelectField(_('soft tissue'), coerce=int)
+class SelectEBLocationEventForm(Form):
+    location = SelectField(_('soft tissue'), coerce=int)
 
 class EndoBuccalEventForm(Form):
     id = HiddenField(_('id'))
@@ -61,25 +61,65 @@ def add_tooth_event():
 def add_periodonte_event():
     pass
 
-@app.route('/add/softtissues_event')
-def add_endo_buccal_event():
+@app.route('/add/endo_buccal_event?pid=<int:patient_id>&aid=<int:appointment_id>', 
+                                                    methods=['GET', 'POST'])
+def add_endo_buccal_event(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-
-    select_soft_form = SelectSTEventForm(request.form)
-    select_soft_form.soft_tissue.choices = []
+    patient = (
+        meta.session.query(administration.Patient)
+            .filter(administration.Patient.id == patient_id)
+            .one()
+        )
+    appointment = (
+        meta.session.query(schedule.Appointment)
+            .filter(schedule.Appointment.id == appointment_id)
+            .one()
+        )
+    select_location_form = SelectEBLocationEventForm(request.form)
+    select_location_form.location.choices = []
     for loc in constants.ANATOMIC_LOCATION.items():
         if loc[1][2] != "endobuccal":
             continue
-        select_soft_form.soft_tissue.choices.append(
+        select_location_form.location.choices.append(
             (loc[0], loc[1][0]) 
         )
     endo_buccal_event_form = EndoBuccalEventForm(request.form)
 
-    if ( request.method == 'POST' and select_soft_form.validate()
+    if ( request.method == 'POST' and select_location_form.validate()
                                     and endo_buccal_event_form.validate() ):
-        pass
+        
+        loc = select_location_form.location.data
+        if constants.ANATOMIC_LOCATION[loc][2] == "endobuccal":
+            LocationEvent = getattr(endobuccal, 
+                                        constants.ANATOMIC_LOCATION[loc][3] )
+        elif constants.ANATOMIC_LOCATION[loc][3] == "headneck":
+            LocationEvent = getattr(headneck,
+                                        constants.ANATOMIC_LOCATION[loc][3] )
+        else:
+            return redirect(url_for('index'))
+
+        values = {
+            'patient_id': session['patient_id'],
+            'appointment_id': session['appointment_id'],
+            'name': endo_buccal_event_form.name.data,
+            'comments': endo_buccal_event_form.comments.data,
+#            'docs': endo_buccal_event_form.docs.data,
+            }
+        new_event = LocationEvent(**values)
+        meta.session.add(new_event)
+        meta.session.commit()
+
+        return redirect(url_for('choose_event_location',
+                                patient_id=session['patient_id'],
+                                appointment_id=session['appointment_id']))
+
+    return render_template('add_endobuccal_event.html',
+                            select_location_form=select_location_form,
+                            endo_buccal_event_form=endo_buccal_event_form,
+                            patient=patient,
+                            appointment=appointment)
 
 @app.route('/add/headneck_event')
 def add_headneck_event():

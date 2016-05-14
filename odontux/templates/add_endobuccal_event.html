@@ -1,0 +1,16 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+Adding new endo buccal event
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="{{ url_for('add_endo_buccal_event',
+                                    patient_id=session.patient_id,
+                                    appointment_id=session.appointment_id
+                                    ) }}">
+  <dl>
+    {{ render_field(select_location_form.location) }}
+    {{ render_field(endo_buccal_event_form.name) }}
+    {{ render_field(endo_buccal_event_form.comments) }}
+  </dl>
+  <p><input type="submit" value="Add">
+</form>
+{% endblock %}

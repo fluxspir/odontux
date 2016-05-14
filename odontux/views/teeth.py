@@ -300,12 +300,6 @@ def add_event_tooth_located(patient_id, appointment_id):
 
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment()
-#    if tooth_id:
-#        tooth = meta.session.query(teeth.Tooth).filter(
-#                teeth.Tooth.id == tooth_id).one()
-#    else:
-#        tooth = ""
-
     # Create the forms
     event_form = EventForm(request.form)
     # Populate select fields, get defaults data for the 'GET' method
@@ -426,7 +420,7 @@ def add_crownevent(patient_id, appointment_id, event_id):
 
 @app.route('/event_root/add?id=<int:patient_id>'
            '&appointment_id=<int:appointment_id>'
-           '&event_form=<event_form>', methods=['GET', 'POST'])
+           '&event_id=<int:event_id>', methods=['GET', 'POST'])
 def add_rootevent(patient_id, appointment_id, event_id):
     """ """
     patient = checks.get_patient(patient_id)
