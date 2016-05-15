@@ -198,6 +198,8 @@ PERIODONTE_STATES = {
 EVENT_LOCATION_TOOTH = (0, "tooth")
 EVENT_LOCATION_CROWN = (1, "crown")
 EVENT_LOCATION_ROOT = (2, "root")
+EVENT_LOCATION_PERIODONTE = (3, "periodonte")
+
 
 # could be turn to [ ( 0 , "sane" ), (1, "place" ), ...]  after a 
 # {models,commands,views}/teeth.py update
