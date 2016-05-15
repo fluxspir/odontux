@@ -47,8 +47,10 @@ def choose_event_location(patient_id, appointment_id):
     appointment = (
         meta.session.query(schedule.Appointment)
             .filter(schedule.Appointment.id == appointment_id)
-            .one()
+            .one_or_none()
         )
+    if not appointment:
+        return redirect(url_for('add_appointment', body_id=patient_id))
     return render_template('choose_event_location.html',
                                             patient=patient,
                                             appointment=appointment)
