@@ -1,22 +1,61 @@
-{% from "_formhelpers.html" import render_simple_field, render_simple_hidden_field %}
-{% extends "summary_patient.html" %}
-{% block javascript_specific %}
-  <script type="text/javascript" src="/static/js/event.js"></script>
-{% endblock %}
+
+<script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<script type="text/javascript">
+  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
+{% extends 'summary_patient.html' %}
+
 {% block main %}
-  <div id="event">
-  {% block event %}
-    <form method="post" action="{{ url_for('add_event_tooth_located', patient_id=patient.id, appointment_id=event_form.appointment_id.data) }}">
-      {{ render_simple_hidden_field(event_form.event_id) }}
-      {{ render_simple_field(event_form.tooth_id) }}
-      {{ render_simple_field(event_form.new_tooth) }}
-      {{ render_simple_field(event_form.appointment_id) }}
-      {{ render_simple_field(event_form.location) }}
-      {{ render_simple_field(event_form.color) }}
-      {{ render_simple_field(event_form.pic) }}
-      {{ render_simple_field(event_form.comments) }}
-      <input type="submit" value="Add" />
-    </form>
-  {% endblock %}
+{% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_field, render_hidden_field, render_field_js_onchange, render_simple_field%}
+
+<h3>Add an event on a tooth (or set of teeth).</h3>
+<form method="post" action={{ url_for('add_event_tooth_located',
+                              patient_id=session.patient_id,
+                              appointment_id=session.appointment_id) }}>
+
+  <div id="anat_loc">
+    {{ render_field_js_onchange(event_form.anatomic_location) }}
+  <br />
+    {{ render_simple_field(event_form.teeth) }}
   </div>
+  <br />
+    {{ render_simple_field(event_form.appointment_id) }}
+
+  <div id="tooth">
+    {{ render_simple_field(tooth_event_form.choose_state) }}
+  </div>
+  
+  <div id="crown">
+    {{ render_simple_field(crown_event_form.choose_state) }}
+    {{ render_simple_field(crown_event_form.side) }}
+    {{ render_simple_field(crown_event_form.tooth_shade) }}
+  </div>
+  
+  <div id="root">
+    {{ render_simple_field(root_event_form.choose_state) }}
+    {{ render_simple_field(root_event_form.root) }}
+  </div>
+  
+  <div id="periodonte">
+    {{ render_simple_field(periodonte_event_form.choose_state) }}
+    {{ render_simple_field(periodonte_event_form.bleeding) }}
+    {{ render_simple_field(periodonte_event_form.furcation) }}
+    {{ render_simple_field(periodonte_event_form.recession) }}
+    {{ render_simple_field(periodonte_event_form.pocket_depth) }}
+  </div>
+
+
+    {{ render_simple_field(event_form.comments) }}
+    {{ render_simple_field(event_form.pic) }}
+    {{ render_simple_field(event_form.color) }}
+
+</form>
+
+<script type="text/javascript" src="/static/js/select_field.js"></script>
+
+{% if clear_form %}
+  <script type="text/javascript" src="/static/js/reset_teeth_event_on_load.js">
+  </script>;
+{% endif %}
 {% endblock %}

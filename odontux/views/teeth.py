@@ -6,11 +6,9 @@
 #
 
 import pdb
-from wtforms import (
-                    Form, 
-                    TextField, TextAreaField,
-                    HiddenField, 
-                    SelectField, 
+from wtforms import ( Form, 
+                    TextField, TextAreaField, HiddenField, SelectMultipleField,
+                    BooleanField, RadioField, IntegerField, SelectField, 
                     validators
                     )
 import sqlalchemy
@@ -27,89 +25,53 @@ from odontux.views.log import index
 
 class EventForm(Form):
     event_id = HiddenField(_("ID"))
-    tooth_id = SelectField(_("Tooth"), coerce=int)
-    new_tooth = TextField(_("New_tooth"))
+    teeth = TextField(_("Teeth"))
+    anatomic_location = SelectField(_("Location"),
+                        description='ChangementToothAnatomicLocation()')
+
     appointment_id = SelectField(_("Appointment"), coerce=int)
-    location = SelectField(_("Location"), coerce=int)
-    color = forms.ColorField(_("color"))
+    
+    description = TextField(_("Description"))
+    comments = TextAreaField(_("General comments of this event"))
     pic = TextField(_("pic"))
-    comments = TextAreaField(_("comments"))
+    color = forms.ColorField(_("color"))
 
 class ToothEventForm(Form):
-    toothevent_id = HiddenField(_("ID"))
-    event_id = HiddenField(_("event_id"))
-    sane = TextField(_("sane"))
-    place = TextField(_("place"))
-    mobility = TextField(_("mobility"))
-    fracture = TextField(_("fracture"))
-    absence = TextField(_("absence"))
-    replaced = TextField(_("replaced"))
-    implant = TextField(_("implant"))
+    choose_state = SelectField(_("Choose state of tooth/teeth"), coerce=int)
 
 class CrownEventForm(Form):
-    crownevent_id = HiddenField(_("ID"))
-    event_id = HiddenField(_("event_id"))
-    side = TextField(_("side"))
+    choose_state = SelectField(_("Choose state of crown(s)"), coerce=int)
+    side = SelectMultipleField(_("Sides"), coerce=int)
     tooth_shade = TextField(_("tooth_shade"))
-    sealing = TextField(_("sealing"))
-    decay = TextField(_("decay"))
-    obturation = TextField(_("obturation"))
-    crowned = TextField(_("crowned"))
-    bridge = TextField(_("bridge"))
 
 class RootEventForm(Form):
-    rootevent_id = HiddenField(_("ID"))
-    event_id = HiddenField(_("event_id"))
-    canal = TextField(_("canal"))
-    infected = TextField(_("infected"))
-    abscess = TextField(_("abscess"))
-    obturation = TextField(_("obturation"))
-    inlaycore = TextField(_("inlay core"))
-    screwpost = TextField(_("screw post"))
+    choose_state = SelectField(_("Choose state of root(s)"), coerce=int)
+    root = SelectMultipleField(_("Root"), coerce=int)
 
-def get_location_choices():
-    return [ constants.EVENT_LOCATION_TOOTH, constants.EVENT_LOCATION_CROWN,
-             constants.EVENT_LOCATION_ROOT ]
+class PeriodonteEventForm(Form):
+    choose_state = SelectField(_("Choose state of periodonte"), coerce=int)
+    bleeding = BooleanField(_('Bleeding'))
+    furcation = IntegerField(_('Furcation') ) ## validators <=3 ?
+    recession = IntegerField(_('Recession') )
+    pocket_depth = IntegerField(_('Pocket depth') )
 
 def get_event_field_list():
-    return [ "tooth_id", "appointment_id", "location", "pic",
-             "color", "comments" ]
+    return [ "teeth", "appointment_id", "anatomic_location", "pic",
+             "color", "comments", "description" ]
 
 def get_tooth_event_field_list():
-    return [ "event_id", "sane", "place", "mobility", "fracture",
-             "absence", "replaced", "implant" ]
+    return [ "choose_state" ]
 
 def get_crown_event_field_list():
-    return [ "event_id", "side", "tooth_shade", "sealing", "decay",
-             "obturation", "crowned", "bridge" ]
+    return [ "side", "tooth_shade", "choose_state"]
 
 def get_root_event_field_list():
-    return [ "event_id", "canal", "infected", "abscess", "obturation",
-             "inlaycore", "screwpost" ]
+    return [ "choose_state", "root" ]
 
-def get_tooth_id_choice_list(patient_id):
-    patient = checks.get_patient(patient_id)
-    try:
-        patient_teeth = meta.session.query(teeth.Tooth).filter(
-            teeth.Tooth.patient_id == patient.id).all()
-    except AttributeError:
-        patient_teeth = ""
+def get_periodonte_event_field_list():
+    return [ "chosse_state", "bleeding", "furcation", "recession", 
+            "pocket_depth" ]
 
-    if patient_teeth:
-        tooth_id_list = [(t.id, t.name) for t in 
-                            meta.session.query(teeth.Tooth).filter(
-                            teeth.Tooth.patient_id == patient.id).order_by(
-                            teeth.Tooth.name).all() ]
-    else:
-        tooth_id_list = [ ( 0, "") ]
-    return tooth_id_list
- 
-#def add_mouth(patient_id):
-#    new_mouth = headneck.Mouth(**{"patient_id": patient_id})
-#    meta.session.add(new_mouth)
-#    meta.session.commit()
-#    return new_mouth.id
-#
 def add_tooth(patient_id, name, state="s", surveillance=False):
     values = {
         "patient_id": patient_id,
@@ -122,34 +84,12 @@ def add_tooth(patient_id, name, state="s", surveillance=False):
     meta.session.commit()
     return new_tooth.id
 
-#def checks_if_mouth_exists(patient_id):
-#    patient = checks.get_patient(patient_id)
-#    if patient.mouth.id:
-#        return True
-#    return False
-#
-
 def _set_tooth_state(tooth_id, state):
     """ """
     tooth = meta.session.query(teeth.Tooth).filter(
                         teeth.Tooth.id == tooth_id).one()
-    tooth_state = {
-        "sane": "s",
-        "sealing": "x",
-        "obturation": "o",
-        "crowned": "c",
-        "decay": "d",
-        "place": "p",
-        "mobility": "m",
-        "fracture": "f",
-        "absence": "a",
-        "absent": "a",
-        "bridge": "b",
-        "resin": "r",
-        "implant": "I"
-        }
     try:
-        tooth.state = tooth_state[state]
+        tooth.state = state
         meta.session.commit()
     except KeyError:
         pass
@@ -185,6 +125,7 @@ def show_tooth(tooth_id):
     actual_appointment = checks.get_appointment()
     if not actual_appointment:
         actual_appointment = patient.appointments[-1]
+        session['appointment_id'] = actual_appointment.id
     
     tooth = meta.session.query(teeth.Tooth)\
         .filter(teeth.Tooth.id == tooth_id)\
@@ -288,9 +229,84 @@ def show_tooth(tooth_id):
                                               events_list=events_list)
 
 
-@app.route('/add/event_tooth_located?pid=<int:patient_id>&aid=<appointment_id>',
-            methods=['GET', 'POST'])
+@app.route('/add/event_tooth_located?pid=<int:patient_id>'
+                '&aid=<int:appointment_id>', methods=['GET','POST'])
 def add_event_tooth_located(patient_id, appointment_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment()
+
+    event_form = EventForm(request.form)
+    tooth_event_form = ToothEventForm(request.form)
+    crown_event_form = CrownEventForm(request.form)
+    root_event_form = RootEventForm(request.form)
+    periodonte_event_form = PeriodonteEventForm(request.form)
+
+    event_form.anatomic_location.choices =\
+                                    constants.TOOTH_EVENT_LOCATIONS.items()
+    event_form.appointment_id.choices = [
+            (a.id, str(a.agenda.starttime.date()) 
+            + " " + str(a.agenda.starttime.time()) 
+            ) for a in meta.session.query(schedule.Appointment)
+                        .filter(schedule.Appointment.patient_id == patient.id)
+                        .all() 
+            ]
+
+    tooth_event_form.choose_state.choices = [ (id, state[0]) for id, state in
+                                            constants.TOOTH_STATES.items() ]
+    crown_event_form.choose_state.choices = [ (id, state[0]) for id, state in
+                                            constants.CROWN_STATES.items() ]
+    crown_event_form.side.choices = [ (id, side[0]) for id, side in 
+                                        constants.CROWN_SIDES.items() ]
+    root_event_form.choose_state.choices = [ (id, state[0]) for id, state in 
+                                        constants.ROOT_STATES.items() ]
+    root_event_form.root.choices = [ (id, root[0] ) for id, root in
+                                        constants.ROOT_CANALS.items() ]
+    periodonte_event_form.choose_state.choices = [ (id, state[0]) 
+                        for id, state in constants.PERIODONTE_STATES.items() ]
+
+    if request.method == 'POST' and event_form.validate():
+        if event_form.location.data == "tooth":
+            if tooth_event_form.validate():
+                add_tooth_event()
+        elif event_form.location.data == "crown": 
+            if crown_event_form.validate():
+                add_crown_event()
+        elif event_form.location.data == "root":
+            if root_event_form.validate():
+                add_root_event()
+        elif event_form.location.data == "periodonte":
+            if periodonte_event_form.validate():
+                add_periodonte_event()
+        else:
+            return redirect(url_for('index'))
+    
+#    session['location_tooth'] = constants.TOOTH_EVENT_LOCATION_TOOTH
+#    session['location_crown'] = constants.TOOTH_EVENT_LOCATION_CROWN
+#    session['location_root'] = constants.TOOTH_EVENT_LOCATION_ROOT
+#    session['location_periodonte'] = constants.TOOTH_EVENT_LOCATION_PERIODONTE
+
+    if request.method == 'POST':
+        clear_form = False
+    else:
+        clear_form = True
+
+    return render_template('add_event_tooth_located.html',
+                    patient=patient, appointment=appointment,
+                    event_form=event_form,
+                    tooth_event_form=tooth_event_form,
+                    crown_event_form=crown_event_form,
+                    root_event_form=root_event_form,
+                    periodonte_event_form=periodonte_event_form,
+                    clear_form=clear_form)
+
+@app.route('/add/event_tooth_loc?pid=<int:patient_id>&aid=<appointment_id>',
+            methods=['GET', 'POST'])
+def add_event_tooth_loc(patient_id, appointment_id):
     """
     An event is generic and related to more specific : tooth, crown or root,
     which are called in a second time.
@@ -303,7 +319,6 @@ def add_event_tooth_located(patient_id, appointment_id):
     # Create the forms
     event_form = EventForm(request.form)
     # Populate select fields, get defaults data for the 'GET' method
-    event_form.tooth_id.choices = get_tooth_id_choice_list(patient_id)
    
     # Prepare the appointment select_field :
     event_form.appointment_id.choices = [(a.id, 
@@ -318,9 +333,17 @@ def add_event_tooth_located(patient_id, appointment_id):
         session['appointment_id'] = appointment.id
     event_form.appointment_id.data = appointment.id
     
-    event_form.location.choices = get_location_choices()
+    event_form.anatomic_location.choices =\
+                                    constants.TOOTH_EVENT_LOCATIONS.items()
  
     if request.method == 'POST' and event_form.validate():
+
+        # Separation of teeth on which appeared this event;
+        # unique teeth separated by ";" or ","
+        # sequence of maxilar or mandibular teeth : separated by "-".
+        
+        teeth_affected_by_event = []
+        event_form.teeth.data
 
         # if the user want to add new tooth
         if event_form.new_tooth.data:
@@ -351,13 +374,14 @@ def add_event_tooth_located(patient_id, appointment_id):
         else:
             raise Exception(_("This event_location doesn't exist"))
 
-    return render_template("add_event.html", patient=patient, 
+    return render_template("add_event_tooth_located.html", patient=patient, 
                                           appointment=appointment,
                                           event_form=event_form)
 
-@app.route('/event_tooth/add?id=<int:patient_id>'
-           '&appointment_id=<int:appointment_id>'
-           '&event_id=<int:event_id>', methods=['GET', 'POST'])
+@app.route('/event_tooth/add?pid=<int:patient_id>'
+                        '&aid=<int:appointment_id>'
+                        '&event_id=<int:event_id>', 
+                        methods=['GET', 'POST'])
 def add_toothevent(patient_id, appointment_id, event_id):
     """ """
     patient = checks.get_patient(patient_id)
