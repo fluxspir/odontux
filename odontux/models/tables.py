@@ -137,9 +137,3 @@ Column('material_id', Integer, ForeignKey('material.id')),
 Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("quantity_used", Numeric)
 )
-
-sterilized_asset_appointment_table = Table("sterilized_asset_appointment", 
-                                                                Base.metadata,
-Column('asset_sterilized_id', Integer, ForeignKey('asset_sterilized.id')),
-Column('appointment_id', Integer, ForeignKey('appointment.id'))
-)
