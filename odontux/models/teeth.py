@@ -50,7 +50,9 @@ class Event(Base):
     description = Column(String)
     comments = Column(String, default="")
     color = Column(String, default="")
-    pic = Column(String, default="")
+    x_ray = Column(Boolean, default=False)
+    pic = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
     location = Column(Integer, nullable=False)
 
     __mapper_args__ = {
@@ -102,13 +104,6 @@ class CrownEvent(Event):
         * v/b : Vestibular / Buccal
         * l/p : Lingual / Palatal
         * a : All (usually, when the tooth is crowned)
-    A crown is either :
-        * s : sane
-        * x : sealed
-        * c : crowned
-        * b : bridge
-        * o : obturation
-        * d : decayed
     We may add comments
     We may use a color-code for what happened
     For the pics, see "toothevent"

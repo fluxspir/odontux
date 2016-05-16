@@ -22,7 +22,9 @@ class HeadEvent(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                                 nullable=False)
     comments = Column(String, default="")
-    pic = Column(String)
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
 class NeckEvent(Base):
     __tablename__ = 'neck_event'
@@ -32,43 +34,8 @@ class NeckEvent(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                                 nullable=False)
     comments = Column(String, default="")
-    pic = Column(String, default="")
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
-class MouthEvent(Base):
-    id = Column(Integer, primary_key=True)
-    __tablename__ = 'mouth_event'
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
-                                                                nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                                nullable=False)
-    comments = Column(String, default="")
-    pic = Column(String, default="")
 
-#    superiorlip = relationship("SuperiorLip", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-#    inferiorlip = relationship("InferiorLip", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-#    leftcheek = relationship("LeftCheek", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-#    rightcheek = relationship("RightCheek", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-#    hardpalate = relationship("HardPalate", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-#    softpalate = relationship("SoftPalate", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-#    tongue = relationship("Tongue", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-#    mouthbase = relationship("MouthBase", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-##    superioralveolarbone = relationship("SuperiorAlveolarBone", uselist=False,
-##                               backref="mouth", 
-##                               cascade="all, delete, delete-orphan")
-##    inferioralveolarbone = relationship("InferiorAlveolarBone", uselist=False,
-##                               backref="mouth", 
-##                               cascade="all, delete, delete-orphan")
-#    superiorgum = relationship("SuperiorGum", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-#    inferiorgum = relationship("InferiorGum", uselist=False, backref="mouth",
-#                               cascade="all, delete, delete-orphan")
-#    teeth = relationship("Tooth", backref="mouth",
-#                               cascade="all, delete, delete-orphan")

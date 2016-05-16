@@ -14,6 +14,18 @@ from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
 
+class MouthEvent(Base):
+    id = Column(Integer, primary_key=True)
+    __tablename__ = 'mouth_event'
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
+                                                                nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
+    comments = Column(String, default="")
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
+
 class SuperiorLipEvent(Base):
     __tablename__ = 'superior_lip_event'
     id = Column(Integer, primary_key=True)
@@ -23,7 +35,9 @@ class SuperiorLipEvent(Base):
                                                                 nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=func.now())
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
 
 class InferiorLipEvent(Base):
@@ -35,7 +49,9 @@ class InferiorLipEvent(Base):
                                                                 nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=func.now())
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
 
 class LeftCheekEvent(Base):
@@ -47,7 +63,9 @@ class LeftCheekEvent(Base):
                                                                 nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=func.now())
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
 
 class RightCheekEvent(Base):
@@ -59,7 +77,9 @@ class RightCheekEvent(Base):
                                                                 nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=func.now())
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
 
 class HardPalateEvent(Base):
@@ -71,7 +91,9 @@ class HardPalateEvent(Base):
                                                                 nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=func.now())
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
 
 class SoftPalateEvent(Base):
@@ -83,7 +105,9 @@ class SoftPalateEvent(Base):
                                                                 nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=func.now())
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
 
 class TongueEvent(Base):
@@ -95,7 +119,9 @@ class TongueEvent(Base):
                                                                 nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=func.now())
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
 
 class MouthBaseEvent(Base):
@@ -107,7 +133,9 @@ class MouthBaseEvent(Base):
                                                                 nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=func.now())
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 
 class UvulaEvent(Base):
     __tablename__ = 'uvula_event'
@@ -118,5 +146,7 @@ class UvulaEvent(Base):
                                                                 nullable=False)
     name = Column(String, default="")
     comments = Column(String, default="")
-    time_stamp = Column(DateTime, default=func.now())
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
 

@@ -218,6 +218,22 @@ CROWN_STATES = {
             CROWN_STATE_BRIDGE: ( _("bridge"), ),
            }
 
+CROWN_SIDE_ALL = 0
+CROWN_SIDE_OCCLUSAL = 1
+CROWN_SIDE_BUCCAL = 2
+CROWN_SIDE_LINGUAL = 3
+CROWN_SIDE_MESIAL = 4
+CROWN_SIDE_DISTAL = 5
+
+CROWN_SIDES = {
+            CROWN_SIDE_ALL: ( _("all"), ),
+            CROWN_SIDE_OCCLUSAL: ( _("occlusal"), ),
+            CROWN_SIDE_BUCCAL: ( _("buccal"), ),
+            CROWN_SIDE_LINGUAL: ( _("lingual"), ),
+            CROWN_SIDE_MESIAL: ( _("mesial"), ),
+            CROWN_SIDE_DISTAL: ( _("distal"), ),
+            }
+
 ROOT_STATE_SANE = 0
 ROOT_STATE_PULPOTOMIA = 1
 ROOT_STATE_PULPECTOMIA = 2
@@ -238,7 +254,7 @@ ROOT_STATES = {
 
 ROOT_CANAL_ALL = 0
 ROOT_CANAL_CENTRAL = 1
-ROOT_CANAL_BUCAL = 2
+ROOT_CANAL_BUCCAL = 2
 ROOT_CANAL_LINGUAL = 3
 ROOT_CANAL_MESIAL = 4
 ROOT_CANAL_DISTAL = 5
@@ -247,6 +263,20 @@ ROOT_CANAL_MESIO_LINGUAL = 7
 ROOT_CANAL_DISTO_BUCCAL = 8
 ROOT_CANAL_DISTO_LINGUAL = 9
 ROOT_CANAL_MESIO_BUCCAL_2 = 10
+
+ROOT_CANALS = {
+            ROOT_CANAL_ALL: ( _("all"), ),
+            ROOT_CANAL_CENTRAL: ( _("central"), ),
+            ROOT_CANAL_BUCCAL: ( _("buccal"), ),
+            ROOT_CANAL_LINGUAL: ( _("lingual"), ),
+            ROOT_CANAL_MESIAL: ( _("mesial"), ),
+            ROOT_CANAL_DISTAL: ( _("distal"), ),
+            ROOT_CANAL_MESIO_BUCCAL: ( _("mesio-buccal"), ),
+            ROOT_CANAL_MESIO_LINGUAL: ( _("mesio-lingual"), ),
+            ROOT_CANAL_DISTO_BUCCAL: ( _("disto-buccal"), ),
+            ROOT_CANAL_DISTO_LINGUAL: ( _("disto-lingual"), ),
+            ROOT_CANAL_MESIO_BUCCAL_2: ( _("mesio-buccal 2"), ),
+            }
 
 PERIODONTE_STATE_SANE = 0
 PERIODONTE_STATE_GINGIVITIS = 1
@@ -300,11 +330,11 @@ END_USE_REASON_OBSOLETE = 3
 END_USE_REASON_REMOVE_MARKET = 4
 END_USE_REASON_LOST = 5
 END_USE_REASON = [ (END_USE_REASON_IN_USE_STOCK, _('In stock or in use') ), 
-                    ( END_USE_REASON_NATURAL_END, _('Natural end of the asset')),
-                    ( END_USE_REASON_UNCONVENIENT, _('Unconvenient') ), 
-                    ( END_USE_REASON_OBSOLETE, _('Obsolete / Out of date') ), 
-                    ( END_USE_REASON_REMOVE_MARKET, _('Remove from market') ), 
-                    ( END_USE_REASON_LOST, _('Lost') ) 
+                ( END_USE_REASON_NATURAL_END, _('Natural end of the asset')),
+                ( END_USE_REASON_UNCONVENIENT, _('Unconvenient') ), 
+                ( END_USE_REASON_OBSOLETE, _('Obsolete / Out of date') ), 
+                ( END_USE_REASON_REMOVE_MARKET, _('Remove from market') ), 
+                ( END_USE_REASON_LOST, _('Lost') ) 
                 ]
 
 UNITY_PIECE = 0
