@@ -7,7 +7,10 @@
 from meta import Base
 import users, administration, headneck, schedule
 import sqlalchemy
-from odontux import constants
+try:
+    from odontux import constants
+except ImportError:
+    import constants
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
