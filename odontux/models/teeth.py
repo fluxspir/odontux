@@ -7,6 +7,7 @@
 from meta import Base
 import users, administration, headneck, schedule
 import sqlalchemy
+from odontux import constants
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
@@ -14,22 +15,9 @@ from sqlalchemy.orm import relationship, backref
 
 class Tooth(Base):
     """
-    A tooth has to be in a mouth ;
     A tooth has to have a name, the choice is free to name it whatever you want
-    A tooth is either :
-        * None : The tooth never made speak from her.
-        * s : sane ; a root-infected tooth may appear sane !
-        * x : sealing
-        * o : obturation
-        * c : crowned
-        * d : decayed
-        * p : place
-        * m : mobility
-        * f : fracture
-        * a : absent
-        * b : bridge
-        * r : resin (prosthetic mobile)
-        * I : implant
+    Name it in constants.
+    The actual tooth state (see constant.py.TOOTH_STATES)
     We may put it under surveillance.
     """
     __tablename__ = 'tooth'
@@ -37,15 +25,12 @@ class Tooth(Base):
     patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
                                                                 nullable=False)
     name = Column(String, nullable=False)
-    state = Column(String, default="")
+    state = Column(Integer, default=0, nullable=True)
     surveillance = Column(Boolean, default=False)
     patient = relationship('Patient', backref="teeth")
 
 class Periodonte(Base):
     """
-        state : 0 : sane
-                1 : gingivitis
-                2 : parodontitis
     """
     __tablename__ = "periodonte"
     id = Column(Integer, ForeignKey(Tooth.id), primary_key=True)
@@ -55,65 +40,57 @@ class Periodonte(Base):
 
 class Event(Base):
     """
-        event_location : see "constants.py" ; EVENT_LOCATION_TOOTH : 0 = tooth
-                                                                     1 = crown
-                                                                     2 = root
+    location : constants.TOOTH_EVENT_LOCATIONS
     """
     __tablename__ = "event"
     id = Column(Integer, primary_key=True)
     tooth_id = Column(Integer, ForeignKey(Tooth.id), nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
-    location = Column(Integer, nullable=False)
+    description = Column(String)
+    comments = Column(String, default="")
     color = Column(String, default="")
     pic = Column(String, default="")
-    comments = Column(String, default="")
+    location = Column(Integer, nullable=False)
 
-class PeriodonteEvent(Base):
+    __mapper_args__ = {
+        'polymorphic_identity': 'event',
+        'polymorphic_on': location
+    }
+
+class PeriodonteEvent(Event):
     """
-        location : 1 MB, 2 CB, 3 DB, 4 DP 5 CP 6 7 MP
+        perio_location : constants.PERIODONTAL_LOCATIONS 
     """
     __tablename__ = "periodonte_event"
-    id = Column(Integer, primary_key=True)
-    periodonte_id = Column(Integer, ForeignKey(Periodonte.id), nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                nullable=False)
-    location = Column(Integer, nullable=False)
+    id = Column(Integer, ForeignKey(Event.id), primary_key=True)
+    perio_location = Column(Integer, default=0)
     furcation = Column(Integer, default=0)
     recession = Column(Integer, default=0)
     pocket_depth = Column(Integer, default=0)
-    comments = Column(String, default="")
-    pic = Column(String, default="")
 
-class ToothEvent(Base):
+    __mapper_args__ = {
+        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_PERIODONTE
+    }
+
+class ToothEvent(Event):
     """
     A tooth event is an event we can't really class neither as a crown event,
     nor as a root event.
-    Event that can occur to a tooth:
-        * sane
-        * place
-        * mobility
-        * fracture
-        * absence
-        * replaced
-        * implant
+    Event that can occur to a tooth: constants.TOOTH_STATES
     We may add random comments
     We may add path to pics ; maybe just tell "True/False", if the path is
     obvious. Still to define
     """
     __tablename__ = 'tooth_event'
-    id = Column(Integer, primary_key=True)
-    event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
-    sane = Column(String, default="")
-    place = Column(String, default="")
-    mobility = Column(String, default="")
-    fracture = Column(String, default="")
-    absence = Column(String, default="")
-    replaced = Column(String, default="")
-    implant = Column(String, default="")
+    id = Column(Integer, ForeignKey(Event.id), primary_key=True)
+    state = Column(Integer, nullable=False) 
+    
+    __mapper_args__ = {
+        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_TOOTH
+    }
 
-
-class CrownEvent(Base):
+class CrownEvent(Event):
     """
     Crown events :
     Must occur to a tooth (tooth_id)
@@ -137,49 +114,31 @@ class CrownEvent(Base):
     For the pics, see "toothevent"
     """
     __tablename__ = 'crown_event'
-    id = Column(Integer, primary_key=True)
-    event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
+    id = Column(Integer, ForeignKey(Event.id), primary_key=True)
+    state = Column(Integer, nullable=False) 
     side = Column(String, nullable=False)
-    tooth_shade = Column(String, default="")
-    # event
-    sealing = Column(String, default="")
-    decay = Column(String, default="")
-    obturation = Column(String, default="")
-    crowned = Column(String, default="")
-    bridge = Column(String, default="")
+    tooth_shade = Column(String, default=None)
+
+    __mapper_args__ = {
+        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_CROWN
+    }
 
 class RootEvent(Base):
     """
     Root events :
     Must occur to a tooth (tooth_id)
     Are noticed while on an appointment (appointment_id)
-    Occurs on root :
-        * c : Central
-        * v : Vestibular
-        * l/p : Lingual/Palatal
-        * mv : Mesio-Vestibular
-        * mv2 : Mesio-Vestibular 2
-        * ml/mp : Mesio-Lingual / Mesio-Palatal
-        * d : Distal
-        * dv : Disto-Vestibular
-        * a : all
-    A canal may be either :
-        * sane
-        * obturation
-        * infected
-        * apical abscess
+    Occurs on root : constants.ROOT_CANALS
+    A root canal may be either contants.ROOT_STATES
     We may add comments
     We may use a color-code for what happened
     For the pics, see "toothevent"
     """
     __tablename__ = 'root_event'
-    id = Column(Integer, primary_key=True)
-    event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
-    canal = Column(String, nullable=False)
-    # event
-    infected = Column(String, default="")
-    abscess = Column(String, default="")
-    obturation = Column(String, default="")
-    inlaycore = Column(String, default="")
-    screwpost = Column(String, default="")
+    id = Column(Integer, ForeignKey(Event.id), primary_key=True)
+    state = Column(Integer, nullable=False) 
+    root = Column(Integer, nullable=False)
 
+    __mapper_args__ = {
+        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_ROOT
+    }

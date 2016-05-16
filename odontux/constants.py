@@ -172,42 +172,126 @@ ANATOMIC_LOCATION = {
                                                             "UvulaEvent"),
         }
 
+###############
+## teeth events
+##
+TOOTH_STATE_SANE = 0
+TOOTH_STATE_ILL = 1
+TOOTH_STATE_PAIN = 2
+TOOTH_STATE_HEALED = 3
+
+TOOTH_STATE_MISPLACED = 5
+TOOTH_STATE_MOBILE = 6
+TOOTH_STATE_FRACTURE = 7
+TOOTH_STATE_ABSENT = 8
+TOOTH_STATE_RESIN = 10
+TOOTH_STATE_IMPLANT = 11
+TOOTH_WITHOUT_STATE = 20
 
 TOOTH_STATES = {
-            "s": _("sane"),
-            "x": _("sealing"),
-            "o": _("obturated"),
-            "c": _("crowned"),
-            "d": _("decayed"),
-            "p": _("placed"),
-            "m": _("mobile"),
-            "f": _("fracture"),
-            "a": _("absent"),
-            "b": _("bridge"),
-            "r": _("resin"),
-            "I": _("implant"),
-            "w": _("without_state"),
-           }
-
-PERIODONTE_STATES = {
-            '0': _('sane'),
-            '1': _('gingivitis'),
-            '2': _('parodontitis')
+            TOOTH_STATE_SANE: ( _("sane"), ),
+            TOOTH_STATE_MISPLACED: ( _("misplaced"), ),
+            TOOTH_STATE_MOBILE: ( _("mobile"), ),
+            TOOTH_STATE_FRACTURE: ( _("fracture"), ),
+            TOOTH_STATE_ABSENT: ( _("absent"), ),
+            TOOTH_STATE_RESIN: ( _("resin"), ),
+            TOOTH_STATE_IMPLANT: ( _("implant"), ),
+            TOOTH_STATE_ILL: ( _("ill"), ),
+            TOOTH_STATE_HEALED:( _('healed'), ),
+            TOOTH_STATE_PAIN: ( _("pain"), ),
+            TOOTH_WITHOUT_STATE: ( _("without_state"), ),
             }
 
-EVENT_LOCATION_TOOTH = (0, "tooth")
-EVENT_LOCATION_CROWN = (1, "crown")
-EVENT_LOCATION_ROOT = (2, "root")
-EVENT_LOCATION_PERIODONTE = (3, "periodonte")
+CROWN_STATE_SANE = 0
+CROWN_STATE_SEALING = 1
+CROWN_STATE_OBTURATED = 2
+CROWN_STATE_CROWNED = 3
+CROWN_STATE_DECAYED = 4
+CROWN_STATE_BRIDGE = 5
+
+CROWN_STATES = {
+            CROWN_STATE_SANE: ( _("sane"), ),
+            CROWN_STATE_SEALING: ( _("sealing"), ),
+            CROWN_STATE_OBTURATED: ( _("obturated"), ),
+            CROWN_STATE_CROWNED: ( _("crowned"), ),
+            CROWN_STATE_DECAYED: ( _("decayed"), ),
+            CROWN_STATE_BRIDGE: ( _("bridge"), ),
+           }
+
+ROOT_STATE_SANE = 0
+ROOT_STATE_PULPOTOMIA = 1
+ROOT_STATE_PULPECTOMIA = 2
+ROOT_STATE_OBTURATED = 3
+ROOT_STATE_INFECTED = 4
+ROOT_STATE_APICAL_ABSCESS = 5
+ROOT_STATE_POST_CORE = 6
+
+ROOT_STATES = {
+            ROOT_STATE_SANE: ( _("sane"), ),
+            ROOT_STATE_PULPOTOMIA: ( _("pulpotomia"), ),
+            ROOT_STATE_PULPECTOMIA: ( _("pulpectomia"), ),
+            ROOT_STATE_OBTURATED: ( _("obturated"), ),
+            ROOT_STATE_INFECTED: ( _("infected"), ),
+            ROOT_STATE_APICAL_ABSCESS: ( _("apical abscess"), ),
+            ROOT_STATE_POST_CORE: ( _("prosthetic core"), ),
+            }
+
+ROOT_CANAL_ALL = 0
+ROOT_CANAL_CENTRAL = 1
+ROOT_CANAL_BUCAL = 2
+ROOT_CANAL_LINGUAL = 3
+ROOT_CANAL_MESIAL = 4
+ROOT_CANAL_DISTAL = 5
+ROOT_CANAL_MESIO_BUCCAL = 6
+ROOT_CANAL_MESIO_LINGUAL = 7
+ROOT_CANAL_DISTO_BUCCAL = 8
+ROOT_CANAL_DISTO_LINGUAL = 9
+ROOT_CANAL_MESIO_BUCCAL_2 = 10
+
+PERIODONTE_STATE_SANE = 0
+PERIODONTE_STATE_GINGIVITIS = 1
+PERIODONTE_STATE_PARODONTITIS = 2
+
+PERIODONTE_STATES = {
+            PERIODONTE_STATE_SANE: ( _('sane'), ),
+            PERIODONTE_STATE_GINGIVITIS: ( _('gingivitis'), ),
+            PERIODONTE_STATE_PARODONTITIS: ( _('parodontitis') ),
+            }
+
+PERIODONTAL_LOC_MESIO_BUCCAL = 1
+PERIODONTAL_LOC_BUCCAL = 2
+PERIODONTAL_LOC_DISTO_BUCCAL = 3
+PERIODONTAL_LOC_DISTO_LINGUAL = 4
+PERIODONTAL_LOC_LINGUAL = 5
+PERIODONTAL_LOC_MESIO_LINGUAL = 6
+
+PERIODONTAL_LOCATIONS = {
+            PERIODONTAL_LOC_MESIO_BUCCAL: _('mesio buccal'),
+            PERIODONTAL_LOC_BUCCAL: _('buccal'),
+            PERIODONTAL_LOC_DISTO_BUCCAL: _('disto buccal'),
+            PERIODONTAL_LOC_DISTO_LINGUAL: _('disto lingual'),
+            PERIODONTAL_LOC_LINGUAL: _('lingual'),
+            PERIODONTAL_LOC_MESIO_LINGUAL: _('mesio lingual'),
+            }
 
 
-# could be turn to [ ( 0 , "sane" ), (1, "place" ), ...]  after a 
-# {models,commands,views}/teeth.py update
-TOOTH_EVENT_ATTRIBUTES = [ "sane", "place", "mobility", "fracture", "absence",
-                           "replaced", "implant" ]
-CROWN_EVENT_ATTRIBUTES = [ "sealing", "decay", "obturation", "crowned", 
-                           "bridge" ]
-ROOT_EVENT_ATTRIBUTES = [ "infected", "abscess", "obturation", "inlaycore" ]
+TOOTH_EVENT_LOCATION_TOOTH = 0
+TOOTH_EVENT_LOCATION_CROWN = 1
+TOOTH_EVENT_LOCATION_ROOT = 2
+TOOTH_EVENT_LOCATION_PERIODONTE = 3
+
+TOOTH_EVENT_LOCATIONS = {
+            TOOTH_EVENT_LOCATION_TOOTH: _("tooth"),
+            TOOTH_EVENT_LOCATION_CROWN: _("crown"),
+            TOOTH_EVENT_LOCATION_ROOT: _("root"),
+            TOOTH_EVENT_LOCATION_PERIODONTE: _("periodonte"),
+            }
+
+#TOOTH_EVENT_ATTRIBUTES = [ "sane", "place", "mobility", "fracture", "absence",
+#                           "replaced", "implant" ]
+#CROWN_EVENT_ATTRIBUTES = [ "sealing", "decay", "obturation", "crowned", 
+#                           "bridge" ]
+#ROOT_EVENT_ATTRIBUTES = [ "infected", "abscess", "obturation", "inlaycore" ]
 
 END_USE_REASON_IN_USE_STOCK = 0
 END_USE_REASON_NATURAL_END = 1
