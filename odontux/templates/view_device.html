@@ -53,6 +53,9 @@
     {% else %}
       Item to sterilize 
     {% endif %}
+  {% elif asset.asset_category.manufacture_sterilization 
+        and not asset.appointment_id %}
+    Asset was sterilized by the manufacturer.
   {% else %}
     Item was never sterilized
   {% endif %}<br />
