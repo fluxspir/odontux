@@ -212,13 +212,18 @@ class Asset(Base):
 class Device(Asset):
     """
         * lifetime expected ; 0 if forever
+        * appointment_id is used in case of:
+            "DeviceCategory.manufacture_sterilized' is True. The appointment_id
+            is when the device had his seal broken for use.
     """
     __tablename__ = "device"
     id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
     lifetime_expected = Column(Interval, default=None)
     serial_number = Column(String, default=None)
-    manufacture_sterilization = Column(Boolean, default=False)
-
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id), 
+                                                                nullable=False)
+    appointment = secondary('schedule.Appointment', 
+                                backref='assets_manufacture_sterilized')
     __mapper_args__ = {
         'polymorphic_identity': 'device',
     }

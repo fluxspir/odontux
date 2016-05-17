@@ -104,6 +104,7 @@ class AssetSterilized(Base):
                                                     # asset
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id), 
                                                                 default=None)
-    appointment = relationship("schedule.Appointment")
+    appointment = relationship("schedule.Appointment", 
+                                    backref='assets_sterilized')
     expiration_date = Column(Date, nullable=False)
     sealed = Column(Boolean, nullable=False, default=True)
