@@ -13,14 +13,14 @@ from gettext import gettext as _
 
 from odontux.odonweb import app
 from odontux import constants, checks, gnucash_handler
-from odontux.models import meta, act, schedule, administration
+from odontux.models import meta, act, schedule, administration, traceability
 from odontux.views import cotation as views_cotation
 from odontux.views import teeth
 from odontux.views.log import index
 from odontux.views.patient import list_acts
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
-                     DecimalField, HiddenField, validators)
+                     DecimalField, HiddenField, IntegerField, validators)
 from odontux.views.forms import ColorField
 
 class SpecialtyForm(Form):
@@ -47,6 +47,10 @@ class PriceForm(Form):
     acttype_id = HiddenField(_('acttype_id'))
     healthcare_plan_id = HiddenField(_('healthcare_plan_id'))
     price = DecimalField(_('Price'), [validators.Optional()])
+
+class AssetSterilizedUsedForm(Form):
+    asset_sterilized_id = IntegerField(_('Asset sterilized id'),
+                                            [validators.Required()] )
 
 def get_specialty_field_list():
     return [ "name", "color" ]
@@ -492,3 +496,48 @@ def remove_administrativact(patient_id, appointment_id, act_id, code):
     meta.session.delete(gesture)
     meta.session.commit()
     return redirect(url_for('list_acts'))
+
+
+@app.route('/sterilized_asset_used?pid=<int:patient_id>'
+            '$aid=<int:appointment_id>', methods=['GET','POST'])
+def sterilized_asset_used(patient_id, appointment_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
+                    constants.ROLE_NURSE ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment()
+
+    asset_sterilized_form = AssetSterilizedUsedForm(request.form)
+
+    if request.method == 'POST' and asset_sterilized_form.validate():
+        asset_used = (
+            meta.session.query(traceability.AssetSterilized)
+                .filter(traceability.AssetSterilized.id == 
+                            asset_sterilized_form.asset_sterilized_id.data)
+                .one()
+            )
+        asset_used.appointment_id = appointment_id
+        asset_used.sealed = False
+        if asset_used.kit_id:
+            asset_used.kit.end_of_use = appointment.agenda.endtime
+            asset_used.kit.end_use_reason =\
+                                        constants.END_USE_REASON_NATURAL_END
+            asset_used.kit.appointment_id = appointment_id
+        meta.session.commit()
+        return redirect(url_for('sterilized_asset_used', 
+                                patient_id=patient_id,
+                                appointment_id=appointment_id) )
+
+    assets_used = (
+        meta.session.query(traceability.AssetSterilized)
+            .filter(traceability.AssetSterilized.appointment_id == 
+                                                                appointment_id)
+            .all()
+        )
+
+    return render_template('sterilized_asset_used.html', patient=patient,
+                            appointment=appointment,
+                            asset_sterilized_form=asset_sterilized_form,
+                            assets_used=assets_used)

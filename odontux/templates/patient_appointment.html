@@ -23,4 +23,10 @@
       {{ act_table_closing_tag() }}
 
     {% endblock %}
+  <br />
+  <br />
+    <a href="{{ url_for('sterilized_asset_used', patient_id=patient.id,
+                                  appointment_id=appointment.id ) }}">
+        Update sterilized assets used in this appointment
+    </a>
   {% endblock %}

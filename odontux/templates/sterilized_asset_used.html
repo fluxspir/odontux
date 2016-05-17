@@ -1,0 +1,38 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+Sterilized assets used in this appointment :
+<br />
+{% for asset in assets_used %}
+  {% if asset.asset_id %}
+    <a href="{{ url_for('view_asset', asset_id=asset.asset_id ) }}">
+      {{ asset.asset.id }} -- {{ asset.asset.asset_category.brand }} 
+                              {{ asset.asset.asset_category.commercial_name }}
+    </a>
+  {% elif asset.superasset_id %}
+    <a href="{{ url_for('view_asset', asset_id=asset.superasset_id ) }}">
+      {{ asset.superasset.id }} -- 
+            {{ asset.superasset.superasset_category.name }}
+    </a>
+  {% elif asset.kit_id %}
+    <a href="{{ url_for('view_kit', kit_id=asset.kit_id) }}">
+      {{ asset.kit.id }} -- {{ asset.kit.asset_kit_structure.name }}
+    </a>
+  {% else %}
+    
+  {% endif %}
+  <br />
+{% endfor %}
+
+<form method="post" action="{{ url_for('sterilized_asset_used', patient_id=patient.id, appointment_id=appointment.id) }}">
+  <dl>
+    {{ render_field(asset_sterilized_form.asset_sterilized_id) }}
+  </dl>
+  <p><input type="submit" value="Add">
+</form>
+<br />
+<br />
+<a href="{{ url_for('patient_appointment', appointment_id=appointment.id) }}">
+  Quit adding sterilized assets used in this appointment
+</a>
+{% endblock %}

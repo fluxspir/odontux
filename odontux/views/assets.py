@@ -1312,18 +1312,24 @@ def list_kits(kit_types=0):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    if not kit_types:
-        kits_list = meta.session.query(assets.AssetKit).filter(
-                                assets.AssetKit.appointment_id == None).all()
-    else:
+    query = (
+        meta.session.query(assets.AssetKit)
+            .filter(
+                assets.AssetKit.appointment_id.is_(None),
+                assets.AssetKit.end_of_use.is_(None),
+                assets.AssetKit.end_use_reason == 
+                            constants.END_USE_REASON_IN_USE_STOCK
+                )
+        )
+    if kit_types:
         kits_list = []
-        query = meta.session.query(assets.AssetKit).filter(
-                                assets.AssetKit.appointment_id == None)
         for kit_type in kit_types.split(","):
             q = query.filter(
                     assets.AssetKit.asset_kit_structure_id == kit_type).all()
             for kit in q:
                 kits_list.append(kit)
+    else:
+        kits_list = query.all()
     
     return render_template('list_kits.html',
                             kits_list=kits_list)

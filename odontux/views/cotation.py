@@ -19,7 +19,7 @@ from odontux.models import meta, act
 
 class HealthCarePlanForm(Form):
     healthcare_plan_id = HiddenField(_('id'))
-    name = TextField(_('name'), [validators.Required()])
+    name = TextField(_('Name of new Healthcare Plan'), [validators.Required()])
 
 class CotationForm(Form):
     cotation_id = HiddenField(_('ID'))
