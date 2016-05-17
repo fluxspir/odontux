@@ -1117,7 +1117,7 @@ def update_sterilization_cycle(ste_cycle_id):
     This method is not implemented really for normally not being used
     """
     authorized_roles = [ constants.ROLE_DENTIST ]
-    if session['role'] not in authorized_roles
+    if session['role'] not in authorized_roles:
         return redirect(url_for('list_sterilization_cycle'))
     return redirect(url_for('list_sterilization_cycle'))
     ste_cycle = (
