@@ -76,6 +76,7 @@ class AssetCategory(Base):
     description = Column(String, default="")
     asset_specialty_id = Column(Integer, ForeignKey(act.Specialty.id))
     asset_specialty = relationship("act.Specialty")
+    manufacture_sterilization = Column(Boolean, default=False)
     type = Column(String)
 
     __mapper_args__ = {
@@ -87,7 +88,6 @@ class DeviceCategory(AssetCategory):
     __tablename__ = "device_category"
     id = Column(Integer, ForeignKey(AssetCategory.id), primary_key=True)
     sterilizable = Column(Boolean, nullable=False)
-    manufacture_sterilization = Column(Boolean, default=False)
     validity = Column(Interval, default=datetime.timedelta(90))
     sterilizer = Column(Boolean, default=False)
 

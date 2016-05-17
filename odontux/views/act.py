@@ -541,3 +541,43 @@ def sterilized_asset_used(patient_id, appointment_id):
                             appointment=appointment,
                             asset_sterilized_form=asset_sterilized_form,
                             assets_used=assets_used)
+
+@app.route('/add/manufacture_sterilized_asset_to_appointment?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>&asset_id=<int:asset_id>')
+def add_manufacture_sterilized_asset_to_appointment(patient_id,
+                                        appointment_id, asset_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_role:
+        return redirect(url_for('index'))
+
+    asset = (
+        meta.session.query(assets.Device)
+            .filter(assets.Device.id == asset_id)
+            .one()
+        )
+    asset.appointment_id = appointment_id
+    meta.session.commit()
+    return redirect(url_for('choose_manufacture_sterilized_assets',
+                        patient_id=patient_id, appointment_id=appointment_id))
+
+@app.route('/choose/manufacture_sterilized_assets')
+def choose_manufacture_sterilized_assets(patient_id, appointment_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
+                        constants.ROLE_NURSE ]
+    if session['role'] not in authorized_roles:
+        return redirecs(url_for('index'))
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment()
+
+    assets_manufacture_sterilized = (
+        meta.session.query(assets.Device).join(assets.DeviceCategory)
+            .filter(
+                assets.Device.asset_category.manufacture_sterilization ==True,
+                assets.Device.appointment_id.is_(None)
+                )
+            .all()
+        )
+    return render_template('choose_manufacture_sterilized_assets_used.html', 
+                patient=patient, appointment=appointment,
+                assets_manufacture_sterilized=assets_manufacture_sterilized)

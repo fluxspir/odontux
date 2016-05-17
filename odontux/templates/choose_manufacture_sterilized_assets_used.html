@@ -1,0 +1,19 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+Manufacture sterilized assets used in this appointment :
+<br />
+{% for asset in assets_manufacture_sterilized %}
+    <a href="{{ url_for('view_asset', asset_id=asset.asset_id ) }}">
+      {{ asset.id }}</a> -- {{ asset.asset_category.brand }} 
+                              {{ asset.asset_category.commercial_name }}
+    <a href="{{ url_for('add_manufacture_sterilized_asset_to_appointment',
+                patient_id=patient.id, appointment_id=appointment.id,
+                asset_id=asset.id) }}">Add this asset
+    </a>
+  <br />
+{% endfor %}
+
+<a href="{{ url_for('patient_appointment', appointment_id=appointment.id) }}">
+  Quit adding manufactured sterilized assets used in this appointment
+</a>
+{% endblock %}
