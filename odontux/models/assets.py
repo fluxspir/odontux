@@ -222,7 +222,7 @@ class Device(Asset):
     serial_number = Column(String, default=None)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id), 
                                                                 nullable=False)
-    appointment = secondary('schedule.Appointment', 
+    appointment = relationship('schedule.Appointment', 
                                 backref='assets_manufacture_sterilized')
     __mapper_args__ = {
         'polymorphic_identity': 'device',
