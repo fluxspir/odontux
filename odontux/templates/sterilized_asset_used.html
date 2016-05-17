@@ -31,7 +31,11 @@ Sterilized assets used in this appointment :
   <p><input type="submit" value="Add">
 </form>
 <br />
-<br />
+<a href="{{ url_for('choose_manufacture_sterilized_assets',
+                  patient_id=patient.id, appointment_id=appointment.id) }}">
+          Add some manufacture sterilized asset to this appointment.
+</a><br /><br />
+
 <a href="{{ url_for('patient_appointment', appointment_id=appointment.id) }}">
   Quit adding sterilized assets used in this appointment
 </a>

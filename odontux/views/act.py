@@ -13,7 +13,8 @@ from gettext import gettext as _
 
 from odontux.odonweb import app
 from odontux import constants, checks, gnucash_handler
-from odontux.models import meta, act, schedule, administration, traceability
+from odontux.models import ( meta, act, schedule, administration, traceability,
+                            assets )
 from odontux.views import cotation as views_cotation
 from odontux.views import teeth
 from odontux.views.log import index
@@ -561,7 +562,8 @@ def add_manufacture_sterilized_asset_to_appointment(patient_id,
     return redirect(url_for('choose_manufacture_sterilized_assets',
                         patient_id=patient_id, appointment_id=appointment_id))
 
-@app.route('/choose/manufacture_sterilized_assets')
+@app.route('/choose/manufacture_sterilized_assets?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>')
 def choose_manufacture_sterilized_assets(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
                         constants.ROLE_NURSE ]
@@ -569,13 +571,21 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
         return redirecs(url_for('index'))
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment()
-
+    
     assets_manufacture_sterilized = (
-        meta.session.query(assets.Device).join(assets.DeviceCategory)
-            .filter(
-                assets.Device.asset_category.manufacture_sterilization ==True,
-                assets.Device.appointment_id.is_(None)
+        meta.session.query(assets.Asset).filter(assets.Asset.id.in_(
+            meta.session.query(assets.Asset.id)
+                .filter(assets.Asset.asset_category.has(
+                assets.AssetCategory.id.in_(
+                meta.session.query(assets.AssetCategory.id)
+                    .filter(assets.AssetCategory.manufacture_sterilization ==\
+                                                                        True)
+                        )
+                    )
                 )
+                .filter(assets.Device.appointment_id.is_(None))
+                )
+            )
             .all()
         )
     return render_template('choose_manufacture_sterilized_assets_used.html', 

@@ -15,7 +15,7 @@ from odontux.views.log import index
 
 import pdb
 
-@app.route('/patient_appointment/')
+@app.route('/patient_appointment/?aid=<int:appointment_id>')
 def patient_appointment(appointment_id):
     """
     This method must be rewritten with the one below 
@@ -153,7 +153,7 @@ def enter_patient_appointment():
                             appointment=appointment,
                             acts=acts)
 
-@app.route('/patient/appointments/')
+@app.route('/list/patient_appointments/')
 def list_appointments():
     # Go to index if the admin tries to look at appointments
     # or if we aren't in a patient file.
