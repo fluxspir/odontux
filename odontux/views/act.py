@@ -581,11 +581,11 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
     assets_manufacture_sterilized = (
         meta.session.query(assets.Device).filter(assets.Device.id.in_(
             meta.session.query(assets.Device.id)
-                .filter(
-                    assets.Device.asset_category.has(
-                assets.AssetCategory.id.in_(
-                meta.session.query(assets.AssetCategory.id)
-                    .filter(assets.AssetCategory.manufacture_sterilization.is_(True))
+                .filter(assets.Device.asset_category.has(
+                    assets.AssetCategory.id.in_(
+                        meta.session.query(assets.AssetCategory.id)
+                            .filter(
+                    assets.AssetCategory.manufacture_sterilization.is_(True))
                         )
                     )#,
 #                    ~assets.Device.id.in_(
