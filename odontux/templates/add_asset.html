@@ -60,6 +60,7 @@ Add a new asset.
   <div id="asset">
     {{ render_simple_field(asset_form.acquisition_date) }}
     {{ render_simple_field(asset_form.acquisition_price) }}
+    {{ render_simple_field(asset_form.description) }}
     {{ render_simple_field(asset_form.new) }}
     {{ render_simple_field(asset_form.user_id) }}
     {{ render_simple_field(asset_form.office_id) }}
@@ -73,6 +74,7 @@ Add a new asset.
 
   <div id="device">
     {{ render_simple_field(device_form.lifetime_expected) }}
+    {{ render_simple_field(device_form.serial_number) }}
   </div>
   <div id="material">
     {{ render_simple_field(material_form.batch_number) }}
