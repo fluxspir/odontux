@@ -6,6 +6,9 @@
     {{ asset_category.id }} -- 
     {{ asset_category.brand }} -- 
     {{ asset_category.commercial_name }}<br />
+    {% if asset_category.manufacture_sterilization %}
+      This asset comes sterilized by the manufacturer <br />
+    {% endif %}
     This asset is {% if not asset_category.sterilizable %} not {% endif %} sterilizable.<br />
     {% if asset_category.sterilizable %}
       The mean validity of sterilization is {{ asset_category.validity }}.

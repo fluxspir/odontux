@@ -1128,7 +1128,8 @@ def update_sterilization_cycle(ste_cycle_id):
 
 
 @app.route('/unseal/asset?id=<int:asset_sterilized_id>')
-def unseal_asset(asset_sterilized_id):
+@app.route('/unseal/asset?id=<int:asset_sterilized_id>&aid=<int:appointment_id>')
+def unseal_asset(asset_sterilized_id, appointment_id=None):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
@@ -1139,9 +1140,8 @@ def unseal_asset(asset_sterilized_id):
             .filter(traceability.AssetSterilized.id == asset_sterilized_id)
             .one()
         )
-
-    if 'appointment_id' in session:
-        asset_sterilized.appointment_id = session.appointment_id
+    if appointment_id:
+        asset_sterilized.appointment_id = appointment_id
     asset_sterilized.sealed = False
     meta.session.commit()
     if asset_sterilized.asset_id:

@@ -573,14 +573,17 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
     appointment = checks.get_appointment()
     
     assets_manufacture_sterilized = (
-        meta.session.query(assets.Asset).filter(assets.Asset.id.in_(
-            meta.session.query(assets.Asset.id)
-                .filter(assets.Asset.asset_category.has(
+        meta.session.query(assets.Device).filter(assets.Device.id.in_(
+            meta.session.query(assets.Device.id)
+                .filter(
+                    assets.Device.asset_category.has(
                 assets.AssetCategory.id.in_(
                 meta.session.query(assets.AssetCategory.id)
-                    .filter(assets.AssetCategory.manufacture_sterilization ==\
-                                                                        True)
+                    .filter(assets.AssetCategory.manufacture_sterilization.is_(True))
                         )
+                    ),
+                    ~assets.Device.id.in_(
+                    meta.session.query(traceability.AssetSterilized.asset_id)
                     )
                 )
                 .filter(assets.Device.appointment_id.is_(None))

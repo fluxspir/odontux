@@ -3,7 +3,7 @@
 Manufacture sterilized assets used in this appointment :
 <br />
 {% for asset in assets_manufacture_sterilized %}
-    <a href="{{ url_for('view_asset', asset_id=asset.asset_id ) }}">
+    <a href="{{ url_for('view_asset', asset_id=asset.id ) }}">
       {{ asset.id }}</a> -- {{ asset.asset_category.brand }} 
                               {{ asset.asset_category.commercial_name }}
     <a href="{{ url_for('add_manufacture_sterilized_asset_to_appointment',

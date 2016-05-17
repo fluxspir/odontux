@@ -86,6 +86,7 @@ class AssetCategoryForm(Form):
     description = TextAreaField(_('Description'), [validators.Optional()])
     asset_specialty_id = SelectField(_('Specialty'), coerce=int, 
                                         validators=[validators.Optional()])
+    manufacture_sterilization = BooleanField(_('Asset was sterilized made by Manufacturer'))
     type = SelectField(_('Type'), description='ChangementType()')
 
 class DeviceCategoryForm(Form):
@@ -215,7 +216,7 @@ def get_end_use_reason_choices():
     return constants.END_USE_REASON
     
 def get_asset_cat_field_list():
-    return [ "brand", "commercial_name",
+    return [ "brand", "commercial_name", "manufacture_sterilization",
                 "description", "type"]
 
 def get_device_cat_field_list():
