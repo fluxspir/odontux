@@ -489,7 +489,7 @@ def get_assets_list_for_sterilization_cycle():
                 )
     
     query_assets = (
-        meta.session.query(assets.Asset)
+        meta.session.query(assets.Device)
             # the asset hasn't a throw_away date : it's probably in service
             # the asset is still marked : in use or in stock
             # Asset is in use, not in stock
@@ -498,9 +498,6 @@ def get_assets_list_for_sterilization_cycle():
                                         constants.END_USE_REASON_IN_USE_STOCK,
                     assets.Asset.start_of_use.isnot(None)
                 )
-            # Asset may be a "device"
-            #.filter(assets.Asset.type == "device") #MAYBE UPDATE TO ASSET
-
             # the asset is something "sterilizable"
             #.filter(assets.Asset.is_sterilizable() == True)    # NOT WORKING
             .filter(assets.Asset.asset_category_id.in_(
@@ -517,7 +514,22 @@ def get_assets_list_for_sterilization_cycle():
                         meta.session.query(assets.SuperAsset.id).all()
                     )
                 )
-
+            # We are eliminating here assets which are under manufacture 
+            # sterilization
+            .filter(
+                ~assets.Device.id.in_(
+                    meta.session.query(assets.Device.id)
+                    .filter(assets.Device.asset_category.has(
+                        assets.AssetCategory.id.in_(
+                            meta.session.query(assets.AssetCategory.id)
+                            .filter(
+                    assets.AssetCategory.manufacture_sterilization.is_(True))
+                            )
+                        )
+                    )
+                    .filter(assets.Device.appointment_id.is_(None))
+                    )
+                )
             # We are eliminating here all assets that are ready to be use
             .filter(
                 ~assets.Asset.id.in_(
