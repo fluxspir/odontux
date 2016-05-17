@@ -1113,7 +1113,19 @@ def print_sterilization_stickers(ste_cycle_id):
 @app.route('/update/sterilization_cycle?id=<int:ste_cycle_id>', 
                                                     methods=['GET', 'POST'])
 def update_sterilization_cycle(ste_cycle_id):
+    """ 
+    This method is not implemented really for normally not being used
+    """
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles
+        return redirect(url_for('list_sterilization_cycle'))
     return redirect(url_for('list_sterilization_cycle'))
+    ste_cycle = (
+        meta.session.query(traceability.SterilizationCycle)
+            .filter(traceability.SterilizationCycle.id == ste_cycle_id)
+            .one()
+        )
+
 
 @app.route('/unseal/asset?id=<int:asset_sterilized_id>')
 def unseal_asset(asset_sterilized_id):
