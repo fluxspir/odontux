@@ -19,6 +19,10 @@ Sterilized assets used in this appointment :
       {{ asset.kit.id }} -- {{ asset.kit.asset_kit_structure.name }}
     </a>
   {% else %}
+    <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+      {{ asset.id }} -- {{ asset.asset_category.brand }}
+                        {{ asset.asset_category.commercial_name }}
+    </a>
     
   {% endif %}
   <br />

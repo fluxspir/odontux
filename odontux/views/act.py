@@ -537,7 +537,13 @@ def sterilized_asset_used(patient_id, appointment_id):
                                                                 appointment_id)
             .all()
         )
-
+    manufacture_sterilized_assets_used = (
+        meta.session.query(assets.Device)
+            .filter(assets.Device.appointment_id == appointment_id)
+            .all()
+        )
+    for asset in manufacture_sterilized_assets_used:
+        assets_used.append(asset)
     return render_template('sterilized_asset_used.html', patient=patient,
                             appointment=appointment,
                             asset_sterilized_form=asset_sterilized_form,
@@ -549,7 +555,7 @@ def add_manufacture_sterilized_asset_to_appointment(patient_id,
                                         appointment_id, asset_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
-    if session['role'] not in authorized_role:
+    if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
     asset = (
@@ -571,7 +577,7 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
         return redirecs(url_for('index'))
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment()
-    
+   
     assets_manufacture_sterilized = (
         meta.session.query(assets.Device).filter(assets.Device.id.in_(
             meta.session.query(assets.Device.id)
@@ -581,10 +587,10 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
                 meta.session.query(assets.AssetCategory.id)
                     .filter(assets.AssetCategory.manufacture_sterilization.is_(True))
                         )
-                    ),
-                    ~assets.Device.id.in_(
-                    meta.session.query(traceability.AssetSterilized.asset_id)
-                    )
+                    )#,
+#                    ~assets.Device.id.in_(
+#                    meta.session.query(traceability.AssetSterilized.asset_id)
+#                    )
                 )
                 .filter(assets.Device.appointment_id.is_(None))
                 )
