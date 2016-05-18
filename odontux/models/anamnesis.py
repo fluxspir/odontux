@@ -37,82 +37,86 @@ class Question(Base):
     id = Column(Integer, primary_key=True)
     question = Column(String)
 
-
-
-class MedicalHistory(Base):
-    """
-        type : cf constants.ANAMNESIS
-    """
-    __tablename__ = 'medical_history'
-    id = Column(Integer, primary_key=True)
+class Anamnesis(Base):
+    """ """
+    __tablename__ = 'anamnesis'
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                                                         nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                         nullable=False)
+    alert = Column(Boolean, default=False)
+    time_stamp = Column(Date, default=func.current_date())
+    anamnesis_type = Column(String, nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'anamnesis'
+        'polymorphic_on': anamnesis_type
+    }
+
+class MedicalHistory(Anamnesis):
+    """
+        type : cf constants.MEDICAL_HISTORIES
+    """
+    __tablename__ = 'medical_history'
+    id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
+    type = Column(Integer, nullable=False)
     name = Column(String, nullable=False)
     icd = Column(String)
     comment = Column(String)
-    alert = Column(Boolean, default=False)
-    time_stamp = Column(Date, default=func.current_date())
-    type = Column(Integer, nullable=False)
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'medical_history'
+    }
     
-class Addiction(Base):
+class Addiction(Anamnesis):
     """
         type : constants.ADDICTIONS
     """
     __tablename__ = 'addiction'
     id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                        nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                        nullable=False)
     type = Column(Integer, nullable=False)
     comment = Column(String)
     begin = Column(Date)
     end = Column(Date)
-    alert = Column(Boolean, default=False)
-    
 
-class Treatment(Base):
+    __mapper_args__ = {
+        'polymorphic_identity': 'addiction'
+    }
+
+class Treatment(Anamnesis):
     __tablename__ = "treatment"
-    id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                        nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                        nullable=False)
-    anamnesis_id = Column(Integer, ForeignKey(Anamnesis.id))
+    id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
     name = Column(String)
+    posologia = Column(String)
     begin = Column(Date)
     end = Column(Date)
-    alert = Column(Boolean, default=False)
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'treatment'
+    }
 
-class PastSurgeries(Base):
+class PastSurgery(Anamnesis):
     __tablename__ = 'past_surgeries'
-    id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                        nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                        nullable=False)
-    surgery_type = Column(String, default="")
-    problem = Column(String, default="")
-    complication = Column(String, default="")
-    time_stamp = Column(Date, default=func.current_date())
-    alert = Column(Boolean, default=False)
+    id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
+    surgery_type = Column(String)
+    problem = Column(String)
+    complication = Column(String)
 
-class Allergy(Base):
+    __mapper_args__ = {
+        'polymorphic_identity': 'past_surgery'
+    }
+
+class Allergy(Anamnesis):
     """
         type : constants.ALLERGIES
     """
     __tablename__ = 'allergies'
-    id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                        nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                        nullable=False)
+    id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
     name = Column(String, nullable=False)
     type = Column(Integer, nullable=False)
     reaction = Column(Integer)
-    alert = Column(Boolean, default=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'allergy'
+    }
 
