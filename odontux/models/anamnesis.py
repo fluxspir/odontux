@@ -5,6 +5,7 @@
 # licence BSD
 #
 from meta import Base
+from tables import questionnary_question_table
 import users, administration, schedule
 import sqlalchemy
 import datetime
@@ -62,7 +63,7 @@ class Questionnary(Base):
         Could be "anamnesis adult complete", "anamnesis adult resume"
          "anamnesis before implants" ...
     """
-    __tableaname__ = 'questionnary'
+    __tablename__ = 'questionnary'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     questions = relationship('Question', secondary=questionnary_question_table,

@@ -137,3 +137,10 @@ Column('material_id', Integer, ForeignKey('material.id')),
 Column("appointment_id", Integer, ForeignKey("appointment.id")),
 Column("quantity_used", Numeric)
 )
+
+# anamnesis.py
+questionnary_question_table = Table('questionnary_question', Base.metadata,
+Column('questionnary_id', Integer, ForeignKey('questionnary.id')),
+Column('question_id', Integer, ForeignKey('question.id'))
+)
+
