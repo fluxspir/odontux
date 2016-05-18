@@ -130,14 +130,6 @@ Column("kit_structure_id", Integer, ForeignKey("asset_kit_structure.id")),
 Column("superasset_category_id", Integer, ForeignKey("super_asset_category.id"))
 )
 
-# assets.py / appointment.py
-material_appointment_table = Table("material_appointment", Base.metadata,
-Column('id', Integer, primary_key=True),
-Column('material_id', Integer, ForeignKey('material.id')),
-Column("appointment_id", Integer, ForeignKey("appointment.id")),
-Column("quantity_used", Numeric)
-)
-
 # anamnesis.py
 questionnary_question_table = Table('questionnary_question', Base.metadata,
 Column('questionnary_id', Integer, ForeignKey('questionnary.id')),
