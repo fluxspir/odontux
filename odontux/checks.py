@@ -55,14 +55,16 @@ def get_patient(patient_id):
     except sqlalchemy.orm.exc.NoResultFound:
         return False
 
-def get_appointment():
-    try:
-        if session['appointment_id']:
-            appointment = meta.session.query(schedule.Appointment)\
-                .filter(schedule.Appointment.id == session['appointment_id']
-                ).one()
-    except KeyError:
-        appointment = None
+def get_appointment(appointment_id=None):
+    if not appointment_id and not 'appointment_id' in session:
+        return None
+    if not appointment_id:
+        appointment_id = session['appointment_id']
+    appointment = (
+        meta.session.query(schedule.Appointment)
+            .filter(schedule.Appointment.id == appointment_id
+            ).one()
+        )
     return appointment
 
 def is_patient_self_appointment():
