@@ -65,6 +65,8 @@ def get_appointment(appointment_id=None):
             .filter(schedule.Appointment.id == appointment_id
             ).one()
         )
+    # case we got here with session['appointment_id'] empty : 
+    session['appointment_id'] = appointment.id
     return appointment
 
 def is_patient_self_appointment():
