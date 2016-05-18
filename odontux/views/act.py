@@ -53,6 +53,12 @@ class AssetSterilizedUsedForm(Form):
     asset_sterilized_id = IntegerField(_('Asset sterilized id'),
                                             [validators.Required()] )
 
+class MaterioVigilanceForm(Form):
+    material_id = HiddenField(_('Material id'))
+    old_quantity_used = HiddenField(_('Old Quantity Used'))
+    new_quantity_used = DecimalField(_('Quantity used'), 
+                                    [validators.Optional()] )
+
 def get_specialty_field_list():
     return [ "name", "color" ]
 
@@ -434,7 +440,7 @@ def add_administrativact(patient_id, appointment_id):
     # Prepare the formulary dealing with the act of adding an administrativ
     # act
     patient = checks.get_patient(session['patient_id'])
-    appointment = checks.get_appointment()
+    appointment = checks.get_appointment(appointment_id)
     admin_act_form = AppointmentActReferenceForm(request.form)
 
     (admin_act_form.appointment_id.choices, 
@@ -508,7 +514,7 @@ def sterilized_asset_used(patient_id, appointment_id):
         return redirect(url_for('index'))
 
     patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment()
+    appointment = checks.get_appointment(appointment_id)
 
     asset_sterilized_form = AssetSterilizedUsedForm(request.form)
 
@@ -542,12 +548,24 @@ def sterilized_asset_used(patient_id, appointment_id):
             .filter(assets.Device.appointment_id == appointment_id)
             .all()
         )
+    material_used = (
+        meta.session.query(assets.Material)
+        .filter(assets.Material.id.in_(
+            meta.session.query(assets.Material.id)
+            .filter(assets.Material.appointments.any(
+                schedule.Appointment.id == appointment_id
+                    )
+                )
+            )
+        ).all()
+    )
     for asset in manufacture_sterilized_assets_used:
         assets_used.append(asset)
     return render_template('sterilized_asset_used.html', patient=patient,
                             appointment=appointment,
                             asset_sterilized_form=asset_sterilized_form,
-                            assets_used=assets_used)
+                            assets_used=assets_used,
+                            material_used=material_used)
 
 @app.route('/add/manufacture_sterilized_asset_to_appointment?pid=<int:patient_id>'
             '&aid=<int:appointment_id>&asset_id=<int:asset_id>')
@@ -576,21 +594,13 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
     if session['role'] not in authorized_roles:
         return redirecs(url_for('index'))
     patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment()
-   
+    appointment = checks.get_appointment(appointment_id)
+    
     assets_manufacture_sterilized = (
         meta.session.query(assets.Device).filter(assets.Device.id.in_(
             meta.session.query(assets.Device.id)
                 .filter(assets.Device.asset_category.has(
-                    assets.AssetCategory.id.in_(
-                        meta.session.query(assets.AssetCategory.id)
-                            .filter(
-                    assets.AssetCategory.manufacture_sterilization.is_(True))
-                        )
-                    )#,
-#                    ~assets.Device.id.in_(
-#                    meta.session.query(traceability.AssetSterilized.asset_id)
-#                    )
+                    assets.Device.asset_category.manufacture_sterilization.is_(True))
                 )
                 .filter(assets.Device.appointment_id.is_(None))
                 )
@@ -600,3 +610,84 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
     return render_template('choose_manufacture_sterilized_assets_used.html', 
                 patient=patient, appointment=appointment,
                 assets_manufacture_sterilized=assets_manufacture_sterilized)
+
+@app.route('/view/material_used_in_appointment?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>')
+def view_material_used_in_appointment(patient_id, appointment_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(appointment_id)
+    
+    material_used = (
+        meta.session.query(assets.Material)
+        .filter(assets.Material.id.in_(
+            meta.session.query(assets.Material.id)
+            .filter(assets.Material.appointments.any(
+                schedule.Appointment.id == appointment_id
+                    )
+                )
+            )
+        ).all()
+    )
+    return render_template('view_material_used_in_appointment.html',
+                            patient=patient, appointment=appointment,
+                            material_used=material_used)
+
+@app.route('/update/material_used_to_appointment?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>', methods=['GET', 'POST'])
+def update_material_used_to_appointment(patient_id, appointment_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(appointment_id)
+    
+    material_form = MaterioVigilanceForm(request.form)
+
+    if request.method == 'POST' and material_form.validate():
+
+        return redirect(url_for('update/material_used_to_appointment',
+                        patient_id=patient_id, appointment_id=appointment_id))
+    material_used = (
+        meta.session.query(assets.Material)
+            .filter(assets.Material.id.in_(
+                meta.session.query(assets.Material.id)
+                    .filter(assets.Material.appointments.any(
+                        schedule.Appointment.id == appointment_id
+                        )
+                    )
+                )
+            ).all()
+        )
+
+    other_materials = (
+        meta.session.query(assets.Material)
+            .filter(~assets.Material.id.in_(material_used),
+                    ~assets.Material.id.in_(or_(
+                        assets.Material.start_of_use.is_(None),
+                        assets.Material.end_of_use.isnot_(None),
+                        assets.Material.end_use_reason !=\
+                                        constants.END_USE_REASON_IN_USE_STOCK)
+                        )
+            )
+            .all()
+        )
+
+    other_materials_list = []
+    for material in other_materials:
+        material_form.material_id.data = material.id
+        #material_form.old_quantity_used.data = 0
+        material_form.new_quantity_used.data =\
+                                material.asset_category.automatic_decrease
+        other_materials_list.append( (material, material_form) )
+
+    material_used_list = []
+    for material in material_used:
+        material_form.material_id.data = material.id
+        material_form.old_quantity_used.data = 
+                material.appointments
+

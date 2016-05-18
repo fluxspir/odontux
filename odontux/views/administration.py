@@ -322,7 +322,8 @@ def update_patient(body_id, form_to_display):
                             mail_form=mail_form,
                             other_healthcare_plans=other_healthcare_plans)
 
-@app.route('/add/patient_to_healthcare_plan?pid=<int:patient_id>&hcpid=<int:healthcare_plan_id>')
+@app.route('/add/patient_to_healthcare_plan?pid=<int:patient_id>'
+            '&hcpid=<int:healthcare_plan_id>')
 def add_patient_to_healthcare_plan(patient_id, healthcare_plan_id):
     patient = (
         meta.session.query(administration.Patient)
