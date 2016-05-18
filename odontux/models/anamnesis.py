@@ -6,7 +6,7 @@
 #
 from meta import Base
 from tables import questionnary_question_table
-import users, administration, schedule
+import administration, schedule
 import sqlalchemy
 import datetime
 
@@ -20,44 +20,6 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
 
-class Response(Base):
-    __tablename__ = 'response'
-    id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
-                                                        nullable=False)
-    patient = relationship('Patient')
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                        nullable=False)
-    type = Column(String)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'response',
-        'polymorphic_on': type
-    }
-
-class CloseResponse(Response):
-    """ Response may be "yes", "no", or "don't know" 
-        may be developped in the comment
-    """
-    __tablename__ = 'close_response'
-    id = Column(Integer, ForeignKey(Response.id), primary_key=True)
-    response = Column(Integer)
-    comment = Column(String)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'close'
-    }
-
-class OpenResponse(Response):
-    """ Response made as a sentence """
-    __tablename__ = 'open_response'
-    id = Column(Integer, ForeignKey(Response.id), primary_key=True)
-    response = Column(String)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'open'
-    }
-
 class Questionnary(Base):
     """
         Could be "anamnesis adult complete", "anamnesis adult resume"
@@ -70,47 +32,87 @@ class Questionnary(Base):
                                         backref='questionnaries')
 
 class Question(Base):
-    """
-        alert_on : What we want to create an alert; could be "sim", "no", 
-        "any sentence" ; the keyword of alert_on will be search on the
-        Response.response 
-    """
+    """ """
     __tablename__ = 'question'
     id = Column(Integer, primary_key=True)
     question = Column(String)
-    open = Column(Boolean, default=False)
-    alert_on = Column(String, default=None)
 
-#class MedicalHistory(Base):
-#    __tablename__ = 'medical_history'
-#    id = Column(Integer, primary_key=True)
-#    patient_id = Column(Integer, ForeignKey(administration.Patient.id))
-#    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
-#    icd10 = Column(String, default="")
-#    disease = Column(String, default="")
-#    disorder = Column(String, default="")
-#    habitus = Column(String, default="")
-#    treatment = Column(String, default="")
-#    time_stamp = Column(Date, default=func.current_date())
-#
-#class PastSurgeries(Base):
-#    __tablename__ = 'past_surgeries'
-#    id = Column(Integer, primary_key=True)
-#    patient_id = Column(Integer, ForeignKey(administration.Patient.id))
-#    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
-#    surgery_type = Column(String, default="")
-#    problem = Column(String, default="")
-#    complication = Column(String, default="")
-#    time_stamp = Column(Date, default=func.current_date())
-#
-#class Allergies(Base):
-#    __tablename__ = 'allergies'
-#    id = Column(Integer, primary_key=True)
-#    patient_id = Column(Integer, ForeignKey(administration.Patient.id))
-#    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
-#    drug = Column(String, default="")
-#    metal = Column(String, default="")
-#    food = Column(String, default="")
-#    other = Column(String, default="")
-#    reaction = Column(String, default="")
-#    time_stamp = Column(Date, default=func.current_date())
+
+
+class MedicalHistory(Base):
+    """
+        type : cf constants.ANAMNESIS
+    """
+    __tablename__ = 'medical_history'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                        nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                        nullable=False)
+    name = Column(String, nullable=False)
+    icd = Column(String)
+    comment = Column(String)
+    alert = Column(Boolean, default=False)
+    time_stamp = Column(Date, default=func.current_date())
+    type = Column(Integer, nullable=False)
+
+    
+class Addiction(Base):
+    """
+        type : constants.ADDICTIONS
+    """
+    __tablename__ = 'addiction'
+    id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                        nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                        nullable=False)
+    type = Column(Integer, nullable=False)
+    comment = Column(String)
+    begin = Column(Date)
+    end = Column(Date)
+    alert = Column(Boolean, default=False)
+    
+
+class Treatment(Base):
+    __tablename__ = "treatment"
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                        nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                        nullable=False)
+    anamnesis_id = Column(Integer, ForeignKey(Anamnesis.id))
+    name = Column(String)
+    begin = Column(Date)
+    end = Column(Date)
+    alert = Column(Boolean, default=False)
+
+
+class PastSurgeries(Base):
+    __tablename__ = 'past_surgeries'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                        nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                        nullable=False)
+    surgery_type = Column(String, default="")
+    problem = Column(String, default="")
+    complication = Column(String, default="")
+    time_stamp = Column(Date, default=func.current_date())
+    alert = Column(Boolean, default=False)
+
+class Allergy(Base):
+    """
+        type : constants.ALLERGIES
+    """
+    __tablename__ = 'allergies'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                        nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                        nullable=False)
+    name = Column(String, nullable=False)
+    type = Column(Integer, nullable=False)
+    reaction = Column(Integer)
+    alert = Column(Boolean, default=False)
+
