@@ -35,6 +35,9 @@ class Response(Base):
     }
 
 class CloseResponse(Response):
+    """ Response may be "yes", "no", or "don't know" 
+        may be developped in the comment
+    """
     __tablename__ = 'close_response'
     id = Column(Integer, ForeignKey(Response.id), primary_key=True)
     response = Column(Integer)
@@ -45,6 +48,7 @@ class CloseResponse(Response):
     }
 
 class OpenResponse(Response):
+    """ Response made as a sentence """
     __tablename__ = 'open_response'
     id = Column(Integer, ForeignKey(Response.id), primary_key=True)
     response = Column(String)
@@ -54,6 +58,10 @@ class OpenResponse(Response):
     }
 
 class Questionnary(Base):
+    """
+        Could be "anamnesis adult complete", "anamnesis adult resume"
+         "anamnesis before implants" ...
+    """
     __tableaname__ = 'questionnary'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
