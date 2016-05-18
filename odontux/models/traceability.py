@@ -12,8 +12,7 @@ import sqlalchemy
 import datetime
 
 from sqlalchemy import (Table, Column, Integer, String, Numeric,
-                        Date, DateTime, Interval,
-                        Boolean)
+                        Date, DateTime, Interval, Boolean)
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
@@ -108,3 +107,17 @@ class AssetSterilized(Base):
                                     backref='assets_sterilized')
     expiration_date = Column(Date, nullable=False)
     sealed = Column(Boolean, nullable=False, default=True)
+
+
+class MaterioVigilance(Base):
+    """ """
+    __tablename__ = "materio_vigilance"
+    id = Column(Integer, primary_key=True)
+    material_id = Column(Integer, ForeignKey(assets.Material.id), 
+                                                            primary_key=True)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                            primary_key=True)
+    quantity_used = Column(Numeric)
+    material = relationship('assets.Material')
+    appointment = relationship('schedule.Appointment')
+

@@ -17,9 +17,10 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from users import OdontuxUser, DentalOffice, Settings
 from md import MedecineDoctor
 from administration import (Address, Mail, Phone, Payer, Family, Patient)
-#from anamnesis import MedicalHistory, PastSurgeries, Allergies
-from anamnesis import ( Response, OpenResponse, CloseResponse, Questionnary,
-                        Question )
+from anamnesis import MedicalHistory, PastSurgeries, Allergies
+from anamnesis import Questionnary, Question
+#from anamnesis import ( Response, OpenResponse, CloseResponse, Questionnary,
+#                        Question )
 from headneck import HeadEvent, NeckEvent
 from medication import DrugPrescribed, Prescription, PrescribedDrugReference
 from schedule import Agenda, Appointment, AppointmentMemo
@@ -36,7 +37,8 @@ from assets import (AssetProvider, AssetCategory, MaterialCategory,
                     Asset, Device, Material, AssetKitStructure, AssetKit,
                     SuperAssetCategory, SuperAsset)
 from traceability import (SterilizationCycleType, SterilizationCycleMode,
-                            SterilizationCycle, AssetSterilized)
+                            SterilizationCycle, AssetSterilized, 
+                            MaterioVigilance)
 
 def init():
     parser = ConfigParser.ConfigParser()

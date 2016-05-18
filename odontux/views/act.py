@@ -688,6 +688,6 @@ def update_material_used_to_appointment(patient_id, appointment_id):
     material_used_list = []
     for material in material_used:
         material_form.material_id.data = material.id
-        material_form.old_quantity_used.data = 
+        material_form.old_quantity_used.data =\
                 material.appointments
 
