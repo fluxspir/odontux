@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-from tables import payment_act_table 
+from tables import payment_gesture_table 
 import schedule, headneck, teeth
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, Numeric, Boolean
@@ -26,8 +26,8 @@ class HealthCarePlan(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
 
-class ActType(Base):
-    __tablename__ = 'act_type'
+class Gesture(Base):
+    __tablename__ = 'gesture'
     id = Column(Integer, primary_key=True)
     specialty_id = Column(Integer, ForeignKey(Specialty.id), default=None)
     specialty = relationship("Specialty")
@@ -40,21 +40,25 @@ class ActType(Base):
 class Cotation(Base):
     __tablename__ = "cotation"
     id = Column(Integer, primary_key=True)
-    acttype_id = Column(Integer, ForeignKey(ActType.id), primary_key=True)
+    gesture_id = Column(Integer, ForeignKey(Gesture.id), primary_key=True)
     healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id), 
                                                             primary_key=True)
     price = Column(Numeric, nullable=True, default=0)
     active = Column(Boolean, default=True)
 
-    acttype = relationship("ActType", backref=backref("cotations"))
+    gesture = relationship("Gesture", backref=backref("cotations"))
     healthcare_plan = relationship('HealthCarePlan', backref="cotations")
 
-class AppointmentActReference(Base):
-    __tablename__ = 'appointment_act_reference'
+class AppointmentGestureReference(Base):
+    """ 
+        anatomic_location_id = constants.ANATOMIC_LOCATION
+    """
+    __tablename__ = 'appointment_gesture_reference'
     id = Column(Integer, primary_key=True)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                             nullable=False)
-    act_id = Column(Integer, ForeignKey(ActType.id), nullable=False)
+    gesture_id = Column(Integer, ForeignKey(Gesture.id), nullable=False)
+    anatomic_location = Column(Integer, nullable=False)
     tooth_id = Column(Integer, ForeignKey(teeth.Tooth.id))
     healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id))
     code = Column(String, nullable=False)

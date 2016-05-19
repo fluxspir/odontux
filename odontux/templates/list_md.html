@@ -1,8 +1,8 @@
 {% extends 'header.html' %}
 {% block main %}
-<div id="list_acttype">
+<div id="list_md">
 {% if session.role == session.ROLE_DENTIST or session.role == session.ROLE_NURSE or session.role == session.ROLE_ASSISTANT %}
-  <a href="/md/add/">Add new medecine doctor</a><br />
+  <a href="{{ url_for('add_md') }}">Add new medecine doctor</a><br />
 {% endif %}
 <table border=1>
   <tr>

@@ -3,24 +3,24 @@
                                   render_simple_hidden_field %}
 {% block main %}
 <br />
-Act type : {{ acttype.id }} : {{ acttype.specialty.name }}, {{acttype.name }}
-  <a href="{{ url_for('update_acttype', 
-                  acttype_id=acttype.id) }}">Update</a>
+Gesture : {{ gesture.id }} : {{ gesture.specialty.name }}, {{gesture.name }}
+  <a href="{{ url_for('update_gesture', 
+                  gesture_id=gesture.id) }}">Update</a>
 
 
 <br /><br />
-Healthcare plans in acttype: <br />
+Healthcare plans in gesture: <br />
 {% for cotation, price_form in price_forms %}
   <form method="post" 
         action="{{ url_for('update_cotation') }}">
   {{ cotation.healthcare_plan.name }} --
-  {{ render_simple_hidden_field(price_form.acttype_id) }}
+  {{ render_simple_hidden_field(price_form.gesture_id) }}
   {{ render_simple_hidden_field(price_form.healthcare_plan_id) }}
   {{ render_simple_field_line(price_form.price) }}
   {{ cotation.healthcare_plan.active }} 
   <input type="submit" value="Update"> or 
-  <a href="{{ url_for('remove_healthcare_plan_to_acttype',
-                      acttype_id=acttype.id,
+  <a href="{{ url_for('remove_healthcare_plan_to_gesture',
+                      gesture_id=gesture.id,
                       healthcare_plan_id=cotation.healthcare_plan.id) }}">
     Remove</a>
   </form>
@@ -29,11 +29,11 @@ Healthcare plans in acttype: <br />
 {% endfor %}
 
 <br />
-Healthcare plan out of acttype: <br />
-{% for new_HC_plan in healthcare_plans_not_in_acttype %}
+Healthcare plan out of gesture: <br />
+{% for new_HC_plan in healthcare_plans_not_in_gesture %}
   {{ new_HC_plan.name }} 
-  <a href="{{ url_for('add_healthcare_plan_to_acttype', 
-                      acttype_id=acttype.id,
+  <a href="{{ url_for('add_healthcare_plan_to_gesture', 
+                      gesture_id=gesture.id,
                       healthcare_plan_id=new_HC_plan.id)}}">
     Add</a><br />
 {% endfor %}

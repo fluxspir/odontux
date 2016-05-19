@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-from tables import payment_act_table
+from tables import payment_gesture_table
 import act, administration
 import datetime
 
@@ -48,7 +48,7 @@ class Payment(Base):
     advance = Column(Boolean, default=False, nullable=False)
     comments = Column(String, default="")
     cashin_date = Column(Date, default=func.current_date())
-    acts = relationship("AppointmentActReference",
-                          secondary=payment_act_table,
+    gestures = relationship("AppointmentGestureReference",
+                          secondary=payment_gesture_table,
                           backref="payments")
 

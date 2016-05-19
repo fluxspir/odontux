@@ -12,8 +12,8 @@ from sqlalchemy import ForeignKey, MetaData
 
 
 # act.py / compta.py
-payment_act_table = Table('payment_act', Base.metadata,
-Column('act_id', Integer, ForeignKey('appointment_act_reference.id')),
+payment_gesture_table = Table('payment_gesture', Base.metadata,
+Column('gesture_id', Integer, ForeignKey('appointment_gesture_reference.id')),
 Column('payment_id', Integer, ForeignKey('payment.id'))
 )
 

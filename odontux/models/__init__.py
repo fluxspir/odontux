@@ -29,8 +29,8 @@ from endobuccal import (MouthEvent, SuperiorLipEvent, InferiorLipEvent,
                         UvulaEvent)
 from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootEvent,
                     Periodonte, PeriodonteEvent )
-from act import ( Specialty, HealthCarePlan, ActType, Cotation, 
-                AppointmentActReference )
+from act import ( Specialty, HealthCarePlan, Gesture, Cotation, 
+                AppointmentGestureReference )
 from compta import PaymentType, Payment
 from assets import (AssetProvider, AssetCategory, MaterialCategory,
                     Asset, Device, Material, AssetKitStructure, AssetKit,

@@ -2,8 +2,8 @@
 {% block main %}
 <br />
 
-{% for act_type in healthcare_plan.act_types %}
-  {{ act_type.price }} -- {{act_type.active }} || {{ act_type.specialty.name }}
+{% for gesture in healthcare_plan.gestures %}
+  {{ gesture.price }} -- {{gesture.active }} || {{ gesture.specialty.name }}
 
 {% endfor %}
 

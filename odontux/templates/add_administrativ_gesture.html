@@ -1,0 +1,13 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="{{ url_for('add_administrativ_gesture', patient_id=session.patient_id, appointment_id=session.appointment_id) }}">
+  <dl>
+    {{ render_field(admin_gesture_form.appointment_id) }}
+    {{ render_field(admin_gesture_form.act_code) }}
+    {{ render_field(admin_gesture_form.act_id) }}
+    {{ render_field(admin_gesture_form.anatomic_location) }}
+  </dl>
+  <p><input type="submit" value="Add">
+</form>
+{% endblock %}

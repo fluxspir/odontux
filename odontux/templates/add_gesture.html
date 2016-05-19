@@ -4,7 +4,7 @@ Adding new act
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
-<form method="post" action="{{ url_for('add_acttype') }}">
+<form method="post" action="{{ url_for('add_gesture') }}">
   <dl>
     {{ render_field(form.specialty_id) }}
     {{ render_field(form.code) }}

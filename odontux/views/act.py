@@ -30,22 +30,22 @@ class SpecialtyForm(Form):
                      message=_("Must be less than 20 characters"))])
     color = ColorField('color')
 
-class ActTypeForm(Form):
+class GestureForm(Form):
     specialty_id = SelectField('specialty', coerce=int)
     code = TextField('code')
     alias = TextField('alias')
     name = TextField('name')
     color = ColorField('color')
 
-class AppointmentActReferenceForm(Form):
+class AppointmentGestureReferenceForm(Form):
     appointment_id = SelectField(_('appointment'), coerce=int)
-    act_code = TextField(_('act_code'))
-    act_id = SelectField(_('Choose act in list'), coerce=int)
-    tooth_id = SelectField(_('Choose tooth  in list'), coerce=int)
+    gesture_code = TextField(_('gesture_code'))
+    gesture_id = SelectField(_('Choose gesture in list'), coerce=int)
+    anatomic_location = SelectField(_('Choose anatomic location'), coerce=int)
     majoration = SelectField(_('Majoration'), coerce=int)
 
 class PriceForm(Form):
-    acttype_id = HiddenField(_('acttype_id'))
+    gesture_id = HiddenField(_('gesture_id'))
     healthcare_plan_id = HiddenField(_('healthcare_plan_id'))
     price = DecimalField(_('Price'), [validators.Optional()])
 
@@ -62,10 +62,10 @@ class MaterioVigilanceForm(Form):
 def get_specialty_field_list():
     return [ "name", "color" ]
 
-def get_acttype_field_list():
+def get_gesture_field_list():
     return [ "specialty_id", "code", "alias", 
              "name", "color" ]
-def get_appointmentactreference_field_list():
+def get_appointmentgesturereference_field_list():
     return [ "appointment_id", "act_code", "act_id", "tooth_id", "majoration" ]
 
 def get_specialty_choice_list():
@@ -85,19 +85,19 @@ def get_appointment_choice_list(patient_id):
                                )
     return appointment_list
 
-def get_act_choice_list():
-    acts_list = []
-    acts = meta.session.query(act.ActType).order_by(
-           act.ActType.specialty_id).order_by(
-           act.ActType.alias).all()
-    for gesture in acts:
-        acts_list.append((gesture.id, gesture.alias))
-    return acts_list
+def get_gesture_choice_list():
+    gestures_list = []
+    gestures = meta.session.query(act.Gesture).order_by(
+           act.Gesture.specialty_id).order_by(
+           act.Gesture.alias).all()
+    for gesture in gestures:
+        gestures_list.append((gesture.id, gesture.alias))
+    return gestures_list
 
-def get_appointment_act_reference_choice_lists(patient_id):
+def get_appointment_gesture_reference_choice_lists(patient_id):
     """ """
     return (get_appointment_choice_list(patient_id), 
-            get_act_choice_list(),
+            get_gesture_choice_list(),
             teeth.get_tooth_id_choice_list(patient_id))
 
 
@@ -158,14 +158,14 @@ def delete_specialty(specialty_id):
         
 
 #####
-# Acts
+# Gestures
 #####
 
-@app.route('/list/acttype')
-@app.route('/list/acttype?keywords=<keywords>&ordering=<ordering>')
-def list_acttype(keywords="", ordering=""):
+@app.route('/list/gesture')
+@app.route('/list/gesture?kwds=<keywords>&order=<ordering>')
+def list_gesture(keywords="", ordering=""):
     """ The target is to display dentist's gesture, describing it, its values.
-    Looking in ActType table, we may decide to print only 
+    Looking in Gesture table, we may decide to print only 
         acts from one specialty
         then filter by keyword
         ordering the printing
@@ -177,13 +177,13 @@ def list_acttype(keywords="", ordering=""):
     ordering = ordering.split()
     # Get the acts list, named as "gesture", because it is the gesture
     # the dentist make in the patient mouth.
-    query = meta.session.query(act.ActType)
+    query = meta.session.query(act.Gesture)
     # If we only need ones of a specialty : 
     if request.form and request.form['specialty']:
         try:
             specialty = meta.session.query(act.Specialty)\
                 .filter(act.Specialty.id == request.form['specialty'].one())
-            query = query.filter(act.ActType.specialty_id == specialty.id)
+            query = query.filter(act.Gesture.specialty_id == specialty.id)
         except sqlalchemy.orm.exc.NoResultFound:
             pass
     # Filter by keywords
@@ -191,18 +191,18 @@ def list_acttype(keywords="", ordering=""):
         for keyword in keywords:
             keyword = '%{}%'.format(keyword)
             query = query.filter(or_(
-                act.ActType.alias.ilike(keyword),
-                act.ActType.name.ilike(keyword),
-                act.ActType.code.ilike(keyword),
+                act.Gesture.alias.ilike(keyword),
+                act.Gesture.name.ilike(keyword),
+                act.Gesture.code.ilike(keyword),
                 (and_(
-                    act.ActType.specialty_id == act.Specialty.id,
+                    act.Gesture.specialty_id == act.Specialty.id,
                     act.Specialty.name.ilike(keyword)
                     )
                 )
             ))
     # We want to order the result to find what we are looking for more easily
     if not ordering:
-        ordering = [ act.ActType.specialty_id, act.ActType.alias ]
+        ordering = [ act.Gesture.specialty_id, act.Gesture.alias ]
     for o in ordering:
         query = query.order_by(o)
     gestures = query.all()
@@ -216,15 +216,14 @@ def list_acttype(keywords="", ordering=""):
         except sqlalchemy.orm.exc.NoResultFound:
             specialty = ""
         gestures_list.append( (gesture, specialty) )
-    return render_template('list_act.html', 
+    return render_template('list_gesture.html', 
                             gestures_list=gestures_list)
 
-@app.route('/act/add/', methods=['GET', 'POST'])
-@app.route('/add/act/', methods=['GET', 'POST'])
-def add_acttype():
+@app.route('/add/gesture/', methods=['GET', 'POST'])
+def add_gesture():
     """ """
     # TODO  BECAUSE DIFFICULT TO MAKE IT "PERFECT"
-    form = ActTypeForm(request.form)
+    form = GestureForm(request.form)
     form.specialty_id.choices = get_specialty_choice_list()
     if request.method == 'POST' and form.validate():
         values = {}
@@ -233,66 +232,66 @@ def add_acttype():
         values['alias'] = form.alias.data
         values['name'] = form.name.data
         values['color'] = form.color.data
-        new_acttype = act.ActType(**values)
-        meta.session.add(new_acttype)
+        new_gesture = act.Gesture(**values)
+        meta.session.add(new_gesture)
         meta.session.commit()
-        return redirect(url_for('list_acttype'))
-    return render_template('/add_act.html', form=form)
+        return redirect(url_for('list_gesture'))
+    return render_template('/add_gesture.html', form=form)
 
-@app.route('/act/update_acttype=<int:acttype_id>/', methods=['GET', 'POST'])
-def update_acttype(acttype_id):
-    acttype = meta.session.query(act.ActType).filter\
-              (act.ActType.id == acttype_id).one()
-    if not acttype:
-        return redirect(url_for('list_acttype'))
+@app.route('/update/gesture?gid=<int:gesture_id>/', methods=['GET', 'POST'])
+def update_gesture(gesture_id):
+    gesture = meta.session.query(act.Gesture).filter\
+              (act.Gesture.id == gesture_id).one()
+    if not gesture:
+        return redirect(url_for('list_gesture'))
     try:
         specialty = meta.session.query(act.Specialty)\
-                .filter(act.Specialty.id == acttype.specialty_id).one()
+                .filter(act.Specialty.id == gesture.specialty_id).one()
     except sqlalchemy.orm.exc.NoResultFound:
         specialty=""
 
-    acttype_form = ActTypeForm(request.form)
-    acttype_form.specialty_id.choices = get_specialty_choice_list()
+    gesture_form = GestureForm(request.form)
+    gesture_form.specialty_id.choices = get_specialty_choice_list()
     
     #TODO (130202 : je me demande ce que je voulais faire à ce todo qui date 
     # d'on ne sait quand...
     # (update 160504 : toujours pas d'idée)
     
-    if request.method == 'POST' and acttype_form.validate():
-        for f in get_acttype_field_list():
-            setattr(acttype, f, getattr(acttype_form, f).data)
+    if request.method == 'POST' and gesture_form.validate():
+        for f in get_gesture_field_list():
+            setattr(gesture, f, getattr(gesture_form, f).data)
         meta.session.commit()
-        return redirect(url_for('view_acttype', 
-                                    acttype_id=acttype_id))
+        return redirect(url_for('view_gesture', 
+                                    gesture_id=gesture_id))
 
     # For the GET method
-    for f in get_acttype_field_list():
-        getattr(acttype_form, f).data = getattr(acttype, f)
+    for f in get_gesture_field_list():
+        getattr(gesture_form, f).data = getattr(gesture, f)
 
     specialty_form = SpecialtyForm(request.form)
-    return render_template('/update_act.html', 
-                            acttype_form=acttype_form, 
+    return render_template('/update_gesture.html', 
+                            gesture_form=gesture_form, 
                             specialty_form=specialty_form,
-                            acttype=acttype
+                            gesture=gesture
                             )
 
-@app.route('/view/acttype?id=<int:acttype_id>')
-def view_acttype(acttype_id):
+@app.route('/view/gesture?id=<int:gesture_id>')
+def view_gesture(gesture_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    acttype = ( meta.session.query(act.ActType)
-                    .filter(act.ActType.id == acttype_id)
+    gesture = ( meta.session.query(act.Gesture)
+                    .filter(act.Gesture.id == gesture_id)
                     .one() 
             )
 
     price_forms = []
-    for cotation in acttype.cotations:
+    for cotation in gesture.cotations:
         if cotation.active == False:
             continue
         form = PriceForm(request.form)
-        form.acttype_id.data = acttype.id
+        form.gesture_id.data = gesture.id
         form.healthcare_plan_id.data = cotation.healthcare_plan_id
         
         if cotation.price:
@@ -301,11 +300,11 @@ def view_acttype(acttype_id):
             form.price.data = 0
         price_forms.append((cotation, form))
 
-    healthcare_plans_not_in_acttype = (
+    healthcare_plans_not_in_gesture = (
         meta.session.query(act.HealthCarePlan)
             .filter(or_(
                 ~act.HealthCarePlan.cotations.any(
-                    act.ActType.id == acttype.id
+                    act.Gesture.id == gesture.id
                     ),
                 act.HealthCarePlan.cotations.any(
                     act.Cotation.active == False
@@ -314,12 +313,13 @@ def view_acttype(acttype_id):
             ).all()
         )
     
-    return render_template('view_acttype.html', acttype=acttype,
+    return render_template('view_gesture.html', gesture=gesture
             price_forms=price_forms,
-            healthcare_plans_not_in_acttype=healthcare_plans_not_in_acttype)
+            healthcare_plans_not_in_gesture=healthcare_plans_not_in_gesture)
 
-@app.route('/add/healthcare_plan_to_acttype?AT=<int:acttype_id>&HP=<int:healthcare_plan_id>')
-def add_healthcare_plan_to_acttype(acttype_id, healthcare_plan_id):
+@app.route('/add/healthcare_plan_to_gesture?gest=<int:gesture_id>'
+            '&HP=<int:healthcare_plan_id>')
+def add_healthcare_plan_to_gesture(gesture_id, healthcare_plan_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
     if session['role'] not in authorized_roles:
@@ -327,7 +327,7 @@ def add_healthcare_plan_to_acttype(acttype_id, healthcare_plan_id):
 
     cotation = (
         meta.session.query(act.Cotation)
-            .filter(act.Cotation.acttype_id == acttype_id,
+            .filter(act.Cotation.gesture_id == gesture_id,
                     act.Cotation.healthcare_plan_id == healthcare_plan_id
                 )
             .one_or_none()
@@ -336,17 +336,18 @@ def add_healthcare_plan_to_acttype(acttype_id, healthcare_plan_id):
         cotation.active = True
     else:
         values = {
-            'acttype_id': acttype_id,
+            'gesture_id': gesture_id,
             'healthcare_plan_id': healthcare_plan_id
         }
     
         new_cotation = act.Cotation(**values)
         meta.session.add(new_cotation)
     meta.session.commit()
-    return redirect(url_for('view_acttype', acttype_id=acttype_id))
+    return redirect(url_for('view_gesture', gesture_id=gesture_id))
 
-@app.route('/remove/healthcare_plan_to_acttype?AT=<int:acttype_id>&HP=<int:healthcare_plan_id>')
-def remove_healthcare_plan_to_acttype(acttype_id, healthcare_plan_id):
+@app.route('/remove/healthcare_plan_from_gesture?gest=<int:gesture_id>'
+            '&HP=<int:healthcare_plan_id>')
+def remove_healthcare_plan_from_gesture(gesture_id, healthcare_plan_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
     if session['role'] not in authorized_roles:
@@ -354,14 +355,14 @@ def remove_healthcare_plan_to_acttype(acttype_id, healthcare_plan_id):
 
     cotation = ( 
         meta.session.query(act.Cotation)
-            .filter(act.Cotation.acttype_id == acttype_id,
+            .filter(act.Cotation.gesture_id == gesture_id,
                     act.Cotation.healthcare_plan_id == healthcare_plan_id
                 )
             .one()
         )
     cotation.active = False
     meta.session.commit()
-    return redirect(url_for('view_acttype',acttype_id=acttype_id))
+    return redirect(url_for('view_gesture', gesture_id=gesture_id))
 
 @app.route('/update/cotation', methods=['POST'])
 def update_cotation():
@@ -374,7 +375,7 @@ def update_cotation():
     if price_form.validate():
         cotation = (
             meta.session.query(act.Cotation)
-                .filter(act.Cotation.acttype_id== price_form.acttype_id.data,
+                .filter(act.Cotation.gesture_id== price_form.gesture_id.data,
                         act.Cotation.healthcare_plan_id ==
                                         price_form.healthcare_plan_id.data
                     )
@@ -383,17 +384,14 @@ def update_cotation():
         cotation.price = price_form.price.data
         meta.session.commit()
         
-    return redirect(url_for('view_acttype', 
-                            acttype_id=price_form.acttype_id.data))
+    return redirect(url_for('view_gesture', 
+                            gesture_id=price_form.gesture_id.data))
 
-def _add_administrativact(act_id, appointment_id, tooth_id=0):
+def _add_administrativ_gesture(gesture_id, appointment_id, anatomic_location):
     """ """
     values = {}
-    gesture = meta.session.query(act.ActType).filter(
-              act.ActType.id == act_id).one()
-
-#    execution = meta.session.query(cotation.CotationFr).filter(
-#                cotation.CotationFr.id == gesture.cotationfr_id).one()
+    gesture = meta.session.query(act.Gesture).filter(
+              act.Gesture.id == gesture_id).one()
 
     patient = (
         meta.session.query(administration.Patient)
@@ -408,13 +406,21 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0):
     # In the appointment_act_reference table, we'll store
     # appointment, act, and if any, the tooth
     values['appointment_id'] = appointment_id
-    values['act_id'] = act_id
+    values['gesture_id'] = gesture_id
+    values['anatomic_location'] = anatomic_location
+
+    tooth_id = (
+        meta.session.query(teeth.Tooth.id)
+            .filter(teeth.Tooth.patient_id == patient.id,
+                    teeth.Tooth.codename == anatomic_location)
+            .one_or_none()
+        )
     if tooth_id:
         values['tooth_id'] = tooth_id
     # the act code
 
-    new_act = act.AppointmentActReference(**values)
-    meta.session.add(new_act)
+    new_gesture = act.AppointmentGestureReference(**values)
+    meta.session.add(new_gesture)
     meta.session.commit()
 
     if session['role'] == constants.ROLE_DENTIST:
@@ -423,15 +429,16 @@ def _add_administrativact(act_id, appointment_id, tooth_id=0):
         user_id = ""
     invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
                                              user_id)
-    invoice_id = invoice.add_act(values['code'], values['price'], new_act.id)
+    invoice_id = invoice.add_act(values['code'], values['price'],
+                                                                new_gesture.id)
 
-    new_act.invoice_id = invoice_id
+    new_gesture.invoice_id = invoice_id
     meta.session.commit()
-    return new_act.id
+    return new_gesture.id
 
-@app.route('/gesture/add?patient_id=<int:patient_id>'
-           '&appointment_id=<int:appointment_id>', methods=['GET', 'POST'])
-def add_administrativact(patient_id, appointment_id):
+@app.route('/add/gesture?pid=<int:patient_id>&_id=<int:appointment_id>', 
+                                                    methods=['GET', 'POST'])
+def add_administrativ_gesture(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
                         constants.ROLE_NURSE ]
     if session['role'] not in authorized_roles:
@@ -439,44 +446,46 @@ def add_administrativact(patient_id, appointment_id):
 
     # Prepare the formulary dealing with the act of adding an administrativ
     # act
-    patient = checks.get_patient(session['patient_id'])
+    patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment(appointment_id)
-    admin_act_form = AppointmentActReferenceForm(request.form)
+    admin_gesture_form = AppointmentGestureReferenceForm(request.form)
 
-    (admin_act_form.appointment_id.choices, 
-        admin_act_form.act_id.choices, 
-        admin_act_form.tooth_id.choices, 
-    ) = get_appointment_act_reference_choice_lists(patient_id)
+    (admin_gesture_form.appointment_id.choices, 
+        admin_gesture_form.act_id.choices, 
+        admin_gesture_form.tooth_id.choices, 
+    ) = get_appointment_gesture_reference_choice_lists(patient_id)
 
-    if request.method == 'POST' and admin_act_form.validate():
-        if admin_act_form.act_code.data:
-            act_id = (
-                meta.session.query(act.ActType.id)
-                    .filter(act.ActType.code == admin_act_form.act_code_data)
+    if request.method == 'POST' and admin_gesture_form.validate():
+        if admin_gesture_form.gesture_code.data:
+            gesture_id = (
+                meta.session.query(act.Gesture.id)
+                    .filter(act.Gesture.code ==\
+                                        admin_gesture_form.gesture_code_data)
                     .one_or_none()
                 )
             if act_id:
-                admin_act_form.act_id.data = act_id
+                admin_gesture_form.gesture_id.data = gesture_id
         
-        new_act_id = _add_administrativact(admin_act_form.act_id.data,
-                                            admin_act_form.appointment_id.data,
-                                            admin_act_form.tooth_id.data)
-        if not new_act_id:
-            return redirect(url_for("list_acts"))
+        new_gesture_id = _add_administrativ_gesture(
+                                    admin_gesture_form.gesture_id.data,
+                                    admin_gesture_form.appointment_id.data,
+                                    admin_gesture_form.anatomic_location.data)
+        if not new_gesture_id:
+            return redirect(url_for("list_gesture"))
         else:
-            return redirect(url_for("list_acts"))
+            return redirect(url_for("view_gesture", gesture_id=new_gesture_id))
 
-    admin_act_form.appointment_id.data = appointment_id
+    admin_gesture_form.appointment_id.data = appointment_id
 
-    return render_template("add_administrativ_act.html",
+    return render_template("add_administrativ_gesture.html",
                             patient=patient,
                             appointment=appointment,
-                            admin_act_form = admin_act_form)
+                            admin_gesture_form=admin_gesture_form)
 
-@app.route('/gesture/del?patient_id=<int:patient_id>'
-           '&appointment_id=<int:appointment_id>&act_id=<int:act_id>'
+@app.route('/remove/gesture?pid=<int:patient_id>'
+           '&aid=<int:appointment_id>&gid=<int:gesture_id>'
            '&code=<code>')
-def remove_administrativact(patient_id, appointment_id, act_id, code):
+def remove_administrativ_gesture(patient_id, appointment_id, gesture_id, code):
     """ """
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
                         constants.ROLE_NURSE ]
@@ -484,8 +493,8 @@ def remove_administrativact(patient_id, appointment_id, act_id, code):
         return redirect(url_for('index'))
     
     patient = checks.get_patient(patient_id)
-    gesture = meta.session.query(act.AppointmentActReference).filter(
-            act.AppointmentActReference.id == act_id).one()
+    gesture = meta.session.query(act.AppointmentGestureReference).filter(
+            act.AppointmentGestureReference.id == gesture_id).one()
 
     if session['role'] == constants.ROLE_DENTIST:
         user_id = session['user_id']
@@ -494,7 +503,7 @@ def remove_administrativact(patient_id, appointment_id, act_id, code):
     invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
                                              user_id)
     
-    remove_from_gnucash = invoice.remove_act(code, act_id)
+    remove_from_gnucash = invoice.remove_act(code, gesture_id)
     if remove_from_gnucash:
         pass
         # was first made to be sure that all fit together with gnucash.
@@ -502,7 +511,7 @@ def remove_administrativact(patient_id, appointment_id, act_id, code):
 
     meta.session.delete(gesture)
     meta.session.commit()
-    return redirect(url_for('list_acts'))
+    return redirect(url_for('list_gesture'))
 
 
 @app.route('/sterilized_asset_used?pid=<int:patient_id>'

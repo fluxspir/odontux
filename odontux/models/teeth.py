@@ -16,10 +16,35 @@ from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
 from sqlalchemy.orm import relationship, backref
 
+
+class Arcade(Base):
+    """ """
+    __tablename__ = 'arcade'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                            nullable=False)
+    location = Column(Integer, nullable=False)
+
+class Quadrant(Base):
+    """ """
+    __tablename__ = 'quadrant'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                            nullable=False)
+    location = Column(Integer, nullable=False)
+
+class Sextant(Base):
+    """ """
+    __tablename__ = 'maxillar_arcade'
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                            nullable=False)
+    location = Column(Integer, nullable=False)
+
 class Tooth(Base):
     """
     A tooth has to have a name, the choice is free to name it whatever you want
-    Name it in constants.
+    Name is the Integer that link in constants.TOOTH
     The actual tooth state (see constant.py.TOOTH_STATES)
     We may put it under surveillance.
     """
@@ -27,7 +52,7 @@ class Tooth(Base):
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
                                                                 nullable=False)
-    name = Column(String, nullable=False)
+    codename = Column(Integer, nullable=False)
     state = Column(Integer, default=0, nullable=True)
     surveillance = Column(Boolean, default=False)
     patient = relationship('Patient', backref="teeth")

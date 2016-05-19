@@ -24,7 +24,7 @@ class HealthCarePlanForm(Form):
 class CotationForm(Form):
     cotation_id = HiddenField(_('ID'))
     healthcare_plan_id = SelectField(_('healthcare_plan_name'), coerce=int)
-    act_type_id = SelectField(_('act type id'), coerce=int)
+    gesture_id = SelectField(_('Gesture'), coerce=int)
     price = DecimalField(_('price'), [validators.Optional()])
     active = BooleanField(_('active'))
 
@@ -32,16 +32,16 @@ class CotationForm(Form):
 def list_cotations(keywords="", ordering=""):
     keywords = keywords.split()
     ordering = ordering.split()
-    acttypes = meta.session.query(act.ActType)
+    gestures = meta.session.query(act.Gesture)
     if keywords:
         for keyword in keywords:
             keyword = '%{}%'.format(keyword)
-            acttypes = acttypes.filter(or_(
-                act.ActType.alias.ilike(keyword),
-                act.ActType.name.ilike(keyword),
-                act.ActType.code.ilike(keyword),
+            gestures = gestures.filter(or_(
+                act.Gesture.alias.ilike(keyword),
+                act.Gesture.name.ilike(keyword),
+                act.Gesture.code.ilike(keyword),
                 (and_(
-                    act.ActType.specialty_id == act.Specialty.id,
+                    act.Gesture.specialty_id == act.Specialty.id,
                     act.Specialty.name.ilike(keyword)
                     )
                 )
@@ -49,7 +49,7 @@ def list_cotations(keywords="", ordering=""):
     
     if ordering:
         for o in ordering:
-            acttypes = acttypes.order_by(o)
+            gestures = gestures.order_by(o)
 
     cotations = meta.session.query(act.Cotation).all()
 
