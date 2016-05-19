@@ -96,8 +96,8 @@ TONGUE = 960
 MOUTHBASE = 970
 
 MOUTH = 0
-A1 = MAXILAR = 1
-A2 = MANDIBULAR = 2
+A1 = MAXILLA = 1
+A2 = MANDIBULA = 2
 Q10 = QUADRANT_SUPERIOR_RIGHT = 10
 Q20 = QUADRANT_SUPERIOR_LEFT = 20
 Q30 = QUADRANT_INFERIOR_LEFT = 30
@@ -225,10 +225,18 @@ ANATOMIC_LOCATION_SOFT_TISSUES = {
             }
 
 ANATOMIC_LOCATION_TEETH = {
-            MAXILLAR: ( _("maxillar"), str(MAXILLAR), "teeth", 'Arcade'),
-            MANDIBULAR: ( _("mandibular"), str(MANDIBULAR), "teeth", 'Arcade'),
-            QUADRANT: (_("quadrant"), str(QUADRANT), "teeth", "Quadrant"),
-            SEXTANT: (_("sextant"), str(SEXTANT), "teeth", "Sextant"),
+            MAXILLA: ( _("maxillar"), str(MAXILLA), "teeth", 'Arcade'),
+            MANDIBULA: ( _("mandibular"), str(MANDIBULA), "teeth", 'Arcade'),
+            Q10: (_("quadrant superior right"), str(Q10), "teeth", "Quadrant"),
+            Q20: (_("quadrant superior left"), str(Q20), "teeth", "Quadrant"),
+            Q30: (_("quadrant inferior left"), str(Q30), "teeth", "Quadrant"),
+            Q40: (_("quadrant inferior right"), str(Q40), "teeth", "Quadrant"),
+            S03 : (_("sextant superior right"), str(S03), "teeth", "Sextant"),
+            S04 : (_("sextant superior central"), str(S04), "teeth", "Sextant"),
+            S05 : (_("sextant superior left"), str(S05), "teeth", "Sextant"),
+            S06 : (_("sextant inferior left"), str(S06), "teeth", "Sextant"),
+            S07 : (_("sextant inferior central"), str(S07), "teeth", "Sextant"),
+            S08 : (_("sextant inferior right"), str(S08), "teeth", "Sextant"),
             T11: ( _("Incisivo central superior right"), str(T11), "teeth", "Tooth"),
             T12: ( _("Incisivo laterial superior right"), str(T12), "teeth", "Tooth"),
             T13: ( _("Canina superior right"), str(T13), "teeth", "Tooth"),

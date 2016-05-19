@@ -313,7 +313,7 @@ def view_gesture(gesture_id):
             ).all()
         )
     
-    return render_template('view_gesture.html', gesture=gesture
+    return render_template('view_gesture.html', gesture=gesture,
             price_forms=price_forms,
             healthcare_plans_not_in_gesture=healthcare_plans_not_in_gesture)
 
