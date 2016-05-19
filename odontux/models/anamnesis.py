@@ -5,7 +5,7 @@
 # licence BSD
 #
 from meta import Base
-from tables import questionnary_question_table
+from tables import survey_question_table
 import administration, schedule
 import sqlalchemy
 import datetime
@@ -20,26 +20,27 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
 
-class Questionnary(Base):
+class Survey(Base):
     """
         Could be "anamnesis adult complete", "anamnesis adult resume"
          "anamnesis before implants" ...
     """
-    __tablename__ = 'questionnary'
+    __tablename__ = 'survey'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    questions = relationship('Question', secondary=questionnary_question_table,
+    questions = relationship('Question', secondary=survey_question_table,
                                         backref='questionnaries')
 
 class Question(Base):
     """ """
     __tablename__ = 'question'
     id = Column(Integer, primary_key=True)
-    question = Column(String)
+    question = Column(String, nullable=False)
 
 class Anamnesis(Base):
     """ """
     __tablename__ = 'anamnesis'
+    id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                                                         nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
@@ -49,7 +50,7 @@ class Anamnesis(Base):
     anamnesis_type = Column(String, nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'anamnesis'
+        'polymorphic_identity': 'anamnesis',
         'polymorphic_on': anamnesis_type
     }
 
@@ -96,7 +97,7 @@ class Treatment(Anamnesis):
     }
 
 class PastSurgery(Anamnesis):
-    __tablename__ = 'past_surgeries'
+    __tablename__ = 'past_surgery'
     id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
     surgery_type = Column(String)
     problem = Column(String)
@@ -110,7 +111,7 @@ class Allergy(Anamnesis):
     """
         type : constants.ALLERGIES
     """
-    __tablename__ = 'allergies'
+    __tablename__ = 'allergy'
     id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
     name = Column(String, nullable=False)
     type = Column(Integer, nullable=False)

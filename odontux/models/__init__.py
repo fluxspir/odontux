@@ -17,10 +17,9 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from users import OdontuxUser, DentalOffice, Settings
 from md import MedecineDoctor
 from administration import (Address, Mail, Phone, Payer, Family, Patient)
-from anamnesis import MedicalHistory, PastSurgeries, Allergies
-from anamnesis import Questionnary, Question
-#from anamnesis import ( Response, OpenResponse, CloseResponse, Questionnary,
-#                        Question )
+from anamnesis import (Anamnesis, MedicalHistory, Addiction, Treatment, 
+                        PastSurgery, Allergy )
+from anamnesis import Survey, Question
 from headneck import HeadEvent, NeckEvent
 from medication import DrugPrescribed, Prescription, PrescribedDrugReference
 from schedule import Agenda, Appointment, AppointmentMemo

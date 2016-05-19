@@ -80,7 +80,7 @@ ALLERGIC_REACTIONS = {
     ALLERGIC_REACTION_NONE: _('none'),
     ALLERGIC_REACTION_RUSH: _('cutaneous rush'),
     ALLERGIC_REACTION_QUINCKE: _('Quincke Edema'),
-    ALLERGIC_REACTION_ANAPHYLAXIS = _('Anaphylaxis')
+    ALLERGIC_REACTION_ANAPHYLAXIS: _('Anaphylaxis')
     }
 
 HEAD = 900

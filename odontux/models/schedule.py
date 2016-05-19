@@ -34,7 +34,6 @@ class Appointment(Base):
     next_appointment = Column(String, default="")
     absent = Column(Boolean, default=False)
     excuse = Column(String, default="")
-    patient = relationship('administration.Patient')
     dentist = relationship('users.OdontuxUser')
     administrative_acts = relationship("AppointmentActReference",
                                        backref="appointment",
