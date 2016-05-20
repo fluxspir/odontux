@@ -45,6 +45,7 @@ class Anamnesis(Base):
                                                         nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                         nullable=False)
+    question_id = Column(Integer, ForeignKey(Question.id))
     alert = Column(Boolean, default=False)
     time_stamp = Column(Date, default=func.current_date())
     anamnesis_type = Column(String, nullable=False)
