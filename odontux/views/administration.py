@@ -185,14 +185,17 @@ def add_patient():
         phone_args = {g: getattr(phone_form, f).data
                       for f,g in forms.phone_fields}
 
-        if phones_args.items()[1]:
-            new_patient.phones.append(administration.Phone(**phone_args))
-            meta.session.commit()
+        for item in phones_args.items():
+            if item[1]:
+                new_patient.phones.append(administration.Phone(**phone_args))
+                meta.session.commit()
+            break
 
         # Mail
         mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
-        new_patient.mails.append(administration.Mail(**mail_args))
-        meta.session.commit()
+        if mails_args['email']:
+            new_patient.mails.append(administration.Mail(**mail_args))
+            meta.session.commit()
 
 #        ##################################
 #        # The Social Security Number : SSN
