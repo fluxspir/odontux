@@ -175,7 +175,7 @@ def add_user():
                         for f in forms.address_fields}
         for item in address_args.items():
             if item[1]:
-                new_odontuxuser.addresses.append(administration.Address
+                new_odontuxuser.addresses.append(administration.Address(
                                                          **address_args))
             break
 
