@@ -220,8 +220,7 @@ class Device(Asset):
     id = Column(Integer, ForeignKey(Asset.id), primary_key=True)
     lifetime_expected = Column(Interval, default=None)
     serial_number = Column(String, default=None)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id), 
-                                                                nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id))
     appointment = relationship('schedule.Appointment', 
                                 backref='assets_manufacture_sterilized')
     __mapper_args__ = {
