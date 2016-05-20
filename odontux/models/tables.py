@@ -130,9 +130,3 @@ Column("kit_structure_id", Integer, ForeignKey("asset_kit_structure.id")),
 Column("superasset_category_id", Integer, ForeignKey("super_asset_category.id"))
 )
 
-# anamnesis.py
-survey_question_table = Table('survey_question', Base.metadata,
-Column('survey_id', Integer, ForeignKey('survey.id')),
-Column('question_id', Integer, ForeignKey('question.id'))
-)
-

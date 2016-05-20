@@ -5,7 +5,6 @@
 # licence BSD
 #
 from meta import Base
-from tables import survey_question_table
 import administration, schedule
 import sqlalchemy
 import datetime
@@ -28,14 +27,23 @@ class Survey(Base):
     __tablename__ = 'survey'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    questions = relationship('Question', secondary=survey_question_table,
-                                        backref='questionnaries')
 
 class Question(Base):
     """ """
     __tablename__ = 'question'
     id = Column(Integer, primary_key=True)
     question = Column(String, nullable=False)
+
+
+class SurveyQuestionsOrder(Base):
+    """ """
+    __tablename__ = 'survey_questions_order'
+    id = Column(Integer, primary_key=True)
+    survey_id = Column(Integer, ForeignKey(Survey.id), primary_key=True)
+    question_id = Column(Integer, ForeignKey(Question.id), primary_key=True)
+    order = Column(Integer, nullable=False, unique=True)
+    survey = relationship('Survey', backref='questions')
+    question = relationship('Question', backref='surveys')
 
 class Anamnesis(Base):
     """ """
@@ -114,7 +122,7 @@ class Allergy(Anamnesis):
     """
     __tablename__ = 'allergy'
     id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
-    name = Column(String, nullable=False)
+    allergen = Column(String, nullable=False)
     type = Column(Integer, nullable=False)
     reaction = Column(Integer)
 
