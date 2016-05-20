@@ -1,0 +1,24 @@
+{% extends 'header.html' %}
+{% block main %}
+<div id="list_question">
+<a href="{{ url_for('add_question') }}">Add question</a><br />
+<table border=1>
+  <tr>
+    <th>ID</th>
+    <th>Question</th>
+    {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
+      <th>Modify</th>
+    {% endif %}
+{% for question in questions %}
+  <tr>
+    <td>{{ question.id }}</td><td>
+      <a href="{{ url_for('view_question', question_id=question.id) }}">
+      {{ question.question }}</a>
+      </td>
+    {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
+      <td><a href="{{ url_for('update_question', question_id=question.id) }}">Update</a></td>
+    {% endif %}
+  </tr>
+</div>
+{% endfor %}
+{% endblock %}

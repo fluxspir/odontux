@@ -36,12 +36,12 @@ from users import (
                 update_user_mail, add_user_mail, delete_user_mail,
                 )
 from anamnesis import (
-                    list_anamnesis,
-                    update_medical_history, delete_medical_history, 
-                    add_medical_history,
-                    update_past_surgery, delete_past_surgery,
-                    add_past_surgery,
-                    update_allergies, delete_allergies, add_allergies
+                add_anamnesis_entry,
+                anamnesis_portal,
+                add_survey, add_question, list_survey, list_question,
+                view_survey, view_question, add_question_to_survey,
+                remove_question_from_survey, update_survey_name,
+                update_question, delete_survey
                     )
 from medication import (
                     list_drugs,
