@@ -62,15 +62,19 @@ def add_md():
         
         address_args = {f: getattr(address_form, f).data 
                         for f in forms.address_fields}
-        new_medecine_doctor.addresses.append(administration.Address(
-                                             **address_args))
+        if any(address_args.values()):
+            new_medecine_doctor.addresses.append(administration.Address(
+                                                             **address_args))
 
         phone_args = {g: getattr(phone_form, f).data 
                       for f,g in forms.phone_fields}
-        new_medecine_doctor.phones.append(administration.Phone(**phone_args))
+        if any(phone_args.values()):
+            new_medecine_doctor.phones.append(administration.Phone(
+                                                                **phone_args))
 
         mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
-        new_medecine_doctor.mails.append(administration.Mail(**mail_args))
+        if any(mail_args.values()):
+            new_medecine_doctor.mails.append(administration.Mail(**mail_args))
                         
         meta.session.commit()
         return redirect(url_for('list_md'))
