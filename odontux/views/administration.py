@@ -181,10 +181,13 @@ def add_patient():
             meta.session.commit()
 
         # Phone number, in order to contact him.
+        
         phone_args = {g: getattr(phone_form, f).data
                       for f,g in forms.phone_fields}
-        new_patient.phones.append(administration.Phone(**phone_args))
-        meta.session.commit()
+
+        if phones_args.items()[1]:
+            new_patient.phones.append(administration.Phone(**phone_args))
+            meta.session.commit()
 
         # Mail
         mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
