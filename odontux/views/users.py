@@ -173,25 +173,18 @@ def add_user():
         
         address_args = {f: getattr(address_form, f).data 
                         for f in forms.address_fields}
-        for item in address_args.items():
-            if item[1]:
-                new_odontuxuser.addresses.append(administration.Address(
-                                                         **address_args))
-            break
+        if any(address_args.values()):
+            new_odontuxuser.addresses.append(administration.Address(
+                                                            **address_args))
 
         phone_args = {g: getattr(phone_form, f).data 
                       for f,g in forms.phone_fields}
-        for item in phone_args.items():
-            if item[1]:
-                new_odontuxuser.phones.append(administration.Phone(
-                                                                **phone_args))
-            break
+        if any(phone_args.values()):
+            new_odontuxuser.phones.append(administration.Phone(**phone_args))
 
         mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
-        for item in mail_args.items():
-            if item[1]:
-                new_odontuxuser.mails.append(administration.Mail(**mail_args))
-            break
+        if any(mail_args.values()):
+            new_odontuxuser.mails.append(administration.Mail(**mail_args))
 
         meta.session.commit()
         return redirect(url_for('list_users'))

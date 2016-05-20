@@ -329,28 +329,22 @@ def add_provider():
 
         address_args = {f: getattr(address_form, f).data
                     for f in forms.address_fields}
-        for item in address_args.items():
-            if item[1]:
-                new_provider.addresses.append(
+        if any(address_args.values()):
+            new_provider.addresses.append(
                                         administration.Address(**address_args))
-                meta.session.commit()
-            break
+            meta.session.commit()
 
         phone_args = {g: getattr(phone_form, f).data
                     for f,g in forms.phone_fields}
-        for item in phone_args.items():
-            if item[1]:
-                new_provider.phones.append(administration.Phone(**phone_args))
-                meta.session.commit()
-            break
+        if any(phone_args.values()):
+            new_provider.phones.append(administration.Phone(**phone_args))
+            meta.session.commit()
 
         mail_args = {f: getattr(mail_form, f).data 
                             for f in forms.mail_fields}
-        for item in mail_args.items():
-            if item[1]:
-                new_provider.mails.append(administration.Mail(**mail_args))
-                meta.session.commit()
-            break
+        if any(mail_args.values()):
+            new_provider.mails.append(administration.Mail(**mail_args))
+            meta.session.commit()
 
         return redirect(url_for('list_providers'))
 

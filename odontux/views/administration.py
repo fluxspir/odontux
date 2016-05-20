@@ -166,9 +166,8 @@ def add_patient():
                 address_args = {f: getattr(address_form, f).data 
                                 for f in forms.address_fields}
 
-                for item in address_args.items():
-                    if item[1]:
-                        new_patient.family.addresses.append(
+                if any(address_args.values()):
+                    new_patient.family.addresses.append(
                                         administration.Address(**address_args))
         meta.session.commit()
 
@@ -188,19 +187,15 @@ def add_patient():
         phone_args = {g: getattr(phone_form, f).data
                       for f,g in forms.phone_fields}
 
-        for item in phone_args.items():
-            if item[1]:
-                new_patient.phones.append(administration.Phone(**phone_args))
-                meta.session.commit()
-            break
+        if any(phone_args.values()):
+            new_patient.phones.append(administration.Phone(**phone_args))
+            meta.session.commit()
 
         # Mail
         mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
-        for item in mail_args.items():
-            if item[1]:
-                new_patient.mails.append(administration.Mail(**mail_args))
-                meta.session.commit()
-            break
+        if any(mail_args.values()):
+            new_patient.mails.append(administration.Mail(**mail_args))
+            meta.session.commit()
 
 #        ##################################
 #        # The Social Security Number : SSN
