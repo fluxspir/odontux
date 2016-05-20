@@ -1,0 +1,24 @@
+{% extends 'header.html' %}
+{% block main %}
+<div id="list_survey">
+<a href="{{ url_for('add_survey') }}">Add survey</a><br />
+<table border=1>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
+      <th>Modify</th>
+    {% endif %}
+{% for survey in surveys %}
+  <tr>
+    <td>{{ survey.id }}</td><td>
+      <a href="{{ url_for('view_survey', survey_id=survey.id) }}">
+      {{ survey.name }}</a>
+      </td>
+    {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
+      <td><a href="{{ url_for('update_survey_name', survey_id=survey.id) }}">Update</a></td>
+    {% endif %}
+  </tr>
+</div>
+{% endfor %}
+{% endblock %}

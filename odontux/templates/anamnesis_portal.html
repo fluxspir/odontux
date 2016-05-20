@@ -1,0 +1,10 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+Anamnesis portal
+{% endblock %}
+{% block main %}
+<a href="{{ url_for('list_survey') }}">List surveys</a><br />
+<br />
+<a href="{{ url_for('add_survey') }}">Add new survey</a><br />
+<br />
+{% endblock %}

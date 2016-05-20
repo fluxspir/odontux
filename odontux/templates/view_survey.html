@@ -1,0 +1,19 @@
+{% extends "header.html" %}
+{% block main %}
+<br />
+{{ survey.name }}<br /><br />
+Questions in survey : 
+{% for question in survey.questions %}
+  <a href="{{ url_for('remove_question_from_survey', question_id=question.id )}}">
+        Remove</a>{{ question.question }} <br />
+{% endfor %}
+<br /><br /><br />
+Questions not in survey : 
+{% for question in new_questions %}
+  <a href="{{ url_for('add_question_to_survey', question_id=question.id) }}">
+        Add</a>{{ question.question }}<br />
+{% endfor %}
+<br /><br />
+<a href="{{ url_for('update_survey_name', survey_id=survey.id) }}">
+  Update survey name</a><br />
+{% endblock %}

@@ -16,8 +16,140 @@ from gettext import gettext as _
 
 from odontux import constants, checks
 
+class SurveyForm(Form):
+    id = HiddenField(_('id'))
+    name = TextField(_('Survey title'), [validators.Required()])
 
+@app.route('/anamnesis')
+def anamnesis_portal():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
 
+    return render_template('anamnesis_portal.html')
+
+@app.route('/add/survey', methods=['GET', 'POST'])
+def add_survey():
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    survey_form = SurveyForm(request.form)
+    if request.method == 'POST' and survey_form.validate():
+        meta.session.add(anamnesis.Survey(**{'name': survey_form.name.data }))
+        meta.session.commit()
+        return redirect(url_for('list_survey'))
+
+    return render_template('add_survey.html', survey_form=survey_form)
+
+@app.route('/list/survey')
+def list_survey():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    surveys = meta.session.query(anamnesis.Survey).all()
+    return render_template('list_survey.html', surveys=surveys)
+
+@app.route('/view/survey?sid=<int:survey_id>')
+def view_survey(survey_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    survey = ( meta.session.query(anamnesis.Survey)
+                .filter(anamnesis.Survey.id == survey_id)
+                .one() )
+    new_questions = (
+        meta.session.query(anamnesis.Question)
+            .filter(~anamnesis.Question.id.in_(
+                meta.session.query(anamnesis.Question.id)
+                    .filter(anamnesis.Survey.questions.any(
+                        anamnesis.Survey.id == survey_id)
+                        )
+                    )
+                )
+            .all()
+            )
+                        
+    return render_template('view_survey.html', survey=survey, 
+                                        new_questions=new_questions)
+    
+@app.route('/add/question_to_survey?sid=<int:survey_id>'
+            '&qid=<int:question_id>')
+def add_question_to_survey(survey_id, question_id):
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    survey = ( meta.session.query(anamnesis.Survey)
+                .filter(anamnesis.Survey.id == survey_id)
+                .one() )
+    question = ( meta.session.query(anamnesis.Question)
+                .filter(anamnesis.Question.id == question_id)
+                .one() )
+    survey.questions.append(question)
+    meta.session.commit()
+    return redirect(url_for('view_survey', survey_id=survey_id))
+ 
+@app.route('/remove/question_from_survey?sid=<int:survey_id>'
+            '&qid=<int:question_id>')
+def remove_question_from_survey(survey_id, question_id):
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    survey = ( meta.session.query(anamnesis.Survey)
+                .filter(anamnesis.Survey.id == survey_id)
+                .one() )
+    question = ( meta.session.query(anamnesis.Question)
+                .filter(anamnesis.Question.id == question_id)
+                .one() )
+    survey.questions.remove(question)
+    meta.session.commit()
+    return redirect(url_for('view_survey', survey_id=survey_id))
+   
+@app.route('/update/survey_name&sid=<int:survey_id>', methods=['GET', 'POST'])
+def update_survey_name(survey_id):
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    survey = ( meta.session.query(anamnesis.Survey)
+                .filter(anamnesis.Survey.id == survey_id)
+                .one() )
+    survey_form = SurveyForm(request.form)
+    if request.method == 'POST' and survey_form.validate():
+        survey.name = survey_form.name.data
+        meta.session.commit()
+        return redirect(url_for('view_survey', survey_id=survey_id))
+
+    survey_form.name.data = survey.name
+    return render_template('update_survey_name.html', survey=survey,
+                                                    survey_form=survey_form)
+
+@app.route('/delete/survey?sid=survey_id')
+def delete_survey(survey_id):
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+    survey = ( meta.session.query(anamnesis.Survey)
+                .filter(anamnesis.Survey.id == survey_id)
+                .one() )
+    meta.session.delete(survey)
+    meta.session.commit()
+    return redirect(url_for('list_survey'))
+
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
 class GeneralInfoForm(Form):
     patient_id = HiddenField(_('patient_id'), [validators.Required()])
     dentist_id = HiddenField(_('dentist_id'), [validators.Required()])
