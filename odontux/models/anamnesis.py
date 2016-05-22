@@ -30,7 +30,9 @@ class Survey(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
     
-    questions = association_proxy('SurveyQuestionsOrder', 'question',
+    quests = relationship('SurveyQuestionsOrder')
+
+    questions = association_proxy('survey_questions', 'question',
                         creator=lambda p, q:
                             SurveyQuestionsOrder(position=p,
                                                 question=q)
@@ -49,8 +51,8 @@ class SurveyQuestionsOrder(Base):
     survey_id = Column(Integer, ForeignKey(Survey.id), primary_key=True)
     question_id = Column(Integer, ForeignKey(Question.id), primary_key=True)
     position = Column(Integer, nullable=False)
-    survey = relationship('Survey', backref='survey_questions',
-                    collection_class=attribute_mapped_collection('position')
+    survey = relationship(Survey, backref=backref('survey_questions',
+                    collection_class=attribute_mapped_collection('position'))
                     )
     question = relationship('Question')
 

@@ -5,9 +5,10 @@
 # licence BSD
 #
 
+import pdb
 from flask import session, render_template, request, redirect, url_for
 from wtforms import (Form, SelectField, TextField, BooleanField, TextAreaField,
-                     HiddenField, DateField, validators )
+                     IntegerField, HiddenField, DateField, validators )
 from odontux.views.log import index
 from odontux.models import meta, anamnesis, md
 from odontux.odonweb import app
@@ -24,6 +25,12 @@ class QuestionForm(Form):
     id = HiddenField(_('id'))
     question = TextAreaField(_('Question'), [validators.Required()],
                         render_kw={'rows': '4', 'cols': '50'})
+
+class PositionForm(Form):
+    question_id = HiddenField(_('question_id'))
+    old_position = HiddenField(_('old_position'))
+    new_position = IntegerField(_('Position'), [validators.Required()],
+                        render_kw={'width': '30px'})
 
 class AnamnesisForm(Form):
     id = HiddenField(_('id'))
@@ -64,12 +71,16 @@ class AllergyForm(Form):
 
 @app.route('/add/anamnesis_entry?pid=<int:patient_id>'
             '&aid=<int:appointment_id>', methods=['GET', 'POST'] )
+@app.route('/add/anamnesis_entry?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>&sid=<int:survey_id>'
+            '&sen=<int:survey_entry>', methods=['GET', 'POST'] )
 def add_anamnesis_entry(patient_id, appointment_id, survey_id=None, 
                                                     survey_entry=None):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    
+    if survey_entry and survey_id:
+        pass
     anamnesis_form = AnamnesisForm(request.form)
     medical_history_form = MedicalHistoryForm(request.form)
     medical_history_form.type.choices = constants.MEDICAL_HISTORIES.items()
@@ -134,7 +145,7 @@ def add_question():
         return redirect(url_for('index'))
     question_form = QuestionForm(request.form)
     if request.method == 'POST' and question_form.validate():
-        values = {'name': question_form.question.data }
+        values = {'question': question_form.question.data }
         new_question = anamnesis.Question(**values)
         meta.session.add(new_question)
         meta.session.commit()
@@ -161,28 +172,84 @@ def list_question():
     return render_template('list_question.html', questions=questions)
 
 
-@app.route('/view/survey?sid=<int:survey_id>')
+@app.route('/view/survey?sid=<int:survey_id>', methods=['GET', 'POST'])
 def view_survey(survey_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
+    def _new_position_higher(position_form, questions_in_survey):
+        for question in questions_in_survey:
+            if question.question_id == int(position_form.question_id.data):
+                question.position = position_form.new_position.data
+                meta.session.commit()
+                continue
+            if ( question.position <= position_form.new_position.data
+                and question.position > int(position_form.old_position.data) ):
+                question.position -= 1
+                meta.session.commit()
+
+    def _new_position_lower(position_form, questions_in_survey):
+        for question in questions_in_survey:
+            if question.question_id == int(position_form.question_id.data):
+                question.position = position_form.new_position.data
+                meta.session.commit()
+                continue
+            if ( question.position < int(position_form.old_position.data)
+                and question.position >= position_form.new_position.data ):
+                question.position += 1
+                meta.session.commit()
+
+    position_form = PositionForm(request.form)
+    questions_in_survey = (
+        meta.session.query(anamnesis.SurveyQuestionsOrder)
+            .filter(anamnesis.SurveyQuestionsOrder.survey_id == survey_id)
+            .order_by(anamnesis.SurveyQuestionsOrder.position)
+            .all()
+        )
+
+    if request.method == 'POST' and position_form.validate():
+        if position_form.new_position.data > len(questions_in_survey):
+            position_form.new_position.data = len(questions_in_survey)
+        elif position_form.new_position.data <= 0:
+            position_form.new_position.data = 1
+
+        if position_form.new_position.data >\
+                                        int(position_form.old_position.data):
+            _new_position_higher(position_form, questions_in_survey)
+        else:
+            _new_position_lower(position_form, questions_in_survey) 
+        
+        return redirect(url_for('view_survey', survey_id=survey_id))
+
     survey = ( meta.session.query(anamnesis.Survey)
                 .filter(anamnesis.Survey.id == survey_id)
                 .one() )
+
+    question_form_list = []
+    for question in sorted(survey.quests, 
+                                key=lambda question: question.position):
+        position_form = PositionForm(request.form)
+        position_form.question_id.data = question.question_id
+        position_form.old_position.data =\
+            position_form.new_position.data = question.position
+        question_form_list.append( ( question, position_form ) )
+    
     new_questions = (
         meta.session.query(anamnesis.Question)
             .filter(~anamnesis.Question.id.in_(
                 meta.session.query(anamnesis.Question.id)
-                    .filter(anamnesis.Survey.questions.any(
-                        anamnesis.Survey.id == survey_id)
+                    .join(anamnesis.SurveyQuestionsOrder)
+                    .join(anamnesis.Survey)
+                    .filter(anamnesis.Survey.quests.any(
+                        anamnesis.SurveyQuestionsOrder.survey_id == survey_id)
                         )
                     )
                 )
             .all()
-            )
-                        
-    return render_template('view_survey.html', survey=survey, 
+        )
+    return render_template('view_survey.html', survey=survey,
+                                        question_form_list=question_form_list,
                                         new_questions=new_questions)
  
 @app.route('/view/question?sid=<int:question_id>')
@@ -203,13 +270,18 @@ def add_question_to_survey(survey_id, question_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    survey = ( meta.session.query(anamnesis.Survey)
-                .filter(anamnesis.Survey.id == survey_id)
-                .one() )
-    question = ( meta.session.query(anamnesis.Question)
-                .filter(anamnesis.Question.id == question_id)
-                .one() )
-    survey.questions.append(question)
+    number_of_questions = (
+        meta.session.query(anamnesis.SurveyQuestionsOrder)
+            .filter(anamnesis.SurveyQuestionsOrder.survey_id == survey_id)
+            .count()
+        )
+    values = {
+        'survey_id': survey_id,
+        'question_id': question_id,
+        'position': number_of_questions + 1
+    }
+    new_survey_question = anamnesis.SurveyQuestionsOrder(**values)
+    meta.session.add(new_survey_question)
     meta.session.commit()
     return redirect(url_for('view_survey', survey_id=survey_id))
  
@@ -219,13 +291,30 @@ def remove_question_from_survey(survey_id, question_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    survey = ( meta.session.query(anamnesis.Survey)
-                .filter(anamnesis.Survey.id == survey_id)
-                .one() )
-    question = ( meta.session.query(anamnesis.Question)
-                .filter(anamnesis.Question.id == question_id)
-                .one() )
-    survey.questions.remove(question)
+    survey = (
+        meta.session.query(anamnesis.Survey)
+            .filter(anamnesis.Survey.id == survey_id)
+            .one()
+        )
+
+    question_to_remove = (
+        meta.session.query(anamnesis.SurveyQuestionsOrder)
+            .filter(anamnesis.SurveyQuestionsOrder.survey_id == survey_id,
+                    anamnesis.SurveyQuestionsOrder.question_id == question_id)
+            .one()
+        )
+    
+    old_position = question_to_remove.position
+    meta.session.delete(question_to_remove)
+    meta.session.commit()
+    others_questions_in_survey = (
+        meta.session.query(anamnesis.SurveyQuestionsOrder)
+            .filter(anamnesis.SurveyQuestionsOrder.survey_id == survey_id)
+            .all()
+        )
+    for question in others_questions_in_survey:
+        if question.position > old_position:
+            question.position = question.position - 1
     meta.session.commit()
     return redirect(url_for('view_survey', survey_id=survey_id))
    
