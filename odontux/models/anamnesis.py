@@ -17,6 +17,8 @@ except ImportError:
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm import relationship, backref
 
 class Survey(Base):
@@ -26,14 +28,19 @@ class Survey(Base):
     """
     __tablename__ = 'survey'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, unique=True)
+    
+    questions = association_proxy('SurveyQuestionsOrder', 'question',
+                        creator=lambda p, q:
+                            SurveyQuestionsOrder(position=p,
+                                                question=q)
+                        )
 
 class Question(Base):
     """ """
     __tablename__ = 'question'
     id = Column(Integer, primary_key=True)
-    question = Column(String, nullable=False)
-
+    question = Column(String, nullable=False, unique=True)
 
 class SurveyQuestionsOrder(Base):
     """ """
@@ -41,9 +48,11 @@ class SurveyQuestionsOrder(Base):
     id = Column(Integer, primary_key=True)
     survey_id = Column(Integer, ForeignKey(Survey.id), primary_key=True)
     question_id = Column(Integer, ForeignKey(Question.id), primary_key=True)
-    order = Column(Integer, nullable=False, unique=True)
-    survey = relationship('Survey', backref='questions')
-    question = relationship('Question', backref='surveys')
+    position = Column(Integer, nullable=False)
+    survey = relationship('Survey', backref='survey_questions',
+                    collection_class=attribute_mapped_collection('position')
+                    )
+    question = relationship('Question')
 
 class Anamnesis(Base):
     """ """
