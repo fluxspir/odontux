@@ -62,6 +62,8 @@ class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
     family_id = Column(Integer, ForeignKey(Family.id))
+    identity_number_1 = Column(String)
+    identity_number_2 = Column(String)
     title = Column(String, default="Mr")
     lastname = Column(String, nullable=False)
     firstname = Column(String, default="")

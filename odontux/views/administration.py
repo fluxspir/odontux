@@ -28,7 +28,8 @@ def get_gen_info_field_list():
     return [ "title", "lastname", "firstname", "qualifications", 
                     "preferred_name", "correspondence_name", "sex", "dob", 
                     "job", "inactive", "time_stamp",
-                    "office_id", "dentist_id" ]
+                    "office_id", "dentist_id",
+                    "identity_number_1", "identity_number_2" ]
 
 def get_family_field_list():
     return [ "family_id" ]
@@ -43,6 +44,8 @@ class PatientGeneralInfoForm(Form):
     firstname = TextField(_('firstname'), [validators.Length(max=30, 
                            message=_("firstname too long"))],
                            filters=[forms.title_field])
+    identity_number_1 = TextField(_('Identity Number'))
+    identity_number_2 = TextField(_('Licence number or CPF'))
     preferred_name = TextField(_('preferred_name'), [validators.Length(max=30,
                                 message=_("preferred name too long"))])
     correspondence_name = TextField(_('correspondence_name'),
