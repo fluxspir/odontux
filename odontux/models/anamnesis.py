@@ -70,7 +70,7 @@ class Anamnesis(Base):
     anamnesis_type = Column(String, nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'anamnesis',
+        'polymorphic_identity': constants.ANAMNESIS_ANAMNESIS,
         'polymorphic_on': anamnesis_type
     }
 
@@ -86,8 +86,8 @@ class MedicalHistory(Anamnesis):
     comment = Column(String)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'medical_history'
-    }
+        'polymorphic_identity': constants.ANAMNESIS_MEDICAL_HISTORY
+        }
     
 class Addiction(Anamnesis):
     """
@@ -101,7 +101,7 @@ class Addiction(Anamnesis):
     end = Column(Date)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'addiction'
+        'polymorphic_identity': constants.ANAMNESIS_ADDICTION
     }
 
 class Treatment(Anamnesis):
@@ -113,7 +113,7 @@ class Treatment(Anamnesis):
     end = Column(Date)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'treatment'
+        'polymorphic_identity': constants.ANAMNESIS_TREATMENT
     }
 
 class PastSurgery(Anamnesis):
@@ -124,7 +124,7 @@ class PastSurgery(Anamnesis):
     complication = Column(String)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'past_surgery'
+        'polymorphic_identity': constants.ANAMNESIS_PAST_SURGERY
     }
 
 class Allergy(Anamnesis):
@@ -138,6 +138,6 @@ class Allergy(Anamnesis):
     reaction = Column(Integer)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'allergy'
+        'polymorphic_identity': constants.ANAMNESIS_ALLERGY
     }
 

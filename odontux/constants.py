@@ -31,6 +31,9 @@ ROLES_LIST = ROLES.items()  #ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
 
 KID_AGE = 13
 
+#######################
+
+
 MEDICAL_HISTORY_DISEASE = 1
 MEDICAL_HISTORY_DISORDER = 2
 MEDICAL_HISTORY_HABITUS = 3
@@ -80,6 +83,24 @@ ALLERGIC_REACTIONS = {
     ALLERGIC_REACTION_QUINCKE: _('Quincke Edema'),
     ALLERGIC_REACTION_ANAPHYLAXIS: _('Anaphylaxis')
     }
+
+ANAMNESIS_ANAMNESIS = 1
+ANAMNESIS_MEDICAL_HISTORY = 2
+ANAMNESIS_ADDICTION = 3
+ANAMNESIS_TREATMENT = 4
+ANAMNESIS_PAST_SURGERY = 5
+ANAMNESIS_ALLERGY = 6
+
+ANAMNESIS = {
+    ANAMNESIS_ANAMNESIS: ( _('general anamnesis'), None ),
+    ANAMNESIS_MEDICAL_HISTORY: ( _('medical history'), MEDICAL_HISTORIES ),
+    ANAMNESIS_ADDICTION: ( _('addiction'), ADDICTIONS ),
+    ANAMNESIS_TREATMENT: ( _('treatment'), None ),
+    ANAMNESIS_PAST_SURGERY: ( _('past surgery'), None ),
+    ANAMNESIS_ALLERGY: ( _('allergy'), ALLERGIES ),
+    }
+
+####################
 
 HEAD = 900
 NECK = 910
