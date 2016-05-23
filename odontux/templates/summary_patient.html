@@ -29,7 +29,7 @@
               <ul class="options_nav">
                 <li>
                   <div id="act_open" class="options_nav" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-                    <a href={{ url_for("add_administrativact", patient_id=session.patient_id, appointment_id=session.appointment_id) }}>Add</a>
+                    <a href={{ url_for("add_administrativ_gesture", patient_id=session.patient_id, appointment_id=session.appointment_id) }}>Add</a>
                   </div>
                 </li>
               </ul>
@@ -41,11 +41,11 @@
             <a href="{{ url_for("update_patient", body_id=session.patient_id, form_to_display="gen_info") }}">Administrativ</a>
           </li>
           <li>
-            <a href={{ url_for("list_anamnesis") }} onmouseover="mopen('anamnesis_open')" onmouseout="mclosetime()">Anamnesis</a>
+            <a href={{ url_for("list_anamnesis", patient_id=session.patient_id) }} onmouseover="mopen('anamnesis_open')" onmouseout="mclosetime()">Anamnesis</a>
             <ul class="options_nav">
               <li>
                 <div id="anamnesis_open" class="options_nav" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-                  <a href={{ url_for("update_anamnesis") }}>Modify</a>
+                  <a href={{ url_for("update_anamnesis", patient_id=session.patient_id) }}>Modify</a>
                 </div>
               </li>
             </ul>

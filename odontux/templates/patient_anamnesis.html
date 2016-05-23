@@ -11,84 +11,18 @@
       {% endif %}
     {% endblock %}
   </p>
-  
-  <div id="medical_history">
-    <table border=1>
-      <caption>Medical History</caption>
-      <tr>
-        <th class="hidden">patient_id</th>
-        <th class="hidden">dentist_id</th>
-        <th class="hidden">id</th>
-        <th>icd10</th>
-        <th>disease</th>
-        <th>disorder</th>
-        <th>habitus</th>
-        <th>treatment</th>
-        <th>time_stamp</th>
-      </tr>
-      {% block medical_history %}
-        {% for medhist in medical_history %}
-          <tr>
-            <td class="hidden"></td>
-            <td class="hidden"></td>
-            <td class="hidden"></td>
-            <td>{{ medhist.icd10 }}</td>
-            <td>{{ medhist.disease }}</td>
-            <td>{{ medhist.disorder }}</td>
-            <td>{{ medhist.habitus }}</td>
-            <td>{{ medhist.treatment }}</td>
-            <td>{{ medhist.time_stamp }}</td>
-          </tr>
-        {% endfor %}
-      {% endblock %}
-    </table>
   </div>
-  <br />
-  <div id="past_surgeries">
-    <table border=1>
-      <caption>Past Surgeries</caption>
-      <tr>
-        <th>Surgery type</th>
-        <th>Problems</th>
-        <th>Complications</th>
-        <th>time_stamp</th>
-      </tr>
-      {% block past_surgeries %}
-        {% for surgery in past_surgeries %}
-          <tr>
-            <td>{{ surgery.surgery_type }}</td>
-            <td>{{ surgery.problem }}</td>
-            <td>{{ surgery.complication }}</td>
-            <td>{{ surgery.time_stamp }}</td>
-          </tr>
-        {% endfor %}
-      {% endblock %}
-    </table>
-  </div>
-  <br />
-  <div id="allergies">
-    <table border=1>
-      <caption>Allergies</caption>
-      <tr>
-        <th>Drug</th>
-        <th>Metal</th>
-        <th>Food</th>
-        <th>Other</th>
-        <th>Reaction</th>
-        <th>time_stamp</th>
-      </tr>
-      {% block allergies %}
-        {% for allergy in allergies %}
-          <tr>
-            <td>{{ allergy.drug }}</td>
-            <td>{{ allergy.metal }}</td>
-            <td>{{ allergy.food }}</td>
-            <td>{{ allergy.other }}</td>
-            <td>{{ allergy.reaction }}</td>
-            <td>{{ allergy.time_stamp }}</td>
-          </tr>
-        {% endfor %}
-      {% endblock %}
-    </table>
+  <div id="anamnesis">
+  {% for entry in patient_anamnesis %}
+    {% if entry.anamnesis_type == 'medical_history' %}
+
+    {% elif entry.anamnesis_type == 'addictions' %}
+    {% elif entry.anamnesis_type == 'treatment' %}
+    {% elif entry.anamnesis_type == 'past_surgery' %}
+    {% elif entry.anamnesis_type == 'allergy' %}
+
+    {% endif %}
+
+  {% endfor %}
   </div>
 {% endblock %}

@@ -37,7 +37,8 @@ class AgendaForm(Form):
     """ """
     #TODO : validators for time, either duration or endtime must be provided...
     appointment_id = HiddenField('appointment_id')
-    day = DateField(_('day'), [validators.Optional()])
+    day = DateField(_('day'), format='%Y-%m-%d', 
+                            validators=[validators.Optional()])
     starthour = IntegerField(_('h'), [validators.Optional()])
     startmin = IntegerField(_('m'), [validators.Optional()])
     durationhour = IntegerField(_('h'), [validators.Optional()])
@@ -286,6 +287,9 @@ def add_appointment(body_id):
     # making  "smalls" fields ; not working right now ; why ?
     #for f in get_time_field_list():
     #    getattr(agenda_form, f)(style="width:30px;")
+    
+    agenda_form.day.data = datetime.date.today()
+    
     if session['role'] == constants.ROLE_DENTIST:
         appointment_form.dentist_id.data = session['user_id']
     if session['patient_id']:

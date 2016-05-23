@@ -45,7 +45,7 @@ def patient_appointment(appointment_id):
                         body_id=session['patient_id']))
     
     acts = checks.get_patient_acts(patient.id, appointment.id,
-                [ act.AppointmentActReference.tooth_id ]
+                [ act.AppointmentGestureReference.tooth_id ]
                 )
     return render_template("patient_appointment.html",
                             patient=patient,
@@ -128,7 +128,7 @@ def enter_patient_appointment():
                             body_id=session['patient_id']))
         
         acts = checks.get_patient_acts(patient.id, appointment.id,
-                    [ act.AppointmentActReference.tooth_id ]
+                    [ act.AppointmentGestureReference.tooth_id ]
                     )
         return render_template("patient_appointment.html",
                                 patient=patient,
@@ -146,7 +146,7 @@ def enter_patient_appointment():
             .filter(schedule.Appointment.id == session['appointment_id'])\
             .one()
     acts = checks.get_patient_acts(patient.id, appointment.id,
-                    [ act.AppointmentActReference.tooth_id ]
+                    [ act.AppointmentGestureReference.tooth_id ]
                     )
     return render_template("patient_appointment.html",
                             patient=patient,
@@ -193,7 +193,7 @@ def list_acts():
     patient = checks.get_patient(session['patient_id'])
 
     acts = checks.get_patient_acts(patient.id, None,
-            [ act.AppointmentActReference.appointment_id, ]
+            [ act.AppointmentGestureReference.appointment_id, ]
             )
     return render_template("list_patient_acts.html",
                             patient=patient,

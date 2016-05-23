@@ -115,8 +115,8 @@ def get_patient_acts(patient_id, appointment_id=None, ordering=[]):
     made with its name, and not only its ID.
     Returns a list of tuples (gesture, tooth, appointment, act_info, specialty)
     """
-    # Our principal query will be on the "AppointmentActReference" table:
-    query = meta.session.query(act.AppointmentActReference)
+    # Our principal query will be on the "AppointmentGestureReference" table:
+    query = meta.session.query(act.AppointmentGestureReference)
 
     # Get all appointments where the patient came, as it is while an 
     # appointment that acts are made on patient.
@@ -129,7 +129,7 @@ def get_patient_acts(patient_id, appointment_id=None, ordering=[]):
 
     RVlist = [ RV.id for RV in appointments]
     query = query.filter(
-            act.AppointmentActReference.appointment_id.in_(RVlist))
+            act.AppointmentGestureReference.appointment_id.in_(RVlist))
 
     if ordering:
         for o in ordering:
