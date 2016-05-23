@@ -30,23 +30,23 @@ function InService() {
 
 
 function ChangementToothAnatomicLocation() {
-  var anat_loc = document.getElementById("anatomic_location").value;
+  var anat_loc_val = document.getElementById("anatomic_location").value;
   var tooth = document.getElementById("tooth");
   var crown = document.getElementById("crown");
   var root = document.getElementById("root");
   var periodonte = document.getElementById("periodonte");
 
-  if (anat_loc == 1 ) {
+  if (anat_loc_val == 1 ) {
     tooth.style.display = "none";
     crown.style.display = "block";
     root.style.display = "none";
     periodonte.style.display = "none";
-  } else if (anat_loc == 2 ) {
+  } else if (anat_loc_val == 2 ) {
     tooth.style="display:none";
     crown.style="display:none";
     root.style="display:block";
     periodonte.style="display:none";
-  } else if (anat_loc == 3 ) {
+  } else if (anat_loc_val == 3 ) {
     tooth.style="display:none";
     crown.style="display:none";
     root.style="display:none";
@@ -59,3 +59,55 @@ function ChangementToothAnatomicLocation() {
   }
 }
 
+function ChangementAnamnesisType() {
+  var anamnesis_val = document.getElementById("anamnesis_type").value;
+  var medical_history = document.getElementById("medical_history");
+  var addiction = document.getElementById("addiction");
+  var treatment = document.getElementById("treatment");
+  var past_surgery = document.getElementById("past_surgery");
+  var allergy = document.getElementById("allergy");
+
+  if (anamnesis_val == 1) {
+    medical_history.style.display = "none";
+    addiction.style.display = "none";
+    treatment.style.display = "none";
+    past_surgery.style.display = "none";
+    allergy.style.display = "none";
+  } else if ( anamnesis_val == 2) {
+    medical_history.style.display = "block";
+    addiction.style.display = "none";
+    treatment.style.display = "none";
+    past_surgery.style.display = "none";
+    allergy.style.display = "none";
+  } else if ( anamnesis_val == 3) {
+    medical_history.style.display = "none";
+    addiction.style.display = "block";
+    treatment.style.display = "none";
+    past_surgery.style.display = "none";
+    allergy.style.display = "none";
+  } else if ( anamnesis_val == 4) {
+    medical_history.style.display = "none";
+    addiction.style.display = "none";
+    treatment.style.display = "block";
+    past_surgery.style.display = "none";
+    allergy.style.display = "none";
+  } else if ( anamnesis_val == 5) {
+    medical_history.style.display = "none";
+    addiction.style.display = "none";
+    treatment.style.display = "none";
+    past_surgery.style.display = "block";
+    allergy.style.display = "none";
+  } else if (anamnesis_val == 6) {
+    medical_history.style.display = "none";
+    addiction.style.display = "none";
+    treatment.style.display = "none";
+    past_surgery.style.display = "none";
+    allergy.style.display = "block";
+  } else {
+    medical_history.style.display = "none";
+    addiction.style.display = "none";
+    treatment.style.display = "none";
+    past_surgery.style.display = "none";
+    allergy.style.display = "none";
+  }
+}

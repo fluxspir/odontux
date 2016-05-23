@@ -35,10 +35,13 @@ class PositionForm(Form):
 class AnamnesisForm(Form):
     id = HiddenField(_('id'))
     alert = BooleanField(_('Alert'))
-    anamnesis_type = SelectField(_("Anamnesis type"))
+    document = BooleanField(_('Document'))
+    anamnesis_type = SelectField(_("Anamnesis type"),
+                            description='ChangementAnamnesisType()')
 
 class MedicalHistoryForm(Form):
     type = SelectField(_('Type'), coerce=int)
+    disease = SelectField(_('Disease'), coerce=int)
     name = TextField(_('Name'), [validators.Required()])
     icd = TextField(_('ICD'))
     comment = TextAreaField(_('Comments'))
@@ -73,6 +76,10 @@ class MedecineDoctorForm(Form):
     md_id = SelectField(_('Medecine Doctor'), coerce=int)
 
 
+@app.route('/add/medical_history_entry', methods=['POST'])
+def add_medical_history_entry():
+    pass
+
 @app.route('/add/anamnesis_entry?pid=<int:patient_id>'
             '&aid=<int:appointment_id>', methods=['GET', 'POST'] )
 @app.route('/add/anamnesis_entry?pid=<int:patient_id>'
@@ -83,11 +90,16 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    if survey_entry and survey_id:
-        pass
+
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(appointment_id)
+
     anamnesis_form = AnamnesisForm(request.form)
+    anamnesis_form.anamnesis_type.choices = [ (id, info[0]) for id, info in
+                                            constants.ANAMNESIS.items() ]
     medical_history_form = MedicalHistoryForm(request.form)
     medical_history_form.type.choices = constants.MEDICAL_HISTORIES.items()
+    medical_history_form.disease.choices = constants.DISEASES.items()
     addiction_form = AddictionForm(request.form)
     addiction_form.type.choices = constants.ADDICTIONS.items()
     treatment_form = TreatmentForm(request.form)
@@ -95,30 +107,89 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
     allergy_form = AllergyForm(request.form)
     allergy_form.type.choices = constants.ALLERGIES.items()
     allergy_form.reaction.choices = constants.ALLERGIC_REACTIONS.items()
+ 
+    if survey_entry:
+        question = (
+            meta.session.query(anamnesis.Question)
+                .filter(anamnesis.SurveyQuestionsOrder.survey_id == survey_id,
+                    anamnesis.SurveyQuestionsOrder.position == survey_entry)
+                .one_or_none()
+            )
+        survey_entry += 1
+        if question:
+            anamnesis_form.question_id.data = question.id
+    else:
+        question = None
+    
+    clear_form = True
+    
+    return render_template('add_anamnesis_entry.html', patient=patient,
+                                    appointment=appointment,
+                                    question=question,
+                                    survey_id=survey_id, 
+                                    survey_entry=survey_entry,
+                                    anamnesis_form=anamnesis_form,
+                                    medical_history_form=medical_history_form,
+                                    addiction_form=addiction_form,
+                                    treatment_form=treatment_form,
+                                    past_surgery_form=past_surgery_form,
+                                    allergy_form=allergy_form,
+                                    clear_form=clear_form)
 
-    if request.method == 'POST' and anamnesis_form.validate():
-        if anamnesis_form.anamnesis_type.data == 'medical_history':
-            if medical_history_form.validate():
-                pass
-        elif ( anamnesis_form.anamnesis_type.data == 'addiction'
-            and addiction_form.validate() ):
-            pass
-        elif ( anamnesis_form.anamnesis_type.data == 'treatment'
-            and treatment_form.validate() ):
-            pass
-        elif ( anamnesis_form.anamnesis_type.data == 'past_surgery'
-            and past_surgery_form.validate() ):
-            pass
-        elif ( anamnesis_form.anamnesis_type.data == 'allergy'
-            and allergy_form.validate() ):
-            pass
-        
-        if survey_entry:
-            survey_entry += 1
-        return redirect(url_for('add_anamnesis_entry', patient_id=patient_id,
-                                                appointment_id=appointment_id, 
-                                                survey_id=survey_id, 
-                                                survey_entry=survey_entry))
+
+#    if request.method == 'POST' and anamnesis_form.validate():
+#        if anamnesis_form.anamnesis_type.data == 'medical_history':
+#            if medical_history_form.validate():
+#                pass
+#        elif ( anamnesis_form.anamnesis_type.data == 'addiction'
+#            and addiction_form.validate() ):
+#            pass
+#        elif ( anamnesis_form.anamnesis_type.data == 'treatment'
+#            and treatment_form.validate() ):
+#            pass
+#        elif ( anamnesis_form.anamnesis_type.data == 'past_surgery'
+#            and past_surgery_form.validate() ):
+#            pass
+#        elif ( anamnesis_form.anamnesis_type.data == 'allergy'
+#            and allergy_form.validate() ):
+#            pass
+#        
+
+@app.route('/patient/anamnesis?pid=<int:patient_id>')
+def list_anamnesis(patient_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    patient = checks.get_patient(patient_id)
+
+    patient_anamnesis = (
+        meta.session.query(anamnesis.Anamnesis)
+#            .join(anamnesis.MedicalHistory,
+#                    anamnesis.Addiction,
+#                    anamnesis.Treatment,
+#                    anamnesis.PastSurgery,
+#                    anamnesis.Allergy)
+            .filter(anamnesis.Anamnesis.patient_id == patient_id)
+            .all()
+        )
+    
+    doctor = meta.session.query(md.MedecineDoctor).filter(
+        md.MedecineDoctor.id == patient.gen_doc_id).one_or_none()
+    return render_template("patient_anamnesis.html",
+                            patient=patient,
+                            patient_anamnesis=patient_anamnesis,
+                            doctor=doctor)
+
+@app.route('/update/anamnesis?pid=<int:patient_id>')
+def update_anamnesis(patient_id):
+    pass
+
+
+
+
+
 
 @app.route('/anamnesis')
 def anamnesis_portal():
@@ -375,10 +446,6 @@ def delete_survey(survey_id):
     meta.session.commit()
     return redirect(url_for('list_survey'))
 
-
-
-
-
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -453,28 +520,7 @@ def delete_survey(survey_id):
 #def _get_allergies_fields():
 #    return [ "drug", "metal", "food", "other", "reaction" ]
 #
-#@app.route('/patient/anamnesis')
-#def list_anamnesis():
-#    if (session['role'] != constants.ROLE_DENTIST
-#    and session['role'] != constants.ROLE_NURSE
-#    and session['role'] != constants.ROLE_ASSISTANT):
-#        return redirect(url_for('index'))
-#
-#    patient = checks.get_patient(session['patient_id'])
-#    medical_history, past_surgeries, allergies = \
-#        _get_patient_anamnesis(patient.id)
-#    try:    
-#        doctor = meta.session.query(md.MedecineDoctor).filter(
-#               md.MedecineDoctor.id == patient.gen_doc_id).one()
-#    except:
-#        doctor = ""
-#    return render_template("patient_anamnesis.html",
-#                            patient=patient,
-#                            medical_history=medical_history,
-#                            past_surgeries=past_surgeries,
-#                            allergies=allergies,
-#                            doctor=doctor)
-#
+
 #@app.route('/patient/modify_anamnesis/', methods=['GET', 'POST'])
 #def update_anamnesis(): 
 #    if not session['patient_id']:

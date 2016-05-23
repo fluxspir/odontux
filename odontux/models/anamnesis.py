@@ -66,6 +66,7 @@ class Anamnesis(Base):
                                                         nullable=False)
     question_id = Column(Integer, ForeignKey(Question.id))
     alert = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
     time_stamp = Column(Date, default=func.current_date())
     anamnesis_type = Column(String, nullable=False)
 
@@ -81,6 +82,7 @@ class MedicalHistory(Anamnesis):
     __tablename__ = 'medical_history'
     id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
     type = Column(Integer, nullable=False)
+    disease = Column(Integer)
     name = Column(String, nullable=False)
     icd = Column(String)
     comment = Column(String)
