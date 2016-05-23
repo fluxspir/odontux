@@ -29,8 +29,8 @@ class QuestionForm(Form):
 class PositionForm(Form):
     question_id = HiddenField(_('question_id'))
     old_position = HiddenField(_('old_position'))
-    new_position = IntegerField(_('Position'), [validators.Required()],
-                        render_kw={'width': '30px'})
+    new_position = IntegerField(_('Position'),
+                        render_kw={'size': '3'})
 
 class AnamnesisForm(Form):
     id = HiddenField(_('id'))
@@ -211,8 +211,10 @@ def view_survey(survey_id):
     if request.method == 'POST' and position_form.validate():
         if position_form.new_position.data > len(questions_in_survey):
             position_form.new_position.data = len(questions_in_survey)
-        elif position_form.new_position.data <= 0:
+        elif position_form.new_position.data < 1:
             position_form.new_position.data = 1
+        else:
+            position_form.new_position.data = len(questions_in_survey)
 
         if position_form.new_position.data >\
                                         int(position_form.old_position.data):
@@ -355,7 +357,7 @@ def update_question(question_id):
                                                 question_form=question_form)
 
 
-@app.route('/delete/survey?sid=survey_id')
+@app.route('/delete/survey?sid=<int:survey_id>')
 def delete_survey(survey_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
@@ -363,6 +365,8 @@ def delete_survey(survey_id):
     survey = ( meta.session.query(anamnesis.Survey)
                 .filter(anamnesis.Survey.id == survey_id)
                 .one() )
+    for question in survey.quests:
+        meta.session.delete(question)
     meta.session.delete(survey)
     meta.session.commit()
     return redirect(url_for('list_survey'))
