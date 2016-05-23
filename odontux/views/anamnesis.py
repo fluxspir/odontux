@@ -69,6 +69,10 @@ class AllergyForm(Form):
     allergen = TextField(_('Allergen'), [validators.Required()])
     reaction = SelectField(_('Reaction'), coerce=int)
 
+class MedecineDoctorForm(Form):
+    md_id = SelectField(_('Medecine Doctor'), coerce=int)
+
+
 @app.route('/add/anamnesis_entry?pid=<int:patient_id>'
             '&aid=<int:appointment_id>', methods=['GET', 'POST'] )
 @app.route('/add/anamnesis_entry?pid=<int:patient_id>'
@@ -373,6 +377,8 @@ def delete_survey(survey_id):
 
 
 
+
+
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -391,9 +397,7 @@ def delete_survey(survey_id):
 #    dentist_id = HiddenField(_('dentist_id'), [validators.Required()])
 #    time_stamp = DateField(_('time_stamp'), [validators.Optional()])
 #
-#class MedecineDoctorForm(Form):
-#    md_id = SelectField(_('Medecine Doctor'), coerce=int)
-#
+
 #class MedicalHistoryForm(Form):
 #    mh_id = HiddenField('id')
 #    icd10 = TextField(_('icd10'), filters=[forms.upper_field])
