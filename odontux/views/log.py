@@ -52,20 +52,22 @@ def login():
                     session['ROLE_ADMIN'] = constants.ROLE_ADMIN
                     session['ROLE_PATIENT'] = constants.ROLE_PATIENT
                     session['avatar_id'] = user.avatar_id
-                    
-                    session['unity'] = constants.UNITY
-                    for unit in constants.UNITIES:
+                   
+                    session['UNITIES'] = [ ( id, UNIT[0] ) for id, UNIT in
+                                            constants.UNITIES.items() ]
+                    for unit in constants.UNITIES.items():
                         session[unit[1][1]] = unit[0]
                     
                     session['END_USE_REASONS'] = [ ( id, EUR[0] ) for id, EUR 
                                         in constants.END_USE_REASONS.items() ]
-                    for EUR in constants.END_USE_REASONS.items()
-                        session[EUR[1][1] = EUR[0]
+
+                    for EUR in constants.END_USE_REASONS.items():
+                        session[EUR[1][1]] = EUR[0]
 
                     for anamnesis in constants.ANAMNESIS.items():
                         session[anamnesis[1][1]] = anamnesis[0]
 
-                    for AR in constants.ALLERGIC_REACTIONS:
+                    for AR in constants.ALLERGIC_REACTIONS.items():
                         session[AR[1][1]] = AR[0]
 
                     if request.form['password'] == "please_change_password":

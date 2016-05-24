@@ -7,7 +7,7 @@
     Brand : {{ asset_category.brand }} -- 
     Commercial name : {{ asset_category.commercial_name }}<br />
     Initial quantity: {{ asset_category.initial_quantity }} 
-    in {{ session['unity'][asset_category.unity][1] }} --
+    in {{ session['UNITIES'][asset_category.unity][1] }} --
     Automatic decrease : {{ asset_category.automatic_decrease }} --
     Order threshold : {{ asset_category.order_threshold }}<br />
     {% if asset_category.manufacture_sterilization %}
@@ -23,7 +23,7 @@
       {{ a.id }} : {{ a.acquisition_date }} - 
                    Price: {{ a.acquisition_price }} -
                    Start using {{ a.start_of_use }} <br />
-      State {{ session['end_use_reason'][a.end_use_reason][1] }} --
+      State {{ session['END_USE_REASONS'][a.end_use_reason][1] }} --
       {% if a.end_use_reaon %} End of use : {{ session.end_of_use }}
       {% endif %}
     </a><br />
