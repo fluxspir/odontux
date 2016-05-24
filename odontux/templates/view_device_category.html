@@ -22,7 +22,7 @@
       {{ a.id }} : {{ a.acquisition_date }} - 
                    Price: {{ a.acquisition_price }} -
                    Start using {{ a.start_of_use }} <br />
-      State {{ session['end_use_reason'][a.end_use_reason][1] }} --
+      State {{ session['END_USE_REASONS'][a.end_use_reason][1] }} --
       {% if a.end_use_reaon %} End of use : {{ session.end_of_use }}
       {% endif %}
     </a><br />

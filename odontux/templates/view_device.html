@@ -13,7 +13,7 @@
     {{ asset.asset_category.commercial_name }} <br />
   Description : {{ asset.asset_category.description }} <br />
   {% if asset.superassets[-1] 
-      and asset.superassets[-1].end_use_reason == session['in_use_stock'] 
+      and asset.superassets[-1].end_use_reason == session['EUR_IN_USE_STOCK'] 
       and not asset.superassets[-1].end_of_use %}
       Asset is element of 
       <a href="{{ url_for('view_asset', asset_id=asset.superassets[-1].id) }}">

@@ -207,11 +207,6 @@ def get_asset_type_choices():
     return [ ( "device", _("Device") ), 
             ( "material", _("Material") ) ]
 
-def get_material_cat_unity_choices():
-    return constants.UNITY
-#    return [ ( 0, _("pieces/items") ), ( 1, _("volume in mL") ), 
-#                (2, _("weight in gr") ), (3, _('length in m') ) ]
-
 def get_end_use_reason_choices():
     return constants.END_USE_REASON
     
@@ -594,7 +589,9 @@ def add_asset():
     asset_category_form.type.choices = get_asset_type_choices()
     device_category_form = DeviceCategoryForm(request.form)
     material_category_form = MaterialCategoryForm(request.form)
-    material_category_form.unity.choices = get_material_cat_unity_choices()
+    material_category_form.unity.choices = [ (id, unit[0]) for id, unit in
+                                                constants.UNITIES.items() ]
+    
     asset_form = AssetForm(request.form)
     asset_form.provider_id.choices = get_asset_provider_choices()
     if not asset_form.provider_id.choices:
@@ -742,7 +739,8 @@ def update_material_category(material_category_id):
                                                 get_asset_specialty_choices()
     asset_category_form.type.choices = get_asset_type_choices()
     asset_category_form.type.data = asset_category.type
-    material_category_form.unity.choices = get_material_cat_unity_choices()
+    material_category_form.unity.choices = [ (id, unit[0]) for id, unit in
+                                                constants.UNITIES.items() ]
     if ( request.method == 'POST' and asset_category_form.validate()
                                 and material_category_form.validate() ):
         for f in get_asset_cat_field_list():

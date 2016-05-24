@@ -17,15 +17,15 @@
         </a><br/><br />
   <div id="anamnesis">
   {% for entry in patient_anamnesis %}
-    {% if entry.anamnesis_type == session['medical_history'] %}
+    {% if entry.anamnesis_type == session['ANAMNESE_MEDICAL_HISTORY'] %}
       {{ entry.type }} - {{ entry.disease }} 
       -- {{ entry.name }} ; ICD10 : {{ entry.icd10 }}<br />
       {{ entry.comment }}
       <br />------<br />
-    {% elif entry.anamnesis_type == 'addictions' %}
-    {% elif entry.anamnesis_type == 'treatment' %}
-    {% elif entry.anamnesis_type == 'past_surgery' %}
-    {% elif entry.anamnesis_type == 'allergy' %}
+    {% elif entry.anamnesis_type == session['ANAMNESE_ADDICTION'] %}
+    {% elif entry.anamnesis_type == session['ANAMNESE_TREATMENT'] %}
+    {% elif entry.anamnesis_type == session['ANAMNESE_PAST_SURGERY'] %}
+    {% elif entry.anamnesis_type == session['ANAMNESE_ALLERGY'] %}
 
     {% endif %}
 

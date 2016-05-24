@@ -92,10 +92,12 @@ ALLERGIC_REACTION_QUINCKE = 2
 ALLERGIC_REACTION_ANAPHYLAXIS = 3
 
 ALLERGIC_REACTIONS = {
-    ALLERGIC_REACTION_NONE: _('none'),
-    ALLERGIC_REACTION_RUSH: _('cutaneous rush'),
-    ALLERGIC_REACTION_QUINCKE: _('Quincke Edema'),
-    ALLERGIC_REACTION_ANAPHYLAXIS: _('Anaphylaxis')
+    ALLERGIC_REACTION_NONE: ( _('none'), 'ALLERGIC_REACTION_NONE' ),
+    ALLERGIC_REACTION_RUSH: ( _('cutaneous rush'), 'ALLERGIC_REACTION_RUSH' ),
+    ALLERGIC_REACTION_QUINCKE: ( _('Quincke Edema'), 
+                                                'ALLERGIC_REACTION_QUINCKE' ),
+    ALLERGIC_REACTION_ANAPHYLAXIS: ( _('Anaphylaxis'), 
+                                            'ALLERGIC_REACTION_ANAPHYLAXIS' ),
     }
 
 ANAMNESIS_ANAMNESIS = 0
@@ -106,12 +108,13 @@ ANAMNESIS_PAST_SURGERY = 4
 ANAMNESIS_ALLERGY = 5
 
 ANAMNESIS = {
-    ANAMNESIS_MEDICAL_HISTORY: ( _('medical history'), 'medical_history', 
-                                                        MEDICAL_HISTORIES ),
-    ANAMNESIS_ADDICTION: ( _('addiction'), 'addiction', ADDICTIONS ),
-    ANAMNESIS_TREATMENT: ( _('treatment'), 'treatment', None ),
-    ANAMNESIS_PAST_SURGERY: ( _('past surgery'), 'past_surgery', None ),
-    ANAMNESIS_ALLERGY: ( _('allergy'), 'allergy', ALLERGIES ),
+    ANAMNESIS_MEDICAL_HISTORY: ( _('medical history'), 
+                            'ANAMNESES_MEDICAL_HISTORY', MEDICAL_HISTORIES ),
+    ANAMNESIS_ADDICTION: ( _('addiction'), 'ANAMNESE_ADDICTION', ADDICTIONS ),
+    ANAMNESIS_TREATMENT: ( _('treatment'), 'ANAMNESE_TREATMENT', None ),
+    ANAMNESIS_PAST_SURGERY: ( _('past surgery'), 'ANAMNESE_PAST_SURGERY', 
+                                                                        None ),
+    ANAMNESIS_ALLERGY: ( _('allergy'), 'ANAMNESE_ALLERGY', ALLERGIES ),
     }
 
 ####################
@@ -481,21 +484,28 @@ END_USE_REASON_UNCONVENIENT = 2
 END_USE_REASON_OBSOLETE = 3
 END_USE_REASON_REMOVE_MARKET = 4
 END_USE_REASON_LOST = 5
-END_USE_REASON = [ (END_USE_REASON_IN_USE_STOCK, _('In stock or in use') ), 
-                ( END_USE_REASON_NATURAL_END, _('Natural end of the asset')),
-                ( END_USE_REASON_UNCONVENIENT, _('Unconvenient') ), 
-                ( END_USE_REASON_OBSOLETE, _('Obsolete / Out of date') ), 
-                ( END_USE_REASON_REMOVE_MARKET, _('Remove from market') ), 
-                ( END_USE_REASON_LOST, _('Lost') ) 
-                ]
+END_USE_REASONS = {
+                END_USE_REASON_IN_USE_STOCK: ( _('In stock or in use'), 
+                                                        'EUR_IN_USE_STOCK' ), 
+                END_USE_REASON_NATURAL_END: ( _('Natural end of the asset'),
+                                                        'EUR_NATURAL_END'),
+                END_USE_REASON_UNCONVENIENT: ( _('Unconvenient'), 
+                                                        'EUR_UNCONVENIENT' ),
+                END_USE_REASON_OBSOLETE: ( _('Obsolete / Out of date'),
+                                                        'EUR_OBSOLETE' ),
+                END_USE_REASON_REMOVE_MARKET: ( _('Remove from market'),
+                                                        'EUR_REMOVE_MARKET'), 
+                END_USE_REASON_LOST: ( _('Lost'), 'EUR_LOST' ) 
+               } 
 
 UNITY_PIECE = 0
 UNITY_VOLUME = 1
 UNITY_WEIGHT = 2
 UNITY_LENGTH = 3
-UNITY = [ ( UNITY_PIECE, _("pieces/items") ), 
-            ( UNITY_VOLUME, _("volume in mL") ), 
-            ( UNITY_WEIGHT, _("weight in gr") ), 
-            ( UNITY_LENGTH, _('length in m') ) 
-        ]
+UNITIES = {
+            UNITY_PIECE: ( _("pieces/items"), 'UNITY_PIECE' ), 
+            UNITY_VOLUME: ( _("volume in mL"), 'UNITY_VOLUME' ), 
+            UNITY_WEIGHT: ( _("weight in gr"), 'UNITY_WEIGHT' ), 
+            UNITY_LENGTH: ( _('length in m'), 'UNITY_LENGTH' ),
+        }
 
