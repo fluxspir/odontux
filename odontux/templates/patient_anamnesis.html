@@ -1,7 +1,7 @@
 {% extends "summary_patient.html" %}
   <link rel="stylesheet" type="text/css" href="/static/anamnesis.css">
 {% block main %}
-
+{% from "_formhelpers.html" import render_simple_field_line %}
   <p id="patient_doctor">
     {% block medecine_doctor %}
       {% if doctor %}
@@ -14,18 +14,24 @@
   <a href="{{ url_for('add_anamnesis_entry', patient_id=patient.id,
                       appointment_id=session.appointment_id) }}">
         Add an anamnesis entry
-        </a><br/><br />
+        </a> --
+    <form method="post" action={{ url_for('enter_in_survey', patient_id=patient.id,
+                                            appointment_id=session.appointment_id) }}>
+      {{ render_simple_field_line(survey_form.survey_id) }} 
+    <input type="submit" value="enter survey">
+    </form>
+        <br/><br />
   <div id="anamnesis">
   {% for entry in patient_anamnesis %}
-    {% if entry.anamnesis_type == session['ANAMNESE_MEDICAL_HISTORY'] %}
+    {% if entry.anamnesis_type == session['ANAMNESIS_MEDICAL_HISTORY'] %}
       {{ entry.type }} - {{ entry.disease }} 
       -- {{ entry.name }} ; ICD10 : {{ entry.icd10 }}<br />
       {{ entry.comment }}
       <br />------<br />
-    {% elif entry.anamnesis_type == session['ANAMNESE_ADDICTION'] %}
-    {% elif entry.anamnesis_type == session['ANAMNESE_TREATMENT'] %}
-    {% elif entry.anamnesis_type == session['ANAMNESE_PAST_SURGERY'] %}
-    {% elif entry.anamnesis_type == session['ANAMNESE_ALLERGY'] %}
+    {% elif entry.anamnesis_type == session['ANAMNESIS_ADDICTION'] %}
+    {% elif entry.anamnesis_type == session['ANAMNESIS_TREATMENT'] %}
+    {% elif entry.anamnesis_type == session['ANAMNESIS_PAST_SURGERY'] %}
+    {% elif entry.anamnesis_type == session['ANAMNESIS_ALLERGY'] %}
 
     {% endif %}
 

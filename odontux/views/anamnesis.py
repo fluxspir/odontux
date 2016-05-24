@@ -36,6 +36,7 @@ class PositionForm(Form):
 
 class AnamnesisForm(Form):
     id = HiddenField(_('id'))
+    question_id = HiddenField(_('question_id'))
     alert = BooleanField(_('Alert'))
     document = BooleanField(_('Document'))
     anamnesis_type = SelectField(_("Anamnesis type"), coerce=int,
@@ -77,10 +78,22 @@ class AllergyForm(Form):
 class MedecineDoctorForm(Form):
     md_id = SelectField(_('Medecine Doctor'), coerce=int)
 
+class ChooseSurveyForm(Form):
+    survey_id = SelectField(_('Choose Survey'), coerce=int)
 
-@app.route('/add/medical_history_entry', methods=['POST'])
-def add_medical_history_entry():
-    pass
+@app.route('/enter_in_survey?pid=<int:patient_id>'
+            'aid=<int:appointment_id>' , methods=['POST'])
+def enter_in_survey(patient_id, appointment_id):
+    survey_form = ChooseSurveyForm(request.form)
+    survey_form.survey_id.choices =\
+        meta.session.query(anamnesis.Survey.id, anamnesis.Survey.name).all()
+
+    if survey_form.validate():
+        return redirect(url_for('add_anamnesis_entry', patient_id=patient_id,
+                                appointment_id=appointment_id,
+                                survey_id=survey_form.survey_id.data,
+                                survey_entry=1
+                                ))
 
 @app.route('/add/anamnesis_entry?pid=<int:patient_id>'
             '&aid=<int:appointment_id>', methods=['GET', 'POST'] )
@@ -113,6 +126,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
     if survey_entry:
         question = (
             meta.session.query(anamnesis.Question)
+                .join(anamnesis.SurveyQuestionsOrder)
                 .filter(anamnesis.SurveyQuestionsOrder.survey_id == survey_id,
                     anamnesis.SurveyQuestionsOrder.position == survey_entry)
                 .one_or_none()
@@ -246,6 +260,10 @@ def list_anamnesis(patient_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
+    survey_form = ChooseSurveyForm(request.form)
+    survey_form.survey_id.choices =\
+        meta.session.query(anamnesis.Survey.id, anamnesis.Survey.name).all()
+
     patient = checks.get_patient(patient_id)
 
     global_anamnesis = with_polymorphic(anamnesis.Anamnesis, '*')
@@ -259,15 +277,13 @@ def list_anamnesis(patient_id):
     return render_template("patient_anamnesis.html",
                             patient=patient,
                             patient_anamnesis=patient_anamnesis,
-                            doctor=doctor)
+                            doctor=doctor,
+                            survey_form=survey_form)
+
 
 @app.route('/update/anamnesis?pid=<int:patient_id>')
 def update_anamnesis(patient_id):
     pass
-
-
-
-
 
 
 @app.route('/anamnesis')

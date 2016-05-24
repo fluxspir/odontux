@@ -67,37 +67,31 @@ function ChangementAnamnesisType() {
   var past_surgery = document.getElementById("past_surgery");
   var allergy = document.getElementById("allergy");
 
-  if (anamnesis_val == 1) {
-    medical_history.style.display = "none";
-    addiction.style.display = "none";
-    treatment.style.display = "none";
-    past_surgery.style.display = "none";
-    allergy.style.display = "none";
-  } else if ( anamnesis_val == 2) {
+  if ( anamnesis_val == 1 ) {
     medical_history.style.display = "block";
     addiction.style.display = "none";
     treatment.style.display = "none";
     past_surgery.style.display = "none";
     allergy.style.display = "none";
-  } else if ( anamnesis_val == 3) {
+  } else if ( anamnesis_val == 2) {
     medical_history.style.display = "none";
     addiction.style.display = "block";
     treatment.style.display = "none";
     past_surgery.style.display = "none";
     allergy.style.display = "none";
-  } else if ( anamnesis_val == 4) {
+  } else if ( anamnesis_val == 3) {
     medical_history.style.display = "none";
     addiction.style.display = "none";
     treatment.style.display = "block";
     past_surgery.style.display = "none";
     allergy.style.display = "none";
-  } else if ( anamnesis_val == 5) {
+  } else if ( anamnesis_val == 4) {
     medical_history.style.display = "none";
     addiction.style.display = "none";
     treatment.style.display = "none";
     past_surgery.style.display = "block";
     allergy.style.display = "none";
-  } else if (anamnesis_val == 6) {
+  } else if (anamnesis_val == 5) {
     medical_history.style.display = "none";
     addiction.style.display = "none";
     treatment.style.display = "none";

@@ -109,12 +109,12 @@ ANAMNESIS_ALLERGY = 5
 
 ANAMNESIS = {
     ANAMNESIS_MEDICAL_HISTORY: ( _('medical history'), 
-                            'ANAMNESES_MEDICAL_HISTORY', MEDICAL_HISTORIES ),
-    ANAMNESIS_ADDICTION: ( _('addiction'), 'ANAMNESE_ADDICTION', ADDICTIONS ),
-    ANAMNESIS_TREATMENT: ( _('treatment'), 'ANAMNESE_TREATMENT', None ),
-    ANAMNESIS_PAST_SURGERY: ( _('past surgery'), 'ANAMNESE_PAST_SURGERY', 
+                            'ANAMNESIS_MEDICAL_HISTORY', MEDICAL_HISTORIES ),
+    ANAMNESIS_ADDICTION: ( _('addiction'), 'ANAMNESIS_ADDICTION', ADDICTIONS ),
+    ANAMNESIS_TREATMENT: ( _('treatment'), 'ANAMNESIS_TREATMENT', None ),
+    ANAMNESIS_PAST_SURGERY: ( _('past surgery'), 'ANAMNESIS_PAST_SURGERY', 
                                                                         None ),
-    ANAMNESIS_ALLERGY: ( _('allergy'), 'ANAMNESE_ALLERGY', ALLERGIES ),
+    ANAMNESIS_ALLERGY: ( _('allergy'), 'ANAMNESIS_ALLERGY', ALLERGIES ),
     }
 
 ####################
