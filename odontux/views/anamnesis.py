@@ -9,6 +9,8 @@ import pdb
 from flask import session, render_template, request, redirect, url_for
 from wtforms import (Form, SelectField, TextField, BooleanField, TextAreaField,
                      IntegerField, HiddenField, DateField, validators )
+from sqlalchemy.orm import with_polymorphic
+
 from odontux.views.log import index
 from odontux.models import meta, anamnesis, md
 from odontux.odonweb import app
@@ -36,14 +38,14 @@ class AnamnesisForm(Form):
     id = HiddenField(_('id'))
     alert = BooleanField(_('Alert'))
     document = BooleanField(_('Document'))
-    anamnesis_type = SelectField(_("Anamnesis type"),
+    anamnesis_type = SelectField(_("Anamnesis type"), coerce=int,
                             description='ChangementAnamnesisType()')
 
 class MedicalHistoryForm(Form):
     type = SelectField(_('Type'), coerce=int)
     disease = SelectField(_('Disease'), coerce=int)
     name = TextField(_('Name'), [validators.Required()])
-    icd = TextField(_('ICD'))
+    icd10 = TextField(_('ICD 10'))
     comment = TextAreaField(_('Comments'))
 
 class AddictionForm(Form):
@@ -55,7 +57,7 @@ class AddictionForm(Form):
                     validators=[validators.Optional()])
 
 class TreatmentForm(Form):
-    name = TextField(_('Name'))
+    name = TextField(_('Name'), [validators.Required()])
     posologia = TextAreaField(_('Posologia'))
     begin = DateField(_('Begin'), format='%Y-%m-%d', 
                     validators=[validators.Optional()])
@@ -63,7 +65,7 @@ class TreatmentForm(Form):
                     validators=[validators.Optional()])
 
 class PastSurgeryForm(Form):
-    surgery_type = TextField(_('Name'))
+    surgery_type = TextField(_('Name'), [validators.Required()])
     problem = TextAreaField(_('Problem'))
     complication = TextAreaField(_('Complication'))
 
@@ -107,7 +109,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
     allergy_form = AllergyForm(request.form)
     allergy_form.type.choices = constants.ALLERGIES.items()
     allergy_form.reaction.choices = constants.ALLERGIC_REACTIONS.items()
- 
+
     if survey_entry:
         question = (
             meta.session.query(anamnesis.Question)
@@ -115,12 +117,113 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                     anamnesis.SurveyQuestionsOrder.position == survey_entry)
                 .one_or_none()
             )
-        survey_entry += 1
         if question:
             anamnesis_form.question_id.data = question.id
     else:
         question = None
-    
+
+    if request.method == 'POST' and anamnesis_form.validate():
+        
+        anamnesis_values = {
+            'patient_id': patient_id,
+            'appointment_id': appointment_id,
+            'anamnesis_type': anamnesis_form.anamnesis_type.data,
+            'alert': anamnesis_form.alert.data,
+            'document': anamnesis_form.document.data,
+            }
+        if question: anamnesis_values['question_id'] = question.id
+        if survey_entry: survey_entry += 1
+        
+        if ( anamnesis_form.anamnesis_type.data ==\
+                                        constants.ANAMNESIS_MEDICAL_HISTORY
+            and medical_history_form.validate() ):
+            values = {
+                'type': medical_history_form.type.data,
+                'disease': medical_history_form.disease.data,
+                'name': medical_history_form.name.data,
+                'icd10': medical_history_form.icd10.data,
+                'comment': medical_history_form.comment.data,
+                }
+            values.update(anamnesis_values)
+            new_medical_history = anamnesis.MedicalHistory(**values)
+            meta.session.add(new_medical_history)
+            meta.session.commit()
+
+        elif ( anamnesis_form.anamnesis_type.data ==\
+                                        constants.ANAMNESIS_ADDICTION
+            and addiction_form.validate() ):
+            values = {
+                'type': addiction_form.type.data,
+                'comment': addiction_form.comment_data,
+                'begin': addiction_form.begin.data,
+                'end': addiction_form.end.data
+                }
+            values.update(anamnesis_values)
+            new_addiction = anamnesis.Addiction(**values)
+            meta.session.add(new_addiction)
+            meta.session.commit()
+
+        elif ( anamnesis_form.anamnesis_type.data ==\
+                                        constants.ANAMNESIS_TREATMENT
+            and treatment_form.validate() ):
+            values = {
+                'name': treatment_form.name.data,
+                'posologia': treatment_form.posologia.data,
+                'begin': treatment_form.begin.data,
+                'end': treatment_form.end.data
+                }
+            values.update(anamnesis_values)
+            new_treatment = anamnesis.Treatment(**values)
+            meta.session.add(new_treatment)
+            meta.session.commit()
+
+        elif ( anamnesis_form.anamnesis_type.data ==\
+                                        constants.ANAMNESIS_PAST_SURGERY
+            and past_surgery_form.validate() ):
+            values = {
+                'surgery_type': past_surgery.surgery_type.data,
+                'problem': past_surgery.problem.data,
+                'complication': past_surgery.complication.data,
+                }
+            values.update(anamnesis_values)
+            new_past_surgery = anamnesis.PastSurgery(**values)
+            meta.session.add(new_past_surgery)
+            meta.session.commit()
+
+        elif ( anamnesis_form.anamnesis_type.data ==\
+                                        constants.ANAMNESIS_ALLERGY
+            and allergy_form.validate() ):
+            values = {
+                'type': allergy_form.type.data,
+                'allergen': allergy_form.allergen.data,
+                'reaction': allergy_form.reaction.data,
+                }
+            values.update(anamnesis_values)
+            new_allergy = anamnesis.Allergy(**values)
+            meta.session.add(new_allergy)
+            meta.session.commit()
+
+        else:
+            if survey_entry: survey_entry -= 1
+            clear_form = False
+            render_template('add_anamnesis_entry.html', patient=patient,
+                                    appointment=appointment,
+                                    question=question,
+                                    survey_id=survey_id,
+                                    survey_entry=survey_entry,
+                                    anamnesis_form=anamnesis_form,
+                                    medical_history_form=medical_history_form,
+                                    addiction_form=addiction_form,
+                                    treatment_form=treatment_form,
+                                    past_surgery_form=past_surgery_form,
+                                    allergy_form=allergy_form,
+                                    clear_form=clear_form)
+
+        return redirect(url_for('add_anamnesis_entry', 
+                                        patient_id=patient_id,
+                                        appointment_id=appointment_id,
+                                        survey_id=survey_id,
+                                        survey_entry=survey_entry))
     clear_form = True
     
     return render_template('add_anamnesis_entry.html', patient=patient,
@@ -136,25 +239,6 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                     allergy_form=allergy_form,
                                     clear_form=clear_form)
 
-
-#    if request.method == 'POST' and anamnesis_form.validate():
-#        if anamnesis_form.anamnesis_type.data == 'medical_history':
-#            if medical_history_form.validate():
-#                pass
-#        elif ( anamnesis_form.anamnesis_type.data == 'addiction'
-#            and addiction_form.validate() ):
-#            pass
-#        elif ( anamnesis_form.anamnesis_type.data == 'treatment'
-#            and treatment_form.validate() ):
-#            pass
-#        elif ( anamnesis_form.anamnesis_type.data == 'past_surgery'
-#            and past_surgery_form.validate() ):
-#            pass
-#        elif ( anamnesis_form.anamnesis_type.data == 'allergy'
-#            and allergy_form.validate() ):
-#            pass
-#        
-
 @app.route('/patient/anamnesis?pid=<int:patient_id>')
 def list_anamnesis(patient_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
@@ -164,17 +248,12 @@ def list_anamnesis(patient_id):
 
     patient = checks.get_patient(patient_id)
 
+    global_anamnesis = with_polymorphic(anamnesis.Anamnesis, '*')
     patient_anamnesis = (
-        meta.session.query(anamnesis.Anamnesis)
-#            .join(anamnesis.MedicalHistory,
-#                    anamnesis.Addiction,
-#                    anamnesis.Treatment,
-#                    anamnesis.PastSurgery,
-#                    anamnesis.Allergy)
+        meta.session.query(global_anamnesis)
             .filter(anamnesis.Anamnesis.patient_id == patient_id)
             .all()
         )
-    
     doctor = meta.session.query(md.MedecineDoctor).filter(
         md.MedecineDoctor.id == patient.gen_doc_id).one_or_none()
     return render_template("patient_anamnesis.html",

@@ -17,8 +17,11 @@
         </a><br/><br />
   <div id="anamnesis">
   {% for entry in patient_anamnesis %}
-    {% if entry.anamnesis_type == 'medical_history' %}
-
+    {% if entry.anamnesis_type == session['medical_history'] %}
+      {{ entry.type }} - {{ entry.disease }} 
+      -- {{ entry.name }} ; ICD10 : {{ entry.icd10 }}<br />
+      {{ entry.comment }}
+      <br />------<br />
     {% elif entry.anamnesis_type == 'addictions' %}
     {% elif entry.anamnesis_type == 'treatment' %}
     {% elif entry.anamnesis_type == 'past_surgery' %}

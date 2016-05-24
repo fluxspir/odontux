@@ -7,7 +7,6 @@
 
 {% block main %}
 {% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_simple_field, render_hidden_field, render_field_js_onchange, render_simple_field_line%}
-
 <h3>New anamnesis entry</h3>
 {% if question %}
   <h4>{{ question.question }}</h4>
@@ -37,7 +36,7 @@
   <div id="medical_history">
     {{ render_simple_field(medical_history_form.type) }}
     {{ render_simple_field(medical_history_form.disease) }}
-    {{ render_simple_field(medical_history_form.icd) }}
+    {{ render_simple_field(medical_history_form.icd10) }}
     {{ render_simple_field(medical_history_form.name) }}
     {{ render_simple_field(medical_history_form.comment) }}
   </div>
@@ -67,7 +66,13 @@
     {{ render_simple_field(allergy_form.allergen) }}
     {{ render_simple_field(allergy_form.reaction) }}
   </div>
+
+  <br /><br />
+  <input type="submit" value="Add">
 </form>
+<br /><br />
+<a href="{{ url_for('list_anamnesis', patient_id=patient.id) }}">
+  Quit adding to anamnesis </a>
 
 <script type="text/javascript" src="/static/js/select_field.js"></script>
 

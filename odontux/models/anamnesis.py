@@ -84,7 +84,7 @@ class MedicalHistory(Anamnesis):
     type = Column(Integer, nullable=False)
     disease = Column(Integer)
     name = Column(String, nullable=False)
-    icd = Column(String)
+    icd10 = Column(String)
     comment = Column(String)
 
     __mapper_args__ = {
@@ -109,7 +109,7 @@ class Addiction(Anamnesis):
 class Treatment(Anamnesis):
     __tablename__ = "treatment"
     id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
-    name = Column(String)
+    name = Column(String, nullable=False)
     posologia = Column(String)
     begin = Column(Date)
     end = Column(Date)

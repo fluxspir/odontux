@@ -98,20 +98,20 @@ ALLERGIC_REACTIONS = {
     ALLERGIC_REACTION_ANAPHYLAXIS: _('Anaphylaxis')
     }
 
-ANAMNESIS_ANAMNESIS = 1
-ANAMNESIS_MEDICAL_HISTORY = 2
-ANAMNESIS_ADDICTION = 3
-ANAMNESIS_TREATMENT = 4
-ANAMNESIS_PAST_SURGERY = 5
-ANAMNESIS_ALLERGY = 6
+ANAMNESIS_ANAMNESIS = 0
+ANAMNESIS_MEDICAL_HISTORY = 1
+ANAMNESIS_ADDICTION = 2
+ANAMNESIS_TREATMENT = 3
+ANAMNESIS_PAST_SURGERY = 4
+ANAMNESIS_ALLERGY = 5
 
 ANAMNESIS = {
-    #ANAMNESIS_ANAMNESIS: ( _('general anamnesis'), None ),
-    ANAMNESIS_MEDICAL_HISTORY: ( _('medical history'), MEDICAL_HISTORIES ),
-    ANAMNESIS_ADDICTION: ( _('addiction'), ADDICTIONS ),
-    ANAMNESIS_TREATMENT: ( _('treatment'), None ),
-    ANAMNESIS_PAST_SURGERY: ( _('past surgery'), None ),
-    ANAMNESIS_ALLERGY: ( _('allergy'), ALLERGIES ),
+    ANAMNESIS_MEDICAL_HISTORY: ( _('medical history'), 'medical_history', 
+                                                        MEDICAL_HISTORIES ),
+    ANAMNESIS_ADDICTION: ( _('addiction'), 'addiction', ADDICTIONS ),
+    ANAMNESIS_TREATMENT: ( _('treatment'), 'treatment', None ),
+    ANAMNESIS_PAST_SURGERY: ( _('past surgery'), 'past_surgery', None ),
+    ANAMNESIS_ALLERGY: ( _('allergy'), 'allergy', ALLERGIES ),
     }
 
 ####################

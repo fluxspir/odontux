@@ -56,6 +56,9 @@ def login():
                     session['unity'] = constants.UNITY
                     session['in_use_stock'] =\
                                         constants.END_USE_REASON_IN_USE_STOCK
+
+                    for anamnesis in constants.ANAMNESIS.items():
+                        session[anamnesis[1][1]] = anamnesis[0]
                     
                     if request.form['password'] == "please_change_password":
                         return redirect(url_for('update_user',
