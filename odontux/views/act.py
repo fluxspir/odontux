@@ -561,7 +561,7 @@ def sterilized_asset_used(patient_id, appointment_id):
         meta.session.query(assets.Material)
         .filter(assets.Material.id.in_(
             meta.session.query(assets.Material.id)
-            .filter(assets.Material.appointments.any(
+            .filter(traceability.MaterioVigilance.appointments.has(
                 schedule.Appointment.id == appointment_id
                     )
                 )
@@ -606,12 +606,17 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
     appointment = checks.get_appointment(appointment_id)
     
     assets_manufacture_sterilized = (
-        meta.session.query(assets.Device).filter(assets.Device.id.in_(
-            meta.session.query(assets.Device.id)
-                .filter(assets.Device.asset_category.has(
-                    assets.Device.asset_category.manufacture_sterilization.is_(True))
+        meta.session.query(assets.Device)
+            .filter(
+                assets.Device.appointment_id.is_(None),
+                assets.Device.start_of_use.isnot(None)
                 )
-                .filter(assets.Device.appointment_id.is_(None))
+            .filter(assets.Device.id.in_(
+                meta.session.query(assets.Device.id)
+                    .filter(assets.Device.asset_category.has(
+                        assets.AssetCategory.manufacture_sterilization.is_(True)
+                        )
+                    )
                 )
             )
             .all()
@@ -634,7 +639,7 @@ def view_material_used_in_appointment(patient_id, appointment_id):
         meta.session.query(assets.Material)
         .filter(assets.Material.id.in_(
             meta.session.query(assets.Material.id)
-            .filter(assets.Material.appointments.any(
+            .filter(traceability.MaterioVigilance.appointments.has(
                 schedule.Appointment.id == appointment_id
                     )
                 )
@@ -665,23 +670,27 @@ def update_material_used_to_appointment(patient_id, appointment_id):
         meta.session.query(assets.Material)
             .filter(assets.Material.id.in_(
                 meta.session.query(assets.Material.id)
-                    .filter(assets.Material.appointments.any(
+                    .filter(traceability.MaterioVigilance.appointments.has(
                         schedule.Appointment.id == appointment_id
                         )
                     )
                 )
             ).all()
         )
-
+    
+    
     other_materials = (
         meta.session.query(assets.Material)
             .filter(~assets.Material.id.in_(material_used),
-                    ~assets.Material.id.in_(or_(
+                    ~assets.Material.id.in_(
+                        meta.session.query(assets.Material.id)
+                        .filter(or_(
                         assets.Material.start_of_use.is_(None),
-                        assets.Material.end_of_use.isnot_(None),
+                        assets.Material.end_of_use.isnot(None),
                         assets.Material.end_use_reason !=\
                                         constants.END_USE_REASON_IN_USE_STOCK)
                         )
+                )
             )
             .all()
         )

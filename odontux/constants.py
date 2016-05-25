@@ -518,6 +518,7 @@ END_USE_REASON_UNCONVENIENT = 2
 END_USE_REASON_OBSOLETE = 3
 END_USE_REASON_REMOVE_MARKET = 4
 END_USE_REASON_LOST = 5
+
 END_USE_REASONS = {
                 END_USE_REASON_IN_USE_STOCK: ( _('In stock or in use'), 
                                                         'EUR_IN_USE_STOCK' ), 

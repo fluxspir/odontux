@@ -208,7 +208,8 @@ def get_asset_type_choices():
             ( "material", _("Material") ) ]
 
 def get_end_use_reason_choices():
-    return constants.END_USE_REASON
+    return [ ( id, reason[1][0] ) for id, reason in 
+                    constants.END_USE_REASONS.items() ]
     
 def get_asset_cat_field_list():
     return [ "brand", "commercial_name", "manufacture_sterilization",
