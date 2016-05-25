@@ -13,7 +13,7 @@ Materio-vigilance : material used in this appointment :
 {% endfor %}
 
 <br />
-<a href="{{ url_for('update_material_used_to_appointment',
+<a href="{{ url_for('update_material_used_in_appointment',
                   patient_id=patient.id, appointment_id=appointment.id) }}">
           Add material used to this appointment.
 </a><br /><br />
