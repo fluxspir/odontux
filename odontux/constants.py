@@ -13,6 +13,11 @@ home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
 LOCALE = parser.get("environment", "locale").title()
 
+# ------------------------------------
+# Odontux user
+# ------------------------------------
+
+
 ROLE_DENTIST = 0
 ROLE_NURSE = 1
 ROLE_ASSISTANT = 2
@@ -31,7 +36,9 @@ ROLES_LIST = ROLES.items()  #ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
 
 KID_AGE = 13
 
-#######################
+# ------------------------------------
+# Anamnesis
+# ------------------------------------
 
 HYGIENE_DENTIST = 1
 HYGIENE_BRUSH = 2
@@ -151,7 +158,9 @@ ANAMNESIS = {
                                                                 ORAL_HYGIENE ),
     }
 
-####################
+# ---------------------------------
+# Anatomic location
+# ---------------------------------
 
 HEAD = 900
 NECK = 910
@@ -361,9 +370,6 @@ ANATOMIC_LOCATION_TEETH = {
             T85: ( _("teeth"), str(T85), "teeth", "Tooth"),
         }
 
-###############
-## teeth events
-##
 TOOTH_STATE_SANE = 0
 TOOTH_STATE_ILL = 1
 TOOTH_STATE_PAIN = 2
@@ -506,11 +512,9 @@ TOOTH_EVENT_LOCATIONS = {
             TOOTH_EVENT_LOCATION_PERIODONTE: _("periodonte"),
             }
 
-#TOOTH_EVENT_ATTRIBUTES = [ "sane", "place", "mobility", "fracture", "absence",
-#                           "replaced", "implant" ]
-#CROWN_EVENT_ATTRIBUTES = [ "sealing", "decay", "obturation", "crowned", 
-#                           "bridge" ]
-#ROOT_EVENT_ATTRIBUTES = [ "infected", "abscess", "obturation", "inlaycore" ]
+# -------------------------------------------
+# Assets
+# -------------------------------------------
 
 END_USE_REASON_IN_USE_STOCK = 0
 END_USE_REASON_NATURAL_END = 1
