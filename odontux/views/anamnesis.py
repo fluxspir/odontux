@@ -270,8 +270,24 @@ def list_anamnesis(patient_id):
     patient_anamnesis = (
         meta.session.query(global_anamnesis)
             .filter(anamnesis.Anamnesis.patient_id == patient_id)
+            .order_by(anamnesis.Anamnesis.anamnesis_type,
+                        anamnesis.Anamnesis.alert.desc(),
+                        anamnesis.MedicalHistory.type,
+                        anamnesis.MedicalHistory.disease,
+                        anamnesis.Anamnesis.time_stamp)
             .all()
         )
+    
+    for anam in patient_anamnesis:
+        if anam.anamnesis_type == constants.ANAMNESIS_MEDICAL_HISTORY:
+            anam.type = constants.MEDICAL_HISTORIES[anam.type]
+            anam.disease = constants.DISEASES[anam.disease]
+        elif anam.anamnesis_type == constants.ANAMNESIS_ADDICTION:
+            anam.type = constants.ADDICTIONS[anam.type]           
+        elif anam.anamnesis_type == constants.ANAMNESIS_ALLERGY:
+            anam.type = constants.ALLERGIES[anam.type]
+            anam.reaction = constants.ALLERGIC_REACTIONS[anam.reaction]
+    
     doctor = meta.session.query(md.MedecineDoctor).filter(
         md.MedecineDoctor.id == patient.gen_doc_id).one_or_none()
     return render_template("patient_anamnesis.html",

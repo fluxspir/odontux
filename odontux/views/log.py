@@ -61,11 +61,15 @@ def login():
                     session['END_USE_REASONS'] = [ ( id, EUR[0] ) for id, EUR 
                                         in constants.END_USE_REASONS.items() ]
 
+                    session['MEDICAL_HISTORIES'] = constants.MEDICAL_HISTORIES
+                    
                     for EUR in constants.END_USE_REASONS.items():
                         session[EUR[1][1]] = EUR[0]
 
                     for anamnesis in constants.ANAMNESIS.items():
                         session[anamnesis[1][1]] = anamnesis[0]
+                        #anamnesis_type = 'anamnesis_type_' + str(anamnesis[0])
+                        #session[anamnesis_type]= anamnesis[1][0]
 
                     for AR in constants.ALLERGIC_REACTIONS.items():
                         session[AR[1][1]] = AR[0]

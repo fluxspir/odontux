@@ -33,6 +33,19 @@ KID_AGE = 13
 
 #######################
 
+HYGIENE_DENTIST = 1
+HYGIENE_BRUSH = 2
+HYGIENE_FLOSS = 3
+HYGIENE_ANTISEPTICS = 4
+HYGIENE_TOOTH_PASTE = 5
+
+ORAL_HYGIENE = {
+    HYGIENE_DENTIST: _('dentist'),
+    HYGIENE_BRUSH: _('brush'),
+    HYGIENE_FLOSS: _('dental floss'),
+    HYGIENE_ANTISEPTICS: _('antiseptics'),
+    HYGIENE_TOOTH_PASTE: _('toothpaste'),
+    }
 
 MEDICAL_HISTORY_DISEASE = 1
 MEDICAL_HISTORY_DISORDER = 2
@@ -49,6 +62,15 @@ DISEASE_BACTERIAL_INFECTION = 1
 DISEASE_VIRAL_INFECTION = 2
 DISEASE_FUNGAL_INFECTION = 3
 DISEASE_CANCER = 4
+DISEASE_CHRONIC_RENAL_FAILURE = 5
+DISEASE_CHRONIC_HEPATIC_FAILURE = 6
+DISEASE_CHRONIC_LUNG_FAILURE = 7
+DISEASE_FAILURE = 8
+DISEASE_ENDOCARDITIS = 9
+DISEASE_HYPERTENSION = 10
+DISEASE_DIABETE_TYPE_1 = 11
+DISEASE_DIABETE_TYPE_2 = 12
+DISEASE_DIABETE = 13
 
 DISEASES = {
     DISEASE_SANE: _(''),
@@ -56,6 +78,15 @@ DISEASES = {
     DISEASE_VIRAL_INFECTION: _('viral infection'),
     DISEASE_FUNGAL_INFECTION: _('fungal infection'),
     DISEASE_CANCER: _('cancer'),
+    DISEASE_CHRONIC_RENAL_FAILURE: _('chronic renal failure'),
+    DISEASE_CHRONIC_HEPATIC_FAILURE: _('chronic hepatic failure'),
+    DISEASE_CHRONIC_LUNG_FAILURE: _('chronic lung failure'),
+    DISEASE_FAILURE: _('other failure'),
+    DISEASE_ENDOCARDITIS: _('endocarditis'),
+    DISEASE_HYPERTENSION: _('high blood pressure'),
+    DISEASE_DIABETE_TYPE_1: _('diabete insulino-dependant'),
+    DISEASE_DIABETE_TYPE_2: _('diabete no insulino-dependant'),
+    DISEASE_DIABETE: _('other diabete'),
     }
 
 ADDICTION_TOBACCO = 0
@@ -106,6 +137,7 @@ ANAMNESIS_ADDICTION = 2
 ANAMNESIS_TREATMENT = 3
 ANAMNESIS_PAST_SURGERY = 4
 ANAMNESIS_ALLERGY = 5
+ANAMNESIS_ORAL_HYGIENE = 6
 
 ANAMNESIS = {
     ANAMNESIS_MEDICAL_HISTORY: ( _('medical history'), 
@@ -115,6 +147,8 @@ ANAMNESIS = {
     ANAMNESIS_PAST_SURGERY: ( _('past surgery'), 'ANAMNESIS_PAST_SURGERY', 
                                                                         None ),
     ANAMNESIS_ALLERGY: ( _('allergy'), 'ANAMNESIS_ALLERGY', ALLERGIES ),
+    ANAMNESIS_ORAL_HYGIENE: ( _('oral hygiene'), 'ORAL_HIGIENE', 
+                                                                ORAL_HYGIENE ),
     }
 
 ####################

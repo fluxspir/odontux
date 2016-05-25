@@ -14,7 +14,8 @@ try:
 except ImportError:
     from odontux import constants
 
-from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
+from sqlalchemy import ( Table, Column, Integer, String, Date, DateTime, 
+                        Boolean, Interval )
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -68,7 +69,7 @@ class Anamnesis(Base):
     alert = Column(Boolean, default=False)
     document = Column(Boolean, default=False)
     time_stamp = Column(Date, default=func.current_date())
-    anamnesis_type = Column(String, nullable=False)
+    anamnesis_type = Column(Integer, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': constants.ANAMNESIS_ANAMNESIS,
@@ -143,3 +144,16 @@ class Allergy(Anamnesis):
         'polymorphic_identity': constants.ANAMNESIS_ALLERGY
     }
 
+class OralHygiene(Anamnesis):
+    """ 
+        type : cf constants.ORAL_HYGIENE
+    """
+    __tablename__ = 'oral_hygiene'
+    id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
+    type = Column(Integer)
+    frequency = Column(Interval)
+    comment = Column(String)
+
+    __mapper_args__= {
+        'polymorphic_identity': constants.ANAMNESIS_ORAL_HYGIENE
+    }
