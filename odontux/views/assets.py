@@ -493,11 +493,19 @@ def list_assets(asset_type="all"):
     else:
         query = meta.session.query(assets.Asset)
         
-    query = ( query.order_by(assets.Asset.acquisition_date.desc())
-                    .limit(100)
-                    .all()
+    query = ( query
+                .order_by(
+                    assets.Asset.start_of_use,
+                    assets.Asset.acquisition_date,
+                    assets.Asset.end_use_reason
+                    )
+#               .limit(100)
+                .all()
             )
-
+    for asset in query:
+        if asset.end_use_reason:
+            asset.end_user_reason =\
+                constants.END_USE_REASONS[asset.end_use_reason][0]
     return render_template('list_assets.html', 
                             assets_list=query)
 

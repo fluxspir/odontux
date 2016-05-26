@@ -15,8 +15,22 @@
         <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
                             {{ asset.id }} -- {{ asset.asset_category.brand }} 
                             {{ asset.asset_category.commercial_name }} -- 
-                            {{ asset.asset_category.description }} -- 
-                            Expire : {{ asset.expiration_date }}</a><br />
+                            {{ asset.asset_category.description }}</a> -- 
+                            Expire :  {% if asset.expiration_date %}
+                                          {{ asset.expiration_date }}
+                                      {% else %} None
+                                      {% endif %}-- 
+                            {% if asset.end_of_use %} 
+                              {% if asset.end_use_reason %} 
+                                  {{asset.end_use_reason }}
+                              {% else %}
+                                  Asset thrown away
+                              {% endif %}
+                            {% elif asset.start_of_use %} 
+                                  In use since {{ asset.start_of_use }}
+                            {% endif %}
+                            
+                            <br />
       {% endif %}
     {% endfor %}
   {% endblock %}
