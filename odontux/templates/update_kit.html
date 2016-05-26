@@ -8,11 +8,13 @@ Assets in kit :<br />
     {% if asset.type == 'superasset' %}
     <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
       {{ asset.id }} -- {{ asset.superasset_category.name }}
+                    -- {{ asset.description }}
     </a> ;
     {% else %}
     <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
     {{ asset.id }} -- {{ asset.asset_category.brand }} 
                               {{ asset.asset_category.commercial_name }}
+                              -- {{ asset.description }}
     </a> ;
     {% endif %}
     <a href="{{ url_for('remove_asset_from_kit',
@@ -26,6 +28,7 @@ SuperAssets not in kit :<br />
   {% for superasset in superassets %}
     <a href="{{ url_for('view_asset', asset_id=superasset.id) }}">
     {{ superasset.id }} -- {{ superasset.superasset_category.name }}
+                       -- {{ superasset.description }}
     </a>
      ; 
     <a href="{{ url_for('add_asset_in_kit',
@@ -38,6 +41,7 @@ Assets not in kit :<br />
     <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
     {{ asset.id }} -- {{ asset.asset_category.brand }}
                           {{ asset.asset_category.commercial_name }}
+                    -- {{ asset.description }}
     </a> ; 
     <a href="{{ url_for('add_asset_in_kit', 
                             kit_id=kit.id, asset_id=asset.id ) }}">

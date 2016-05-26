@@ -860,6 +860,13 @@ def update_asset(asset_id):
         meta.session.commit()
         return redirect(url_for('view_material', asset_id=asset.id))
 
+    if (request.method == "POST" and asset.type == "superasset"
+        and asset_form.validate() ):
+        for f in update_asset_field_list:
+            setattr(asset, f, getattr(asset_form, f).data)
+        meta.session.commit()
+        return redirect(url_for('view_superasset', asset_id=asset.id))
+
    
     if request.method == 'POST':
         clear_form = False
@@ -893,6 +900,15 @@ def update_asset(asset_id):
         return render_template('update_material.html',
                             asset_form=asset_form,
                             material_form=material_form,
+                            asset=asset,
+                            clear_form=clear_form)
+
+    elif asset.type == 'superasset':
+        for f in update_asset_field_list:
+            getattr(asset_form, f).data = getattr(asset, f)
+
+        return render_template('update_superasset.html',
+                            asset_form=asset_form,
                             asset=asset,
                             clear_form=clear_form)
     else:

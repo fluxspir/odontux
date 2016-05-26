@@ -11,7 +11,8 @@
     {{ asset.id }} ({{ asset.asset_category.id }}) -- 
     {{ asset.asset_category.brand }}  -- 
     {{ asset.asset_category.commercial_name }} <br />
-  Description : {{ asset.asset_category.description }} <br />
+  Category description : {{ asset.asset_category.description }} <br />
+  Asset description : {{ asset.description }} <br />
   {% if asset.superassets[-1] 
       and asset.superassets[-1].end_use_reason == session['EUR_IN_USE_STOCK'] 
       and not asset.superassets[-1].end_of_use %}

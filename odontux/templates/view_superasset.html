@@ -8,6 +8,8 @@
 {% endif %}
 <br />
     {{ asset.id }} {{ asset.superasset_category.name }}<br />
+    Description : {{ asset.description }} <br />
+    --------------------<br />
   Assets composing the superasset:<br />
   {% for a in asset.assets %}
     <a href="{{ url_for('view_asset', asset_id=a.id) }}">
