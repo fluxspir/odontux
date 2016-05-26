@@ -156,7 +156,8 @@ class SuperAssetForm(Form):
     id = HiddenField(_('id'))
     superasset_category_id = SelectField(_('Type of SuperAsset'), coerce=int)
     assets = SelectMultipleField(_('Assets elements of the Super Asset'), 
-                                                                coerce=int)
+                                                                coerce=int,
+                                   render_kw={'size': '20'} )
 
 class AssetKitStructureForm(Form):
     id = HiddenField(_('id'))

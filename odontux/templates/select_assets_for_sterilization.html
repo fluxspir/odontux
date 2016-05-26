@@ -38,7 +38,8 @@ Items that are going to be sterilized but without linking it to an asset :<br />
     {% for superasset in sterilize_assets_list['superassets'] %}
       <form method="post" action="{{ url_for('remove_asset_from_sterilization') }}">
         <a href="{{ url_for('view_asset', asset_id=superasset[0].id) }}">
-          {{ superasset[0].id }} -- {{ superasset[0].superasset_category.name }}</a>
+          {{ superasset[0].id }} -- {{ superasset[0].superasset_category.name }}
+                                  - {{ superasset[0].description }}</a>
           {{ render_simple_hidden_field(superasset[1].item_id) }}
           {{ render_simple_hidden_field(superasset[1].item_type) }}
           {{ render_simple_field_line(superasset[1].validity) }}
@@ -51,6 +52,7 @@ Items that are going to be sterilized but without linking it to an asset :<br />
           {{ asset[0].id }} -- {{ asset[0].asset_category.brand }} 
           {{ asset[0].asset_category.commercial_name }} -- 
           {{ asset[0].asset_category.description }} -- 
+          {{ asset[0].description }} -- 
           {{ asset[0].expiration_date }}</a>
           {{ render_simple_hidden_field(asset[1].item_id) }} 
           {{ render_simple_hidden_field(asset[1].item_type) }} 
@@ -75,7 +77,8 @@ Items that are going to be sterilized but without linking it to an asset :<br />
     {% for superasset in assets_list['superassets'] %}
       <form method="post" action="{{ url_for('create_sterilization_list') }}">
         <a href="{{ url_for('view_asset', asset_id=superasset[0].id) }}">
-          {{ superasset[0].id }} -- {{ superasset[0].superasset_category.name }}</a>
+          {{ superasset[0].id }} -- {{ superasset[0].superasset_category.name }}
+                                  - {{ superasset[0].description }}</a>
           {{ render_simple_hidden_field(superasset[1].item_id) }}
           {{ render_simple_hidden_field(superasset[1].item_type) }}
           {{ render_simple_field_line(superasset[1].validity) }}
@@ -89,6 +92,7 @@ Items that are going to be sterilized but without linking it to an asset :<br />
         {{ asset[0].asset_category.brand }} 
         {{ asset[0].asset_category.commercial_name }} -- 
         {{ asset[0].asset_category.description }} -- 
+        {{ asset[0].description }} -- 
         {{ asset[0].expiration_date }}</a> ||| 
         {{ asset[0].asset_category.asset_specialty.name }} 
         {{ render_simple_hidden_field(asset[1].item_id) }} 
