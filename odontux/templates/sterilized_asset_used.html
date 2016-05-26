@@ -30,7 +30,7 @@ Sterilized assets used in this appointment :
 
 <form method="post" action="{{ url_for('sterilized_asset_used', patient_id=patient.id, appointment_id=appointment.id) }}">
   <dl>
-    {{ render_field(asset_sterilized_form.asset_sterilized_id) }}
+    {{ render_field(asset_sterilized_form.asset_sterilized_id, autofocus="autofocus") }}
   </dl>
   <p><input type="submit" value="Add">
 </form>

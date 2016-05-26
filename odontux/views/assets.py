@@ -208,7 +208,7 @@ def get_asset_type_choices():
             ( "material", _("Material") ) ]
 
 def get_end_use_reason_choices():
-    return [ ( id, reason[1][0] ) for id, reason in 
+    return [ ( reason[0], reason[1][0] ) for reason in 
                     constants.END_USE_REASONS.items() ]
     
 def get_asset_cat_field_list():
@@ -1367,7 +1367,6 @@ def add_kit(kit_type_id=0):
     if kit_type_id:
         kit_form.asset_kit_structure_id.data = kit_type_id
     kit_form.end_use_reason.choices = get_end_use_reason_choices()
-    
     if request.method == "POST" and kit_form.validate():
         values = { f: getattr(kit_form, f).data
             for f in _get_asset_kit_field_list() }
@@ -1449,6 +1448,7 @@ def update_kit(kit_id):
                 assets.Asset.end_of_use.is_(None),
                 assets.Asset.end_use_reason ==
                         constants.END_USE_REASON_IN_USE_STOCK,
+                assets.Asset.start_of_use.isnot(None),
 #                # Asset is sterilizable
 #                assets.DeviceCategory.sterilizable == True,
                 # Asset element of asset_categories listed by kit_structure
