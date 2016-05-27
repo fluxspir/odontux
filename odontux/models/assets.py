@@ -5,6 +5,7 @@
 # Licence BSD
 #
 
+import pdb
 from meta import Base
 import meta
 from tables import (asset_provider_address_table, asset_provider_phone_table, 
@@ -16,6 +17,10 @@ from tables import (asset_provider_address_table, asset_provider_phone_table,
 import users, act, schedule 
 import sqlalchemy
 import datetime
+try:
+    import constants
+except ImportError:
+    from odontux import constants
 
 from sqlalchemy import (Table, Column, Integer, String, Date, DateTime, 
                         Numeric, Boolean, Interval)
@@ -186,28 +191,24 @@ class Asset(Base):
     def element_of_kit(self):
         query = (
             meta.session.query(AssetKit)
-                .filter(AssetKit.end_of_use.is_(None))
-                .filter(AssetKit.end_use_reason == 0)
-                .filter(AssetKit.appointment_id.is_(None))
-                ).all()
-        for q in query:
-            for asset in q.assets:
-                if asset.id == self.id:
-                    return True
-        return False
-    
-#    def is_sterilized(self):
-#        if not self.is_sterilizable:
-#            return None
-#        query = (
-#            meta.session.query(AssetSterilized)
-#                .filter(AssetSterilized.asset_id == self.id)
-#                .filter(AssetSterilized.appointment_id.is_(None))
-#                .filter(AssetSterilized.expiration_date >
-#                                                        func.current_date())
-#                .one_or_none()
-#            )
-#        return query
+                .filter(
+                    AssetKit.end_of_use.is_(None),
+                    AssetKit.end_use_reason ==
+                                        constants.END_USE_REASON_IN_USE_STOCK,
+                    AssetKit.appointment_id.is_(None)
+                    )
+                .filter(AssetKit.id.in_(
+                    meta.session.query(AssetKit.id)
+                        .filter(
+                            AssetKit.assets.any(
+                                Asset.id == self.id
+                                )
+                            )
+                        )
+                    )
+                .one_or_none()
+            )
+        return query
 
 class Device(Asset):
     """
