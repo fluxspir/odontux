@@ -6,6 +6,7 @@
 #
 
 import pdb
+import datetime
 from flask import session, render_template, request, redirect, url_for
 from wtforms import (Form, SelectField, TextField, BooleanField, TextAreaField,
                      IntegerField, HiddenField, DateField, validators )
@@ -75,6 +76,13 @@ class AllergyForm(Form):
     allergen = TextField(_('Allergen'), [validators.Required()])
     reaction = SelectField(_('Reaction'), coerce=int)
 
+class OralHygieneForm(Form):
+    type = SelectField(_('Type'), coerce=int)
+    frequency = IntegerField(_('Frequency per day (per years for dentist)'), 
+                                                    [validators.Optional()])
+    comment = TextAreaField(_('Comment'), 
+                                    render_kw={'rows': '2', 'cols': '30'})
+
 class MedecineDoctorForm(Form):
     md_id = SelectField(_('Medecine Doctor'), coerce=int)
 
@@ -122,6 +130,8 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
     allergy_form = AllergyForm(request.form)
     allergy_form.type.choices = constants.ALLERGIES.items()
     allergy_form.reaction.choices = constants.ALLERGIC_REACTIONS.items()
+    oral_hygiene_form = OralHygieneForm(request.form)
+    oral_hygiene_form.type.choices = constants.ORAL_HYGIENE.items()
 
     if survey_entry:
         question = (
@@ -217,6 +227,19 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
             meta.session.add(new_allergy)
             meta.session.commit()
 
+        elif ( anamnesis_form.anamnesis_type.data ==\
+                                        constants.ANAMNESIS_ORAL_HYGIENE
+            and oral_hygiene_form.validate() ):
+            values = {
+                'type': oral_hygiene_form.type.data,
+                'frequency': oral_hygiene_form.frequency.data,
+                'comment': oral_hygiene_form.comment.data
+                }
+            values.update(anamnesis_values)
+            new_oral_hygiene = anamnesis.OralHygiene(**values)
+            meta.session.add(new_oral_hygiene)
+            meta.session.commit()
+
         else:
             if survey_entry: survey_entry -= 1
             clear_form = False
@@ -231,6 +254,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                     treatment_form=treatment_form,
                                     past_surgery_form=past_surgery_form,
                                     allergy_form=allergy_form,
+                                    oral_hygiene_form=oral_hygiene_form,
                                     clear_form=clear_form)
 
         return redirect(url_for('add_anamnesis_entry', 
@@ -251,6 +275,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                     treatment_form=treatment_form,
                                     past_surgery_form=past_surgery_form,
                                     allergy_form=allergy_form,
+                                    oral_hygiene_form=oral_hygiene_form,
                                     clear_form=clear_form)
 
 @app.route('/patient/anamnesis?pid=<int:patient_id>')
@@ -287,6 +312,8 @@ def list_anamnesis(patient_id):
         elif anam.anamnesis_type == constants.ANAMNESIS_ALLERGY:
             anam.type = constants.ALLERGIES[anam.type]
             anam.reaction = constants.ALLERGIC_REACTIONS[anam.reaction]
+        elif anam.anamnesis_type == constants.ANAMNESIS_ORAL_HYGIENE:
+            anam.type = constants.ORAL_HYGIENE[anam.type]
     
     doctor = meta.session.query(md.MedecineDoctor).filter(
         md.MedecineDoctor.id == patient.gen_doc_id).one_or_none()
@@ -295,7 +322,6 @@ def list_anamnesis(patient_id):
                             patient_anamnesis=patient_anamnesis,
                             doctor=doctor,
                             survey_form=survey_form)
-
 
 @app.route('/update/anamnesis?pid=<int:patient_id>')
 def update_anamnesis(patient_id):

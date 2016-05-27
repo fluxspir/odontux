@@ -151,7 +151,7 @@ class OralHygiene(Anamnesis):
     __tablename__ = 'oral_hygiene'
     id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
     type = Column(Integer)
-    frequency = Column(Interval)
+    frequency = Column(Integer)
     comment = Column(String)
 
     __mapper_args__= {

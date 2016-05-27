@@ -66,6 +66,7 @@ function ChangementAnamnesisType() {
   var treatment = document.getElementById("treatment");
   var past_surgery = document.getElementById("past_surgery");
   var allergy = document.getElementById("allergy");
+  var oral_hygiene = document.getElementById("oral_hygiene");
 
   if ( anamnesis_val == 1 ) {
     medical_history.style.display = "block";
@@ -73,35 +74,48 @@ function ChangementAnamnesisType() {
     treatment.style.display = "none";
     past_surgery.style.display = "none";
     allergy.style.display = "none";
+    oral_hygiene.style.display = "none";
   } else if ( anamnesis_val == 2) {
     medical_history.style.display = "none";
     addiction.style.display = "block";
     treatment.style.display = "none";
     past_surgery.style.display = "none";
     allergy.style.display = "none";
+    oral_hygiene.style.display = "none";
   } else if ( anamnesis_val == 3) {
     medical_history.style.display = "none";
     addiction.style.display = "none";
     treatment.style.display = "block";
     past_surgery.style.display = "none";
     allergy.style.display = "none";
+    oral_hygiene.style.display = "none";
   } else if ( anamnesis_val == 4) {
     medical_history.style.display = "none";
     addiction.style.display = "none";
     treatment.style.display = "none";
     past_surgery.style.display = "block";
     allergy.style.display = "none";
+    oral_hygiene.style.display = "none";
   } else if (anamnesis_val == 5) {
     medical_history.style.display = "none";
     addiction.style.display = "none";
     treatment.style.display = "none";
     past_surgery.style.display = "none";
     allergy.style.display = "block";
+    oral_hygiene.style.display = "none";
+  } else if (anamnesis_val == 6) {
+    medical_history.style.display = "none";
+    addiction.style.display = "none";
+    treatment.style.display = "none";
+    past_surgery.style.display = "none";
+    allergy.style.display = "none";
+    oral_hygiene.style.display = "block";
   } else {
     medical_history.style.display = "none";
     addiction.style.display = "none";
     treatment.style.display = "none";
     past_surgery.style.display = "none";
     allergy.style.display = "none";
+    oral_hygiene.style.display = "none";
   }
 }

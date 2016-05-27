@@ -7,4 +7,5 @@ window.onload = function() {
   document.getElementById( "treatment" ).style.display = "none";
   document.getElementById( "past_surgery" ).style.display = "none";
   document.getElementById( "allergy" ).style.display = "none";
+  document.getElementById( "oral_hygiene" ).style.display = "none";
 }
