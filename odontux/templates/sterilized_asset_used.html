@@ -1,7 +1,7 @@
 {% extends "summary_patient.html" %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
-Sterilized assets used in this appointment :
+Sterilized assets used in this appointment : {{ assets_used|length }}
 <br />
 {% for asset in assets_used %}
   {% if asset.asset_id %}
