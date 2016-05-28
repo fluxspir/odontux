@@ -53,8 +53,10 @@ class Agenda(Base):
     __tablename__ = 'agenda'
     id = Column(Integer, primary_key=True)
     appointment_id = Column(Integer, ForeignKey(Appointment.id))
-    dental_unit_id = Column(Integer, ForeignKey(users.DentalUnit.id))
-    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
+    dental_unit_id = Column(Integer, ForeignKey(users.DentalUnit.id),
+                                                                nullable=False)
+    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id),
+                                                                nullable=False)
     date_taker_id = Column(Integer, ForeignKey(users.OdontuxUser.id),
                                                                 nullable=False)
     starttime = Column(DateTime, nullable=False)

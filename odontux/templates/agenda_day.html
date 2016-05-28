@@ -1,12 +1,26 @@
 {% macro date_choice() %}
   {% from "_formhelpers.html" import render_simple_field_line %}
-        <a href="{{ url_for('display_day', dateday=prevday, dentist_id=dentist_id) }}">Previous Day</a>
-        <form class="inline" method="post" action="{{ url_for('agenda_date', dateday=summary_agenda_form.day.data, dentist_id=summary_agenda_form.dentist_id.data) }}">
+    <br />
+        <a href="{{ url_for('display_day', dateday=prevday, 
+                                          dentist_id=dentist_id, 
+                                          dental_unit_id=dental_unit_id) }}">
+          Previous Day</a>
+
+        <form class="inline" method="post" 
+                            action="{{ url_for('agenda_date', 
+                                    dateday=summary_agenda_form.day.data, 
+                                    dentist_id=summary_agenda_form.dentist_id.data, 
+                                    dental_unit_id=summary_agenda_form.dental_unit_id.data) }}">
           {{ render_simple_field_line( summary_agenda_form.day ) }}
           {{ render_simple_field_line( summary_agenda_form.dentist_id ) }}
+          {{ render_simple_field_line( summary_agenda_form.dental_unit_id) }}
           <input type="submit" value="Go" />
         </form>
-        <a href="{{ url_for('display_day', dateday=nextday, dentist_id=dentist_id) }}">Next Day</a>
+
+        <a href="{{ url_for('display_day', dateday=nextday, 
+                                          dentist_id=dentist_id, 
+                                          dental_unit_id=dental_unit_id) }}">
+          Next Day</a>
 {% endmacro %}
 
 
@@ -14,10 +28,13 @@
 
 {% block main %}
 
-  {% if appointments %}
+  {% if meetings %}
+      {{ date_choice() }}
+      <br />
+      <br />
     <table border=1>
       <caption>
-      {{ date_choice() }}
+        Appointments on {{ summary_agenda_form.day.data }}
       </caption>
       <tr>
         <th></th>
@@ -27,20 +44,30 @@
         <th>Reason</th>
         <th></th>
       </tr>
-    {% for patient,appointment in appointments %}
+    {% for meeting in meetings %}
       <tr>
         <td>{{ loop.index }}</td>
-        <td>{{ appointment.agenda.starttime.time() }}</td>
-        <td>{{ appointment.agenda.endtime - appointment.agenda.starttime }}</td>
-        <td>{{ patient.lastname }} {{ patient.firstname }}</td>
-        <td>{{ appointment.reason }}</td>
-        <td>
-          <form method="post" action="{{ url_for('enter_patient_appointment') }}">
-            <input type="hidden" name="patient_id" value={{ patient.id }} />
-            <input type="hidden" name="appointment_id" value={{ appointment.id }} />
-            <input type="submit" value="Go" />
-          </form>
-        </td>
+        <td>{{ meeting.starttime.time() }}</td>
+        <td>{{ meeting.endtime - meeting.starttime }}</td>
+        
+        {% if meeting.appointment %}
+          <td>{{ meeting.appointment.patient.lastname }} 
+              {{ meeting.appointment.patient.firstname }}
+          </td>
+          <td>{{ meeting.appointment.reason }}</td>
+          <td>
+            <form method="post" action="{{ url_for('enter_patient_appointment') }}">
+              <input type="hidden" name="patient_id" value={{ meeting.appointment.patient_id }} />
+              <input type="hidden" name="appointment_id" value={{ meeting.appointment.id }} />
+              <input type="submit" value="Go" />
+            </form>
+          </td>
+        {% else %}
+          <td>New patient : {{ meeting.comment }}</td>
+          <td> </td>
+          <td> </td>
+        {% endif %}
+
       </tr>
     {% endfor %}
     </table>

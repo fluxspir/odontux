@@ -11,10 +11,20 @@
       </span>
     {% endif %}
 
-    <a href="{{url_for('enter_patient_file', body_id=patient.id)}}">{{ patient['lastname'] }} {{ patient['firstname'] }}</a>, {{ patient.age() }} years old, 
+    <a href="{{url_for('enter_patient_file', body_id=patient.id)}}">
+            {{ patient['lastname'] }} {{ patient['firstname'] }}</a>, 
+            {{ patient.age() }} years old, 
     
     {% if appointment %}
-      <a href="{{ url_for('display_day', dateday=appointment.agenda.starttime.date(), dentist_id=session['user_id']) }}">from {{ appointment.agenda.starttime.time() }} to {{ appointment.agenda.endtime.time() }} the {{ appointment.agenda.starttime.date() }}</a>
+      <a href="{{ url_for('display_day', 
+                          dateday=appointment.agenda.starttime.date(), 
+                          dentist_id=appointment.dentist_id,
+                          dental_unit_id=appointment.dental_unit_id
+                          
+                          ) }}">from {{ appointment.agenda.starttime.time() }}
+                          to {{ appointment.agenda.endtime.time() }}
+                          the {{ appointment.agenda.starttime.date() }}
+      </a>
       <span class="right">
         <form method="post" action="{{ url_for( 'enter_patient_appointment') }}">
           <input type="hidden" name="appointment_id" value="{{ appointment.id + 1 }}" />

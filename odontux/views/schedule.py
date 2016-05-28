@@ -48,7 +48,10 @@ class AgendaForm(Form):
 
 class SummaryAgendaForm(Form):
     day = DateField(_('day'), format='%Y-%m-%d')
-    dentist_id = SelectField(_('Dentist'), coerce=int)
+    dentist_id = SelectField(_('Dentist'), coerce=int,
+                                    validators=[validators.Optional()] )
+    dental_unit_id = SelectField(_('Dental_unit'), coerce=int,
+                                    validators=[validators.Optional()] )
 
 
 def get_appointment_field_list():
@@ -78,7 +81,12 @@ def get_summary_agenda_form(day=datetime.date.today()):
                                     .filter(users.OdontuxUser.role ==
                                             constants.ROLE_DENTIST)\
                                     .all()
-                                            ]
+                                    ]
+    summary_agenda_form.dental_unit_id.choices  = [ 
+                (dental_unit.id, dental_unit.name) for dental_unit in
+                    meta.session.query(users.DentalUnit).all()
+                ]
+
     if session['role'] == constants.ROLE_DENTIST :
         summary_agenda_form.dentist_id.data = session['user_id']
     return summary_agenda_form
@@ -89,7 +97,8 @@ def agenda_date():
     if request.method == 'POST' :
         return redirect(url_for('display_day', 
                     dateday=summary_agenda_form["day"].data,
-                    dentist_id=summary_agenda_form['dentist_id'].data))
+                    dentist_id=summary_agenda_form['dentist_id'].data,
+                    dental_unit_id=summary_agenda_form['dental_unit_id'].data))
 
 @app.route('/agenda/')
 def agenda():
@@ -97,8 +106,9 @@ def agenda():
     return render_template('summary_agenda.html', 
                             summary_agenda_form=summary_agenda_form)
 
-@app.route('/agenda/day?date=<dateday>&dentist=<int:dentist_id>')
-def display_day(dateday, dentist_id):
+@app.route('/agenda/day?date=<dateday>&dentist=<int:dentist_id>'
+            '&dental_unit_id=<int:dental_unit_id>')
+def display_day(dateday, dentist_id, dental_unit_id):
     """ 
     For viewing all appointments occured the day "dateday",
     and create links for "previous_day" and "next_day"
@@ -109,33 +119,25 @@ def display_day(dateday, dentist_id):
         return redirect(url_for('index'))
     nextday = dateday + datetime.timedelta(days=1)
     prevday = dateday - datetime.timedelta(days=1)
-    meetings = meta.session.query(schedule.Agenda).filter(or_(
-                        cast(schedule.Agenda.starttime, Date) == (dateday),
-                        cast(schedule.Agenda.endtime, Date) == (dateday) )
-                        ).filter(
-                        schedule.Appointment.dentist_id == dentist_id
-                        ).all()
+    meetings = (
+        meta.session.query(schedule.Agenda)
+            .filter(or_(
+                cast(schedule.Agenda.starttime, Date) == (dateday),
+                cast(schedule.Agenda.endtime, Date) == (dateday) 
+                )
+            )
+            .filter(
+                schedule.Appointment.dentist_id == dentist_id,
+                schedule.Appointment.dental_unit_id == dental_unit_id
+            )
+            .all()
+    )
 
-#    meetings = meta.session.query(schedule.Agenda).filter(or_(
-#                        schedule.Agenda.starttime == dateday,
-#                        schedule.Agenda.endtime == dateday )
-#                        ).filter(
-#                        schedule.Appointment.dentist_id == dentist_id
-#                        ).all()
-    appointments = []
-    for meeting in meetings:
-        appointment = meta.session.query(schedule.Appointment).filter(
-                    schedule.Appointment.id == meeting.appointment_id
-                    ).one()
-        patient = meta.session.query(administration.Patient).filter(
-                    administration.Patient.id == appointment.patient_id
-                    ).one()
-        appointments.append((patient, appointment))
     # dateday is return to create links to previous and next day
-    return render_template('agenda_day.html', appointments=appointments,
+    return render_template('agenda_day.html', meetings=meetings,
                             dateday=dateday, nextday=nextday, prevday=prevday,
                             summary_agenda_form=summary_agenda_form,
-                            dentist_id=dentist_id)
+                            dentist_id=dentist_id, dental_unit_id=dental_unit_id)
 
 
 def agenda_handler(day, starthour=0, startmin=0, durationhour=0, durationmin=0,
@@ -237,7 +239,9 @@ def update_appointment(body_id, appointment_id):
 
 @app.route('/agenda/add?id=<int:body_id>', methods=['GET', 'POST'])
 def add_appointment(body_id):
-    if session['role'] == constants.ROLE_ADMIN:
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
     if not body_id:
