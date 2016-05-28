@@ -35,6 +35,12 @@ class DentalOffice(Base):
                          backref="dental_office")
     patients = relationship("Patient", backref="office")
 
+class DentalUnit(Base):
+    __tablename__ = 'dental_unit'
+    id = Column(Integer, primary_key=True)
+    dental_office_id = Column(Integer, ForeignKey(DentalOffice.id), 
+                                                                nullable=False)
+    name = Column(String)
 
 class OdontuxUser(Base):
     __tablename__ = 'odontux_user'
