@@ -55,9 +55,12 @@ class Agenda(Base):
     appointment_id = Column(Integer, ForeignKey(Appointment.id))
     dental_unit_id = Column(Integer, ForeignKey(users.DentalUnit.id))
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
+    date_taker_id = Column(Integer, ForeignKey(users.OdontuxUser.id),
+                                                                nullable=False)
     starttime = Column(DateTime, nullable=False)
     endtime = Column(DateTime, nullable=False)
     comment = Column(String)
+
 
 
 class AppointmentMemo(Base):
