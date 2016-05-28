@@ -23,6 +23,8 @@ class Appointment(Base):
                         nullable=False)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id),
                         nullable=False)
+    dental_unit_id = Column(Integer, ForeignKey(users.DentalUnit.id),
+                        nullable=False)
     agenda = relationship("Agenda", uselist=False, backref="appointment", 
                            cascade="all, delete, delete-orphan")
     emergency = Column(Boolean, default=False)
@@ -51,8 +53,11 @@ class Agenda(Base):
     __tablename__ = 'agenda'
     id = Column(Integer, primary_key=True)
     appointment_id = Column(Integer, ForeignKey(Appointment.id))
+    dental_unit_id = Column(Integer, ForeignKey(users.DentalUnit.id))
+    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id))
     starttime = Column(DateTime, nullable=False)
     endtime = Column(DateTime, nullable=False)
+    comment = Column(String)
 
 
 class AppointmentMemo(Base):
