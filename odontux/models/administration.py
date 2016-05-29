@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-import users, md
+import users, md 
 import sqlalchemy
 import datetime
 
@@ -91,6 +91,9 @@ class Patient(Base):
                         secondary=patient_healthcare_plan_table,
                         backref="patients")
     healthcare_plans = association_proxy('hcs', 'name')
+    
+    teeth = relationship("Tooth")
+    teeth_codenames = association_proxy('teeth', 'codename')
 
     def age(self):
         return (

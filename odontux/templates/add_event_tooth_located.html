@@ -22,23 +22,27 @@
   </div>
   <br />
     {{ render_simple_field(event_form.appointment_id) }}
+    {{ render_simple_field_line(tooth_form.choose_tooth_state) }}
+    {{ render_simple_field_line(tooth_form.surveillance) }}
+  <br />
+    {{ render_simple_field(event_form.description) }}
+
   <div id="tooth">
-    {{ render_simple_field(tooth_event_form.choose_state) }}
   </div>
   
   <div id="crown">
-    {{ render_simple_field(crown_event_form.choose_state) }}
+    {{ render_simple_field(crown_event_form.choose_crown_state) }}
     {{ render_simple_field(crown_event_form.side) }}
     {{ render_simple_field(crown_event_form.tooth_shade) }}
   </div>
   
   <div id="root">
-    {{ render_simple_field(root_event_form.choose_state) }}
+    {{ render_simple_field(root_event_form.choose_root_state) }}
     {{ render_simple_field(root_event_form.root) }}
   </div>
   
   <div id="periodonte">
-    {{ render_simple_field(periodonte_event_form.choose_state) }}
+    {{ render_simple_field(periodonte_event_form.choose_periodonte_state) }}
     {{ render_simple_field(periodonte_event_form.bleeding) }}
     {{ render_simple_field(periodonte_event_form.furcation) }}
     {{ render_simple_field(periodonte_event_form.recession) }}

@@ -5,7 +5,7 @@
 # licence BSD
 #
 from meta import Base
-import users, administration, headneck, schedule
+import users, headneck, schedule, administration
 import sqlalchemy
 try:
     from odontux import constants
@@ -43,9 +43,8 @@ class Sextant(Base):
 
 class Tooth(Base):
     """
-    A tooth has to have a name, the choice is free to name it whatever you want
-    Name is the Integer that link in constants.TOOTH
-    The actual tooth state (see constant.py.TOOTH_STATES)
+    codeame link to constants.TOOTH
+    The actual tooth state (see constant.TOOTH_STATES)
     We may put it under surveillance.
     """
     __tablename__ = 'tooth'
@@ -55,16 +54,16 @@ class Tooth(Base):
     codename = Column(Integer, nullable=False)
     state = Column(Integer, default=0, nullable=True)
     surveillance = Column(Boolean, default=False)
-    patient = relationship('Patient', backref="teeth")
+    #patient = relationship('Patient', backref="teeth")
 
 class Periodonte(Base):
     """
     """
     __tablename__ = "periodonte"
     id = Column(Integer, ForeignKey(Tooth.id), primary_key=True)
-    tooth = relationship('Tooth', backref='periodonte')
     state = Column(Integer, default=0)
     bleeding = Column(Boolean)
+    tooth = relationship('Tooth', backref='periodonte')
 
 class Event(Base):
     """
@@ -140,7 +139,7 @@ class CrownEvent(Event):
         'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_CROWN
     }
 
-class RootEvent(Base):
+class RootEvent(Event):
     """
     Root events :
     Must occur to a tooth (tooth_id)
