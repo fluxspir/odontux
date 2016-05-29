@@ -158,7 +158,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
         if question: anamnesis_values['question_id'] = question.id
         if survey_entry: survey_entry += 1
         
-        if ( anamnesis_form.anamnesis_type.data ==\
+        if ( anamnesis_form.anamnesis_type.data ==
                                         constants.ANAMNESIS_MEDICAL_HISTORY
             and medical_history_form.validate() ):
             values = {
@@ -173,7 +173,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
             meta.session.add(new_medical_history)
             meta.session.commit()
 
-        elif ( anamnesis_form.anamnesis_type.data ==\
+        elif ( anamnesis_form.anamnesis_type.data ==
                                         constants.ANAMNESIS_ADDICTION
             and addiction_form.validate() ):
             values = {
@@ -187,7 +187,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
             meta.session.add(new_addiction)
             meta.session.commit()
 
-        elif ( anamnesis_form.anamnesis_type.data ==\
+        elif ( anamnesis_form.anamnesis_type.data ==
                                         constants.ANAMNESIS_TREATMENT
             and treatment_form.validate() ):
             values = {
@@ -201,7 +201,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
             meta.session.add(new_treatment)
             meta.session.commit()
 
-        elif ( anamnesis_form.anamnesis_type.data ==\
+        elif ( anamnesis_form.anamnesis_type.data ==
                                         constants.ANAMNESIS_PAST_SURGERY
             and past_surgery_form.validate() ):
             values = {
@@ -214,7 +214,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
             meta.session.add(new_past_surgery)
             meta.session.commit()
 
-        elif ( anamnesis_form.anamnesis_type.data ==\
+        elif ( anamnesis_form.anamnesis_type.data ==
                                         constants.ANAMNESIS_ALLERGY
             and allergy_form.validate() ):
             values = {
@@ -227,7 +227,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
             meta.session.add(new_allergy)
             meta.session.commit()
 
-        elif ( anamnesis_form.anamnesis_type.data ==\
+        elif ( anamnesis_form.anamnesis_type.data ==
                                         constants.ANAMNESIS_ORAL_HYGIENE
             and oral_hygiene_form.validate() ):
             values = {
