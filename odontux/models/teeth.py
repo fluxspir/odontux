@@ -76,7 +76,7 @@ class Event(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
     description = Column(String)
-    comments = Column(String, default="")
+    comment = Column(String, default="")
     color = Column(String, default="")
     x_ray = Column(Boolean, default=False)
     pic = Column(Boolean, default=False)
@@ -125,13 +125,7 @@ class CrownEvent(Event):
     Crown events :
     Must occur to a tooth (tooth_id)
     Are noticed while an appointment (appointment_id)
-    Occurs on one or more faces :
-        * o : Occlusal
-        * m : Mesial
-        * d : Distal
-        * v/b : Vestibular / Buccal
-        * l/p : Lingual / Palatal
-        * a : All (usually, when the tooth is crowned)
+    Occurs on one or more faces : constants.CROWN_SIDES
     We may add comments
     We may use a color-code for what happened
     For the pics, see "toothevent"
@@ -139,7 +133,7 @@ class CrownEvent(Event):
     __tablename__ = 'crown_event'
     id = Column(Integer, ForeignKey(Event.id), primary_key=True)
     state = Column(Integer, nullable=False) 
-    side = Column(String, nullable=False)
+    side = Column(Integer, nullable=False)
     tooth_shade = Column(String, default=None)
 
     __mapper_args__ = {
