@@ -13,6 +13,64 @@ home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
 LOCALE = parser.get("environment", "locale").title()
 
+T11_NAME = _("11") # _("Incisivo central superior right permanent")
+T12_NAME = _("12") # _("Incisivo laterial superior right permanent")
+T13_NAME = _("13") # _("Canina superior right permanent")
+T14_NAME = _("14") # _("First Premolar superior right permanent")
+T15_NAME = _("15") # _("Second Premolar superior right permanent")
+T16_NAME = _("16") # _("First Molar superior right") 
+T17_NAME = _("17") # _("Second Molar superior right permanent")
+T18_NAME = _("18") # _("Third Molar superior right permanent")
+T21_NAME = _("21") # _("Incisivo central superior left permanent")
+T22_NAME = _("22") # _("Incisivo laterial superior left permanent")
+T23_NAME = _("23") # _("Canina superior left permanent")
+T24_NAME = _("24") # _("First Premolar laterial superior left permanent")
+T25_NAME = _("25") # _("Second Premolar superior left permanent")
+T26_NAME = _("26") # _("First Molar superior left") 
+T27_NAME = _("27") # _("Second Molar superior left permanent")
+T28_NAME = _("28") # _("Third Molar superior left permanent")
+T31_NAME = _("31") # _("Incisivo central inferior left permanent")
+T32_NAME = _("32") # _("Incisivo laterial inferior left permanent")
+T33_NAME = _("33") # _("Canina inferior left permanent")
+T34_NAME = _("34") # _("First Premolar inferior left permanent")
+T35_NAME = _("35") # _("Second Premolar inferior left permanent")
+T36_NAME = _("36") # _("First Molar inferior left") 
+T37_NAME = _("37") # _("Second Molar inferior left permanent")
+T38_NAME = _("38") # _("Third Molar inferior left permanent")
+T41_NAME = _("41") # _("Incisivo central inferior right permanent")
+T42_NAME = _("42") # _("Incisivo laterial inferior right permanent")
+T43_NAME = _("43") # _("Canina inferior right permanent")
+T44_NAME = _("44") # _("First Premolar inferior right permanent")
+T45_NAME = _("45") # _("Second Premolar inferior right permanent")
+T46_NAME = _("46") # _("First Molar inferior right") 
+T47_NAME = _("47") # _("Second Molar inferior right permanent")
+T48_NAME = _("48") # _("Third Molar inferior right permanent")
+T51_NAME = _("51") # _("Incisivo central superior right deciduous")
+T52_NAME = _("52") # _("Incisivo laterial superior right deciduous")
+T53_NAME = _("53") # _("Canina superior right deciduous")
+T54_NAME = _("54") # _("First Molar superior right deciduous")
+T55_NAME = _("55") # _("Second Molar superior right deciduous")
+T61_NAME = _("61") # _("Incisivo central superior left deciduous")
+T62_NAME = _("62") # _("Incisivo laterial superior left deciduous")
+T63_NAME = _("63") # _("Canina superior left deciduous")
+T64_NAME = _("64") # _("First Molar superior left deciduous")
+T65_NAME = _("65") # _("Second Molar superior left deciduous")
+T71_NAME = _("71") # _("Incisivo central inferior left deciduous")
+T72_NAME = _("72") # _("Incisivo laterial inferior left deciduous")
+T73_NAME = _("73") # _("Canina inferior left deciduous")
+T74_NAME = _("74") # _("First Molar inferior left deciduous")
+T75_NAME = _("75") # _("Second Molar inferior left deciduous")
+T81_NAME = _("81") # _("Incisivo central inferior right deciduous")
+T82_NAME = _("82") # _("Incisivo laterial inferior right deciduous")
+T83_NAME = _("83") # _("Canina inferior right deciduous")
+T84_NAME = _("84") # _("First Molar inferior right deciduous")
+T85_NAME = _("85") # _("Second Molar inferior right deciduous")
+
+
+
+
+
+
 # ------------------------------------
 # Odontux user
 # ------------------------------------
@@ -188,97 +246,123 @@ S06 = SEXTANT_INFERIOR_LEFT = 6
 S07 = SEXTANT_INFERIOR_CENTRAL = 7
 S08 = SEXTANT_INFERIOR_RIGHT = 8
 
-T11 = TOOTH_INCISIVO_CENTRAL_SUPERIOR_RIGHT_DEFINITIVE = 11
-T12 = TOOTH_INCISIVO_LATERAL_SUPERIOR_RIGHT_DEFINITIVE = 12
-T13 = TOOTH_CANINA_SUPERIOR_RIGHT_DEFINITIVE = 13
-T14 = TOOTH_FIRST_PREMOLAR_SUPERIOR_RIGHT_DEFINITIVE = 14
-T15 = TOOTH_SECOND_PREMOLAL_SUPERIOR_RIGHT_DEFINITIVE = 15
-T16 = TOOTH_FIRST_MOLAR_SUPERIOR_RIGHT_DEFINITIVE = 16
-T17 = TOOTH_SECOND_MOLAR_SUPERIOR_RIGHT_DEFINITIVE = 17
-T18 = TOOTH_THIRD_MOLAR_SUPERIOR_RIGHT_DEFINITIVE = 18
-T21 = TOOTH_INCISIVO_CENTRAL_SUPERIOR_LEFT_DEFINITIVE = 21
-T22 = TOOTH_INCISIVO_LATERAL_SUPERIOR_LEFT_DEFINITIVE = 22
-T23 = TOOTH_CANINA_SUPERIOR_LEFT_DEFINITIVE = 23
-T24 = TOOTH_FIRST_PREMOLAR_SUPERIOR_LEFT_DEFINITIVE = 24
-T25 = TOOTH_SECOND_PREMOLAL_SUPERIOR_LEFT_DEFINITIVE = 25
-T26 = TOOTH_FIRST_MOLAR_SUPERIOR_LEFT_DEFINITIVE = 26
-T27 = TOOTH_SECOND_MOLAR_SUPERIOR_LEFT_DEFINITIVE = 27
-T28 = TOOTH_THIRD_MOLAR_SUPERIOR_LEFT_DEFINITIVE = 28
-T31 = TOOTH_INCISIVO_CENTRAL_INFERIOR_LEFT_DEFINITIVE = 31
-T32 = TOOTH_INCISIVO_LATERAL_INFERIOR_LEFT_DEFINITIVE = 32
-T33 = TOOTH_CANINA_INFERIOR_LEFT_DEFINITIVE = 33
-T34 = TOOTH_FIRST_PREMOLAR_INFERIOR_LEFT_DEFINITIVE = 34
-T35 = TOOTH_SECOND_PREMOLAL_INFERIOR_LEFT_DEFINITIVE = 35
-T36 = TOOTH_FIRST_MOLAR_INFERIOR_LEFT_DEFINITIVE = 36
-T37 = TOOTH_SECOND_MOLAR_INFERIOR_LEFT_DEFINITIVE = 37
-T38 = TOOTH_THIRD_MOLAR_INFERIOR_LEFT_DEFINITIVE = 38
-T41 = TOOTH_INCISIVO_CENTRAL_INFERIOR_RIGHT_DEFINITIVE = 41
-T42 = TOOTH_INCISIVO_LATERAL_INFERIOR_RIGHT_DEFINITIVE = 42
-T43 = TOOTH_CANINA_INFERIOR_RIGHT_DEFINITIVE = 43
-T44 = TOOTH_FIRST_PREMOLAR_INFERIOR_RIGHT_DEFINITIVE = 44
-T45 = TOOTH_SECOND_PREMOLAL_INFERIOR_RIGHT_DEFINITIVE = 45
-T46 = TOOTH_FIRST_MOLAR_INFERIOR_RIGHT_DEFINITIVE = 46
-T47 = TOOTH_SECOND_MOLAR_INFERIOR_RIGHT_DEFINITIVE = 47
-T48 = TOOTH_THIRD_MOLAR_INFERIOR_RIGHT_DEFINITIVE = 48
+T11 = TOOTH_INCISIVO_CENTRAL_SUPERIOR_RIGHT_PERMANENT = 11
+T12 = TOOTH_INCISIVO_LATERAL_SUPERIOR_RIGHT_PERMANENT = 12
+T13 = TOOTH_CANINA_SUPERIOR_RIGHT_PERMANENT = 13
+T14 = TOOTH_FIRST_PREMOLAR_SUPERIOR_RIGHT_PERMANENT = 14
+T15 = TOOTH_SECOND_PREMOLAR_SUPERIOR_RIGHT_PERMANENT = 15
+T16 = TOOTH_FIRST_MOLAR_SUPERIOR_RIGHT_PERMANENT = 16
+T17 = TOOTH_SECOND_MOLAR_SUPERIOR_RIGHT_PERMANENT = 17
+T18 = TOOTH_THIRD_MOLAR_SUPERIOR_RIGHT_PERMANENT = 18
+T21 = TOOTH_INCISIVO_CENTRAL_SUPERIOR_LEFT_PERMANENT = 21
+T22 = TOOTH_INCISIVO_LATERAL_SUPERIOR_LEFT_PERMANENT = 22
+T23 = TOOTH_CANINA_SUPERIOR_LEFT_PERMANENT = 23
+T24 = TOOTH_FIRST_PREMOLAR_SUPERIOR_LEFT_PERMANENT = 24
+T25 = TOOTH_SECOND_PREMOLAR_SUPERIOR_LEFT_PERMANENT = 25
+T26 = TOOTH_FIRST_MOLAR_SUPERIOR_LEFT_PERMANENT = 26
+T27 = TOOTH_SECOND_MOLAR_SUPERIOR_LEFT_PERMANENT = 27
+T28 = TOOTH_THIRD_MOLAR_SUPERIOR_LEFT_PERMANENT = 28
+T31 = TOOTH_INCISIVO_CENTRAL_INFERIOR_LEFT_PERMANENT = 31
+T32 = TOOTH_INCISIVO_LATERAL_INFERIOR_LEFT_PERMANENT = 32
+T33 = TOOTH_CANINA_INFERIOR_LEFT_PERMANENT = 33
+T34 = TOOTH_FIRST_PREMOLAR_INFERIOR_LEFT_PERMANENT = 34
+T35 = TOOTH_SECOND_PREMOLAR_INFERIOR_LEFT_PERMANENT = 35
+T36 = TOOTH_FIRST_MOLAR_INFERIOR_LEFT_PERMANENT = 36
+T37 = TOOTH_SECOND_MOLAR_INFERIOR_LEFT_PERMANENT = 37
+T38 = TOOTH_THIRD_MOLAR_INFERIOR_LEFT_PERMANENT = 38
+T41 = TOOTH_INCISIVO_CENTRAL_INFERIOR_RIGHT_PERMANENT = 41
+T42 = TOOTH_INCISIVO_LATERAL_INFERIOR_RIGHT_PERMANENT = 42
+T43 = TOOTH_CANINA_INFERIOR_RIGHT_PERMANENT = 43
+T44 = TOOTH_FIRST_PREMOLAR_INFERIOR_RIGHT_PERMANENT = 44
+T45 = TOOTH_SECOND_PREMOLAR_INFERIOR_RIGHT_PERMANENT = 45
+T46 = TOOTH_FIRST_MOLAR_INFERIOR_RIGHT_PERMANENT = 46
+T47 = TOOTH_SECOND_MOLAR_INFERIOR_RIGHT_PERMANENT = 47
+T48 = TOOTH_THIRD_MOLAR_INFERIOR_RIGHT_PERMANENT = 48
 
-DEFINITIVE_SUPERIOR_TEETH_SEQUENCE = ( 
-                            TOOTH_THIRD_MOLAR_SUPERIOR_RIGHT_DEFINITIVE, 
-                            TOOTH_SECOND_MOLAR_SUPERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_FIRST_MOLAR_SUPERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_SECOND_PREMOLAL_SUPERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_FIRST_PREMOLAR_SUPERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_CANINA_SUPERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_INCISIVO_LATERAL_SUPERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_INCISIVO_CENTRAL_SUPERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_INCISIVO_CENTRAL_SUPERIOR_LEFT_DEFINITIVE,
-                            TOOTH_INCISIVO_LATERAL_SUPERIOR_LEFT_DEFINITIVE,
-                            TOOTH_CANINA_SUPERIOR_LEFT_DEFINITIVE,
-                            TOOTH_FIRST_PREMOLAR_SUPERIOR_LEFT_DEFINITIVE,
-                            TOOTH_SECOND_PREMOLAL_SUPERIOR_LEFT_DEFINITIVE,
-                            TOOTH_FIRST_MOLAR_SUPERIOR_LEFT_DEFINITIVE,
-                            TOOTH_SECOND_MOLAR_SUPERIOR_LEFT_DEFINITIVE,
-                            TOOTH_THIRD_MOLAR_SUPERIOR_LEFT_DEFINITIVE
+PERMANENT_SUPERIOR_TEETH_SEQUENCE = ( 
+                            TOOTH_THIRD_MOLAR_SUPERIOR_RIGHT_PERMANENT, 
+                            TOOTH_SECOND_MOLAR_SUPERIOR_RIGHT_PERMANENT,
+                            TOOTH_FIRST_MOLAR_SUPERIOR_RIGHT_PERMANENT,
+                            TOOTH_SECOND_PREMOLAR_SUPERIOR_RIGHT_PERMANENT,
+                            TOOTH_FIRST_PREMOLAR_SUPERIOR_RIGHT_PERMANENT,
+                            TOOTH_CANINA_SUPERIOR_RIGHT_PERMANENT,
+                            TOOTH_INCISIVO_LATERAL_SUPERIOR_RIGHT_PERMANENT,
+                            TOOTH_INCISIVO_CENTRAL_SUPERIOR_RIGHT_PERMANENT,
+                            TOOTH_INCISIVO_CENTRAL_SUPERIOR_LEFT_PERMANENT,
+                            TOOTH_INCISIVO_LATERAL_SUPERIOR_LEFT_PERMANENT,
+                            TOOTH_CANINA_SUPERIOR_LEFT_PERMANENT,
+                            TOOTH_FIRST_PREMOLAR_SUPERIOR_LEFT_PERMANENT,
+                            TOOTH_SECOND_PREMOLAR_SUPERIOR_LEFT_PERMANENT,
+                            TOOTH_FIRST_MOLAR_SUPERIOR_LEFT_PERMANENT,
+                            TOOTH_SECOND_MOLAR_SUPERIOR_LEFT_PERMANENT,
+                            TOOTH_THIRD_MOLAR_SUPERIOR_LEFT_PERMANENT
                             )
 
-DEFINITIVE_INFERIOR_TEETH_SEQUENCE = (
-                            TOOTH_THIRD_MOLAR_INFERIOR_LEFT_DEFINITIVE,
-                            TOOTH_SECOND_MOLAR_INFERIOR_LEFT_DEFINITIVE,
-                            TOOTH_FIRST_MOLAR_INFERIOR_LEFT_DEFINITIVE,
-                            TOOTH_SECOND_PREMOLAL_INFERIOR_LEFT_DEFINITIVE,
-                            TOOTH_FIRST_PREMOLAR_INFERIOR_LEFT_DEFINITIVE,
-                            TOOTH_CANINA_INFERIOR_LEFT_DEFINITIVE,
-                            TOOTH_INCISIVO_LATERAL_INFERIOR_LEFT_DEFINITIVE,
-                            TOOTH_INCISIVO_CENTRAL_INFERIOR_LEFT_DEFINITIVE,
-                            TOOTH_INCISIVO_CENTRAL_INFERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_INCISIVO_LATERAL_INFERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_CANINA_INFERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_FIRST_PREMOLAR_INFERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_SECOND_PREMOLAL_INFERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_FIRST_MOLAR_INFERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_SECOND_MOLAR_INFERIOR_RIGHT_DEFINITIVE,
-                            TOOTH_THIRD_MOLAR_INFERIOR_RIGHT_DEFINITIVE
+PERMANENT_INFERIOR_TEETH_SEQUENCE = (
+                            TOOTH_THIRD_MOLAR_INFERIOR_LEFT_PERMANENT,
+                            TOOTH_SECOND_MOLAR_INFERIOR_LEFT_PERMANENT,
+                            TOOTH_FIRST_MOLAR_INFERIOR_LEFT_PERMANENT,
+                            TOOTH_SECOND_PREMOLAR_INFERIOR_LEFT_PERMANENT,
+                            TOOTH_FIRST_PREMOLAR_INFERIOR_LEFT_PERMANENT,
+                            TOOTH_CANINA_INFERIOR_LEFT_PERMANENT,
+                            TOOTH_INCISIVO_LATERAL_INFERIOR_LEFT_PERMANENT,
+                            TOOTH_INCISIVO_CENTRAL_INFERIOR_LEFT_PERMANENT,
+                            TOOTH_INCISIVO_CENTRAL_INFERIOR_RIGHT_PERMANENT,
+                            TOOTH_INCISIVO_LATERAL_INFERIOR_RIGHT_PERMANENT,
+                            TOOTH_CANINA_INFERIOR_RIGHT_PERMANENT,
+                            TOOTH_FIRST_PREMOLAR_INFERIOR_RIGHT_PERMANENT,
+                            TOOTH_SECOND_PREMOLAR_INFERIOR_RIGHT_PERMANENT,
+                            TOOTH_FIRST_MOLAR_INFERIOR_RIGHT_PERMANENT,
+                            TOOTH_SECOND_MOLAR_INFERIOR_RIGHT_PERMANENT,
+                            TOOTH_THIRD_MOLAR_INFERIOR_RIGHT_PERMANENT
                             )
 
-T51 = TOOTH_INCISIVO_CENTRAL_SUPERIOR_RIGHT_TEMPORARY = 51
-T52 = TOOTH_INCISIVO_LATERAL_SUPERIOR_RIGHT_TEMPORARY = 52
-T53 = TOOTH_CANINA_SUPERIOR_RIGHT_TEMPORARY = 53
-T54 = TOOTH_FIRST_MOLAR_SUPERIOR_RIGHT_TEMPORARY = 54
-T55 = TOOTH_SECOND_MOLAR_SUPERIOR_RIGHT_TEMPORARY = 55
-T61 = TOOTH_INCISIVO_CENTRAL_SUPERIOR_LEFT_TEMPORARY = 61
-T62 = TOOTH_INCISIVO_LATERAL_SUPERIOR_LEFT_TEMPORARY = 62
-T63 = TOOTH_CANINA_SUPERIOR_LEFT_TEMPORARY = 63
-T64 = TOOTH_FIRST_MOLAR_SUPERIOR_LEFT_TEMPORARY = 64
-T65 = TOOTH_SECOND_MOLAR_SUPERIOR_LEFT_TEMPORARY = 65
-T71 = TOOTH_INCISIVO_CENTRAL_INFERIOR_LEFT_TEMPORARY = 71
-T72 = TOOTH_INCISIVO_LATERAL_INFERIOR_LEFT_TEMPORARY = 72
-T73 = TOOTH_CANINA_INFERIOR_LEFT_TEMPORARY = 73
-T74 = TOOTH_FIRST_MOLAR_INFERIOR_LEFT_TEMPORARY = 74
-T75 = TOOTH_SECOND_MOLAR_INFERIOR_LEFT_TEMPORARY = 75
-T81 = TOOTH_INCISIVO_CENTRAL_INFERIOR_RIGHT_TEMPORARY = 81
-T82 = TOOTH_INCISIVO_LATERAL_INFERIOR_RIGHT_TEMPORARY = 82
-T83 = TOOTH_CANINA_INFERIOR_RIGHT_TEMPORARY = 83
-T84 = TOOTH_FIRST_MOLAR_INFERIOR_RIGHT_TEMPORARY = 84
-T85 = TOOTH_ECOND_MOLAR_INFERIOR_RIGHT_TEMPORARY = 85
+T51 = TOOTH_INCISIVO_CENTRAL_SUPERIOR_RIGHT_DECIDUOUS = 51
+T52 = TOOTH_INCISIVO_LATERAL_SUPERIOR_RIGHT_DECIDUOUS = 52
+T53 = TOOTH_CANINA_SUPERIOR_RIGHT_DECIDUOUS = 53
+T54 = TOOTH_FIRST_MOLAR_SUPERIOR_RIGHT_DECIDUOUS = 54
+T55 = TOOTH_SECOND_MOLAR_SUPERIOR_RIGHT_DECIDUOUS = 55
+T61 = TOOTH_INCISIVO_CENTRAL_SUPERIOR_LEFT_DECIDUOUS = 61
+T62 = TOOTH_INCISIVO_LATERAL_SUPERIOR_LEFT_DECIDUOUS = 62
+T63 = TOOTH_CANINA_SUPERIOR_LEFT_DECIDUOUS = 63
+T64 = TOOTH_FIRST_MOLAR_SUPERIOR_LEFT_DECIDUOUS = 64
+T65 = TOOTH_SECOND_MOLAR_SUPERIOR_LEFT_DECIDUOUS = 65
+T71 = TOOTH_INCISIVO_CENTRAL_INFERIOR_LEFT_DECIDUOUS = 71
+T72 = TOOTH_INCISIVO_LATERAL_INFERIOR_LEFT_DECIDUOUS = 72
+T73 = TOOTH_CANINA_INFERIOR_LEFT_DECIDUOUS = 73
+T74 = TOOTH_FIRST_MOLAR_INFERIOR_LEFT_DECIDUOUS = 74
+T75 = TOOTH_SECOND_MOLAR_INFERIOR_LEFT_DECIDUOUS = 75
+T81 = TOOTH_INCISIVO_CENTRAL_INFERIOR_RIGHT_DECIDUOUS = 81
+T82 = TOOTH_INCISIVO_LATERAL_INFERIOR_RIGHT_DECIDUOUS = 82
+T83 = TOOTH_CANINA_INFERIOR_RIGHT_DECIDUOUS = 83
+T84 = TOOTH_FIRST_MOLAR_INFERIOR_RIGHT_DECIDUOUS = 84
+T85 = TOOTH_ECOND_MOLAR_INFERIOR_RIGHT_DECIDUOUS = 85
+
+DECIDUOUS_SUPERIOR_TEETH_SEQUENCE = (
+                            TOOTH_SECOND_MOLAR_SUPERIOR_RIGHT_DECIDUOUS,
+                            TOOTH_FIRST_MOLAR_SUPERIOR_RIGHT_DECIDUOUS,
+                            TOOTH_CANINA_SUPERIOR_RIGHT_DECIDUOUS,
+                            TOOTH_INCISIVO_LATERAL_SUPERIOR_RIGHT_DECIDUOUS,
+                            TOOTH_INCISIVO_CENTRAL_SUPERIOR_RIGHT_DECIDUOUS,
+                            TOOTH_INCISIVO_CENTRAL_SUPERIOR_LEFT_DECIDUOUS,
+                            TOOTH_INCISIVO_LATERAL_SUPERIOR_LEFT_DECIDUOUS,
+                            TOOTH_CANINA_SUPERIOR_LEFT_DECIDUOUS,
+                            TOOTH_FIRST_MOLAR_SUPERIOR_LEFT_DECIDUOUS,
+                            TOOTH_SECOND_MOLAR_SUPERIOR_LEFT_DECIDUOUS,
+                            )
+
+DECIDUOUS_INFERIOR_TEETH_SEQUENCE = (
+                            TOOTH_SECOND_MOLAR_INFERIOR_LEFT_DECIDUOUS,
+                            TOOTH_FIRST_MOLAR_INFERIOR_LEFT_DECIDUOUS,
+                            TOOTH_CANINA_INFERIOR_LEFT_DECIDUOUS,
+                            TOOTH_INCISIVO_LATERAL_INFERIOR_LEFT_DECIDUOUS,
+                            TOOTH_INCISIVO_CENTRAL_INFERIOR_LEFT_DECIDUOUS,
+                            TOOTH_INCISIVO_CENTRAL_INFERIOR_RIGHT_DECIDUOUS,
+                            TOOTH_INCISIVO_LATERAL_INFERIOR_RIGHT_DECIDUOUS,
+                            TOOTH_CANINA_INFERIOR_RIGHT_DECIDUOUS,
+                            TOOTH_FIRST_MOLAR_INFERIOR_RIGHT_DECIDUOUS,
+                            TOOTH_SECOND_MOLAR_INFERIOR_RIGHT_DECIDUOUS,
+                            )
 
 ANATOMIC_LOCATION_SOFT_TISSUES = {
             HEAD: ( _("head"), str(HEAD), "headneck", "HeadEvent" ),
@@ -303,7 +387,7 @@ ANATOMIC_LOCATION_SOFT_TISSUES = {
                                                             "UvulaEvent"),
             }
 
-ANATOMIC_LOCATION_TEETH = {
+ANATOMIC_LOCATION_TEETH_SET = {
             MAXILLA: ( _("maxillar"), str(MAXILLA), "teeth", 'Arcade'),
             MANDIBULA: ( _("mandibular"), str(MANDIBULA), "teeth", 'Arcade'),
             Q10: (_("quadrant superior right"), str(Q10), "teeth", "Quadrant"),
@@ -316,59 +400,62 @@ ANATOMIC_LOCATION_TEETH = {
             S06 : (_("sextant inferior left"), str(S06), "teeth", "Sextant"),
             S07 : (_("sextant inferior central"), str(S07), "teeth", "Sextant"),
             S08 : (_("sextant inferior right"), str(S08), "teeth", "Sextant"),
-            T11: ( _("Incisivo central superior right"), str(T11), "teeth", "Tooth"),
-            T12: ( _("Incisivo laterial superior right"), str(T12), "teeth", "Tooth"),
-            T13: ( _("Canina superior right"), str(T13), "teeth", "Tooth"),
-            T14: ( _("First Premolar superior right"), str(T14), "teeth", "Tooth"),
-            T15: ( _("Second Premolar superior right"), str(T15), "teeth", "Tooth"),
-            T16: ( _("First Molar superior right"), str(T16), "teeth", "Tooth"),
-            T17: ( _("Second Molar superior right"), str(T17), "teeth", "Tooth"),
-            T18: ( _("Third Molar superior right"), str(T18), "teeth", "Tooth"),
-            T21: ( _("Incisivo central superior left"), str(T21), "teeth", "Tooth"),
-            T22: ( _("Incisivo lateral superior left"), str(T22), "teeth", "Tooth"),
-            T23: ( _("Canina superior left"), str(T23), "teeth", "Tooth"),
-            T24: ( _("First Premolar superior left"), str(T24), "teeth", "Tooth"),
-            T25: ( _("Second Premolar superior left"), str(T25), "teeth", "Tooth"),
-            T26: ( _("First Molar superior left"), str(T26), "teeth", "Tooth"),
-            T27: ( _("Second Molar superior left"), str(T27), "teeth", "Tooth"),
-            T28: ( _("Third Molar superior left"), str(T28), "teeth", "Tooth"),
-            T31: ( _("teeth"), str(T31), "teeth", "Tooth"),
-            T32: ( _("teeth"), str(T32), "teeth", "Tooth"),
-            T33: ( _("teeth"), str(T33), "teeth", "Tooth"),
-            T34: ( _("teeth"), str(T34), "teeth", "Tooth"),
-            T35: ( _("teeth"), str(T35), "teeth", "Tooth"),
-            T36: ( _("teeth"), str(T36), "teeth", "Tooth"),
-            T37: ( _("teeth"), str(T37), "teeth", "Tooth"),
-            T38: ( _("teeth"), str(T38), "teeth", "Tooth"),
-            T41: ( _("teeth"), str(T41), "teeth", "Tooth"),
-            T42: ( _("teeth"), str(T42), "teeth", "Tooth"),
-            T43: ( _("teeth"), str(T43), "teeth", "Tooth"),
-            T44: ( _("teeth"), str(T44), "teeth", "Tooth"),
-            T45: ( _("teeth"), str(T45), "teeth", "Tooth"),
-            T46: ( _("teeth"), str(T46), "teeth", "Tooth"),
-            T47: ( _("teeth"), str(T47), "teeth", "Tooth"),
-            T48: ( _("teeth"), str(T48), "teeth", "Tooth"),
-            T51: ( _("teeth"), str(T51), "teeth", "Tooth"),
-            T52: ( _("teeth"), str(T52), "teeth", "Tooth"),
-            T53: ( _("teeth"), str(T53), "teeth", "Tooth"),
-            T54: ( _("teeth"), str(T54), "teeth", "Tooth"),
-            T55: ( _("teeth"), str(T55), "teeth", "Tooth"),
-            T61: ( _("teeth"), str(T61), "teeth", "Tooth"),
-            T62: ( _("teeth"), str(T62), "teeth", "Tooth"),
-            T63: ( _("teeth"), str(T63), "teeth", "Tooth"),
-            T64: ( _("teeth"), str(T64), "teeth", "Tooth"),
-            T65: ( _("teeth"), str(T65), "teeth", "Tooth"),
-            T71: ( _("teeth"), str(T71), "teeth", "Tooth"),
-            T72: ( _("teeth"), str(T72), "teeth", "Tooth"),
-            T73: ( _("teeth"), str(T73), "teeth", "Tooth"),
-            T74: ( _("teeth"), str(T74), "teeth", "Tooth"),
-            T75: ( _("teeth"), str(T75), "teeth", "Tooth"),
-            T81: ( _("teeth"), str(T81), "teeth", "Tooth"),
-            T82: ( _("teeth"), str(T82), "teeth", "Tooth"),
-            T83: ( _("teeth"), str(T83), "teeth", "Tooth"),
-            T84: ( _("teeth"), str(T84), "teeth", "Tooth"),
-            T85: ( _("teeth"), str(T85), "teeth", "Tooth"),
-        }
+            }
+
+ANATOMIC_LOCATION_TEETH = {
+            T11: ( T11_NAME , str(T11), "teeth", "Tooth"),
+            T12: ( T12_NAME , str(T12), "teeth", "Tooth"),
+            T13: ( T13_NAME , str(T13), "teeth", "Tooth"),
+            T14: ( T14_NAME , str(T14), "teeth", "Tooth"),
+            T15: ( T15_NAME , str(T15), "teeth", "Tooth"),
+            T16: ( T16_NAME , str(T16), "teeth", "Tooth"),
+            T17: ( T17_NAME , str(T17), "teeth", "Tooth"),
+            T18: ( T18_NAME , str(T18), "teeth", "Tooth"),
+            T21: ( T21_NAME , str(T21), "teeth", "Tooth"),
+            T22: ( T22_NAME , str(T22), "teeth", "Tooth"),
+            T23: ( T23_NAME , str(T23), "teeth", "Tooth"),
+            T24: ( T24_NAME , str(T24), "teeth", "Tooth"),
+            T25: ( T25_NAME , str(T25), "teeth", "Tooth"),
+            T26: ( T26_NAME , str(T26), "teeth", "Tooth"),
+            T27: ( T27_NAME , str(T27), "teeth", "Tooth"),
+            T28: ( T28_NAME , str(T28), "teeth", "Tooth"),
+            T31: ( T31_NAME, str(T31), "teeth", "Tooth"),
+            T32: ( T32_NAME, str(T32), "teeth", "Tooth"),
+            T33: ( T33_NAME, str(T33), "teeth", "Tooth"),
+            T34: ( T34_NAME, str(T34), "teeth", "Tooth"),
+            T35: ( T35_NAME, str(T35), "teeth", "Tooth"),
+            T36: ( T36_NAME, str(T36), "teeth", "Tooth"),
+            T37: ( T37_NAME, str(T37), "teeth", "Tooth"),
+            T38: ( T38_NAME, str(T38), "teeth", "Tooth"),
+            T41: ( T41_NAME, str(T41), "teeth", "Tooth"),
+            T42: ( T42_NAME, str(T42), "teeth", "Tooth"),
+            T43: ( T43_NAME, str(T43), "teeth", "Tooth"),
+            T44: ( T44_NAME, str(T44), "teeth", "Tooth"),
+            T45: ( T45_NAME, str(T45), "teeth", "Tooth"),
+            T46: ( T46_NAME, str(T46), "teeth", "Tooth"),
+            T47: ( T47_NAME, str(T47), "teeth", "Tooth"),
+            T48: ( T48_NAME, str(T48), "teeth", "Tooth"),
+            T51: ( T51_NAME, str(T51), "teeth", "Tooth"),
+            T52: ( T52_NAME, str(T52), "teeth", "Tooth"),
+            T53: ( T53_NAME, str(T53), "teeth", "Tooth"),
+            T54: ( T54_NAME, str(T54), "teeth", "Tooth"),
+            T55: ( T55_NAME, str(T55), "teeth", "Tooth"),
+            T61: ( T61_NAME, str(T61), "teeth", "Tooth"),
+            T62: ( T62_NAME, str(T62), "teeth", "Tooth"),
+            T63: ( T63_NAME, str(T63), "teeth", "Tooth"),
+            T64: ( T64_NAME, str(T64), "teeth", "Tooth"),
+            T65: ( T65_NAME, str(T65), "teeth", "Tooth"),
+            T71: ( T71_NAME, str(T71), "teeth", "Tooth"),
+            T72: ( T72_NAME, str(T72), "teeth", "Tooth"),
+            T73: ( T73_NAME, str(T73), "teeth", "Tooth"),
+            T74: ( T74_NAME, str(T74), "teeth", "Tooth"),
+            T75: ( T75_NAME, str(T75), "teeth", "Tooth"),
+            T81: ( T81_NAME, str(T81), "teeth", "Tooth"),
+            T82: ( T82_NAME, str(T82), "teeth", "Tooth"),
+            T83: ( T83_NAME, str(T83), "teeth", "Tooth"),
+            T84: ( T84_NAME, str(T84), "teeth", "Tooth"),
+            T85: ( T85_NAME, str(T85), "teeth", "Tooth"),
+            }
 
 TOOTH_STATE_SANE = 0
 TOOTH_STATE_ILL = 1
