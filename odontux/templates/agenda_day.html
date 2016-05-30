@@ -12,6 +12,7 @@
                                     dentist_id=summary_agenda_form.dentist_id.data, 
                                     dental_unit_id=summary_agenda_form.dental_unit_id.data) }}">
           {{ render_simple_field_line( summary_agenda_form.day ) }}
+          {{ isoweekday }}
           {{ render_simple_field_line( summary_agenda_form.dentist_id ) }}
           {{ render_simple_field_line( summary_agenda_form.dental_unit_id) }}
           <input type="submit" value="Go" />

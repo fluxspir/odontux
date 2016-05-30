@@ -8,7 +8,8 @@
 import pdb
 from flask import render_template, request, redirect, url_for, session 
 from wtforms import (Form, HiddenField, BooleanField, TextAreaField, TextField,
-                    IntegerField, SelectField, DateField, validators)
+                    IntegerField, SelectField, validators)
+from wtforms.fields.html5 import DateField
 from gettext import gettext as _
 from sqlalchemy import or_
 from sqlalchemy import cast, Date
@@ -35,10 +36,10 @@ class AppointmentForm(Form):
 
 class AgendaForm(Form):
     """ """
-    #TODO : validators for time, either duration or endtime must be provided...
     appointment_id = HiddenField('appointment_id')
     day = DateField(_('day'), format='%Y-%m-%d', 
-                            validators=[validators.Optional()])
+                            validators=[validators.Optional()],
+                            render_kw={'col': '10'} )
     starthour = IntegerField(_('h'), [validators.Optional()])
     startmin = IntegerField(_('m'), [validators.Optional()])
     durationhour = IntegerField(_('h'), [validators.Optional()])
@@ -101,10 +102,24 @@ def agenda_date():
                     dental_unit_id=summary_agenda_form['dental_unit_id'].data))
 
 @app.route('/agenda/')
-def agenda():
+@app.route('/agenda?year=<int:year>&month=<int:month>&day=<int:day>')
+def agenda(year=None, month=None, day=None):
     summary_agenda_form = get_summary_agenda_form()
+    if year is None and month is None and day is None:
+        day_to_emph = datetime.date.today()
+    else:
+        try:
+            day_to_emph = datetime.date(year, month, day)
+        except ValueError:
+            day_to_emph = (datetime.date(year, month + 1, 1) - datetime.timedelta(1))
+    
+    summary_agenda_form.day.data = day_to_emph
+    month = constants.MONTHS[day_to_emph.month]
     return render_template('summary_agenda.html', 
-                            summary_agenda_form=summary_agenda_form)
+                            summary_agenda_form=summary_agenda_form,
+                            day_to_emph=day_to_emph,
+                            month=month,
+                            datetime=datetime)
 
 @app.route('/agenda/day?date=<dateday>&dentist=<int:dentist_id>'
             '&dental_unit_id=<int:dental_unit_id>')
@@ -114,6 +129,7 @@ def display_day(dateday, dentist_id, dental_unit_id):
     and create links for "previous_day" and "next_day"
     """
     dateday = datetime.datetime.strptime(dateday,'%Y-%m-%d').date()
+    isoweekday = constants.ISOWEEKDAYS[dateday.isoweekday()]
     summary_agenda_form = get_summary_agenda_form(dateday)
     if not dentist_id:
         return redirect(url_for('index'))
@@ -136,6 +152,7 @@ def display_day(dateday, dentist_id, dental_unit_id):
     # dateday is return to create links to previous and next day
     return render_template('agenda_day.html', meetings=meetings,
                             dateday=dateday, nextday=nextday, prevday=prevday,
+                            isoweekday=isoweekday,
                             summary_agenda_form=summary_agenda_form,
                             dentist_id=dentist_id, dental_unit_id=dental_unit_id)
 

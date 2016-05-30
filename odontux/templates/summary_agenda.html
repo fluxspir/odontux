@@ -8,4 +8,42 @@
     {{ render_simple_field_line( summary_agenda_form.dental_unit_id) }}
     <input type="submit" value="Go" />
   </form>
+  <br />
+  <div>
+    <table>
+      <tr>
+        <th>
+          <a href="{{ url_for('agenda',
+                        year=(datetime.date(day_to_emph.year, day_to_emph.month, 1) - datetime.timedelta(1)).year,
+                        month=(datetime.date(day_to_emph.year, day_to_emph.month, 1) - datetime.timedelta(1)).month,
+                        day=day_to_emph.day) }}")>
+            ←
+          </a></th>
+        <th>{{ month }} {{ day_to_emph.year }}</th>
+        <th>
+          {% if day_to_emph.month == 12 %}
+            <a href="{{ url_for('agenda',
+                          year=(day_to_emph).year +1, month=1, day=day_to_emph.day) }}">
+          {% else %}
+            <a href="{{ url_for('agenda',
+                        year=((datetime.date(day_to_emph.year, day_to_emph.month +1, 1) - datetime.timedelta(1)) + datetime.timedelta(1)).year,
+                        month=((datetime.date(day_to_emph.year, day_to_emph.month +1, 1) - datetime.timedelta(1)) + datetime.timedelta(1)).month,
+                        day=day_to_emph.day) }}")>
+          {% endif %}
+            →
+          </a></th>
+
+      </tr>
+      <tr>
+        <th>{{ session['isoweekdays']['1'] }}</th>
+        <th>{{ session['isoweekdays']['2'] }}</th>
+        <th>{{ session['isoweekdays']['3'] }}</th>
+        <th>{{ session['isoweekdays']['4'] }}</th>
+        <th>{{ session['isoweekdays']['5'] }}</th>
+        <th>{{ session['isoweekdays']['6'] }}</th>
+        <th>{{ session['isoweekdays']['7'] }}</th>
+      </tr>
+    </table>
+  </div>
+
 {% endblock %}
