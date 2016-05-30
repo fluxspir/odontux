@@ -14,6 +14,7 @@ from gettext import gettext as _
 from sqlalchemy import or_
 from sqlalchemy import cast, Date
 import datetime
+import calendar
 
 from odontux import constants, checks
 from odontux.odonweb import app
@@ -94,7 +95,7 @@ def get_summary_agenda_form(day=datetime.date.today()):
 
 @app.route('/agenda/date/', methods=['POST'])
 def agenda_date():
-    summary_agenda_form = SummaryAgendaForm(request.form)
+    summary_agenda_form = get_summary_agenda_form()
     if request.method == 'POST' :
         return redirect(url_for('display_day', 
                     dateday=summary_agenda_form["day"].data,
@@ -109,17 +110,26 @@ def agenda(year=None, month=None, day=None):
         day_to_emph = datetime.date.today()
     else:
         try:
+            if month == 13:
+                year = year + 1
+                month = 1
+            elif month == 0:
+                year = year - 1
+                month = 12
+            else: day_to_emph = datetime.date.today()
             day_to_emph = datetime.date(year, month, day)
         except ValueError:
             day_to_emph = (datetime.date(year, month + 1, 1) - datetime.timedelta(1))
     
     summary_agenda_form.day.data = day_to_emph
-    month = constants.MONTHS[day_to_emph.month]
+    month_name = constants.MONTHS[day_to_emph.month]
+    cal = calendar.monthcalendar(day_to_emph.year, day_to_emph.month)
     return render_template('summary_agenda.html', 
                             summary_agenda_form=summary_agenda_form,
                             day_to_emph=day_to_emph,
-                            month=month,
-                            datetime=datetime)
+                            month_name=month_name,
+                            datetime=datetime,
+                            cal=cal)
 
 @app.route('/agenda/day?date=<dateday>&dentist=<int:dentist_id>'
             '&dental_unit_id=<int:dental_unit_id>')

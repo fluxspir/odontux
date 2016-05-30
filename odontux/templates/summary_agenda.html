@@ -14,22 +14,13 @@
       <tr>
         <th>
           <a href="{{ url_for('agenda',
-                        year=(datetime.date(day_to_emph.year, day_to_emph.month, 1) - datetime.timedelta(1)).year,
-                        month=(datetime.date(day_to_emph.year, day_to_emph.month, 1) - datetime.timedelta(1)).month,
-                        day=day_to_emph.day) }}")>
+                        year=day_to_emph.year, month=(day_to_emph.month - 1 ), day=day_to_emph.day) }}")>
             ←
           </a></th>
-        <th>{{ month }} {{ day_to_emph.year }}</th>
+        <th>{{ month_name }} {{ day_to_emph.year }}</th>
         <th>
-          {% if day_to_emph.month == 12 %}
             <a href="{{ url_for('agenda',
-                          year=(day_to_emph).year +1, month=1, day=day_to_emph.day) }}">
-          {% else %}
-            <a href="{{ url_for('agenda',
-                        year=((datetime.date(day_to_emph.year, day_to_emph.month +1, 1) - datetime.timedelta(1)) + datetime.timedelta(1)).year,
-                        month=((datetime.date(day_to_emph.year, day_to_emph.month +1, 1) - datetime.timedelta(1)) + datetime.timedelta(1)).month,
-                        day=day_to_emph.day) }}")>
-          {% endif %}
+                        year=day_to_emph.year, month=(day_to_emph.month +1 ), day=day_to_emph.day) }}">
             →
           </a></th>
 
@@ -43,6 +34,24 @@
         <th>{{ session['isoweekdays']['6'] }}</th>
         <th>{{ session['isoweekdays']['7'] }}</th>
       </tr>
+      {% for week in cal %}
+        <tr>
+          {% for day in week %}
+            <td>
+            {% if day %}
+              
+              <a href="{{ url_for('display_day', 
+                                  dateday=datetime.date(day_to_emph.year, day_to_emph.month, day).isoformat(),
+                                  dentist_id=summary_agenda_form.dentist_id.data,
+                                  dental_unit_id=1,
+                                ) }}"</a>
+                    {{ day }}
+              </a>
+            {% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
     </table>
   </div>
 
