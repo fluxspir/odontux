@@ -27,7 +27,7 @@ from endobuccal import (MouthEvent, SuperiorLipEvent, InferiorLipEvent,
                         LeftCheekEvent, RightCheekEvent,HardPalateEvent, 
                         SoftPalateEvent, TongueEvent, MouthBaseEvent, 
                         UvulaEvent)
-from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootEvent,
+from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootCanalEvent,
                     Periodonte, PeriodonteEvent )
 from act import ( Specialty, HealthCarePlan, Gesture, Cotation, 
                 AppointmentGestureReference )

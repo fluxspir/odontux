@@ -32,13 +32,27 @@
   
   <div id="crown">
     {{ render_simple_field(crown_event_form.choose_crown_state) }}
-    {{ render_simple_field(crown_event_form.side) }}
     {{ render_simple_field(crown_event_form.tooth_shade) }}
+    
+    {{ render_simple_field_line(crown_event_form.is_occlusal) }}
+    {{ render_simple_field_line(crown_event_form.is_buccal) }}
+    {{ render_simple_field_line(crown_event_form.is_lingual) }}
+    {{ render_simple_field_line(crown_event_form.is_mesial) }}
+    {{ render_simple_field_line(crown_event_form.is_distal) }}
   </div>
   
   <div id="root">
     {{ render_simple_field(root_event_form.choose_root_state) }}
-    {{ render_simple_field(root_event_form.root) }}
+    {{ render_simple_field_line(root_event_form.is_central) }}
+    {{ render_simple_field_line(root_event_form.is_buccal) }}
+    {{ render_simple_field_line(root_event_form.is_lingual) }}
+    {{ render_simple_field_line(root_event_form.is_mesial) }}
+    {{ render_simple_field_line(root_event_form.is_distal) }}
+    {{ render_simple_field_line(root_event_form.is_mesio_buccal) }}
+    {{ render_simple_field_line(root_event_form.is_disto_buccal) }}
+    {{ render_simple_field_line(root_event_form.is_mesio_lingual) }}
+    {{ render_simple_field_line(root_event_form.is_disto_lingual) }}
+    {{ render_simple_field_line(root_event_form.is_mesio_buccal_2) }}
   </div>
   
   <div id="periodonte">
@@ -47,6 +61,13 @@
     {{ render_simple_field(periodonte_event_form.furcation) }}
     {{ render_simple_field(periodonte_event_form.recession) }}
     {{ render_simple_field(periodonte_event_form.pocket_depth) }}
+    
+    {{ render_simple_field_line(periodonte_event_form.is_mesio_buccal) }}
+    {{ render_simple_field_line(periodonte_event_form.is_buccal) }}
+    {{ render_simple_field_line(periodonte_event_form.is_disto_buccal) }}
+    {{ render_simple_field_line(periodonte_event_form.is_disto_lingual) }}
+    {{ render_simple_field_line(periodonte_event_form.is_lingual) }}
+    {{ render_simple_field_line(periodonte_event_form.is_mesio_lingual) }}
   </div>
   <br />
     {{ render_simple_field(event_form.comment) }}
