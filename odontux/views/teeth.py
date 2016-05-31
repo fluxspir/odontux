@@ -12,6 +12,7 @@ from wtforms import ( Form,
                     validators
                     )
 import sqlalchemy
+from sqlalchemy.orm import with_polymorphic
 from flask import session, render_template, redirect, url_for, request
 
 from gettext import gettext as _
@@ -190,17 +191,17 @@ def _set_tooth_state(tooth_id, state):
         pass
 
 
-@app.route('/patient/teeth/')
-def list_teeth():
+@app.route('/patient/teeth?pid=<int:patient_id>')
+def list_teeth(patient_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
-    if session['role'] not in constants.ROLE_DENTIST :
+    if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     
-    patient = checks.get_patient(session['patient_id'])
+    patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment()
     if patient.teeth:
         teeth = [(tooth.id, 
-                constants.ANATOMIC_LOCATION_TEETH[tooth.codename], 
+                constants.ANATOMIC_LOCATION_TEETH[tooth.codename][1], 
                 constants.TOOTH_STATES[tooth.state], 
                 tooth.surveillance) 
                 for tooth in patient.teeth ]
@@ -209,112 +210,71 @@ def list_teeth():
     return render_template('list_teeth.html', patient=patient, 
                             appointment=appointment, teeth=teeth)
 
-
-@app.route('/patient/tooth?<int:tooth_id>')
-def show_tooth(tooth_id):
-    """ 
-    tooth = ( int:tooth.id , char:tooth.name, char:readable_tooth.state, 
-              bool:tooth.surveillance )
-    xxx_events = [ ( event , appointment ) ]
-    """
-    authorized_roles = [ constants.ROLE_DENTIST ] 
+@app.route('/show/tooth?pid=<int:patient_id>&tcn=<int:tooth_codename>')
+def show_tooth(patient_id, tooth_codename):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    patient = checks.get_patient(session['patient_id'])
-    actual_appointment = checks.get_appointment(session['appointment_id'])
+    patient = checks.get_patient(patient_id)
+    actual_appointment = checks.get_appointment()
     if not actual_appointment:
         actual_appointment = patient.appointments[-1]
         session['appointment_id'] = actual_appointment.id
     
-    tooth = ( meta.session.query(teeth.Tooth)
-                .filter(teeth.Tooth.id == tooth_id).one() )
-
-    if not tooth in patient.teeth:
-        return redirect(url_for('list_teeth'))
-    
-    events = ( 
-        meta.session.query(teeth.Event)
-            .filter(
-                teeth.Event.tooth_id == tooth_id,
-                teeth.Event.appointment_id == schedule.Appointment.id,
-                schedule.Appointment.id == schedule.Agenda.appointment_id,
-                schedule.Agenda.starttime <= actual_appointment.agenda.starttime
-            ).order_by(
-                schedule.Agenda.starttime,
-                teeth.Event.id
-            ).all()
+    tooth = ( 
+        meta.session.query(teeth.Tooth)
+            .filter(teeth.Tooth.patient_id == patient_id,
+                    teeth.Tooth.codename == tooth_codename
+            )
+            .one_or_none()
     )
-
-    events_list = []
-    for event in events:
-        if event.location == constants.TOOTH_EVENT_LOCATION_TOOTH:
-
-            try:
-                tooth_event = ( meta.session.query(teeth.ToothEvent)
-                    .filter(teeth.ToothEvent.event_id == event.id)
-                    .one() )
-            except sqlalchemy.orm.exc.NoResultFound:
-                return redirect(url_for('list_teeth'))
-            appointment = (meta.session.query(schedule.Appointment)
-                .filter(schedule.Appointment.id == event.appointment_id)
-                .one() )
-
-            event_description = []
-            for f in constants.TOOTH_STATES:
-                if getattr(tooth_event, f):
-                    event_name = f
-                    event_data = getattr(tooth_event, f)
-                    event_description.append( (event_name, event_data) )
-
-            events_list.append( (event, "tooth", tooth_event, 
-                                 event_description, appointment) )
-
-        elif event.location == constants.EVENT_LOCATION_CROWN[0]:
-
-            crown_event = ( meta.session.query(teeth.CrownEvent)
-                .filter(teeth.CrownEvent.event_id == event.id)
-                .one() )
-            appointment = (meta.session.query(schedule.Appointment)
-                .filter(schedule.Appointment.id == event.appointment_id)
-                .one() )
-
-            event_description = []
-            for f in constants.CROWN_EVENT_ATTRIBUTES:
-                if getattr(crown_event, f):
-                    event_name = f
-                    event_data = getattr(crown_event, f)
-                    event_description.append( (event_name, event_data) )
-            
-            events_list.append( (event, "crown", crown_event,
-                                 event_description, appointment) )
-
-        elif event.location == constants.EVENT_LOCATION_ROOT[0]:
-
-            root_event = ( meta.session.query(teeth.RootEvent)
-                .filter(teeth.RootEvent.event_id == event.id)
-                .one() )
-            appointment = (meta.session.query(schedule.Appointment)
-                .filter(schedule.Appointment.id == event.appointment_id)
-                .one() )
-            
-            event_description = []
-            for f in constants.ROOT_EVENT_ATTRIBUTES:
-                if getattr(root_event, f):
-                    event_name = f
-                    event_data = getattr(root_event, f)
-                    event_description.append( (event_name, event_data) )
-
-            events_list.append( (event, "root", root_event, 
-                                 event_description, appointment) )
-
-        else:
-            raise Exception(_("Unknown event location"))
- 
+    # we want that appears only events that occured before the 
+    # actual_appointment we're in.
+    all_event_type = with_polymorphic(teeth.Event, '*')
+    events = (
+        meta.session.query(all_event_type)
+            .filter(
+                teeth.Event.tooth_id == tooth.id,
+                teeth.Event.appointment_id.in_(
+                    meta.session.query(schedule.Agenda.appointment_id)
+                        .filter(
+                            schedule.Agenda.starttime <=
+                                        actual_appointment.agenda.starttime
+                        )
+                    )
+            )
+            .join(schedule.Appointment, schedule.Agenda)
+            .order_by(
+                schedule.Agenda.starttime.desc(),
+                teeth.Event.location
+            )
+            .all()
+        )
+#    for event in events:
+#        if event.location == constants.TOOTH_EVENT_LOCATION_TOOTH:
+#            pass
+#
+#        elif event.location == constants.TOOTH_EVENT_LOCATION_CROWN:
+#            event.side = constants.CROWN_EVENT_SIDES[event.side]
+#            event.state = constants.CROWN_EVENT_STATES[event.state]
+#
+#        elif event.location == constants.TOOTH_EVENT_LOCATION_ROOT:
+#            event.root = constants.ROOT_CANALS[event.root]
+#            event.state = constants.ROOT_STATES[event.state]
+#
+#        elif event.location == constants.TOOTH_EVENT_LOCATION_PERIODONTE:
+#            event.state = constants.PERIODONTAL_STATES[event.state]
+#            event.perio_location =\
+#                        constants.PERIODONTAL_LOCATIONS[event.perio_location]
+#        
+#        event.location = constants.TOOTH_EVENT_LOCATIONS[event.location]
+#        #tooth.state = constants.TOOTH_STATES[tooth.state][0]
     return render_template('show_tooth.html', patient=patient,
                                               appointment=actual_appointment,
                                               tooth=tooth,
-                                              events_list=events_list)
+                                              constants=constants,
+                                              events=events)
 
 
 @app.route('/add/event_tooth_located?pid=<int:patient_id>'
@@ -374,7 +334,7 @@ def add_event_tooth_located(patient_id, appointment_id):
             'surveillance': tooth_form.surveillance.data,
         }
         event_values = {
-            'appointment_id': appointment_id,
+            'appointment_id': event_form.appointment_id.data,
             'description': event_form.description.data,
             'comment': event_form.comment.data,
             'color': event_form.color.data,

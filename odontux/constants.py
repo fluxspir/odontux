@@ -500,21 +500,20 @@ CROWN_STATES = {
             CROWN_STATE_BRIDGE: ( _("bridge"), ),
            }
 
-CROWN_SIDE_ALL = 0
-CROWN_SIDE_OCCLUSAL = 1
-CROWN_SIDE_BUCCAL = 2
-CROWN_SIDE_LINGUAL = 3
-CROWN_SIDE_MESIAL = 4
-CROWN_SIDE_DISTAL = 5
-
-CROWN_SIDES = {
-            CROWN_SIDE_ALL: ( _("all"), ),
-            CROWN_SIDE_OCCLUSAL: ( _("occlusal"), ),
-            CROWN_SIDE_BUCCAL: ( _("buccal"), ),
-            CROWN_SIDE_LINGUAL: ( _("lingual"), ),
-            CROWN_SIDE_MESIAL: ( _("mesial"), ),
-            CROWN_SIDE_DISTAL: ( _("distal"), ),
-            }
+#CROWN_SIDE_OCCLUSAL = 1
+#CROWN_SIDE_BUCCAL = 2
+#CROWN_SIDE_LINGUAL = 4
+#CROWN_SIDE_MESIAL = 8
+#CROWN_SIDE_DISTAL = 16
+#
+#CROWN_SIDES = {
+#            CROWN_SIDE_ALL: ( _("all"), ),
+#            CROWN_SIDE_OCCLUSAL: ( _("occlusal"), ),
+#            CROWN_SIDE_BUCCAL: ( _("buccal"), ),
+#            CROWN_SIDE_LINGUAL: ( _("lingual"), ),
+#            CROWN_SIDE_MESIAL: ( _("mesial"), ),
+#            CROWN_SIDE_DISTAL: ( _("distal"), ),
+#            }
 
 ROOT_STATE_SANE = 0
 ROOT_STATE_PULPOTOMIA = 1
@@ -534,58 +533,57 @@ ROOT_STATES = {
             ROOT_STATE_POST_CORE: ( _("prosthetic core"), ),
             }
 
-ROOT_CANAL_ALL = 0
-ROOT_CANAL_CENTRAL = 1
-ROOT_CANAL_BUCCAL = 2
-ROOT_CANAL_LINGUAL = 3
-ROOT_CANAL_MESIAL = 4
-ROOT_CANAL_DISTAL = 5
-ROOT_CANAL_MESIO_BUCCAL = 6
-ROOT_CANAL_MESIO_LINGUAL = 7
-ROOT_CANAL_DISTO_BUCCAL = 8
-ROOT_CANAL_DISTO_LINGUAL = 9
-ROOT_CANAL_MESIO_BUCCAL_2 = 10
+#ROOT_CANAL_CENTRAL = 1
+#ROOT_CANAL_BUCCAL = 2
+#ROOT_CANAL_LINGUAL = 4
+#ROOT_CANAL_MESIAL = 8
+#ROOT_CANAL_DISTAL = 16 
+#ROOT_CANAL_MESIO_BUCCAL = 32
+#ROOT_CANAL_MESIO_LINGUAL = 64
+#ROOT_CANAL_DISTO_BUCCAL = 128
+#ROOT_CANAL_DISTO_LINGUAL = 256
+#ROOT_CANAL_MESIO_BUCCAL_2 = 512
+#
+#ROOT_CANALS = {
+#            ROOT_CANAL_ALL: ( _("all"), ),
+#            ROOT_CANAL_CENTRAL: ( _("central"), ),
+#            ROOT_CANAL_BUCCAL: ( _("buccal"), ),
+#            ROOT_CANAL_LINGUAL: ( _("lingual"), ),
+#            ROOT_CANAL_MESIAL: ( _("mesial"), ),
+#            ROOT_CANAL_DISTAL: ( _("distal"), ),
+#            ROOT_CANAL_MESIO_BUCCAL: ( _("mesio-buccal"), ),
+#            ROOT_CANAL_MESIO_LINGUAL: ( _("mesio-lingual"), ),
+#            ROOT_CANAL_DISTO_BUCCAL: ( _("disto-buccal"), ),
+#            ROOT_CANAL_DISTO_LINGUAL: ( _("disto-lingual"), ),
+#            ROOT_CANAL_MESIO_BUCCAL_2: ( _("mesio-buccal 2"), ),
+#            }
 
-ROOT_CANALS = {
-            ROOT_CANAL_ALL: ( _("all"), ),
-            ROOT_CANAL_CENTRAL: ( _("central"), ),
-            ROOT_CANAL_BUCCAL: ( _("buccal"), ),
-            ROOT_CANAL_LINGUAL: ( _("lingual"), ),
-            ROOT_CANAL_MESIAL: ( _("mesial"), ),
-            ROOT_CANAL_DISTAL: ( _("distal"), ),
-            ROOT_CANAL_MESIO_BUCCAL: ( _("mesio-buccal"), ),
-            ROOT_CANAL_MESIO_LINGUAL: ( _("mesio-lingual"), ),
-            ROOT_CANAL_DISTO_BUCCAL: ( _("disto-buccal"), ),
-            ROOT_CANAL_DISTO_LINGUAL: ( _("disto-lingual"), ),
-            ROOT_CANAL_MESIO_BUCCAL_2: ( _("mesio-buccal 2"), ),
+PERIODONTAL_STATE_SANE = 0
+PERIODONTAL_STATE_GINGIVITIS = 1
+PERIODONTAL_STATE_PARODONTITIS = 2
+
+PERIODONTAL_STATES = {
+            PERIODONTAL_STATE_SANE: ( _('sane'), ),
+            PERIODONTAL_STATE_GINGIVITIS: ( _('gingivitis'), ),
+            PERIODONTAL_STATE_PARODONTITIS: ( _('parodontitis') ),
             }
 
-PERIODONTE_STATE_SANE = 0
-PERIODONTE_STATE_GINGIVITIS = 1
-PERIODONTE_STATE_PARODONTITIS = 2
-
-PERIODONTE_STATES = {
-            PERIODONTE_STATE_SANE: ( _('sane'), ),
-            PERIODONTE_STATE_GINGIVITIS: ( _('gingivitis'), ),
-            PERIODONTE_STATE_PARODONTITIS: ( _('parodontitis') ),
-            }
-
-PERIODONTAL_LOC_MESIO_BUCCAL = 1
-PERIODONTAL_LOC_BUCCAL = 2
-PERIODONTAL_LOC_DISTO_BUCCAL = 3
-PERIODONTAL_LOC_DISTO_LINGUAL = 4
-PERIODONTAL_LOC_LINGUAL = 5
-PERIODONTAL_LOC_MESIO_LINGUAL = 6
-
-PERIODONTAL_LOCATIONS = {
-            PERIODONTAL_LOC_MESIO_BUCCAL: _('mesio buccal'),
-            PERIODONTAL_LOC_BUCCAL: _('buccal'),
-            PERIODONTAL_LOC_DISTO_BUCCAL: _('disto buccal'),
-            PERIODONTAL_LOC_DISTO_LINGUAL: _('disto lingual'),
-            PERIODONTAL_LOC_LINGUAL: _('lingual'),
-            PERIODONTAL_LOC_MESIO_LINGUAL: _('mesio lingual'),
-            }
-
+#PERIODONTAL_LOC_MESIO_BUCCAL = 1
+#PERIODONTAL_LOC_BUCCAL = 2
+#PERIODONTAL_LOC_DISTO_BUCCAL = 3
+#PERIODONTAL_LOC_DISTO_LINGUAL = 4
+#PERIODONTAL_LOC_LINGUAL = 5
+#PERIODONTAL_LOC_MESIO_LINGUAL = 6
+#
+#PERIODONTAL_LOCATIONS = {
+#            PERIODONTAL_LOC_MESIO_BUCCAL: _('mesio buccal'),
+#            PERIODONTAL_LOC_BUCCAL: _('buccal'),
+#            PERIODONTAL_LOC_DISTO_BUCCAL: _('disto buccal'),
+#            PERIODONTAL_LOC_DISTO_LINGUAL: _('disto lingual'),
+#            PERIODONTAL_LOC_LINGUAL: _('lingual'),
+#            PERIODONTAL_LOC_MESIO_LINGUAL: _('mesio lingual'),
+#            }
+#
 
 TOOTH_EVENT_LOCATION_TOOTH = 0
 TOOTH_EVENT_LOCATION_CROWN = 1
