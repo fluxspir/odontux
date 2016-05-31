@@ -52,7 +52,8 @@ def login():
                     session['ROLE_ADMIN'] = constants.ROLE_ADMIN
                     session['ROLE_PATIENT'] = constants.ROLE_PATIENT
                     session['avatar_id'] = user.avatar_id
-                   
+                    session['isoweekdays'] = constants.ISOWEEKDAYS 
+                    session['months'] = constants.MONTHS
                     session['UNITIES'] = [ ( id, UNIT[0] ) for id, UNIT in
                                             constants.UNITIES.items() ]
                     for unit in constants.UNITIES.items():

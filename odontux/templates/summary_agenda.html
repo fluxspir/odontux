@@ -1,9 +1,58 @@
 {% extends "header.html" %}
 {% from "_formhelpers.html" import render_simple_field_line %}
-{% block mainsummary %}
+{% block main %}
+ <br />
   <form method="post" action="{{ url_for('agenda_date') }}">
     {{ render_simple_field_line( summary_agenda_form.day ) }}
     {{ render_simple_field_line( summary_agenda_form.dentist_id) }}
+    {{ render_simple_field_line( summary_agenda_form.dental_unit_id) }}
     <input type="submit" value="Go" />
   </form>
+  <br />
+  <div>
+    <table>
+      <tr>
+        <th>
+          <a href="{{ url_for('agenda',
+                        year=day_to_emph.year, month=(day_to_emph.month - 1 ), day=day_to_emph.day) }}")>
+            ←
+          </a></th>
+        <th>{{ month_name }} {{ day_to_emph.year }}</th>
+        <th>
+            <a href="{{ url_for('agenda',
+                        year=day_to_emph.year, month=(day_to_emph.month +1 ), day=day_to_emph.day) }}">
+            →
+          </a></th>
+
+      </tr>
+      <tr>
+        <th>{{ session['isoweekdays']['1'] }}</th>
+        <th>{{ session['isoweekdays']['2'] }}</th>
+        <th>{{ session['isoweekdays']['3'] }}</th>
+        <th>{{ session['isoweekdays']['4'] }}</th>
+        <th>{{ session['isoweekdays']['5'] }}</th>
+        <th>{{ session['isoweekdays']['6'] }}</th>
+        <th>{{ session['isoweekdays']['7'] }}</th>
+      </tr>
+      {% for week in cal %}
+        <tr>
+          {% for day in week %}
+            <td>
+            {% if day %}
+              
+              <a href="{{ url_for('display_day', 
+                                  dateday=datetime.date(day_to_emph.year, day_to_emph.month, day).isoformat(),
+                                  dentist_id=summary_agenda_form.dentist_id.data,
+                                  dental_unit_id=1,
+                                ) }}"</a>
+                    {{ day }}
+              </a>
+            {% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+
 {% endblock %}
