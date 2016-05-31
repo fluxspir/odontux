@@ -7,7 +7,7 @@
 {% extends 'summary_patient.html' %}
 
 {% block main %}
-{% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_field, render_hidden_field, render_field_js_onchange, render_simple_field%}
+{% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_field, render_hidden_field, render_field_js_onchange, render_simple_field, render_simple_field_line%}
 
 <h3>Add an event on a tooth (or set of teeth).</h3>
 <form method="post" action={{ url_for('add_event_tooth_located',
@@ -17,39 +17,45 @@
   <div id="anat_loc">
     {{ render_field_js_onchange(event_form.anatomic_location) }}
   <br />
+  <br />
     {{ render_simple_field(event_form.teeth) }}
   </div>
   <br />
     {{ render_simple_field(event_form.appointment_id) }}
+    {{ render_simple_field_line(tooth_form.choose_tooth_state) }}
+    {{ render_simple_field_line(tooth_form.surveillance) }}
+  <br />
+    {{ render_simple_field(event_form.description) }}
 
   <div id="tooth">
-    {{ render_simple_field(tooth_event_form.choose_state) }}
   </div>
   
   <div id="crown">
-    {{ render_simple_field(crown_event_form.choose_state) }}
+    {{ render_simple_field(crown_event_form.choose_crown_state) }}
     {{ render_simple_field(crown_event_form.side) }}
     {{ render_simple_field(crown_event_form.tooth_shade) }}
   </div>
   
   <div id="root">
-    {{ render_simple_field(root_event_form.choose_state) }}
+    {{ render_simple_field(root_event_form.choose_root_state) }}
     {{ render_simple_field(root_event_form.root) }}
   </div>
   
   <div id="periodonte">
-    {{ render_simple_field(periodonte_event_form.choose_state) }}
+    {{ render_simple_field(periodonte_event_form.choose_periodonte_state) }}
     {{ render_simple_field(periodonte_event_form.bleeding) }}
     {{ render_simple_field(periodonte_event_form.furcation) }}
     {{ render_simple_field(periodonte_event_form.recession) }}
     {{ render_simple_field(periodonte_event_form.pocket_depth) }}
   </div>
-
-
-    {{ render_simple_field(event_form.comments) }}
-    {{ render_simple_field(event_form.pic) }}
+  <br />
+    {{ render_simple_field(event_form.comment) }}
+    {{ render_simple_field_line(event_form.x_ray) }}
+    {{ render_simple_field_line(event_form.pic) }}
+    {{ render_simple_field_line(event_form.document) }}
     {{ render_simple_field(event_form.color) }}
-
+  <br />
+<input type="submit" value="Add">
 </form>
 
 <script type="text/javascript" src="/static/js/select_field.js"></script>

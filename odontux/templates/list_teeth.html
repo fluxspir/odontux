@@ -5,13 +5,15 @@
 {% block main %}
 {% if teeth %}
   <ul>
-    {% for tooth_id, name, state, surveillance in teeth %}
+    {% for tooth_id, codename, state, surveillance in teeth %}
       {% if surveillance %}
         <li style="color:red;">
       {% else %}
         <li style="color:blue;">
       {% endif %}
-      <a href="{{ url_for('show_tooth', tooth_id=tooth_id) }}">{{ name }}</a> : {{ state }}
+      <a href="{{ url_for('show_tooth', patient_id=patient.id,
+                        tooth_codename=codename) }}">{{ codename }}</a> 
+          : {{ state }}
       </li>
     {% endfor %}
   </ul>

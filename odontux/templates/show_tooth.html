@@ -1,18 +1,35 @@
 {% extends 'summary_patient.html' %}
 
 {% block main %}
-  <table border=1>
-    <caption>
      {% if tooth.surveillance %}
         <div class="alert">
       {% else %}
         <div>
       {% endif %}
-        <span class="hidden">Tooth_id = {{ tooth.id }}</span>
-          Tooth {{ tooth.name }} ; state : {{ tooth.state }}
+        {#<span class="hidden">Tooth_id = {{ tooth.id }}</span>#}
+          <center><h2>{{ constants.ANATOMIC_LOCATION_TEETH[tooth.codename][0] }}</h2>
+          <p>Actual State: <strong>{{ constants.TOOTH_STATES[tooth.state][0] }}</strong></p></center>
         </div>
-    </caption>
-    <tr>
+
+      {% for event in events %}
+        {{ event.appointment.agenda.starttime.date() }}: 
+        {{ constants.TOOTH_EVENT_LOCATIONS[event.location] }} - 
+        {% if constants.TOOTH_EVENT_LOCATIONS[event.location] == 'tooth' %}
+          {{ constants.TOOTH_STATES[event.state][0] }}
+        {% elif constants.TOOTH_EVENT_LOCATIONS[event.location] == 'crown' %}
+          {{ constants.CROWN_SIDES[event.side][0] }}:
+          {{ constants.CROWN_STATES[event.state][0] }}
+        {% elif constants.TOOTH_EVENT_LOCATIONS[event.location] == 'root' %}
+          {{ constants.ROOT_CANALS[event.root][0] }}: 
+          {{ constants.ROOT_STATES[event.state][0] }}
+
+        {% endif %}
+
+        <br />
+        --------------
+        <br />
+      {% endfor %}
+{#    <tr>
       <th>Date</th>
       <th>Location</th>
       <th>Event name</th>
@@ -67,5 +84,6 @@
       <td style="background-color:{{ event.color }};"></td>
     </tr>
     {% endfor %}
+#}
   </table>
 {% endblock %}

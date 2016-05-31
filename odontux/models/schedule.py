@@ -44,7 +44,7 @@ class Appointment(Base):
                               cascade="all, delete, delete-orphan")
     memo = relationship("AppointmentMemo", backref="appointment",
                          cascade="all, delete, delete-orphan")
-    events = relationship("Event", backref="appointment",
+    events = relationship("Event",
                         cascade="all, delete, delete-orphan")
     materiovigilance = relationship("traceability.MaterioVigilance", 
                                                         backref="appointments")

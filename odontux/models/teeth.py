@@ -5,7 +5,7 @@
 # licence BSD
 #
 from meta import Base
-import users, administration, headneck, schedule
+import users, headneck, schedule, administration
 import sqlalchemy
 try:
     from odontux import constants
@@ -43,9 +43,8 @@ class Sextant(Base):
 
 class Tooth(Base):
     """
-    A tooth has to have a name, the choice is free to name it whatever you want
-    Name is the Integer that link in constants.TOOTH
-    The actual tooth state (see constant.py.TOOTH_STATES)
+    codeame link to constants.TOOTH
+    The actual tooth state (see constant.TOOTH_STATES)
     We may put it under surveillance.
     """
     __tablename__ = 'tooth'
@@ -55,16 +54,16 @@ class Tooth(Base):
     codename = Column(Integer, nullable=False)
     state = Column(Integer, default=0, nullable=True)
     surveillance = Column(Boolean, default=False)
-    patient = relationship('Patient', backref="teeth")
+    #patient = relationship('Patient', backref="teeth")
 
 class Periodonte(Base):
     """
     """
     __tablename__ = "periodonte"
     id = Column(Integer, ForeignKey(Tooth.id), primary_key=True)
-    tooth = relationship('Tooth', backref='periodonte')
     state = Column(Integer, default=0)
     bleeding = Column(Boolean)
+    tooth = relationship('Tooth', backref='periodonte')
 
 class Event(Base):
     """
@@ -76,12 +75,14 @@ class Event(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                 nullable=False)
     description = Column(String)
-    comments = Column(String, default="")
+    comment = Column(String, default="")
     color = Column(String, default="")
     x_ray = Column(Boolean, default=False)
     pic = Column(Boolean, default=False)
     document = Column(Boolean, default=False)
     location = Column(Integer, nullable=False)
+    tooth = relationship('Tooth', backref="events")
+    appointment = relationship('Appointment')
 
     __mapper_args__ = {
         'polymorphic_identity': 'event',
@@ -94,10 +95,15 @@ class PeriodonteEvent(Event):
     """
     __tablename__ = "periodonte_event"
     id = Column(Integer, ForeignKey(Event.id), primary_key=True)
-    perio_location = Column(Integer, default=0)
     furcation = Column(Integer, default=0)
     recession = Column(Integer, default=0)
     pocket_depth = Column(Integer, default=0)
+    is_mesio_buccal = Column(Boolean, default=False)
+    is_buccal = Column(Boolean, default=False)
+    is_disto_buccal = Column(Boolean, default=False)
+    is_disto_lingual = Column(Boolean, default=False)
+    is_lingual = Column(Boolean, default=False)
+    is_mesio_lingual = Column(Boolean, default=False)
 
     __mapper_args__ = {
         'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_PERIODONTE
@@ -125,13 +131,7 @@ class CrownEvent(Event):
     Crown events :
     Must occur to a tooth (tooth_id)
     Are noticed while an appointment (appointment_id)
-    Occurs on one or more faces :
-        * o : Occlusal
-        * m : Mesial
-        * d : Distal
-        * v/b : Vestibular / Buccal
-        * l/p : Lingual / Palatal
-        * a : All (usually, when the tooth is crowned)
+    Occurs on one or more faces : constants.CROWN_SIDES
     We may add comments
     We may use a color-code for what happened
     For the pics, see "toothevent"
@@ -139,14 +139,18 @@ class CrownEvent(Event):
     __tablename__ = 'crown_event'
     id = Column(Integer, ForeignKey(Event.id), primary_key=True)
     state = Column(Integer, nullable=False) 
-    side = Column(String, nullable=False)
+    is_occlusal = Column(Boolean, default=False)
+    is_buccal = Column(Boolean, default=False)
+    is_lingual = Column(Boolean, default=False)
+    is_mesial = Column(Boolean, default=False)
+    is_distal = Column(Boolean, default=False)
     tooth_shade = Column(String, default=None)
 
     __mapper_args__ = {
         'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_CROWN
     }
 
-class RootEvent(Base):
+class RootCanalEvent(Event):
     """
     Root events :
     Must occur to a tooth (tooth_id)
@@ -157,10 +161,19 @@ class RootEvent(Base):
     We may use a color-code for what happened
     For the pics, see "toothevent"
     """
-    __tablename__ = 'root_event'
+    __tablename__ = 'root_canal_event'
     id = Column(Integer, ForeignKey(Event.id), primary_key=True)
     state = Column(Integer, nullable=False) 
-    root = Column(Integer, nullable=False)
+    is_central = Column(Boolean, default=False)
+    is_buccal = Column(Boolean, default=False)
+    is_lingual = Column(Boolean, default=False)
+    is_mesial = Column(Boolean, default=False)
+    is_distal = Column(Boolean, default=False)
+    is_mesio-buccal = Column(Boolean, default=False)
+    is_disto-buccal = Column(Boolean, default=False)
+    is_mesio-lingual = Column(Boolean, default=False)
+    is_disto-lingual = Column(Boolean, default=False)
+    is_mesio-buccal_2 = Column(Boolean, default=False)
 
     __mapper_args__ = {
         'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_ROOT

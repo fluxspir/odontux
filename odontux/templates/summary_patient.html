@@ -11,7 +11,7 @@
     {% if session.patient_id %}
         <ul id="patient_navigation">
           <li>
-            <a href="{{ url_for("list_teeth") }}">Mouth</a>
+            <a href="{{ url_for("list_teeth", patient_id=session.patient_id) }}">Mouth</a>
           </li>
           <li>
             {% if appointment %}
