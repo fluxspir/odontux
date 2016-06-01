@@ -73,7 +73,7 @@ def add_endo_buccal_event(patient_id, appointment_id):
         )
     select_location_form = SelectEBLocationEventForm(request.form)
     select_location_form.location.choices = []
-    for loc in constants.ANATOMIC_LOCATION.items():
+    for loc in constants.ANATOMIC_LOCATION_SOFT_TISSUES.items():
         if loc[1][2] != "endobuccal":
             continue
         select_location_form.location.choices.append(
@@ -85,12 +85,12 @@ def add_endo_buccal_event(patient_id, appointment_id):
                                     and endo_buccal_event_form.validate() ):
         
         loc = select_location_form.location.data
-        if constants.ANATOMIC_LOCATION[loc][2] == "endobuccal":
+        if constants.ANATOMIC_LOCATION_SOFT_TISSUES[loc][2] == "endobuccal":
             LocationEvent = getattr(endobuccal, 
-                                        constants.ANATOMIC_LOCATION[loc][3] )
-        elif constants.ANATOMIC_LOCATION[loc][3] == "headneck":
+                            constants.ANATOMIC_LOCATION_SOFT_TISSUES[loc][3] )
+        elif constants.ANATOMIC_LOCATION_SOFT_TISSUES[loc][3] == "headneck":
             LocationEvent = getattr(headneck,
-                                        constants.ANATOMIC_LOCATION[loc][3] )
+                            constants.ANATOMIC_LOCATION_SOFT_TISSUES[loc][3] )
         else:
             return redirect(url_for('index'))
 
