@@ -56,10 +56,10 @@ class Tooth(Base):
     surveillance = Column(Boolean, default=False)
     #patient = relationship('Patient', backref="teeth")
 
-class Periodonte(Base):
+class Gum(Base):
     """
     """
-    __tablename__ = "periodonte"
+    __tablename__ = "gum"
     id = Column(Integer, ForeignKey(Tooth.id), primary_key=True)
     state = Column(Integer, default=0)
     bleeding = Column(Boolean)
@@ -89,11 +89,11 @@ class Event(Base):
         'polymorphic_on': location
     }
 
-class PeriodonteEvent(Event):
+class PeriodontalEvent(Event):
     """
         perio_location : constants.PERIODONTAL_LOCATIONS 
     """
-    __tablename__ = "periodonte_event"
+    __tablename__ = "periodontal_event"
     id = Column(Integer, ForeignKey(Event.id), primary_key=True)
     furcation = Column(Integer, default=0)
     recession = Column(Integer, default=0)
@@ -106,7 +106,7 @@ class PeriodonteEvent(Event):
     is_mesio_lingual = Column(Boolean, default=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_PERIODONTE
+        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_PERIODONTAL
     }
 
 class ToothEvent(Event):
@@ -169,11 +169,11 @@ class RootCanalEvent(Event):
     is_lingual = Column(Boolean, default=False)
     is_mesial = Column(Boolean, default=False)
     is_distal = Column(Boolean, default=False)
-    is_mesio-buccal = Column(Boolean, default=False)
-    is_disto-buccal = Column(Boolean, default=False)
-    is_mesio-lingual = Column(Boolean, default=False)
-    is_disto-lingual = Column(Boolean, default=False)
-    is_mesio-buccal_2 = Column(Boolean, default=False)
+    is_mesio_buccal = Column(Boolean, default=False)
+    is_disto_buccal = Column(Boolean, default=False)
+    is_mesio_lingual = Column(Boolean, default=False)
+    is_disto_lingual = Column(Boolean, default=False)
+    is_mesio_buccal_2 = Column(Boolean, default=False)
 
     __mapper_args__ = {
         'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_ROOT
