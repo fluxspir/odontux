@@ -169,11 +169,11 @@ class RootCanalEvent(Event):
     is_lingual = Column(Boolean, default=False)
     is_mesial = Column(Boolean, default=False)
     is_distal = Column(Boolean, default=False)
-    is_mesio-buccal = Column(Boolean, default=False)
-    is_disto-buccal = Column(Boolean, default=False)
-    is_mesio-lingual = Column(Boolean, default=False)
-    is_disto-lingual = Column(Boolean, default=False)
-    is_mesio-buccal_2 = Column(Boolean, default=False)
+    is_mesio_buccal = Column(Boolean, default=False)
+    is_disto_buccal = Column(Boolean, default=False)
+    is_mesio_lingual = Column(Boolean, default=False)
+    is_disto_lingual = Column(Boolean, default=False)
+    is_mesio_buccal_2 = Column(Boolean, default=False)
 
     __mapper_args__ = {
         'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_ROOT
