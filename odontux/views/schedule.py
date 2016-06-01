@@ -50,7 +50,7 @@ class AgendaForm(Form):
     endmin = IntegerField(_('m'), [validators.Optional()])
 
 class SummaryAgendaForm(Form):
-    day = DateField(_('day'), format='%Y-%m-%d')
+    day = DateField(_('day'), format='%Y-%m-%d', render_kw={'size': '8'})
     dentist_id = SelectField(coerce=int,
                                     validators=[validators.Optional()] )
     dental_unit_id = SelectField(coerce=int,
@@ -109,6 +109,9 @@ def agenda(year=None, month=None, day=None):
     summary_agenda_form = get_summary_agenda_form()
     if year is None and month is None and day is None:
         day_to_emph = datetime.date.today()
+        year = day_to_emph.year
+        month = day_to_emph.month
+        day = day_to_emph.day
     else:
         try:
             if month == 13:
@@ -123,13 +126,14 @@ def agenda(year=None, month=None, day=None):
             day_to_emph = (datetime.date(year, month + 1, 1) - datetime.timedelta(1))
     
     summary_agenda_form.day.data = day_to_emph
-    month_name = constants.MONTHS[day_to_emph.month]
+    month_name = calendar.month_name[month]
     cal = calendar.monthcalendar(day_to_emph.year, day_to_emph.month)
     return render_template('summary_agenda.html', 
                             summary_agenda_form=summary_agenda_form,
                             day_to_emph=day_to_emph,
                             month_name=month_name,
                             datetime=datetime,
+                            calendar=calendar,
                             cal=cal)
 
 @app.route('/agenda/day?date=<dateday>&dentist=<int:dentist_id>'
@@ -140,7 +144,6 @@ def display_day(dateday, dentist_id, dental_unit_id):
     and create links for "previous_day" and "next_day"
     """
     dateday = datetime.datetime.strptime(dateday,'%Y-%m-%d').date()
-    isoweekday = constants.ISOWEEKDAYS[dateday.isoweekday()]
     summary_agenda_form = get_summary_agenda_form(dateday)
     if not dentist_id:
         return redirect(url_for('index'))
@@ -160,6 +163,7 @@ def display_day(dateday, dentist_id, dental_unit_id):
             .all()
     )
 
+    isoweekday = calendar.day_name[dateday.weekday()]
     # dateday is return to create links to previous and next day
     return render_template('agenda_day.html', meetings=meetings,
                             dateday=dateday, nextday=nextday, prevday=prevday,
@@ -267,9 +271,16 @@ def update_appointment(body_id, appointment_id):
                             agenda_form=agenda_form,
                             appointment=appointment)
 
+@app.route('/add/appointment')
+def add_appointment():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
 
 @app.route('/agenda/add?id=<int:body_id>', methods=['GET', 'POST'])
-def add_appointment(body_id):
+def add_patient_appointment(body_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                 constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
     if session['role'] not in authorized_roles:

@@ -29,8 +29,13 @@
 
 {% block main %}
 
+      {{ date_choice() }}<br />
+    <center><h2><a href="{{ url_for('add_appointment') }}">
+          Add new appointment</a></h2></center><br />
+
+
+{#
   {% if meetings %}
-      {{ date_choice() }}
       <br />
       <br />
     <table border=1>
@@ -75,6 +80,7 @@
   
   
   {% else %}
-    {{ date_choice() }}
+    No appointment on  {{ dateday }}
   {% endif %}
+#}
 {% endblock %}

@@ -14,52 +14,6 @@ home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
 LOCALE = parser.get("environment", "locale").title()
 
-MONDAY = 1
-TUESDAY = 2
-WEDNESDAY = 3
-THURSDAY = 4
-FRIDAY = 5
-SATURDAY = 6
-SUNDAY = 7
-
-ISOWEEKDAYS = {
-    MONDAY: _('Monday'),
-    TUESDAY: _('Tuesday'),
-    WEDNESDAY: _('Wednesday'),
-    THURSDAY: _('Thursday'),
-    FRIDAY: _('Friday'),
-    SATURDAY: _('Saturday'),
-    SUNDAY: _('Sunday'),
-    }
-
-JANUARY = 1
-FEBRUARY = 2
-MARCH = 3
-APRIL = 4
-MAY = 5
-JUNE = 6
-JULY = 7
-AUGUST = 8
-SEPTEMBER = 9
-OCTOBER = 10
-NOVEMBER = 11
-DECEMBER = 12
-
-MONTHS = {
-    JANUARY: _("January"),
-    FEBRUARY: _("February"),
-    MARCH: _('March'),
-    APRIL: _('April'),
-    MAY: _('May'),
-    JUNE: _('June'),
-    JULY: _('July'),
-    AUGUST: _('August'),
-    SEPTEMBER: _('September'),
-    OCTOBER: _('October'),
-    NOVEMBER: _('November'),
-    DECEMBER: _('December'),
-    }
-
 T11_NAME = _("11") # _("Incisivo central superior right permanent")
 T12_NAME = _("12") # _("Incisivo laterial superior right permanent")
 T13_NAME = _("13") # _("Canina superior right permanent")

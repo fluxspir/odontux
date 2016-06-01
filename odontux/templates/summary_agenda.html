@@ -26,13 +26,13 @@
 
       </tr>
       <tr>
-        <th>{{ session['isoweekdays']['1'] }}</th>
-        <th>{{ session['isoweekdays']['2'] }}</th>
-        <th>{{ session['isoweekdays']['3'] }}</th>
-        <th>{{ session['isoweekdays']['4'] }}</th>
-        <th>{{ session['isoweekdays']['5'] }}</th>
-        <th>{{ session['isoweekdays']['6'] }}</th>
-        <th>{{ session['isoweekdays']['7'] }}</th>
+        <th>{{ calendar.day_name[0] }}</th>
+        <th>{{ calendar.day_name[1] }}</th>
+        <th>{{ calendar.day_name[2] }}</th>
+        <th>{{ calendar.day_name[3] }}</th>
+        <th>{{ calendar.day_name[4] }}</th>
+        <th>{{ calendar.day_name[5] }}</th>
+        <th>{{ calendar.day_name[6] }}</th>
       </tr>
       {% for week in cal %}
         <tr>
