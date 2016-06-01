@@ -1,39 +1,67 @@
+{% from "_formhelpers.html" import render_sfl_wol %}
+{% extends "header.html" %}
+
+{% block main %}
+
+<div id="agenda_left">
+
+  <form>
+    <center>
+      <a href="{{ url_for('display_day', dateday=prevday, 
+                                              dentist_id=dentist_id, 
+                                              dental_unit_id=dental_unit_id) }}">
+              ← {{ calendar.day_name[prevday.weekday()] }} {{ prevday.day }}
+      </a><br /><br />
+
+                <strong>
+                  {{ calendar.day_name[dateday.weekday()] }}
+                </strong>
+               {{ render_sfl_wol(summary_agenda_form.day) }}
+              <br /><br />
+
+      <a href="{{ url_for('display_day', dateday=nextday, 
+                                              dentist_id=dentist_id, 
+                                              dental_unit_id=dental_unit_id) }}">
+              {{ calendar.day_name[nextday.weekday()] }} {{ nextday.day }} →
+      </a><br /><br />
+    </center>
+  </form>
+</div>
+
+<div id="agenda_day">
+ seuant
+</div>
+{% endblock %}
+
+
+
+
+{#
 {% macro date_choice() %}
   {% from "_formhelpers.html" import render_simple_field_line %}
     <br />
-        <a href="{{ url_for('display_day', dateday=prevday, 
-                                          dentist_id=dentist_id, 
-                                          dental_unit_id=dental_unit_id) }}">
-          Previous Day</a>
-
-        <form class="inline" method="post" 
+                <form class="inline" method="post" 
                             action="{{ url_for('agenda_date', 
                                     dateday=summary_agenda_form.day.data, 
                                     dentist_id=summary_agenda_form.dentist_id.data, 
                                     dental_unit_id=summary_agenda_form.dental_unit_id.data) }}">
           {{ render_simple_field_line( summary_agenda_form.day ) }}
-          {{ isoweekday }}
           {{ render_simple_field_line( summary_agenda_form.dentist_id ) }}
           {{ render_simple_field_line( summary_agenda_form.dental_unit_id) }}
           <input type="submit" value="Go" />
         </form>
 
-        <a href="{{ url_for('display_day', dateday=nextday, 
-                                          dentist_id=dentist_id, 
-                                          dental_unit_id=dental_unit_id) }}">
           Next Day</a>
 {% endmacro %}
 
 
-{% extends "summary_agenda.html" %}
+{% extends "monthly_agenda.html" %}
 
 {% block main %}
-
       {{ date_choice() }}<br />
     <center><h2><a href="{{ url_for('add_appointment') }}">
           Add new appointment</a></h2></center><br />
-
-
+#}
 {#
   {% if meetings %}
       <br />
@@ -83,4 +111,4 @@
     No appointment on  {{ dateday }}
   {% endif %}
 #}
-{% endblock %}
+{# {% endblock %} #}

@@ -17,7 +17,7 @@
                         year=day_to_emph.year, month=(day_to_emph.month - 1 ), day=day_to_emph.day) }}")>
             ←
           </a></th>
-        <th>{{ month_name }} {{ day_to_emph.year }}</th>
+        <th>{{ calendar.month_name[day_to_emph.month] }} {{ day_to_emph.year }}</th>
         <th>
             <a href="{{ url_for('agenda',
                         year=day_to_emph.year, month=(day_to_emph.month +1 ), day=day_to_emph.day) }}">

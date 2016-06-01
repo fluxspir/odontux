@@ -109,9 +109,6 @@ def agenda(year=None, month=None, day=None):
     summary_agenda_form = get_summary_agenda_form()
     if year is None and month is None and day is None:
         day_to_emph = datetime.date.today()
-        year = day_to_emph.year
-        month = day_to_emph.month
-        day = day_to_emph.day
     else:
         try:
             if month == 13:
@@ -126,12 +123,10 @@ def agenda(year=None, month=None, day=None):
             day_to_emph = (datetime.date(year, month + 1, 1) - datetime.timedelta(1))
     
     summary_agenda_form.day.data = day_to_emph
-    month_name = calendar.month_name[month]
     cal = calendar.monthcalendar(day_to_emph.year, day_to_emph.month)
-    return render_template('summary_agenda.html', 
+    return render_template('monthly_agenda.html', 
                             summary_agenda_form=summary_agenda_form,
                             day_to_emph=day_to_emph,
-                            month_name=month_name,
                             datetime=datetime,
                             calendar=calendar,
                             cal=cal)
@@ -163,11 +158,10 @@ def display_day(dateday, dentist_id, dental_unit_id):
             .all()
     )
 
-    isoweekday = calendar.day_name[dateday.weekday()]
     # dateday is return to create links to previous and next day
     return render_template('agenda_day.html', meetings=meetings,
                             dateday=dateday, nextday=nextday, prevday=prevday,
-                            isoweekday=isoweekday,
+                            calendar=calendar,
                             summary_agenda_form=summary_agenda_form,
                             dentist_id=dentist_id, dental_unit_id=dental_unit_id)
 
