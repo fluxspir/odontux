@@ -612,7 +612,7 @@ PERIODONTAL_STATE_PARODONTITIS = 2
 PERIODONTAL_STATES = {
             PERIODONTAL_STATE_SANE: ( _('sane'), ),
             PERIODONTAL_STATE_GINGIVITIS: ( _('gingivitis'), ),
-            PERIODONTAL_STATE_PARODONTITIS: ( _('parodontitis') ),
+            PERIODONTAL_STATE_PARODONTITIS: ( _('parodontitis'), ),
             }
 
 #PERIODONTAL_LOC_MESIO_BUCCAL = 1
@@ -635,13 +635,13 @@ PERIODONTAL_STATES = {
 TOOTH_EVENT_LOCATION_TOOTH = 0
 TOOTH_EVENT_LOCATION_CROWN = 1
 TOOTH_EVENT_LOCATION_ROOT = 2
-TOOTH_EVENT_LOCATION_PERIODONTE = 3
+TOOTH_EVENT_LOCATION_PERIODONTAL = 3
 
 TOOTH_EVENT_LOCATIONS = {
             TOOTH_EVENT_LOCATION_TOOTH: _("tooth"),
             TOOTH_EVENT_LOCATION_CROWN: _("crown"),
             TOOTH_EVENT_LOCATION_ROOT: _("root"),
-            TOOTH_EVENT_LOCATION_PERIODONTE: _("periodonte"),
+            TOOTH_EVENT_LOCATION_PERIODONTAL: _("periodontal"),
             }
 
 # -------------------------------------------

@@ -27,8 +27,8 @@ from endobuccal import (MouthEvent, SuperiorLipEvent, InferiorLipEvent,
                         LeftCheekEvent, RightCheekEvent,HardPalateEvent, 
                         SoftPalateEvent, TongueEvent, MouthBaseEvent, 
                         UvulaEvent)
-from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootEvent,
-                    Periodonte, PeriodonteEvent )
+from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootCanalEvent,
+                    Gum, PeriodontalEvent )
 from act import ( Specialty, HealthCarePlan, Gesture, Cotation, 
                 AppointmentGestureReference )
 from compta import PaymentType, Payment
