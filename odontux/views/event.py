@@ -55,16 +55,8 @@ def choose_event_location(patient_id, appointment_id):
                                             patient=patient,
                                             appointment=appointment)
 
-@app.route('/add/tooth_event')
-def add_tooth_event():
-    pass
-
-@app.route('/add/periodonte_event')
-def add_periodonte_event():
-    pass
-
-@app.route('/add/endo_buccal_event?pid=<int:patient_id>&aid=<int:appointment_id>', 
-                                                    methods=['GET', 'POST'])
+@app.route('/add/endo_buccal_event?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>', methods=['GET', 'POST'])
 def add_endo_buccal_event(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
