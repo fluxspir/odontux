@@ -42,7 +42,8 @@ class AgendaForm(Form):
     day = DateField(_('day'), format='%Y-%m-%d', 
                             validators=[validators.Optional()],
                             render_kw={'col': '10'} )
-    starthour = IntegerField(_('h'), [validators.Optional()])
+    starthour = IntegerField(_('h'), [validators.Optional()], 
+                                            render_kw={'size': '30'})
     startmin = IntegerField(_('m'), [validators.Optional()])
     durationhour = IntegerField(_('h'), [validators.Optional()])
     durationmin = IntegerField(_('m'), [validators.Optional()])
@@ -224,6 +225,9 @@ def update_appointment(body_id, appointment_id):
                             users.OdontuxUser.role == constants.ROLE_DENTIST)\
                             .all()
                                            ]
+    appointment_form.dental_unit_id.choices = [ 
+                        (dental_unit.id, dental_unit.name) for dental_unit in
+                            meta.session.query(users.DentalUnit).all() ]
 
     if (request.method == 'POST' and agenda_form.validate()
         and appointment_form.validate() ):
