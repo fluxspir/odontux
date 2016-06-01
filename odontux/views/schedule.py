@@ -41,9 +41,8 @@ class AgendaForm(Form):
     appointment_id = HiddenField('appointment_id')
     day = DateField(_('day'), format='%Y-%m-%d', 
                             validators=[validators.Optional()],
-                            render_kw={'col': '10'} )
-    starthour = IntegerField(_('h'), [validators.Optional()], 
-                                            render_kw={'size': '30'})
+                            render_kw={'size': '10'} )
+    starthour = IntegerField(_('h'), [validators.Optional()])
     startmin = IntegerField(_('m'), [validators.Optional()])
     durationhour = IntegerField(_('h'), [validators.Optional()])
     durationmin = IntegerField(_('m'), [validators.Optional()])
@@ -321,11 +320,6 @@ def add_appointment(body_id):
         session['appointment_id'] = new_schedule.id
         return redirect(url_for('enter_patient_appointment'))
 
-    # the 'GET method' ; 
-    # making  "smalls" fields ; not working right now ; why ?
-    #for f in get_time_field_list():
-    #    getattr(agenda_form, f)(style="width:30px;")
-    
     agenda_form.day.data = datetime.date.today()
     
     if session['role'] == constants.ROLE_DENTIST:
