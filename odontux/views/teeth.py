@@ -117,21 +117,21 @@ def get_patient_tooth(patient_id, tooth_codename):
         meta.session.add(new_tooth)
         meta.session.commit()
 
-        periodonte_values = {
+        gum_values = {
             'id': new_tooth.id
             }
-        new_periodonte = teeth.Periodonte(**periodonte_values)
-        meta.session.add(new_periodonte)
+        new_gum = teeth.Gum(**gum_values)
+        meta.session.add(new_gum)
         meta.session.commit()
 
         return new_tooth
 
     return tooth
 
-def get_patient_periodonte(patient_id, tooth_codename):
-    periodonte = (
-        meta.session.query(teeth.Periodonte)
-            .filter(teeth.Periodonte.id.in_(
+def get_patient_gum(patient_id, tooth_codename):
+    gum = (
+        meta.session.query(teeth.Gum)
+            .filter(teeth.Gum.id.in_(
                 meta.session.query(teeth.Tooth.id)
                     .filter(
                         teeth.Tooth.patient_id == patient_id,
@@ -141,7 +141,7 @@ def get_patient_periodonte(patient_id, tooth_codename):
                 )
             .one_or_none()
     )
-    return periodonte
+    return gum
 
 class ToothForm(Form):
     tooth_id = HiddenField(_("id"))
@@ -173,7 +173,6 @@ class CrownEventForm(Form):
 
 class RootCanalEventForm(Form):
     choose_root_state = SelectField(_("Choose state of root(s)"), coerce=int)
-    #root_canal = SelectMultipleField(_("Root"), coerce=int)
     is_central = BooleanField(_('Canal central'))
     is_buccal = BooleanField(_('Canal buccal'))
     is_lingual = BooleanField(_('Canal lingual'))
@@ -185,13 +184,13 @@ class RootCanalEventForm(Form):
     is_disto_lingual = BooleanField(_('Canal disto lingual'))
     is_mesio_buccal_2 = BooleanField(_('Canal mesio buccal 2'))
 
-class PeriodonteEventForm(Form):
-    choose_periodonte_state = SelectField(_("Choose state of periodonte"), 
+class PeriodontalEventForm(Form):
+    choose_periodontal_state = SelectField(_("Choose state of periodonte"), 
                                                                     coerce=int)
     bleeding = BooleanField(_('Bleeding'))
-    furcation = IntegerField(_('Furcation') ) ## validators <=3 ?
-    recession = IntegerField(_('Recession') )
-    pocket_depth = IntegerField(_('Pocket depth') )
+    furcation = IntegerField(_('Furcation'), [validators.Optional()]) ## validators <=3 ?
+    recession = IntegerField(_('Recession'), [validators.Optional()])
+    pocket_depth = IntegerField(_('Pocket depth'), [validators.Optional()])
     is_mesio_buccal = BooleanField(_('mesio buccal'))
     is_buccal = BooleanField(_('buccal'))
     is_disto_buccal = BooleanField(_('disto buccal'))
@@ -208,20 +207,9 @@ def root_canals():
             'is_mesio_buccal', 'is_mesio_lingual', 'is_disto_buccal', 
             'is_disto_lingual', 'is_mesio_buccal_2' ]
 
-def periodonte_locations():
-    return [ 'is_mesio_buccal', 'is_mesial', 'is_disto_buccal',
+def periodontal_locations():
+    return [ 'is_mesio_buccal', 'is_buccal', 'is_disto_buccal',
             'is_disto_lingual', 'is_lingual', 'is_mesio_lingual' ]
-
-def _set_tooth_state(tooth_id, state):
-    """ """
-    tooth = meta.session.query(teeth.Tooth).filter(
-                        teeth.Tooth.id == tooth_id).one()
-    try:
-        tooth.state = state
-        meta.session.commit()
-    except KeyError:
-        pass
-
 
 @app.route('/patient/teeth?pid=<int:patient_id>')
 def list_teeth(patient_id):
@@ -305,7 +293,7 @@ def add_event_tooth_located(patient_id, appointment_id):
     event_form = EventForm(request.form)
     crown_event_form = CrownEventForm(request.form)
     root_event_form = RootCanalEventForm(request.form)
-    periodonte_event_form = PeriodonteEventForm(request.form)
+    periodontal_event_form = PeriodontalEventForm(request.form)
 
     tooth_form.choose_tooth_state.choices = [ (id, state[0]) 
                             for id, state in constants.TOOTH_STATES.items() ]
@@ -325,9 +313,9 @@ def add_event_tooth_located(patient_id, appointment_id):
                             for id, state in constants.CROWN_STATES.items() ]
     root_event_form.choose_root_state.choices = [ (id, state[0]) 
                             for id, state in constants.ROOT_STATES.items() ]
-    periodonte_event_form.choose_periodonte_state.choices = [ (id, state[0]) 
-                        for id, state in constants.PERIODONTE_STATES.items() ]
-
+    periodontal_event_form.choose_periodontal_state.choices = [ (id, state[0]) 
+                        for id, state in constants.PERIODONTAL_STATES.items() ]
+    
     if ( request.method == 'POST' and event_form.validate() 
                                                 and tooth_form.validate() ):
 
@@ -381,7 +369,7 @@ def add_event_tooth_located(patient_id, appointment_id):
                 values.update(event_values)
                 values['tooth_id'] = tooth.id
                 for side in crown_sides():
-                    setattr(values, side, getattr(crown_event_form, side).data)
+                    values[side] = getattr(crown_event_form, side).data
                 new_crown_event = teeth.CrownEvent(**values)
                 meta.session.add(new_crown_event)
                 meta.session.commit()
@@ -399,34 +387,34 @@ def add_event_tooth_located(patient_id, appointment_id):
                 _update_tooth_datas(tooth, tooth_values)
                 values['tooth_id'] = tooth.id
                 for root_canal in root_canals():
-                    setattr(values, root_canal, 
-                                    getattr(root_event_form, root_canal).data)
+                    values[root_canal] = getattr(root_event_form, root_canal).data
                 new_root_event = teeth.RootCanalEvent(**values)
                 meta.session.add(new_root_event)
                 meta.session.commit()
-
+        
         elif ( event_form.anatomic_location.data == 
-                                    constants.TOOTH_EVENT_LOCATION_PERIODONTE
-        and periodonte_event_form.validate() ):
+                                    constants.TOOTH_EVENT_LOCATION_PERIODONTAL
+        and periodontal_event_form.validate() ):
             values = {
-                'furcation': periodonte_event_form.furcation.data,
-                'recession': periodonte_event_form.recession.data,
-                'pocket_depth': periodonte_event_form.pocket_depth.data,
+                'furcation': periodontal_event_form.furcation.data,
+                'recession': periodontal_event_form.recession.data,
+                'pocket_depth': periodontal_event_form.pocket_depth.data,
                 }
+            values.update(event_values)
+            del values['state'] # As there is no "state" in PeriodontalEvent
             for tooth_codename in teeth_to_add:
                 tooth = get_patient_tooth(patient_id, tooth_codename)
-                periodonte = get_patient_periodonte(patient_id, tooth_codename)
-                # updating periodonte table
-                periodonte.state = periodonte_event_form.choose_periodonte_state.data
-                periodonte.bleeding = periodonte_event_form.bleeding.data
+                gum = get_patient_gum(patient_id, tooth_codename)
+                # updating gum table
+                gum.state = periodontal_event_form.choose_periodontal_state.data
+                gum.bleeding = periodontal_event_form.bleeding.data
                 # working with event_values for state !
                 _update_tooth_datas(tooth, tooth_values)
                 values['tooth_id'] = tooth.id
-                for perio_location in periodonte_locations():
-                    setattr(values, perio_location, 
-                                    getattr(periodonte_event_form, perio_location).data)
-                new_periodonte_event = teeth.PeriodonteEvent(**values)
-                meta.session.add(new_periodonte_event)
+                for site in periodontal_locations():
+                    values[site] = getattr(periodontal_event_form, site).data
+                new_periodontal_event = teeth.PeriodontalEvent(**values)
+                meta.session.add(new_periodontal_event)
                 meta.session.commit()
 
         return redirect(url_for('add_event_tooth_located',
@@ -444,7 +432,7 @@ def add_event_tooth_located(patient_id, appointment_id):
                     event_form=event_form,
                     crown_event_form=crown_event_form,
                     root_event_form=root_event_form,
-                    periodonte_event_form=periodonte_event_form,
+                    periodontal_event_form=periodontal_event_form,
                     clear_form=clear_form)
 
 

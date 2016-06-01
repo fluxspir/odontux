@@ -55,19 +55,20 @@
     {{ render_simple_field_line(root_event_form.is_mesio_buccal_2) }}
   </div>
   
-  <div id="periodonte">
-    {{ render_simple_field(periodonte_event_form.choose_periodonte_state) }}
-    {{ render_simple_field(periodonte_event_form.bleeding) }}
-    {{ render_simple_field(periodonte_event_form.furcation) }}
-    {{ render_simple_field(periodonte_event_form.recession) }}
-    {{ render_simple_field(periodonte_event_form.pocket_depth) }}
+  <div id="periodontal">
+    {{ render_simple_field(periodontal_event_form.choose_periodontal_state) }}
+    {{ render_simple_field(periodontal_event_form.bleeding) }}
+    {{ render_simple_field(periodontal_event_form.furcation) }}
+    {{ render_simple_field(periodontal_event_form.recession) }}
+    {{ render_simple_field(periodontal_event_form.pocket_depth) }}
     
-    {{ render_simple_field_line(periodonte_event_form.is_mesio_buccal) }}
-    {{ render_simple_field_line(periodonte_event_form.is_buccal) }}
-    {{ render_simple_field_line(periodonte_event_form.is_disto_buccal) }}
-    {{ render_simple_field_line(periodonte_event_form.is_disto_lingual) }}
-    {{ render_simple_field_line(periodonte_event_form.is_lingual) }}
-    {{ render_simple_field_line(periodonte_event_form.is_mesio_lingual) }}
+    {{ render_simple_field_line(periodontal_event_form.is_mesio_buccal) }}
+    {{ render_simple_field_line(periodontal_event_form.is_buccal) }}
+    {{ render_simple_field_line(periodontal_event_form.is_disto_buccal) }}
+    {{ render_simple_field_line(periodontal_event_form.is_disto_lingual) }}
+    {{ render_simple_field_line(periodontal_event_form.is_lingual) }}
+    {{ render_simple_field_line(periodontal_event_form.is_mesio_lingual) }}
+
   </div>
   <br />
     {{ render_simple_field(event_form.comment) }}
