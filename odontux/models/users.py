@@ -13,6 +13,11 @@ from tables import (odontux_user_address_table, odontux_user_mail_table,
                     odontux_user_phone_table, dental_office_address_table,
                     dental_office_mail_table, dental_office_phone_table)
 
+try:
+    import constants
+except ImportError:
+    from odontux import constants
+
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
@@ -73,8 +78,43 @@ class OdontuxUser(Base):
                                                             default=None)
     patients = relationship("Patient", backref="user")
 
+class TimeSheet(Base):
+    __tablename__ = 'time_sheet'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey(OdontuxUser.id), nullable=False)
+    weekday = Column(Integer, nullable=False)
+    period = Column(Integer, nullable=False)
+    begin = Column(Time, nullable=False)
+    end = Column(Time, nullable=False)
+    user_role = Column(Integer, nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'time_sheet',
+        'polymorphic_on': 'user_role',
+    }
+
+class DentistTimeSheet(TimeSheet):
+    __tablename__ = 'dentist_time_sheet'
+    id = Column(Integer, ForeignKey(TimeSheet.id), primary_key=True)
+    dental_unit_id = Column(Integer, ForeignKey(DentalUnit.id, nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': constants.ROLE_DENTIST
+    }
+
+class AssistantTimeSheet(TimeSheet):
+    __tablename__ = 'assistant_time_sheet'
+    id = Column(Integer, ForeignKey(TimeSheet.id), primary_key=True)
+    dentist_id = Column(Integer, ForeignKey(OdontuxUser.id)
+
+    __mapper_args__ = {
+        'polymorphic_identity': constants.ROLE_ASSISTANT
+    }
+
+
 class Settings(Base):
     __tablename__ = 'settings'
     id = Column(Integer, primary_key=True)
     key = Column(String, nullable=False)
     value = Column(String)
+    user_id = Column(Integer, ForeignKey(OdontuxUser.id))

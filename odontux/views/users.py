@@ -15,7 +15,7 @@ from sqlalchemy import and_, or_
 from gettext import gettext as _
 from wtforms import (Form, IntegerField, TextField, PasswordField,
                     SelectField, BooleanField, TextAreaField, HiddenField,
-                    DateField, validators)
+                    DateField, TimeField, validators)
 
 from odontux import constants, checks
 from odontux.models import meta, users, administration
@@ -74,6 +74,10 @@ class OdontuxUserNewPasswordForm(Form):
                         match")])
     confirm = PasswordField(_('Repeat New Password'))
 
+class OdontuxUserTimeSheetForm(Form):
+    user_id = SelectField(_('User'), coerce=int)
+    begin = TimeField(_('Begin'), [validators.Optional()])
+    end = TimeField(_('End'), [validators.Optional()])
 
 class DentalOfficeForm(Form):
     dental_office_id = HiddenField(_('id'))
