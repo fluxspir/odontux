@@ -25,6 +25,7 @@ from odontux.views.log import index
 class AppointmentForm(Form):
     patient_id = HiddenField('patient_id')
     dentist_id = SelectField(coerce=int)
+    dental_unit_id = SelectField(coerce=int)
     emergency = BooleanField(_('emergency'))
     reason = TextAreaField(_('reason'))
     diagnostic = TextAreaField(_('diagnostic'))
@@ -50,16 +51,16 @@ class AgendaForm(Form):
 
 class SummaryAgendaForm(Form):
     day = DateField(_('day'), format='%Y-%m-%d')
-    dentist_id = SelectField(_('Dentist'), coerce=int,
+    dentist_id = SelectField(coerce=int,
                                     validators=[validators.Optional()] )
-    dental_unit_id = SelectField(_('Dental_unit'), coerce=int,
+    dental_unit_id = SelectField(coerce=int,
                                     validators=[validators.Optional()] )
 
 
 def get_appointment_field_list():
     return [ "patient_id", "dentist_id", "emergency", "reason", "diagnostic", 
              "treatment", "prognostic", "advise", "next_appointment", "absent",
-             "excuse"]
+             "excuse", "dental_unit_id"]
 
 def get_agenda_field_list():
     return [ "appointment_id", "day", "starthour", "startmin", "durationhour",
@@ -283,10 +284,12 @@ def add_appointment(body_id):
                             users.OdontuxUser.role == constants.ROLE_DENTIST)\
                             .all()
                                           ]
+    appointment_form.dental_unit_id.choices = [ 
+                    ( dental_unit.id, dental_unit.name ) for dental_unit in
+                                meta.session.query(users.DentalUnit).all() ]
 
     if (request.method == 'POST' and agenda_form.validate()
-        and appointment_form.validate() 
-       ):
+        and appointment_form.validate() ):
         # get the appointment agenda schedule first, to raise exception if 
         # agenda problems
         (starttime, endtime) = agenda_handler(agenda_form.day.data, 
