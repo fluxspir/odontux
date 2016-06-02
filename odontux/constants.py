@@ -94,6 +94,16 @@ ROLES = { ROLE_DENTIST: _("dentist"),
 
 KID_AGE = 13
 
+PERIOD_MORNING = 1
+PERIOD_AFTERNOON = 2
+PERIOD_NIGHT = 3
+
+PERIODS = {
+    PERIOD_MORNING: _('Morning'),
+    PERIOD_AFTERNOON: _('Afternoon'),
+    PERIOD_NIGHT: _('Night')
+}
+
 # ------------------------------------
 # Anamnesis
 # ------------------------------------
