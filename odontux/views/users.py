@@ -8,6 +8,7 @@
 import scrypt
 from base64 import b64encode
 import os
+import calendar
 
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
@@ -15,7 +16,9 @@ from sqlalchemy import and_, or_
 from gettext import gettext as _
 from wtforms import (Form, IntegerField, TextField, PasswordField,
                     SelectField, BooleanField, TextAreaField, HiddenField,
-                    DateField, TimeField, validators)
+                    DateField, validators)
+#from wtforms_components import TimeField
+from forms import TimeField
 
 from odontux import constants, checks
 from odontux.models import meta, users, administration
@@ -75,9 +78,11 @@ class OdontuxUserNewPasswordForm(Form):
     confirm = PasswordField(_('Repeat New Password'))
 
 class OdontuxUserTimeSheetForm(Form):
-    user_id = SelectField(_('User'), coerce=int)
+    weekday = HiddenField(_('Weekday'))
+    period = HiddenField(_('Period'))
     begin = TimeField(_('Begin'), [validators.Optional()])
     end = TimeField(_('End'), [validators.Optional()])
+    dental_unit_id = SelectField(_('Dental Unit'), coerce=int)
 
 class DentalOfficeForm(Form):
     dental_office_id = HiddenField(_('id'))
@@ -147,7 +152,7 @@ def add_user():
     gen_info_form.title.choices = forms.get_title_choice_list()
 
     gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
-    gen_info_admin_form.role.choices = constants.ROLES_LIST
+    gen_info_admin_form.role.choices = constants.ROLES.items()
     dentist_specific_form = DentistSpecificForm(request.form)
     dentist_specific_admin_form = DentistSpecificAdminForm(request.form)
     address_form = forms.AddressForm(request.form)
@@ -259,18 +264,25 @@ def update_user(body_id, form_to_display):
 
     if session['role'] == constants.ROLE_ADMIN:
         gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
-        gen_info_admin_form.role.choices = constants.ROLES_LIST
+        gen_info_admin_form.role.choices = constants.ROLES.items()
     else:
         gen_info_admin_form = ""
+
     if user.role == constants.ROLE_DENTIST: 
         dentist_specific_form = DentistSpecificForm(request.form)
     else:
         dentist_specific_form = ""
+
     if (session['role'] == constants.ROLE_ADMIN 
             and user.role == constants.ROLE_DENTIST):
         dentist_specific_admin_form = DentistSpecificAdminForm(request.form)
     else:
         dentist_specific_admin_form = ""
+
+    odontux_user_time_sheet_form = OdontuxUserTimeSheetForm(request.form)
+    odontux_user_time_sheet_form.dental_unit_id.choices =\
+            [ (dental_unit.id, dental_unit.name) for dental_unit in
+                            meta.session.query(users.DentalUnit).all() ]
 
     if request.method == 'POST' and gen_info_form.validate():
         for f in get_gen_info_field_list():
@@ -323,6 +335,8 @@ def update_user(body_id, form_to_display):
                             mail_form=mail_form,
                             password_form=password_form,
                             dentist_specific_form=dentist_specific_form,
+                            timesheet_form=odontux_user_time_sheet_form,
+                            calendar=calendar,
                        dentist_specific_admin_form=dentist_specific_admin_form)
 
 @app.route('/dental_office/update?id=<int:body_id>'

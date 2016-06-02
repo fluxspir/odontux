@@ -18,7 +18,8 @@ try:
 except ImportError:
     from odontux import constants
 
-from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
+from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Time 
+from sqlalchemy import Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
@@ -90,13 +91,13 @@ class TimeSheet(Base):
 
     __mapper_args__ = {
         'polymorphic_identity': 'time_sheet',
-        'polymorphic_on': 'user_role',
+        'polymorphic_on': user_role
     }
 
 class DentistTimeSheet(TimeSheet):
     __tablename__ = 'dentist_time_sheet'
     id = Column(Integer, ForeignKey(TimeSheet.id), primary_key=True)
-    dental_unit_id = Column(Integer, ForeignKey(DentalUnit.id, nullable=False)
+    dental_unit_id = Column(Integer, ForeignKey(DentalUnit.id), nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': constants.ROLE_DENTIST
@@ -105,7 +106,7 @@ class DentistTimeSheet(TimeSheet):
 class AssistantTimeSheet(TimeSheet):
     __tablename__ = 'assistant_time_sheet'
     id = Column(Integer, ForeignKey(TimeSheet.id), primary_key=True)
-    dentist_id = Column(Integer, ForeignKey(OdontuxUser.id)
+    dentist_id = Column(Integer, ForeignKey(OdontuxUser.id))
 
     __mapper_args__ = {
         'polymorphic_identity': constants.ROLE_ASSISTANT

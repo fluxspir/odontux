@@ -129,14 +129,21 @@
       </tr>
       {% for mail in body.mails %}
       <tr>
-        <form method="post" action={{ url_for(url_update, body_id=body.id, form_to_display='mail') }}>
-          <td class="hidden"><input type="text" name="mail_index" value="{{ loop.index0 }}" /></td>
+        <form method="post" action={{ url_for(url_update, body_id=body.id, 
+                                                form_to_display='mail') }}>
+          <td class="hidden"><input type="text" name="mail_index" 
+                                    value="{{ loop.index0 }}" /></td>
+
           {{ render_table_field(mail_form.email, value=mail.email) }}
+
           <td><input type=submit value="Update" /></td>
         </form>
-        <form class="hidden" method="post" action={{ url_for(url_delete, body_id=body.id, form_to_display='mail') }}>
+
+        <form class="hidden" method="post" 
+                            action={{ url_for(url_delete, body_id=body.id, 
+                                                form_to_display='mail') }}>
           <input type="hidden" name="mail_id" value="{{ mail.id }}" />
-          <td><input type="submit" value="Delete" /></td
+          <td><input type="submit" value="Delete" /></td>
         </form>
       </tr>
       {%endfor%}

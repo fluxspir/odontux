@@ -13,6 +13,7 @@
     <li onclick='display_form("phone")'>phone</li>
     <li onclick='display_form("mail")'>mail</li>
     <li onclick='display_form("password_container")'>password</li>
+    <li onclick='display_form("time_sheet")'>Time Sheet</li>
   </ul>
 </nav>
 <div id="update_user">
@@ -64,6 +65,15 @@
       </dl>
       <input type="submit" value="Change password" />
     </form>
+  </div>
+  <div id="time_sheet">
+    {% for i in range(7) %}
+      <div id="{{ calendar.day_name[i] }}" style="width:13.5%;height:100%;float:left">
+        <strong>{{ calendar.day_name[i] }}</strong<br /><br />
+        Morning<br />
+        
+      </div>
+    {% endfor %}
   </div>
 </div>
 {% if form_to_display %}
