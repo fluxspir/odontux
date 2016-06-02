@@ -14,6 +14,7 @@ import calendar
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import with_polymorphic
 from gettext import gettext as _
 from wtforms import (Form, IntegerField, TextField, PasswordField,
                     SelectField, BooleanField, TextAreaField, HiddenField,
@@ -397,17 +398,32 @@ def update_timesheet(body_id):
                 int(timesheet_form[weekday][period].end.data.split(":")[0]),
                 int(timesheet_form[weekday][period].end.data.split(":")[1])
                 )
+
+                all_timesheets = with_polymorphic(users.TimeSheet, '*')
                 TS = ( 
-                    meta.session.query(users.TimeSheet)
+                    meta.session.query(all_timesheets)
                         .filter(
                             users.TimeSheet.user_id == body_id,
                             users.TimeSheet.weekday == weekday,
-                            users.TimeSheet.period == period,
-                            users.TimeSheet.dental_unit_id ==\
+                            users.TimeSheet.period == period
+                        )
+                    )
+                if user['role'] == constants.ROLE_DENTIST:
+                    TS = (
+                        TS.filter(
+                            users.DentistTimeSheet.dental_unit_id ==
                             timesheet_form[weekday][period].dental_unit_id.data
                         )
-                        .one_or_none()
-                )
+                    )
+                elif user['role'] == constants.ROLE_ASSISTANT:
+                    TS = (
+                        TS.filter(
+                            users.AssistantTimeSheet.dentist_id ==
+                                timesheet_form[weekday][period].dentist_id.data
+                        )
+                    )
+
+                TS = TS.one_or_none()
 
                 if not TS:
                     values = { 
@@ -415,13 +431,13 @@ def update_timesheet(body_id):
                         for f in timesheet_fields 
                     }
 
-                    if user.role == constants.ROLE_DENTIST:
+                    if user['role'] == constants.ROLE_DENTIST:
                         [ values[f] =
                             getattr(timesheet_form[weekday][period], f).data
                             for f in dentist_timesheet_fields ]
                         new_TS = users.DentistTimeSheet(**values)
 
-                    elif user.role == constants.ROLE_ASSISTANT:
+                    elif user['role'] == constants.ROLE_ASSISTANT:
                         [ values[f] = 
                             getattr(timesheet_form[weekday][period], f).data
                             for f in assistant_timesheet_fields ]
@@ -436,11 +452,11 @@ def update_timesheet(body_id):
                     [ setattr(TS, f, 
                             getattr(timesheet_form[weekday][period], f).data)
                         for f in timesheet_fields ]
-                    if user.role == constants.ROLE_DENTIST:
+                    if user['role'] == constants.ROLE_DENTIST:
                         [ setattr(TS, f,
                             getattr(timesheet_form[weekday][period], f).data)
                             for f in dentist_timesheet_fields ]
-                    elif user.role == constants.ROLE_ASSISTANT:
+                    elif user['role'] == constants.ROLE_ASSISTANT:
                         [ setattr(TS, f,
                             getattr(timesheet_form[weekday][period], f).data)
                             for f in assistant_timesheet_fields ]
