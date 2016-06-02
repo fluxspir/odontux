@@ -69,10 +69,11 @@
     </form>
   </div>
   <div id="time_sheet">
-   <form method="post" action="{{ url_for('update_timesheet', body_id=user.id) }}">
+{# <form method="post" action="{{ url_for('update_timesheet', body_id=user.id) }}">
     <div id="send_timesheet" style='float:right'>
       <input type='submit' value='Update Timesheet'>
     </div>
+#}
     {% for weekday in range(7) %}
       <div id="{{ calendar.day_name[i] }}">
         <table>
@@ -83,8 +84,16 @@
             {% for period in constants.PERIODS.keys() %}
             <td>
                 <table>
+                  <form method="post" action="{{ url_for('update_timesheet_1', body_id=user.id) }}">
+
                     <caption>
-                      {{ render_simple_field_line(timesheet_form[weekday][period].dental_unit_id) }}
+                      {% if user.role == constants.ROLE_DENTIST %}
+                        {{ render_simple_field_line(timesheet_form[weekday][period].dental_unit_id) }}
+                      {% elif user.role == constants.ROLE_ASSISTANT %}
+                        {{ render_simple_field_line(timesheet_form[weekday][period].dentist_id) }}
+                      {% endif %}
+                      {{render_simple_hidden_field_line(timesheet_form[weekday][period].weekday) }}
+                      {{ render_simple_hidden_field_line(timesheet_form[weekday][period].period) }}
                     </caption>
                   <tr>
                     <td>
@@ -93,7 +102,10 @@
                     <td>
                       {{ render_simple_field_line(timesheet_form[weekday][period].end) }}
                     </td>
+                    <td><input type="submit" value="update"></td>
                   </tr>
+                </form>
+
                 </table>
             </td>
             {% endfor %}
@@ -102,6 +114,9 @@
       <br />
       </div>
     {% endfor %}
+{#
+   </form>
+#}
   </div>
 </div>
 {% if form_to_display %}

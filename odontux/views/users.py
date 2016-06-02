@@ -10,6 +10,7 @@ import scrypt
 from base64 import b64encode
 import os
 import calendar
+import datetime
 
 from flask import session, render_template, request, redirect, url_for
 import sqlalchemy
@@ -85,6 +86,7 @@ class OdontuxUserTimeSheetForm(Form):
     end = TextField(_('End'), [validators.Optional()], 
                         render_kw={'size':'8px'})
     dental_unit_id = SelectField(_('Dental Unit'), coerce=int )
+    dentist_id = SelectField(_('Dentist'), coerce=int)
 
 class DentalOfficeForm(Form):
     dental_office_id = HiddenField(_('id'))
@@ -94,18 +96,30 @@ class DentalOfficeForm(Form):
     url = TextField(_("url"))
 
 
-def generate_timesheet_form():
+def generate_timesheet_form(user_role):
     timesheet_form = {}
     for weekday in range(7):
         timesheet_form[weekday] = {}
         for period in constants.PERIODS.keys():
             timesheet_form[weekday][period] =\
                                     OdontuxUserTimeSheetForm(request.form)
+            timesheet_form[weekday][period].weekday.data = weekday
+            timesheet_form[weekday][period].period.data = period
+
+#            if user_role == constants.ROLE_DENTIST:
             timesheet_form[weekday][period].dental_unit_id.choices =\
                         [ (dental_unit.id, dental_unit.name) for dental_unit in
                                 meta.session.query(users.DentalUnit).all() ]
-            timesheet_form[weekday][period].weekday.data = weekday
-            timesheet_form[weekday][period].period.data = period
+
+#            elif user_role == constants.ROLE_ASSISTANT:
+            timesheet_form[weekday][period].dentist_id.choices =\
+                [ (dentist.id, dentist.username) for dentist in
+                    meta.session.query(users.OdontuxUser)
+                    .filter(users.OdontuxUser.role == constants.ROLE_DENTIST)
+                    .all()
+                ]
+            timesheet_form[weekday][period].dentist_id.choices.append(
+                                                                    (0, ""))
     return timesheet_form
 
 def get_gen_info_field_list():
@@ -332,7 +346,7 @@ def update_user(body_id, form_to_display):
                 except:
                     pass
 
-    timesheet_form = generate_timesheet_form()
+    timesheet_form = generate_timesheet_form(user.role)
     # populate timesheet_form
     for weekday in range(7):
         for period in constants.PERIODS.keys():
@@ -350,7 +364,7 @@ def update_user(body_id, form_to_display):
                 timesheet_form[weekday][period].end.data = TS.end
                 timesheet_form[weekday][period].dental_unit_id.data =\
                                                             TS.dental_unit_id
-    
+
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
@@ -370,20 +384,139 @@ def update_user(body_id, form_to_display):
                             constants=constants,
                        dentist_specific_admin_form=dentist_specific_admin_form)
 
-@app.route('/update/timesheet?body_id=<int:body_id>', methods=['POST'])
-def update_timesheet(body_id):
-
-    timesheet_fields = [ 'user_id', 'weekday', 'period',
-                        'begin', 'end', 'user_role' ]
+@app.route('/update/timesheet_1?body_id=<int:body_id>', methods=['POST'])
+def update_timesheet_1(body_id):
+ 
+    timesheet_fields = [ 'weekday', 'period', 'begin', 'end' ]
     dentist_timesheet_fields = [ 'dental_unit_id' ]
     assistant_timesheet_fields = [ 'dentist_id' ]
-
-    timesheet_form = generate_timesheet_form()
-
+    
     user = (
         meta.session.query(users.OdontuxUser)
             .filter(users.OdontuxUser.id == body_id)
+            .one()
         )
+    
+    timesheet_form = OdontuxUserTimeSheetForm(request.form)
+#    if user.role == constants.ROLE_DENTIST:
+    timesheet_form.dental_unit_id.choices =\
+            [ (dental_unit.id, dental_unit.name) for dental_unit in
+                meta.session.query(users.DentalUnit).all() ]
+#    elif user.role == constants.ROLE_ASSISTANT:
+    timesheet_form.dentist_id.choices =\
+            [ (dentist.id, dentist.username) for dentist in
+                meta.session.query(users.OdontuxUser)
+                    .filter(users.OdontuxUser.role == constants.ROLE_DENTIST)
+                    .all()
+            ]
+    timesheet_form.dentist_id.choices.append( (0, "" ) )
+    try:
+        begin = datetime.time(
+        int(timesheet_form.begin.data.split(":")[0]),
+        int(timesheet_form.begin.data.split(":")[1])
+        )
+        
+        end = datetime.time(
+        int(timesheet_form.end.data.split(":")[0]),
+        int(timesheet_form.end.data.split(":")[1])
+        )
+
+        all_timesheets = with_polymorphic(users.TimeSheet, '*')
+        TS = ( 
+            meta.session.query(all_timesheets)
+                .filter(
+                    users.TimeSheet.user_id == body_id,
+                    users.TimeSheet.weekday == timesheet_form.weekday.data,
+                    users.TimeSheet.period == timesheet_form.period.data
+                )
+            )
+        if user.role == constants.ROLE_DENTIST:
+            TS = (
+                TS.filter(
+                    users.DentistTimeSheet.dental_unit_id ==
+                    timesheet_form.dental_unit_id.data
+                )
+            )
+        elif user.role == constants.ROLE_ASSISTANT:
+            TS = (
+                TS.filter(
+                    users.AssistantTimeSheet.dentist_id ==
+                        timesheet_form.dentist_id.data
+                )
+            )
+
+        TS = TS.one_or_none()
+
+        if not TS:
+            values = { 
+                f: getattr(timesheet_form, f).data
+                for f in timesheet_fields 
+            }
+            values['user_id'] = user.id
+            values['user_role'] = user.role
+            if user.role == constants.ROLE_DENTIST:
+                for f in dentist_timesheet_fields:
+                    values[f] =\
+                    getattr(timesheet_form, f).data
+
+#                        [ values[f] =
+#                            getattr(timesheet_form, f).data
+#                            for f in dentist_timesheet_fields ]
+                new_TS = users.DentistTimeSheet(**values)
+
+            elif user.role == constants.ROLE_ASSISTANT:
+                for f in assistant_timesheet_fields:
+                    values[f] =\
+                    getattr(timesheet_form, f).data
+                    
+#                        [ values[f] = 
+#                            getattr(timesheet_form, f).data
+#                            for f in assistant_timesheet_fields ]
+                new_TS = users.AssistantTimeSheet(**values)
+
+            else:
+                new_TS = users.TimeSheet(**values)
+            
+            meta.session.add(new_TS)
+
+        else:
+            [ setattr(TS, f, 
+                    getattr(timesheet_form, f).data)
+                for f in timesheet_fields ]
+            if user.role == constants.ROLE_DENTIST:
+                [ setattr(TS, f,
+                    getattr(timesheet_form, f).data)
+                    for f in dentist_timesheet_fields ]
+            elif user.role == constants.ROLE_ASSISTANT:
+                [ setattr(TS, f,
+                    getattr(timesheet_form, f).data)
+                    for f in assistant_timesheet_fields ]
+
+        meta.session.commit()
+
+    except (ValueError, TypeError, IndexError):
+        pass
+
+    return redirect(url_for('update_user', body_id=body_id,
+                                        form_to_display="time_sheet"))
+
+   
+
+@app.route('/update/timesheet?body_id=<int:body_id>', methods=['POST'])
+def update_timesheet(body_id):
+
+    timesheet_fields = [ 'weekday', 'period', 'begin', 'end' ]
+    dentist_timesheet_fields = [ 'dental_unit_id' ]
+    assistant_timesheet_fields = [ 'dentist_id' ]
+    
+    user = (
+        meta.session.query(users.OdontuxUser)
+            .filter(users.OdontuxUser.id == body_id)
+            .one()
+        )
+    
+    timesheet_form = generate_timesheet_form(user.role)
+    
     for weekday in range(7):
         for period in constants.PERIODS.keys():
             if not timesheet_form[weekday][period].validate():
@@ -408,14 +541,14 @@ def update_timesheet(body_id):
                             users.TimeSheet.period == period
                         )
                     )
-                if user['role'] == constants.ROLE_DENTIST:
+                if user.role == constants.ROLE_DENTIST:
                     TS = (
                         TS.filter(
                             users.DentistTimeSheet.dental_unit_id ==
                             timesheet_form[weekday][period].dental_unit_id.data
                         )
                     )
-                elif user['role'] == constants.ROLE_ASSISTANT:
+                elif user.role == constants.ROLE_ASSISTANT:
                     TS = (
                         TS.filter(
                             users.AssistantTimeSheet.dentist_id ==
@@ -430,17 +563,26 @@ def update_timesheet(body_id):
                         f: getattr(timesheet_form[weekday][period], f).data
                         for f in timesheet_fields 
                     }
-
-                    if user['role'] == constants.ROLE_DENTIST:
-                        [ values[f] =
+                    values['user_id'] = user.id
+                    values['user_role'] = user.role
+                    if user.role == constants.ROLE_DENTIST:
+                        for f in dentist_timesheet_fields:
+                            values[f] =\
                             getattr(timesheet_form[weekday][period], f).data
-                            for f in dentist_timesheet_fields ]
+
+#                        [ values[f] =
+#                            getattr(timesheet_form[weekday][period], f).data
+#                            for f in dentist_timesheet_fields ]
                         new_TS = users.DentistTimeSheet(**values)
 
-                    elif user['role'] == constants.ROLE_ASSISTANT:
-                        [ values[f] = 
+                    elif user.role == constants.ROLE_ASSISTANT:
+                        for f in assistant_timesheet_fields:
+                            values[f] =\
                             getattr(timesheet_form[weekday][period], f).data
-                            for f in assistant_timesheet_fields ]
+                            
+#                        [ values[f] = 
+#                            getattr(timesheet_form[weekday][period], f).data
+#                            for f in assistant_timesheet_fields ]
                         new_TS = users.AssistantTimeSheet(**values)
 
                     else:
@@ -452,11 +594,11 @@ def update_timesheet(body_id):
                     [ setattr(TS, f, 
                             getattr(timesheet_form[weekday][period], f).data)
                         for f in timesheet_fields ]
-                    if user['role'] == constants.ROLE_DENTIST:
+                    if user.role == constants.ROLE_DENTIST:
                         [ setattr(TS, f,
                             getattr(timesheet_form[weekday][period], f).data)
                             for f in dentist_timesheet_fields ]
-                    elif user['role'] == constants.ROLE_ASSISTANT:
+                    elif user.role == constants.ROLE_ASSISTANT:
                         [ setattr(TS, f,
                             getattr(timesheet_form[weekday][period], f).data)
                             for f in assistant_timesheet_fields ]

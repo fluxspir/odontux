@@ -77,12 +77,12 @@ T85_NAME = _("85") # _("Second Molar inferior right deciduous")
 # ------------------------------------
 
 
-ROLE_DENTIST = 0
-ROLE_NURSE = 1
-ROLE_ASSISTANT = 2
-ROLE_SECRETARY = 3
-ROLE_ADMIN = 4
-ROLE_PATIENT = 5
+ROLE_DENTIST = 1
+ROLE_NURSE = 2
+ROLE_ASSISTANT = 3
+ROLE_SECRETARY = 4
+ROLE_ADMIN = 5
+ROLE_PATIENT = 6
 
 ROLES = { ROLE_DENTIST: _("dentist"),
           ROLE_NURSE: _("nurse"),
