@@ -1,4 +1,6 @@
 {% from "_formhelpers.html" import render_field, render_hidden_field %}
+{% from "_formhelpers.html" import render_simple_field_line, render_simple_hidden_field_line %}
+{% from "_formhelpers.html" import render_field, render_hidden_field %}
 {% from "_formhelpers.html" import render_table_field, render_table_hidden_field %}
 {% from "_contactformhelper.html" import update_phone_form %}
 {% from "_contactformhelper.html" import update_address_form %}
@@ -67,11 +69,37 @@
     </form>
   </div>
   <div id="time_sheet">
-    {% for i in range(7) %}
-      <div id="{{ calendar.day_name[i] }}" style="width:13.5%;height:100%;float:left">
-        <strong>{{ calendar.day_name[i] }}</strong<br /><br />
-        Morning<br />
-        
+   <form method="post" action="{{ url_for('update_timesheet', body_id=user.id) }}">
+    <div id="send_timesheet" style='float:right'>
+      <input type='submit' value='Update Timesheet'>
+    </div>
+    {% for weekday in range(7) %}
+      <div id="{{ calendar.day_name[i] }}">
+        <table>
+          <tr>
+            <th>
+              <strong>{{ calendar.day_name[weekday] }}</strong>: 
+            </th>
+            {% for period in constants.PERIODS.keys() %}
+            <td>
+                <table>
+                    <caption>
+                      {{ render_simple_field_line(timesheet_form[weekday][period].dental_unit_id) }}
+                    </caption>
+                  <tr>
+                    <td>
+                      {{ render_simple_field_line(timesheet_form[weekday][period].begin) }}
+                    </td>
+                    <td>
+                      {{ render_simple_field_line(timesheet_form[weekday][period].end) }}
+                    </td>
+                  </tr>
+                </table>
+            </td>
+            {% endfor %}
+          </tr>
+        </table>
+      <br />
       </div>
     {% endfor %}
   </div>

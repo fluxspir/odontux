@@ -33,7 +33,6 @@ def get_title_choice_list():
              ( "Dr", _("Dr") ), ( "Pr", _("Pr")) ] 
 
 
-
 # create filter for fields of wtforms
 def upper_field(value):
     if value:

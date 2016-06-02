@@ -5,6 +5,7 @@
 # Licence BSD
 #
 
+import pdb
 import scrypt
 from base64 import b64encode
 import os
@@ -16,9 +17,7 @@ from sqlalchemy import and_, or_
 from gettext import gettext as _
 from wtforms import (Form, IntegerField, TextField, PasswordField,
                     SelectField, BooleanField, TextAreaField, HiddenField,
-                    DateField, validators)
-#from wtforms_components import TimeField
-from forms import TimeField
+                    DateField, DateTimeField, validators)
 
 from odontux import constants, checks
 from odontux.models import meta, users, administration
@@ -80,9 +79,11 @@ class OdontuxUserNewPasswordForm(Form):
 class OdontuxUserTimeSheetForm(Form):
     weekday = HiddenField(_('Weekday'))
     period = HiddenField(_('Period'))
-    begin = TimeField(_('Begin'), [validators.Optional()])
-    end = TimeField(_('End'), [validators.Optional()])
-    dental_unit_id = SelectField(_('Dental Unit'), coerce=int)
+    begin = TextField(_('Begin'), [validators.Optional()], 
+                        render_kw={'size':'8px'})
+    end = TextField(_('End'), [validators.Optional()], 
+                        render_kw={'size':'8px'})
+    dental_unit_id = SelectField(_('Dental Unit'), coerce=int )
 
 class DentalOfficeForm(Form):
     dental_office_id = HiddenField(_('id'))
@@ -91,6 +92,20 @@ class DentalOfficeForm(Form):
     owner_firstname = TextField(_("owner_firstname"))
     url = TextField(_("url"))
 
+
+def generate_timesheet_form():
+    timesheet_form = {}
+    for weekday in range(7):
+        timesheet_form[weekday] = {}
+        for period in constants.PERIODS.keys():
+            timesheet_form[weekday][period] =\
+                                    OdontuxUserTimeSheetForm(request.form)
+            timesheet_form[weekday][period].dental_unit_id.choices =\
+                        [ (dental_unit.id, dental_unit.name) for dental_unit in
+                                meta.session.query(users.DentalUnit).all() ]
+            timesheet_form[weekday][period].weekday.data = weekday
+            timesheet_form[weekday][period].period.data = period
+    return timesheet_form
 
 def get_gen_info_field_list():
     return [ "title", "lastname", "firstname", "qualifications", 
@@ -279,11 +294,6 @@ def update_user(body_id, form_to_display):
     else:
         dentist_specific_admin_form = ""
 
-    odontux_user_time_sheet_form = OdontuxUserTimeSheetForm(request.form)
-    odontux_user_time_sheet_form.dental_unit_id.choices =\
-            [ (dental_unit.id, dental_unit.name) for dental_unit in
-                            meta.session.query(users.DentalUnit).all() ]
-
     if request.method == 'POST' and gen_info_form.validate():
         for f in get_gen_info_field_list():
             setattr(user, f, getattr(gen_info_form, f).data)
@@ -321,6 +331,25 @@ def update_user(body_id, form_to_display):
                 except:
                     pass
 
+    timesheet_form = generate_timesheet_form()
+    # populate timesheet_form
+    for weekday in range(7):
+        for period in constants.PERIODS.keys():
+            TS = (
+                meta.session.query(users.TimeSheet)
+                    .filter(
+                        users.TimeSheet.user_id == user.id,
+                        users.TimeSheet.weekday == weekday,
+                        users.TimeSheet.period == period
+                    )
+                .one_or_none()
+            )
+            if TS:
+                timesheet_form[weekday][period].begin.data = TS.begin
+                timesheet_form[weekday][period].end.data = TS.end
+                timesheet_form[weekday][period].dental_unit_id.data =\
+                                                            TS.dental_unit_id
+    
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
@@ -335,9 +364,93 @@ def update_user(body_id, form_to_display):
                             mail_form=mail_form,
                             password_form=password_form,
                             dentist_specific_form=dentist_specific_form,
-                            timesheet_form=odontux_user_time_sheet_form,
+                            timesheet_form=timesheet_form,
                             calendar=calendar,
+                            constants=constants,
                        dentist_specific_admin_form=dentist_specific_admin_form)
+
+@app.route('/update/timesheet?body_id=<int:body_id>', methods=['POST'])
+def update_timesheet(body_id):
+
+    timesheet_fields = [ 'user_id', 'weekday', 'period',
+                        'begin', 'end', 'user_role' ]
+    dentist_timesheet_fields = [ 'dental_unit_id' ]
+    assistant_timesheet_fields = [ 'dentist_id' ]
+
+    timesheet_form = generate_timesheet_form()
+
+    user = (
+        meta.session.query(users.OdontuxUser)
+            .filter(users.OdontuxUser.id == body_id)
+        )
+    for weekday in range(7):
+        for period in constants.PERIODS.keys():
+            if not timesheet_form[weekday][period].validate():
+                continue
+            try:
+                begin = datetime.time(
+                int(timesheet_form[weekday][period].begin.data.split(":")[0]),
+                int(timesheet_form[weekday][period].begin.data.split(":")[1])
+                )
+                
+                end = datetime.time(
+                int(timesheet_form[weekday][period].end.data.split(":")[0]),
+                int(timesheet_form[weekday][period].end.data.split(":")[1])
+                )
+                TS = ( 
+                    meta.session.query(users.TimeSheet)
+                        .filter(
+                            users.TimeSheet.user_id == body_id,
+                            users.TimeSheet.weekday == weekday,
+                            users.TimeSheet.period == period,
+                            users.TimeSheet.dental_unit_id ==\
+                            timesheet_form[weekday][period].dental_unit_id.data
+                        )
+                        .one_or_none()
+                )
+
+                if not TS:
+                    values = { 
+                        f: getattr(timesheet_form[weekday][period], f).data
+                        for f in timesheet_fields 
+                    }
+
+                    if user.role == constants.ROLE_DENTIST:
+                        [ values[f] =
+                            getattr(timesheet_form[weekday][period], f).data
+                            for f in dentist_timesheet_fields ]
+                        new_TS = users.DentistTimeSheet(**values)
+
+                    elif user.role == constants.ROLE_ASSISTANT:
+                        [ values[f] = 
+                            getattr(timesheet_form[weekday][period], f).data
+                            for f in assistant_timesheet_fields ]
+                        new_TS = users.AssistantTimeSheet(**values)
+
+                    else:
+                        new_TS = users.TimeSheet(**values)
+                    
+                    meta.session.add(new_TS)
+
+                else:
+                    [ setattr(TS, f, 
+                            getattr(timesheet_form[weekday][period], f).data)
+                        for f in timesheet_fields ]
+                    if user.role == constants.ROLE_DENTIST:
+                        [ setattr(TS, f,
+                            getattr(timesheet_form[weekday][period], f).data)
+                            for f in dentist_timesheet_fields ]
+                    elif user.role == constants.ROLE_ASSISTANT:
+                        [ setattr(TS, f,
+                            getattr(timesheet_form[weekday][period], f).data)
+                            for f in assistant_timesheet_fields ]
+
+                meta.session.commit()
+
+            except ValueError, TypeError:
+                continue
+    return redirect(url_for('update_user', body_id=body_id,
+                                        form_to_display="time_sheet"))
 
 @app.route('/dental_office/update?id=<int:body_id>'
             '&form_to_display=<form_to_display>/', methods=['GET', 'POST'])
