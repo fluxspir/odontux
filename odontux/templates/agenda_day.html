@@ -1,15 +1,15 @@
-{% from "_formhelpers.html" import render_sfl_wol %}
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_field,
+                                    render_simple_hidden_field_line %}
 {% extends "header.html" %}
 
 {% block main %}
 
 <div id="agenda_left">
 
-  <form>
     <center>
       <a href="{{ url_for('display_day', dateday=prevday, 
-                                              dentist_id=dentist_id, 
-                                              dental_unit_id=dental_unit_id) }}">
+                                              dentist_id=dentist.id, 
+                                              dental_unit_id=dental_unit.id) }}">
               ← {{ calendar.day_name[prevday.weekday()] }} {{ prevday.day }}
       </a><br /><br />
 
@@ -20,20 +20,55 @@
               <br /><br />
 
       <a href="{{ url_for('display_day', dateday=nextday, 
-                                              dentist_id=dentist_id, 
-                                              dental_unit_id=dental_unit_id) }}">
+                                              dentist_id=dentist.id, 
+                                              dental_unit_id=dental_unit.id) }}">
               {{ calendar.day_name[nextday.weekday()] }} {{ nextday.day }} →
       </a><br /><br />
+
+      {{ dentist.firstname }} {{ dentist.lastname }}<br />
+      {{ dental_unit.name}}<br /><br />
+
+      <form method='post' action="{{ url_for('schedule_new_patient') }}">
+        {{ render_simple_hidden_field_line(sched_new_pat_form.day) }}
+        {{ render_simple_hidden_field_line(sched_new_pat_form.dentist_id) }}
+        {{ render_simple_hidden_field_line(sched_new_pat_form.dental_unit_id) }}
+        {{ render_simple_hidden_field_line(sched_new_pat_form.date_taker_id) }}
+        {{ render_simple_field(sched_new_pat_form.starttime) }}
+        {{ render_simple_field(sched_new_pat_form.duration) }}
+        {{ render_simple_field(sched_new_pat_form.comment) }}
+        <input type='submit' value='add'>
+      </form>
+
     </center>
-  </form>
 </div>
-
+{#    {% for meeting in meetings %}
+        {{ loop.index }}
+        {{ meeting.starttime.time() }}
+        {{ meeting.endtime - meeting.starttime }}
+        
+        {% if meeting.appointment %}
+          {{ meeting.appointment.patient.lastname }} 
+              {{ meeting.appointment.patient.firstname }}
+          {{ meeting.appointment.reason }}
+        {% else %}
+          {{ meeting.comment }}
+        {% endif %}
+      {% endfor %}
+#}
+{# 
 <div id="agenda_day">
- seuant
+ <div id={{ constants.PERIODS[1] }} style='width:33%;height:100%;'>{#float:left;'>
+    <canvas id={{ constants.PERIODS[1] }} width='33%' height='100%' style="border:1px solid #000000;">
+    </canvas>
+<div id={{ constants.PERIODS[2] }} style='width:33%;height:100%;'>{#float:left;'>
+    <canvas id={{ constants.PERIODS[2] }} width='33%' height='100%' style="border:1px solid #000000;">
+    </canvas>
+  <div id={{ constants.PERIODS[3] }} style='width:33%;height:100%;'>{#float:right;'>
+    <canvas id={{ constants.PERIODS[3] }} width='33%' height='100%' style="border:1px solid #000000;">
+    </canvas>
 </div>
+#}
 {% endblock %}
-
-
 
 
 {#

@@ -12,7 +12,7 @@ from wtforms import (Form, HiddenField, BooleanField, TextAreaField, TextField,
 from wtforms.fields.html5 import DateField
 from gettext import gettext as _
 from sqlalchemy import or_
-from sqlalchemy import cast, Date
+from sqlalchemy import cast, Date, Time
 import datetime
 import calendar
 
@@ -41,7 +41,7 @@ class AgendaForm(Form):
     appointment_id = HiddenField('appointment_id')
     day = DateField(_('day'), format='%Y-%m-%d', 
                             validators=[validators.Optional()],
-                            render_kw={'size': '10'} )
+                            render_kw={'size': '10px'} )
     starthour = IntegerField(_('h'), [validators.Optional()])
     startmin = IntegerField(_('m'), [validators.Optional()])
     durationhour = IntegerField(_('h'), [validators.Optional()])
@@ -50,11 +50,22 @@ class AgendaForm(Form):
     endmin = IntegerField(_('m'), [validators.Optional()])
 
 class SummaryAgendaForm(Form):
-    day = DateField(_('day'), format='%Y-%m-%d', render_kw={'size': '8'})
+    day = DateField(_('day'), format='%Y-%m-%d', render_kw={'size': '8px'})
     dentist_id = SelectField(coerce=int,
                                     validators=[validators.Optional()] )
     dental_unit_id = SelectField(coerce=int,
                                     validators=[validators.Optional()] )
+
+class ScheduleNewPatientForm(Form):
+    day = DateField(_('Day'))
+    dentist_id = HiddenField(_('dentist'))
+    dental_unit_id = HiddenField(_('dental unit'))
+    date_taker_id = HiddenField(_('date_taker'))
+    starttime = TextField(_('Start'), [validators.Required()],
+                                        render_kw={'size':'8px'}) 
+    duration = TextField(_('Duration'), [validators.Required()],
+                                        render_kw={'size':'8px'})
+    comment = TextAreaField(_('Name(...)'), [validators.Required()])
 
 
 def get_appointment_field_list():
@@ -137,34 +148,200 @@ def display_day(dateday, dentist_id, dental_unit_id):
     """ 
     For viewing all appointments occured the day "dateday",
     and create links for "previous_day" and "next_day"
+    
+    agenda_day is a dictionnary that contains all details for 
+    the day.
+     agenda_day = { 
+        constants.PERIODS[x]: (
+                                (start_time, period_starttime),
+                                [ meetings ],
+                                (end_time, period_endtime),
+                            ),
+                                ..., 
+        }
     """
+    agenda_day = {}
+    
+    def _time_to_datetime(time, day=datetime.date.today()):
+        return datetime.datetime.combine(day, time)
+
+    def _get_first_meeting_time(meeting):
+        return datetime.time(meeting.starttime.hour, meeting.starttime.minute)
+
+    def _get_last_meeting_time(meeting):
+        return datetime.time(meeting.endtime.hour, meeting.endtime.minute)
+
+    def _get_first_scheduled_time(period, first_patient_schedule_time):
+        """ return the first time, and boolean that inform if the time is the 
+            theorical real time or not."""
+        if period.begin <= first_patient_schedule_time:
+            return (period.begin, period.begin)
+        return (first_patient_schedule_time, period.begin)
+
+    def _get_last_scheduled_time(period, last_patient_scheduled_time):
+        """ see _get_fist_schedule_time()"""
+        if period.end >= last_patient_scheduled_time:
+            return (period.end, period.end)
+        return (last_patient_scheduled_time, period.end)
+
+    def _get_period_schedule(meetings, period, limit_min=None, limit_max=None):
+        if period:
+            if limit_max:
+                meetings = meetings.filter(
+                            cast(schedule.Agenda.endtime, Time) < limit_max)
+            if limit_min:
+                meetings = meetings.filter(
+                            cast(schedule.Agenda.starttime, Time) > limit_min)
+        meetings = meetings.order_by(schedule.Agenda.starttime).all()
+
+        try:
+            first_patient_schedule_time = _get_first_meeting_time(meetings[0])
+            last_patient_schedule_time = _get_last_meeting_time(meetings[-1])
+        except IndexError:
+            if not period:
+                return ( (None, None), None, (None, None) )
+            else:
+                return ( (None, period.begin), None, (None, period.end) )
+        if not period:  
+            return ( (first_patient_schedule_time, None), meetings, 
+                        (last_patient_schedule_time, None) 
+                    )
+        return ( _get_first_scheduled_time( period,
+                                            first_patient_schedule_time),
+                    meetings, 
+                    _get_last_scheduled_time(period, 
+                                            last_patient_schedule_time)
+                )
+        
     dateday = datetime.datetime.strptime(dateday,'%Y-%m-%d').date()
-    summary_agenda_form = get_summary_agenda_form(dateday)
-    if not dentist_id:
-        return redirect(url_for('index'))
     nextday = dateday + datetime.timedelta(days=1)
     prevday = dateday - datetime.timedelta(days=1)
-    meetings = (
-        meta.session.query(schedule.Agenda)
-            .filter(or_(
-                cast(schedule.Agenda.starttime, Date) == (dateday),
-                cast(schedule.Agenda.endtime, Date) == (dateday) 
-                )
-            )
-            .filter(
-                schedule.Appointment.dentist_id == dentist_id,
-                schedule.Appointment.dental_unit_id == dental_unit_id
-            )
-            .all()
-    )
+    
+    summary_agenda_form = get_summary_agenda_form(dateday)
 
+    dentist = ( meta.session.query(users.OdontuxUser)
+                    .filter(users.OdontuxUser.id == dentist_id)
+                    .one()
+    )
+    dental_unit = ( meta.session.query(users.DentalUnit)
+                    .filter(users.DentalUnit.id == dental_unit_id)
+                    .one()
+    )
+    day_timesheet = ( meta.session.query(users.TimeSheet)
+                        .filter(
+                            users.TimeSheet.user_id == dentist.id,
+                            users.TimeSheet.weekday == dateday.isoweekday(),
+                        )
+                        .order_by(users.TimeSheet.begin)
+                        .all()
+    )
+    meetings = ( meta.session.query(schedule.Agenda)
+                    .filter(or_(
+                        cast(schedule.Agenda.starttime, Date) == (dateday),
+                        cast(schedule.Agenda.endtime, Date) == (dateday) 
+                        ),
+                        schedule.Appointment.dentist_id == dentist_id,
+                        schedule.Appointment.dental_unit_id == dental_unit_id
+                    )
+    )
+    
+    def _get_limit_min(period, period_break):
+        period_begin = _time_to_datetime(period.begin)
+        interval_break_start =\
+                        _time_to_datetime(period_break[period.period - 1][1])
+        interval_break_end =\
+                        _time_to_datetime(period_break[period.period][0])
+        interval_break_duration = interval_break_end - interval_break_start
+        return (period_begin - (interval_break_duration / 2 )).time()
+
+    def _get_limit_max(period, period_break):
+        period_end = _time_to_datetime(period.end)
+        interval_break_start =\
+                        _time_to_datetime(period_break[period.period][1])
+        interval_break_end =\
+                        _time_to_datetime(period_break[period.period + 1][0])
+        interval_break_duration = interval_break_end - interval_break_start
+        return (period_end + (interval_break_duration /2)).time()
+
+    if not day_timesheet:
+        agenda_day[0] = _get_period_schedule(meetings, None)
+    else:
+        period_break = { period.period: (period.begin , period.end) 
+                                                for period in day_timesheet }
+        for period in day_timesheet:
+            limit_min = limit_max = None
+            if len(period_break) > period.period * 2:
+                limit_max = _get_limit_max(period, period_break)
+            if period.period > 1:
+                limit_min = _get_limit_min(period, period_break)
+            
+            agenda_day[period.period] = _get_period_schedule(meetings, period,
+                                                        limit_min, limit_max )
+
+
+    ## For scheduling new patients
+    schedule_new_patient_form = ScheduleNewPatientForm(request.form)
+    schedule_new_patient_form.day.data = dateday
+    schedule_new_patient_form.dentist_id.data = dentist.id
+    schedule_new_patient_form.dental_unit_id.data = dental_unit.id
+    schedule_new_patient_form.date_taker_id.data = session['user_id']
     # dateday is return to create links to previous and next day
-    return render_template('agenda_day.html', meetings=meetings,
+    return render_template('agenda_day.html',
                             dateday=dateday, nextday=nextday, prevday=prevday,
                             calendar=calendar,
+                            constants=constants,
+                            agenda_day=agenda_day
                             summary_agenda_form=summary_agenda_form,
-                            dentist_id=dentist_id, dental_unit_id=dental_unit_id)
+                            sched_new_pat_form=schedule_new_patient_form,
+                            dentist=dentist, 
+                            dental_unit=dental_unit,
+                            )
 
+@app.route('/schedule/new_patient', methods=['POST'])
+def schedule_new_patient():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    sched_new_pat_form = ScheduleNewPatientForm(request.form)
+    if sched_new_pat_form.validate():
+        try:
+            hour = int(sched_new_pat_form.starttime.data.split(":")[0])
+            minute = int(sched_new_pat_form.starttime.data.split(":")[1])
+            h_duration = int(sched_new_pat_form.duration.data.split(":")[0])
+            m_duration = int(sched_new_pat_form.duration.data.split(":")[1])
+        except (ValueError, IndexError, TypeError):
+            return redirect(url_for('display_day', 
+                        dateday=sched_new_pat_form.day.data,
+                        dentist_id=sched_new_pat_form.dentist_id.data,
+                        dental_unit_id=sched_new_pat_form.dental_unit_id.data))
+
+        (year, month, day) = ( sched_new_pat_form.day.data.year,
+                                    sched_new_pat_form.day.data.month,
+                                    sched_new_pat_form.day.data.day )
+
+        
+        values = {
+            'dentist_id': sched_new_pat_form.dentist_id.data,
+            'dental_unit_id': sched_new_pat_form.dental_unit_id.data,
+            'date_taker_id': sched_new_pat_form.date_taker_id.data,
+            'starttime': datetime.datetime( year, month, day, hour, minute),
+            'endtime': ( datetime.datetime(year, month, day, hour, minute) +
+                        datetime.timedelta(hours=h_duration) + 
+                        datetime.timedelta(minutes=m_duration)
+                        ),
+            'comment': sched_new_pat_form.comment.data,
+
+        }
+        new_schedule_patient = schedule.Agenda(**values)
+        meta.session.add(new_schedule_patient)
+        meta.session.commit()
+
+    return redirect(url_for('display_day', 
+                        dateday=sched_new_pat_form.day.data,
+                        dentist_id=sched_new_pat_form.dentist_id.data,
+                        dental_unit_id=sched_new_pat_form.dental_unit_id.data))
 
 def agenda_handler(day, starthour=0, startmin=0, durationhour=0, durationmin=0,
                    endhour=0, endmin=0):

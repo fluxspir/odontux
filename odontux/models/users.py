@@ -78,6 +78,7 @@ class OdontuxUser(Base):
     dentist_supervisor_id = Column(Integer, ForeignKey('odontux_user.id'),
                                                             default=None)
     patients = relationship("Patient", backref="user")
+    #timesheet = relationship('TimeSheet')
 
 class TimeSheet(Base):
     __tablename__ = 'time_sheet'
