@@ -156,7 +156,7 @@ def display_day(dateday, dentist_id, dental_unit_id):
                                 (start_time, period_starttime),
                                 [ meetings ],
                                 (end_time, period_endtime),
-                            ),
+                        ),
                                 ..., 
         }
     """
@@ -184,14 +184,39 @@ def display_day(dateday, dentist_id, dental_unit_id):
             return (period.end, period.end)
         return (last_patient_scheduled_time, period.end)
 
-    def _get_period_schedule(meetings, period, limit_min=None, limit_max=None):
+
+    def _get_limit_min(period, period_break):
+        period_begin = _time_to_datetime(period.begin)
+        interval_break_start =\
+                        _time_to_datetime(period_break[period.period - 1][1])
+        interval_break_end =\
+                        _time_to_datetime(period_break[period.period][0])
+        interval_break_duration = interval_break_end - interval_break_start
+        return (period_begin - (interval_break_duration / 2 )).time()
+
+    def _get_limit_max(period, period_break):
+        period_end = _time_to_datetime(period.end)
+        interval_break_start =\
+                        _time_to_datetime(period_break[period.period][1])
+        interval_break_end =\
+                        _time_to_datetime(period_break[period.period + 1][0])
+        interval_break_duration = interval_break_end - interval_break_start
+        return (period_end + (interval_break_duration /2)).time()
+
+    def get_period_schedule(meetings, period, limit_min=None, limit_max=None):
         if period:
             if limit_max:
                 meetings = meetings.filter(
-                            cast(schedule.Agenda.endtime, Time) < limit_max)
+                        cast(schedule.Agenda.endtime, Time) < limit_max)
+            else:
+                meetings = meetings.filter(
+                        cast(schedule.Agenda.endtime, Time) < period.end)
             if limit_min:
                 meetings = meetings.filter(
-                            cast(schedule.Agenda.starttime, Time) > limit_min)
+                        cast(schedule.Agenda.starttime, Time) > limit_min)
+            else:
+                meetings = meetings.filter(
+                        cast(schedule.Agenda.starttime, Time) > period.begin)
         meetings = meetings.order_by(schedule.Agenda.starttime).all()
 
         try:
@@ -212,7 +237,8 @@ def display_day(dateday, dentist_id, dental_unit_id):
                     _get_last_scheduled_time(period, 
                                             last_patient_schedule_time)
                 )
-        
+ 
+       
     dateday = datetime.datetime.strptime(dateday,'%Y-%m-%d').date()
     nextday = dateday + datetime.timedelta(days=1)
     prevday = dateday - datetime.timedelta(days=1)
@@ -245,26 +271,8 @@ def display_day(dateday, dentist_id, dental_unit_id):
                     )
     )
     
-    def _get_limit_min(period, period_break):
-        period_begin = _time_to_datetime(period.begin)
-        interval_break_start =\
-                        _time_to_datetime(period_break[period.period - 1][1])
-        interval_break_end =\
-                        _time_to_datetime(period_break[period.period][0])
-        interval_break_duration = interval_break_end - interval_break_start
-        return (period_begin - (interval_break_duration / 2 )).time()
-
-    def _get_limit_max(period, period_break):
-        period_end = _time_to_datetime(period.end)
-        interval_break_start =\
-                        _time_to_datetime(period_break[period.period][1])
-        interval_break_end =\
-                        _time_to_datetime(period_break[period.period + 1][0])
-        interval_break_duration = interval_break_end - interval_break_start
-        return (period_end + (interval_break_duration /2)).time()
-
     if not day_timesheet:
-        agenda_day[0] = _get_period_schedule(meetings, None)
+        agenda_day[0] = get_period_schedule(meetings, None)
     else:
         period_break = { period.period: (period.begin , period.end) 
                                                 for period in day_timesheet }
@@ -275,10 +283,10 @@ def display_day(dateday, dentist_id, dental_unit_id):
             if period.period > 1:
                 limit_min = _get_limit_min(period, period_break)
             
-            agenda_day[period.period] = _get_period_schedule(meetings, period,
+            agenda_day[period.period] = get_period_schedule(meetings, period,
                                                         limit_min, limit_max )
 
-
+    
     ## For scheduling new patients
     schedule_new_patient_form = ScheduleNewPatientForm(request.form)
     schedule_new_patient_form.day.data = dateday
@@ -288,6 +296,7 @@ def display_day(dateday, dentist_id, dental_unit_id):
     # dateday is return to create links to previous and next day
     return render_template('agenda_day.html',
                             dateday=dateday, nextday=nextday, prevday=prevday,
+                            datetime=datetime,
                             calendar=calendar,
                             constants=constants,
                             agenda_day=agenda_day,

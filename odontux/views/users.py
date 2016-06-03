@@ -98,7 +98,7 @@ class DentalOfficeForm(Form):
 
 def generate_timesheet_form(user_role):
     timesheet_form = {}
-    for weekday in range(7):
+    for weekday in range(1,8):
         timesheet_form[weekday] = {}
         for period in constants.PERIODS.keys():
             timesheet_form[weekday][period] =\
@@ -348,7 +348,7 @@ def update_user(body_id, form_to_display):
 
     timesheet_form = generate_timesheet_form(user.role)
     # populate timesheet_form
-    for weekday in range(7):
+    for weekday in range(1,8):
         for period in constants.PERIODS.keys():
             TS = (
                 meta.session.query(users.TimeSheet)
@@ -517,7 +517,7 @@ def update_timesheet(body_id):
     
     timesheet_form = generate_timesheet_form(user.role)
     
-    for weekday in range(7):
+    for weekday in range(1,8):
         for period in constants.PERIODS.keys():
             if not timesheet_form[weekday][period].validate():
                 continue
