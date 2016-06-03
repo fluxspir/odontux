@@ -65,9 +65,12 @@
           {{ meeting.starttime.time() }}
           {{ meeting.endtime - meeting.starttime }}
           {% if meeting.appointment %}
+            <a href="{{ url_for('patient_appointment',
+                                appointment_id=meeting.appointment.id) }}">
             {{ meeting.appointment.patient.lastname }} 
                 {{ meeting.appointment.patient.firstname }}
             {{ meeting.appointment.reason }}
+            </a>
           {% else %}
             <a href="{{ url_for('add_patient') }}">{{ meeting.comment }}</a>
           {% endif %}
