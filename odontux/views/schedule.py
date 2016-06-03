@@ -290,7 +290,7 @@ def display_day(dateday, dentist_id, dental_unit_id):
                             dateday=dateday, nextday=nextday, prevday=prevday,
                             calendar=calendar,
                             constants=constants,
-                            agenda_day=agenda_day
+                            agenda_day=agenda_day,
                             summary_agenda_form=summary_agenda_form,
                             sched_new_pat_form=schedule_new_patient_form,
                             dentist=dentist, 
