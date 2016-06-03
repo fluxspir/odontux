@@ -43,7 +43,7 @@ def login():
                     session['username'] = user.username
                     session['user_id'] = user.id
                     session['role'] = int(user.role)
-                    session['ROLES'] = constants.ROLES_LIST
+                    session['ROLES'] = constants.ROLES.items()
                     session['TOOTH_STATES'] = constants.TOOTH_STATES
                     session['ROLE_DENTIST'] = constants.ROLE_DENTIST
                     session['ROLE_NURSE'] = constants.ROLE_NURSE
@@ -52,8 +52,6 @@ def login():
                     session['ROLE_ADMIN'] = constants.ROLE_ADMIN
                     session['ROLE_PATIENT'] = constants.ROLE_PATIENT
                     session['avatar_id'] = user.avatar_id
-                    session['isoweekdays'] = constants.ISOWEEKDAYS 
-                    session['months'] = constants.MONTHS
                     session['UNITIES'] = [ ( id, UNIT[0] ) for id, UNIT in
                                             constants.UNITIES.items() ]
                     for unit in constants.UNITIES.items():

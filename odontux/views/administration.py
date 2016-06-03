@@ -87,7 +87,6 @@ def enter_patient_file(body_id):
             checks.quit_appointment()
         return render_template('patient_file.html', patient=patient)
 
-@app.route('/patient/add/', methods=['GET', 'POST'])
 @app.route('/add/patient/', methods=['GET', 'POST'])
 def add_patient():
     """ Adding a new patient in database

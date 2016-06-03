@@ -43,3 +43,9 @@ left:50%;
 width:50%;
 height:100%;
 }
+
+#agenda_left {
+float:left;
+height:100%;
+width:15%;
+}

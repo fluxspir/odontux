@@ -14,52 +14,6 @@ home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
 LOCALE = parser.get("environment", "locale").title()
 
-MONDAY = 1
-TUESDAY = 2
-WEDNESDAY = 3
-THURSDAY = 4
-FRIDAY = 5
-SATURDAY = 6
-SUNDAY = 7
-
-ISOWEEKDAYS = {
-    MONDAY: _('Monday'),
-    TUESDAY: _('Tuesday'),
-    WEDNESDAY: _('Wednesday'),
-    THURSDAY: _('Thursday'),
-    FRIDAY: _('Friday'),
-    SATURDAY: _('Saturday'),
-    SUNDAY: _('Sunday'),
-    }
-
-JANUARY = 1
-FEBRUARY = 2
-MARCH = 3
-APRIL = 4
-MAY = 5
-JUNE = 6
-JULY = 7
-AUGUST = 8
-SEPTEMBER = 9
-OCTOBER = 10
-NOVEMBER = 11
-DECEMBER = 12
-
-MONTHS = {
-    JANUARY: _("January"),
-    FEBRUARY: _("February"),
-    MARCH: _('March'),
-    APRIL: _('April'),
-    MAY: _('May'),
-    JUNE: _('June'),
-    JULY: _('July'),
-    AUGUST: _('August'),
-    SEPTEMBER: _('September'),
-    OCTOBER: _('October'),
-    NOVEMBER: _('November'),
-    DECEMBER: _('December'),
-    }
-
 T11_NAME = _("11") # _("Incisivo central superior right permanent")
 T12_NAME = _("12") # _("Incisivo laterial superior right permanent")
 T13_NAME = _("13") # _("Canina superior right permanent")
@@ -123,12 +77,12 @@ T85_NAME = _("85") # _("Second Molar inferior right deciduous")
 # ------------------------------------
 
 
-ROLE_DENTIST = 0
-ROLE_NURSE = 1
-ROLE_ASSISTANT = 2
-ROLE_SECRETARY = 3
-ROLE_ADMIN = 4
-ROLE_PATIENT = 5
+ROLE_DENTIST = 1
+ROLE_NURSE = 2
+ROLE_ASSISTANT = 3
+ROLE_SECRETARY = 4
+ROLE_ADMIN = 5
+ROLE_PATIENT = 6
 
 ROLES = { ROLE_DENTIST: _("dentist"),
           ROLE_NURSE: _("nurse"),
@@ -137,9 +91,18 @@ ROLES = { ROLE_DENTIST: _("dentist"),
           ROLE_ADMIN: _("admin"),
           ROLE_PATIENT: _("patient"),
         }
-ROLES_LIST = ROLES.items()  #ROLES_LIST = [(k, ROLES[k]) for k in ROLES.keys()]
 
 KID_AGE = 13
+
+PERIOD_MORNING = 1
+PERIOD_AFTERNOON = 2
+PERIOD_NIGHT = 3
+
+PERIODS = {
+    PERIOD_MORNING: _('Morning'),
+    PERIOD_AFTERNOON: _('Afternoon'),
+    PERIOD_NIGHT: _('Night')
+}
 
 # ------------------------------------
 # Anamnesis
@@ -580,31 +543,6 @@ ROOT_STATES = {
             ROOT_STATE_POST_CORE: ( _("prosthetic core"), ),
             }
 
-#ROOT_CANAL_CENTRAL = 1
-#ROOT_CANAL_BUCCAL = 2
-#ROOT_CANAL_LINGUAL = 4
-#ROOT_CANAL_MESIAL = 8
-#ROOT_CANAL_DISTAL = 16 
-#ROOT_CANAL_MESIO_BUCCAL = 32
-#ROOT_CANAL_MESIO_LINGUAL = 64
-#ROOT_CANAL_DISTO_BUCCAL = 128
-#ROOT_CANAL_DISTO_LINGUAL = 256
-#ROOT_CANAL_MESIO_BUCCAL_2 = 512
-#
-#ROOT_CANALS = {
-#            ROOT_CANAL_ALL: ( _("all"), ),
-#            ROOT_CANAL_CENTRAL: ( _("central"), ),
-#            ROOT_CANAL_BUCCAL: ( _("buccal"), ),
-#            ROOT_CANAL_LINGUAL: ( _("lingual"), ),
-#            ROOT_CANAL_MESIAL: ( _("mesial"), ),
-#            ROOT_CANAL_DISTAL: ( _("distal"), ),
-#            ROOT_CANAL_MESIO_BUCCAL: ( _("mesio-buccal"), ),
-#            ROOT_CANAL_MESIO_LINGUAL: ( _("mesio-lingual"), ),
-#            ROOT_CANAL_DISTO_BUCCAL: ( _("disto-buccal"), ),
-#            ROOT_CANAL_DISTO_LINGUAL: ( _("disto-lingual"), ),
-#            ROOT_CANAL_MESIO_BUCCAL_2: ( _("mesio-buccal 2"), ),
-#            }
-
 PERIODONTAL_STATE_SANE = 0
 PERIODONTAL_STATE_GINGIVITIS = 1
 PERIODONTAL_STATE_PARODONTITIS = 2
@@ -614,23 +552,6 @@ PERIODONTAL_STATES = {
             PERIODONTAL_STATE_GINGIVITIS: ( _('gingivitis'), ),
             PERIODONTAL_STATE_PARODONTITIS: ( _('parodontitis'), ),
             }
-
-#PERIODONTAL_LOC_MESIO_BUCCAL = 1
-#PERIODONTAL_LOC_BUCCAL = 2
-#PERIODONTAL_LOC_DISTO_BUCCAL = 3
-#PERIODONTAL_LOC_DISTO_LINGUAL = 4
-#PERIODONTAL_LOC_LINGUAL = 5
-#PERIODONTAL_LOC_MESIO_LINGUAL = 6
-#
-#PERIODONTAL_LOCATIONS = {
-#            PERIODONTAL_LOC_MESIO_BUCCAL: _('mesio buccal'),
-#            PERIODONTAL_LOC_BUCCAL: _('buccal'),
-#            PERIODONTAL_LOC_DISTO_BUCCAL: _('disto buccal'),
-#            PERIODONTAL_LOC_DISTO_LINGUAL: _('disto lingual'),
-#            PERIODONTAL_LOC_LINGUAL: _('lingual'),
-#            PERIODONTAL_LOC_MESIO_LINGUAL: _('mesio lingual'),
-#            }
-#
 
 TOOTH_EVENT_LOCATION_TOOTH = 0
 TOOTH_EVENT_LOCATION_CROWN = 1

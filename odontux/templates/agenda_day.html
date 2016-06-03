@@ -1,80 +1,84 @@
-{% macro date_choice() %}
-  {% from "_formhelpers.html" import render_simple_field_line %}
-    <br />
-        <a href="{{ url_for('display_day', dateday=prevday, 
-                                          dentist_id=dentist_id, 
-                                          dental_unit_id=dental_unit_id) }}">
-          Previous Day</a>
-
-        <form class="inline" method="post" 
-                            action="{{ url_for('agenda_date', 
-                                    dateday=summary_agenda_form.day.data, 
-                                    dentist_id=summary_agenda_form.dentist_id.data, 
-                                    dental_unit_id=summary_agenda_form.dental_unit_id.data) }}">
-          {{ render_simple_field_line( summary_agenda_form.day ) }}
-          {{ isoweekday }}
-          {{ render_simple_field_line( summary_agenda_form.dentist_id ) }}
-          {{ render_simple_field_line( summary_agenda_form.dental_unit_id) }}
-          <input type="submit" value="Go" />
-        </form>
-
-        <a href="{{ url_for('display_day', dateday=nextday, 
-                                          dentist_id=dentist_id, 
-                                          dental_unit_id=dental_unit_id) }}">
-          Next Day</a>
-{% endmacro %}
-
-
-{% extends "summary_agenda.html" %}
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_field,
+                                    render_simple_hidden_field_line %}
+{% extends "header.html" %}
 
 {% block main %}
 
-  {% if meetings %}
-      {{ date_choice() }}
-      <br />
-      <br />
-    <table border=1>
-      <caption>
-        Appointments on {{ summary_agenda_form.day.data }}
-      </caption>
-      <tr>
-        <th></th>
-        <th>Time</th>
-        <th>Duration</th>
-        <th>Name</th>
-        <th>Reason</th>
-        <th></th>
-      </tr>
-    {% for meeting in meetings %}
-      <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ meeting.starttime.time() }}</td>
-        <td>{{ meeting.endtime - meeting.starttime }}</td>
-        
-        {% if meeting.appointment %}
-          <td>{{ meeting.appointment.patient.lastname }} 
-              {{ meeting.appointment.patient.firstname }}
-          </td>
-          <td>{{ meeting.appointment.reason }}</td>
-          <td>
-            <form method="post" action="{{ url_for('enter_patient_appointment') }}">
-              <input type="hidden" name="patient_id" value={{ meeting.appointment.patient_id }} />
-              <input type="hidden" name="appointment_id" value={{ meeting.appointment.id }} />
-              <input type="submit" value="Go" />
-            </form>
-          </td>
-        {% else %}
-          <td>New patient : {{ meeting.comment }}</td>
-          <td> </td>
-          <td> </td>
-        {% endif %}
+<div id="agenda_left">
 
-      </tr>
-    {% endfor %}
-    </table>
-  
-  
-  {% else %}
-    {{ date_choice() }}
-  {% endif %}
+    <center>
+      <a href="{{ url_for('display_day', 
+                                    dateday=datetime.date.today(),
+                                    dentist_id=dentist.id,
+                                    dental_unit_id=dental_unit.id) }}">
+              Today 
+      </a><br /><br />
+      <a href="{{ url_for('display_day', dateday=prevday, 
+                                              dentist_id=dentist.id, 
+                                              dental_unit_id=dental_unit.id) }}">
+              ← {{ calendar.day_name[prevday.weekday()] }} {{ prevday.day }}
+      </a><br /><br />
+
+                <strong>
+                  {{ calendar.day_name[dateday.weekday()] }}
+                </strong>
+               {{ render_sfl_wol(summary_agenda_form.day) }}
+              <br /><br />
+
+      <a href="{{ url_for('display_day', dateday=nextday, 
+                                              dentist_id=dentist.id, 
+                                              dental_unit_id=dental_unit.id) }}">
+              {{ calendar.day_name[nextday.weekday()] }} {{ nextday.day }} →
+      </a><br /><br />
+
+      {{ dentist.firstname }} {{ dentist.lastname }}<br />
+      {{ dental_unit.name}}<br /><br />
+
+  <table>
+    <caption>
+      Add appointment for new patient
+    </caption>
+    <tr>
+      <td>
+      <form method='post' action="{{ url_for('schedule_new_patient') }}">
+        {{ render_simple_hidden_field_line(sched_new_pat_form.day) }}
+        {{ render_simple_hidden_field_line(sched_new_pat_form.dentist_id) }}
+        {{ render_simple_hidden_field_line(sched_new_pat_form.dental_unit_id) }}
+        {{ render_simple_hidden_field_line(sched_new_pat_form.date_taker_id) }}
+        {{ render_simple_field(sched_new_pat_form.starttime) }}
+        {{ render_simple_field(sched_new_pat_form.duration) }}
+        {{ render_simple_field(sched_new_pat_form.comment) }}
+        <input type='submit' value='add'>
+      </form>
+      </td>
+    </tr>
+  </table>
+
+    </center>
+</div>
+
+  {% for period, period_datas in agenda_day.items() %}
+    <div id={{ constants.PERIODS[period] }}>
+      {% if period_datas[1] %}
+        {% for meeting in period_datas[1] %}
+          {{ loop.index }}
+          {{ meeting.starttime.time() }}
+          {{ meeting.endtime - meeting.starttime }}
+          {% if meeting.appointment %}
+            <a href="{{ url_for('patient_appointment',
+                                appointment_id=meeting.appointment.id) }}">
+            {{ meeting.appointment.patient.lastname }} 
+                {{ meeting.appointment.patient.firstname }}
+            {{ meeting.appointment.reason }}
+            </a>
+          {% else %}
+            <a href="{{ url_for('add_patient') }}">{{ meeting.comment }}</a>
+          {% endif %}
+        <br />
+        {% endfor %}
+      {% endif %}
+    </div>
+  {% endfor %}
+
 {% endblock %}
+
