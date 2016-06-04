@@ -63,8 +63,6 @@ class Agenda(Base):
     endtime = Column(DateTime, nullable=False)
     comment = Column(String)
 
-
-
 class AppointmentMemo(Base):
     __tablename__ = 'note'
     id = Column(Integer, primary_key=True)

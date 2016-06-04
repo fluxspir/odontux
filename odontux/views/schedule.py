@@ -67,6 +67,22 @@ class ScheduleNewPatientForm(Form):
                                         render_kw={'size':'8px'})
     comment = TextAreaField(_('Name(...)'), [validators.Required()])
 
+class UpdateMeeting(Form):
+    date_taker_id = HiddenField(_('date_taker'))
+    day = DateField(_('Day'))
+    dentist_id = SelectField(_('dentist'))
+    dental_unit_id = SelectField(_('dental_unit'))
+    starttime = TextField(_('Start'), [validators.Required()],
+                                        render_kw={'size':'8px'} )
+    duration = TextField(_('Duration'), [validators.Required()],
+                                        render_kw={'size':'8px'})
+
+class UpdateMeetingNewPatientForm(UpdateMeeting):
+    comment = TextAreaField(_('Name(...)'), [validators.Required()])
+
+class UpdateMeetingKnownPatient(UpdateMeeting):
+    appointment_id = HiddenField(_('appointment'))
+    reason = TextAreaField(_('Reason'))
 
 def get_appointment_field_list():
     return [ "patient_id", "dentist_id", "emergency", "reason", "diagnostic", 
@@ -141,10 +157,11 @@ def agenda(year=None, month=None, day=None):
                             datetime=datetime,
                             calendar=calendar,
                             cal=cal)
-
+@app.route('/agenda/day?date=<dateday>&dentist=<int:dentist_id>'
+            '&dental_unit_id=<int:dental_unit_id>&meeting_id=<int:meeting_id>')
 @app.route('/agenda/day?date=<dateday>&dentist=<int:dentist_id>'
             '&dental_unit_id=<int:dental_unit_id>')
-def display_day(dateday, dentist_id, dental_unit_id):
+def display_day(dateday, dentist_id, dental_unit_id, meeting_id=0):
     """ 
     For viewing all appointments occured the day "dateday",
     and create links for "previous_day" and "next_day"
@@ -293,6 +310,44 @@ def display_day(dateday, dentist_id, dental_unit_id):
     schedule_new_patient_form.dentist_id.data = dentist.id
     schedule_new_patient_form.dental_unit_id.data = dental_unit.id
     schedule_new_patient_form.date_taker_id.data = session['user_id']
+
+    if meeting_id:
+        meeting = ( meta.session.query(schedule.Agenda)
+                        .filter(schedule.Agenda.id == meeting_id)
+                        .one()
+        )
+        if meeting.appointment_id:
+            meeting_form = UpdateMeetingKnownPatientForm(request.form)
+            meeting_form.appointment_id.data = meeting.appointment_id
+            meeting_form.appointment.reason.data = meeting.appointment.reason
+        else:
+            meeting_form = UpdateMeetingNewPatientForm(request.form)
+            meeting_form.comment.data = meeting.comment
+        
+        dentists = ( meta.session.query(users.OdontuxUser)
+                    .filter(users.OdontuxUser.role == constants.ROLE_DENTIST)
+                    .all()
+        )
+        dental_units = meta.session.query(users.DentalUnit).all()
+        meeting_form.dentist_id.choices = [ 
+                ( dentist.id, dentist.firstname + " " + dentist.lastname )
+                                                    for dentist in dentists ]
+        meeting_form.dental_unit_id.choices = [ (DU.id, DU.name) 
+                                                    for DU in dental_units ]
+
+        meeting_form.dentist_id.data = meeting.dentist_id
+        meeting_form.dental_unit_id.data = meeting.dental_unit_id
+        meeting_form.date_taker_id.data = session['user_id']
+        meeting_form.day.data = meeting.starttime.date()
+        meeting_form.starttime.data = meeting.starttime.time()
+        duration = ( meeting.endtime - meeting.starttime ).total_seconds()
+        meeting_form.duration.data = ( str( int(duration / 3600) ) + ":" +
+                                        str( int( (duration % 3600) / 60) )
+                                    )
+
+    else:
+        meeting = meeting_form = None
+
     # dateday is return to create links to previous and next day
     return render_template('agenda_day.html',
                             dateday=dateday, nextday=nextday, prevday=prevday,
@@ -304,7 +359,61 @@ def display_day(dateday, dentist_id, dental_unit_id):
                             sched_new_pat_form=schedule_new_patient_form,
                             dentist=dentist, 
                             dental_unit=dental_unit,
+                            meeting=meeting,
+                            meeting_form=meeting_form
                             )
+
+@app.route('/update/meeting?meeting_id=<int:meeting_id>', methods=['POST'])
+def update_meeting(meeting_id):
+    def _get_start_and_end_time(meeting_form):
+        day = meeting_form.day.data
+        time_begin = datetime.time(
+                        int(meeting_form.starttime.data.split(":")[0]),
+                        int(meeting_form.starttime.data.split(":")[1])
+        )
+        starttime = datetime.datetime.combine(day, time_begin)
+        hour_duration = int(meeting_form.duration.data.split(":")[0])
+        minute_duration = int(meeting_form.duration.data.split(":")[1])
+        duration = datetime.timedelta(minutes=(
+                                    hour_duration * 60 + minute_duration))
+        endtime = starttime + duration
+        return (starttime, endtime)
+
+    meeting = ( meta.session.query(schedule.Agenda)
+                .filter(schedule.Agenda.id == meeting_id).one() )
+    if meeting.appointment_id:
+        meeting_form = UpdateMeetingKnownPatientForm(request.form)
+    else:
+        meeting_form = UpdateMeetingNewPatientForm(request.form)
+
+    dentists = ( meta.session.query(users.OdontuxUser)
+                .filter(users.OdontuxUser.role == constants.ROLE_DENTIST)
+                .all()
+    )
+    dental_units = meta.session.query(users.DentalUnit).all()
+    meeting_form.dentist_id.choices = [ 
+            ( dentist.id, dentist.firstname + " " + dentist.lastname )
+                                                for dentist in dentists ]
+    meeting_form.dental_unit_id.choices = [ (DU.id, DU.name) 
+                                                    for DU in dental_units ]
+    
+    if meeting.appointment_id:
+        meeting.reason = meeting_form.reason.data
+    else:
+        meeting.comment = meeting_form.comment.data
+
+    meeting.date_taker_id = meeting_form.date_taker_id.data
+    meeting.dentist_id = meeting_form.dentist_id.data
+    meeting.dental_unit_id = meeting_form.dental_unit_id.data
+    (starttime, endtime) = _get_start_and_end_time(meeting_form)
+    meeting.starttime = starttime
+    meeting.endtime = endtime
+
+    meta.session.commit()
+
+    return redirect(url_for('display_day', dateday=meeting_form.day.data,
+                            dentist_id=meeting_form.dentist_id.data,
+                            dental_unit_id=meeting_form.dental_unit_id.data) )
 
 @app.route('/schedule/new_patient', methods=['POST'])
 def schedule_new_patient():
