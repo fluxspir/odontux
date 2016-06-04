@@ -23,7 +23,7 @@
                         {{ gesture.name }}</a></td>
         <td style="background-color:{{ gesture.color }};"></td>
         {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
-          <td><a href="{{ url_for('update_gesture'), gesture_id=gesture.id }}">
+          <td><a href="{{ url_for('update_gesture', gesture_id=gesture.id) }}">
                 Update</a>
         {% endif %}
       </tr>

@@ -48,7 +48,8 @@ class AppointmentGestureReferenceForm(Form):
 class PriceForm(Form):
     gesture_id = HiddenField(_('gesture_id'))
     healthcare_plan_id = HiddenField(_('healthcare_plan_id'))
-    price = DecimalField(_('Price'), [validators.Optional()])
+    price = DecimalField(_('Price'), [validators.Optional()],
+                        render_kw={'size':'6px'})
 
 class AssetSterilizedUsedForm(Form):
     asset_sterilized_id = IntegerField(_('Asset sterilized id'),
@@ -300,17 +301,23 @@ def view_gesture(gesture_id):
 
     healthcare_plans_not_in_gesture = (
         meta.session.query(act.HealthCarePlan)
-            .filter(or_(
-                ~act.HealthCarePlan.cotations.any(
-                    act.Gesture.id == gesture.id
-                    ),
-                act.HealthCarePlan.cotations.any(
-                    act.Cotation.active == False
+        .filter(or_(
+            # Gesture that never had the cotation
+            ~act.HealthCarePlan.cotations.any(
+                act.Cotation.gesture_id == gesture.id),
+            # Gesture that already were associated with the cotation
+            act.HealthCarePlan.cotations.any(
+                act.Cotation.id.in_(
+                    meta.session.query(act.Cotation.id)
+                        .filter(
+                            act.Cotation.gesture_id == gesture.id,
+                            act.Cotation.active == False
+                        )
                     )
                 )
-            ).all()
-        )
-    
+            )
+        ).all()
+    )
     return render_template('view_gesture.html', gesture=gesture,
             price_forms=price_forms,
             healthcare_plans_not_in_gesture=healthcare_plans_not_in_gesture)

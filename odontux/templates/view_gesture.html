@@ -9,7 +9,7 @@ Gesture : {{ gesture.id }} : {{ gesture.specialty.name }}, {{gesture.name }}
 
 
 <br /><br />
-Healthcare plans in gesture: <br />
+<strong>Healthcare plans in gesture:</strong> <br />
 {% for cotation, price_form in price_forms %}
   <form method="post" 
         action="{{ url_for('update_cotation') }}">
@@ -19,7 +19,7 @@ Healthcare plans in gesture: <br />
   {{ render_simple_field_line(price_form.price) }}
   {{ cotation.healthcare_plan.active }} 
   <input type="submit" value="Update"> or 
-  <a href="{{ url_for('remove_healthcare_plan_to_gesture',
+  <a href="{{ url_for('remove_healthcare_plan_from_gesture',
                       gesture_id=gesture.id,
                       healthcare_plan_id=cotation.healthcare_plan.id) }}">
     Remove</a>
@@ -29,7 +29,7 @@ Healthcare plans in gesture: <br />
 {% endfor %}
 
 <br />
-Healthcare plan out of gesture: <br />
+<strong>Healthcare plan out of gesture:</strong> <br />
 {% for new_HC_plan in healthcare_plans_not_in_gesture %}
   {{ new_HC_plan.name }} 
   <a href="{{ url_for('add_healthcare_plan_to_gesture', 
