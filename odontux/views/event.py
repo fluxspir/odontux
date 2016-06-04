@@ -39,18 +39,10 @@ def choose_event_location(patient_id, appointment_id):
                         constants.ROLE_ASSISTANT ]
     if not session['role'] in authorized_roles:
         return redirect(url_for('index'))
-    patient = (
-        meta.session.query(administration.Patient)
-            .filter(administration.Patient.id == patient_id)
-            .one()
-        )
-    appointment = (
-        meta.session.query(schedule.Appointment)
-            .filter(schedule.Appointment.id == appointment_id)
-            .one_or_none()
-        )
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(appointment_id)
     if not appointment:
-        return redirect(url_for('add_appointment', body_id=patient_id))
+        appointment = checks.enter_patient_last_appointment(patient_id)
     return render_template('choose_event_location.html',
                                             patient=patient,
                                             appointment=appointment)

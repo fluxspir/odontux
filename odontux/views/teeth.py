@@ -219,14 +219,13 @@ def list_teeth(patient_id):
     
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment()
-    if patient.teeth:
-        teeth = [(tooth.id, 
-                constants.ANATOMIC_LOCATION_TEETH[tooth.codename][1], 
-                constants.TOOTH_STATES[tooth.state], 
-                tooth.surveillance) 
-                for tooth in patient.teeth ]
-    else:
-        teeth = None
+    teeth = []
+    for tooth in patient.teeth:
+        teeth.append( ( tooth.id, 
+                        constants.ANATOMIC_LOCATION_TEETH[tooth.codename][1], 
+                        constants.TOOTH_STATES[tooth.state][0], 
+                        tooth.surveillance )
+                    )
     return render_template('list_teeth.html', patient=patient, 
                             appointment=appointment, teeth=teeth)
 

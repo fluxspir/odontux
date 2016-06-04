@@ -2,14 +2,14 @@
 {% block main %}
 <br />
 
-<a href="{{ url_for('add_event_tooth_located', patient_id=session.patient_id,
-                                appointment_id=session.appointment_id) }}">
+<a href="{{ url_for('add_event_tooth_located', patient_id=patient.id,
+                                appointment_id=appointment.id) }}">
     Add tooth event</a><br />
 <br />
 <br />
 <a href="{{ url_for('add_endo_buccal_event',
-                      patient_id=session.patient_id,
-                      appointment_id=session.appointment_id) }}">
+                      patient_id=patient.id,
+                      appointment_id=appointment.id) }}">
   Add bucal mucosa event</a>
 <br />
 <a href="{{ url_for('add_headneck_event') }}">Add headneck event</a>

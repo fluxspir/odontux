@@ -5,6 +5,7 @@
 # Licence BSD
 #
 
+import pdb
 import sqlalchemy
 from flask import session
 from gettext import gettext as _
@@ -63,9 +64,23 @@ def get_appointment(appointment_id=None):
     appointment = (
         meta.session.query(schedule.Appointment)
             .filter(schedule.Appointment.id == appointment_id
-            ).one()
+            ).one_or_none()
         )
+    
     # case we got here with session['appointment_id'] empty : 
+    session['appointment_id'] = appointment.id
+    return appointment
+
+def enter_patient_last_appointment(patient_id):
+    appointment = ( 
+        meta.session.query(schedule.Appointment)
+            .join(schedule.Agenda)
+            .order_by(schedule.Agenda.starttime.desc())
+            .first()
+    )
+    if not appointment:
+        return redirect(url_for('add_patient_appointment',
+                                        patient_id=session['patient_id']))
     session['appointment_id'] = appointment.id
     return appointment
 
