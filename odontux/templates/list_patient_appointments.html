@@ -3,7 +3,7 @@
 {% extends "summary_patient.html" %}
 
 {% block main %}
-  <a href="{{ url_for('add_appointment', body_id=session.patient_id) }}">Add appointment</a>
+  <a href="{{ url_for('add_patient_appointment', body_id=patient.id) }}">Add appointment</a>
   {% block appointments %}
     {% block appointment_title %}
       {{ appointment_table_opening_tag("appointments") }}
