@@ -510,21 +510,6 @@ CROWN_STATES = {
             CROWN_STATE_BRIDGE: ( _("bridge"), ),
            }
 
-#CROWN_SIDE_OCCLUSAL = 1
-#CROWN_SIDE_BUCCAL = 2
-#CROWN_SIDE_LINGUAL = 4
-#CROWN_SIDE_MESIAL = 8
-#CROWN_SIDE_DISTAL = 16
-#
-#CROWN_SIDES = {
-#            CROWN_SIDE_ALL: ( _("all"), ),
-#            CROWN_SIDE_OCCLUSAL: ( _("occlusal"), ),
-#            CROWN_SIDE_BUCCAL: ( _("buccal"), ),
-#            CROWN_SIDE_LINGUAL: ( _("lingual"), ),
-#            CROWN_SIDE_MESIAL: ( _("mesial"), ),
-#            CROWN_SIDE_DISTAL: ( _("distal"), ),
-#            }
-
 ROOT_STATE_SANE = 0
 ROOT_STATE_PULPOTOMIA = 1
 ROOT_STATE_PULPECTOMIA = 2
