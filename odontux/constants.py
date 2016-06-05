@@ -517,11 +517,11 @@ CROWN_SIDE_MESIAL = 4
 CROWN_SIDE_DISTAL = 5 
 
 CROWN_SIDES = {
-            CROWN_SIDE_OCCLUSAL: ( _("occlusal"), ),
-            CROWN_SIDE_BUCCAL: ( _("buccal"), ),
-            CROWN_SIDE_LINGUAL: ( _("lingual"), ),
-            CROWN_SIDE_MESIAL: ( _("mesial"), ),
-            CROWN_SIDE_DISTAL: ( _("distal"), ),
+            CROWN_SIDE_OCCLUSAL: ( _('O'), _("occlusal"), ),
+            CROWN_SIDE_BUCCAL: ( _('B'), _("buccal"), ),
+            CROWN_SIDE_LINGUAL: ( _('L'), _("lingual"), ),
+            CROWN_SIDE_MESIAL: ( _('M'), _("mesial"), ),
+            CROWN_SIDE_DISTAL: ( _('D'), _("distal"), ),
             }
 
 ROOT_STATE_SANE = 0
@@ -554,16 +554,16 @@ ROOT_CANAL_DISTO_LINGUAL = 9
 ROOT_CANAL_MESIO_BUCCAL_2 = 10
 
 ROOT_CANALS = {
-            ROOT_CANAL_CENTRAL: ( _("central"), ),
-            ROOT_CANAL_BUCCAL: ( _("buccal"), ),
-            ROOT_CANAL_LINGUAL: ( _("lingual"), ),
-            ROOT_CANAL_MESIAL: ( _("mesial"), ),
-            ROOT_CANAL_DISTAL: ( _("distal"), ),
-            ROOT_CANAL_MESIO_BUCCAL: ( _("mesio-buccal"), ),
-            ROOT_CANAL_MESIO_LINGUAL: ( _("mesio-lingual"), ),
-            ROOT_CANAL_DISTO_BUCCAL: ( _("disto-buccal"), ),
-            ROOT_CANAL_DISTO_LINGUAL: ( _("disto-lingual"), ),
-            ROOT_CANAL_MESIO_BUCCAL_2: ( _("mesio-buccal 2"), ),
+            ROOT_CANAL_CENTRAL: ( _('C'), _("central"), ),
+            ROOT_CANAL_BUCCAL: ( _('B'), _("buccal"), ),
+            ROOT_CANAL_LINGUAL: ( _('L'), _("lingual"), ),
+            ROOT_CANAL_MESIAL: ( _('M'), _("mesial"), ),
+            ROOT_CANAL_DISTAL: ( _('D'), _("distal"), ),
+            ROOT_CANAL_MESIO_BUCCAL: ( _('MB'), _("mesio-buccal"), ),
+            ROOT_CANAL_MESIO_LINGUAL: ( _('ML'), _("mesio-lingual"), ),
+            ROOT_CANAL_DISTO_BUCCAL: ( _('DB'), _("disto-buccal"), ),
+            ROOT_CANAL_DISTO_LINGUAL: ( _('DL'), _("disto-lingual"), ),
+            ROOT_CANAL_MESIO_BUCCAL_2: ( _('MB2'), _("mesio-buccal 2"), ),
 }
 
 PERIODONTAL_STATE_SANE = 0

@@ -17,10 +17,23 @@
         {% if constants.TOOTH_EVENT_LOCATIONS[event.location] == 'tooth' %}
           {{ constants.TOOTH_STATES[event.state][0] }}
         {% elif constants.TOOTH_EVENT_LOCATIONS[event.location] == 'crown' %}
-          {{ constants.CROWN_SIDES[event.side][0] }}:
+          {% if event.is_occlusal %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_OCCLUSAL][0] }}{% endif %}
+          {% if event.is_buccal %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_BUCCAL][0] }}{% endif %}
+          {% if event.is_mesial %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_MESIAL][0] }}{% endif %}
+          {% if event.is_distal %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_DISTAL][0] }}{% endif %}
+          {% if event.is_lingual %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_LINGUAL][0] }}{% endif %}
           {{ constants.CROWN_STATES[event.state][0] }}
         {% elif constants.TOOTH_EVENT_LOCATIONS[event.location] == 'root' %}
-          {{ constants.ROOT_CANALS[event.root][0] }}: 
+          {% if event.is_central %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_CENTRAL][0] }}{% endif %}
+          {% if event.is_buccal %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_BUCCAL][0] }}{% endif %}
+          {% if event.is_mesial %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_MESIAL][0] }}{% endif %}
+          {% if event.is_distal %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_DISTAL][0] }}{% endif %}
+          {% if event.is_lingual %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_LINGUAL][0] }}{% endif %}
+          {% if event.is_mesio_buccal %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_MESIO_BUCCAL][0] }}{% endif %}
+          {% if event.is_mesio_lingual %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_MESIO_LINGUAL][0] }}{% endif %}
+          {% if event.is_disto_buccal %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_DISTO_BUCCAL][0] }}{% endif %}
+          {% if event.is_disto_lingual %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_DISTO_LINGUAL][0] }}{% endif %}
+          {% if event.is_mesio_buccal_2 %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_MESIO_BUCCAL_2][0] }}{% endif %}
           {{ constants.ROOT_STATES[event.state][0] }}
 
         {% endif %}
