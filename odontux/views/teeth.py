@@ -248,6 +248,11 @@ def show_tooth(patient_id, tooth_codename):
             )
             .one_or_none()
     )
+    if tooth:
+        gum = (
+            meta.session.query(teeth.Gum)
+                .filter(teeth.Gum.id == tooth.id).one()
+        )
     # we want that appears only events that occured before the 
     # actual_appointment we're in.
     all_event_type = with_polymorphic(teeth.Event, '*')
@@ -273,6 +278,7 @@ def show_tooth(patient_id, tooth_codename):
     return render_template('show_tooth.html', patient=patient,
                                               appointment=actual_appointment,
                                               tooth=tooth,
+                                              gum=gum,
                                               constants=constants,
                                               events=events)
 
@@ -296,8 +302,11 @@ def add_event_tooth_located(patient_id, appointment_id):
 
     tooth_form.choose_tooth_state.choices = [ (id, state[0]) 
                             for id, state in constants.TOOTH_STATES.items() ]
-    event_form.anatomic_location.choices =\
-                                    constants.TOOTH_EVENT_LOCATIONS.items()
+
+    anatomic_locations = constants.TOOTH_EVENT_LOCATIONS.items()
+    event_form.anatomic_location.choices = [ 
+            (id, location[0]) for id, location in anatomic_locations ]
+
     event_form.appointment_id.choices = [
             (a.id, str(a.agenda.starttime.date()) 
             + " " + str(a.agenda.starttime.time()) 

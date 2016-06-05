@@ -584,12 +584,12 @@ PERIODONTAL_LOC_LINGUAL = 5
 PERIODONTAL_LOC_MESIO_LINGUAL = 6
 
 PERIODONTAL_LOCATIONS = {
-            PERIODONTAL_LOC_MESIO_BUCCAL: _('mesio buccal'),
-            PERIODONTAL_LOC_BUCCAL: _('buccal'),
-            PERIODONTAL_LOC_DISTO_BUCCAL: _('disto buccal'),
-            PERIODONTAL_LOC_DISTO_LINGUAL: _('disto lingual'),
-            PERIODONTAL_LOC_LINGUAL: _('lingual'),
-            PERIODONTAL_LOC_MESIO_LINGUAL: _('mesio lingual'),
+            PERIODONTAL_LOC_MESIO_BUCCAL: ( _('MB'), _('mesio buccal') ),
+            PERIODONTAL_LOC_BUCCAL: ( _('B'), _('buccal') ),
+            PERIODONTAL_LOC_DISTO_BUCCAL: ( _('DB'), _('disto buccal') ),
+            PERIODONTAL_LOC_DISTO_LINGUAL: ( _('DL'), _('disto lingual') ),
+            PERIODONTAL_LOC_LINGUAL: ( _('L'), _('lingual') ),
+            PERIODONTAL_LOC_MESIO_LINGUAL: ( _('ML'), _('mesio lingual') ),
             }
 
 TOOTH_EVENT_LOCATION_TOOTH = 0
@@ -598,10 +598,10 @@ TOOTH_EVENT_LOCATION_ROOT = 2
 TOOTH_EVENT_LOCATION_PERIODONTAL = 3
 
 TOOTH_EVENT_LOCATIONS = {
-            TOOTH_EVENT_LOCATION_TOOTH: _("tooth"),
-            TOOTH_EVENT_LOCATION_CROWN: _("crown"),
-            TOOTH_EVENT_LOCATION_ROOT: _("root"),
-            TOOTH_EVENT_LOCATION_PERIODONTAL: _("periodontal"),
+            TOOTH_EVENT_LOCATION_TOOTH: ( _("tooth"), 'tooth' ),
+            TOOTH_EVENT_LOCATION_CROWN: ( _("crown"), 'crown' ),
+            TOOTH_EVENT_LOCATION_ROOT: ( _("root"), 'root' ),
+            TOOTH_EVENT_LOCATION_PERIODONTAL: (_("periodontal"),'periodontal'),
             }
 
 # -------------------------------------------

@@ -13,17 +13,19 @@
 
       {% for event in events %}
         {{ event.appointment.agenda.starttime.date() }}: 
-        {{ constants.TOOTH_EVENT_LOCATIONS[event.location] }} - 
-        {% if constants.TOOTH_EVENT_LOCATIONS[event.location] == 'tooth' %}
+        Location: {{ constants.TOOTH_EVENT_LOCATIONS[event.location][1] }} <br /> 
+        {% if constants.TOOTH_EVENT_LOCATIONS[event.location][1] == 'tooth' %}
           {{ constants.TOOTH_STATES[event.state][0] }}
-        {% elif constants.TOOTH_EVENT_LOCATIONS[event.location] == 'crown' %}
+        {% elif constants.TOOTH_EVENT_LOCATIONS[event.location][1] == 'crown' %}
+          Side(s):
           {% if event.is_occlusal %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_OCCLUSAL][0] }}{% endif %}
           {% if event.is_buccal %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_BUCCAL][0] }}{% endif %}
           {% if event.is_mesial %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_MESIAL][0] }}{% endif %}
           {% if event.is_distal %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_DISTAL][0] }}{% endif %}
           {% if event.is_lingual %}{{ constants.CROWN_SIDES[constants.CROWN_SIDE_LINGUAL][0] }}{% endif %}
-          {{ constants.CROWN_STATES[event.state][0] }}
-        {% elif constants.TOOTH_EVENT_LOCATIONS[event.location] == 'root' %}
+          Status: {{ constants.CROWN_STATES[event.state][0] }}
+        {% elif constants.TOOTH_EVENT_LOCATIONS[event.location][1] == 'root' %}
+          Canal(s):
           {% if event.is_central %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_CENTRAL][0] }}{% endif %}
           {% if event.is_buccal %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_BUCCAL][0] }}{% endif %}
           {% if event.is_mesial %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_MESIAL][0] }}{% endif %}
@@ -34,8 +36,20 @@
           {% if event.is_disto_buccal %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_DISTO_BUCCAL][0] }}{% endif %}
           {% if event.is_disto_lingual %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_DISTO_LINGUAL][0] }}{% endif %}
           {% if event.is_mesio_buccal_2 %}{{ constants.ROOT_CANALS[constants.ROOT_CANAL_MESIO_BUCCAL_2][0] }}{% endif %}
-          {{ constants.ROOT_STATES[event.state][0] }}
-
+          Status: {{ constants.ROOT_STATES[event.state][0] }}
+        {% elif constants.TOOTH_EVENT_LOCATIONS[event.location][1] == 'periodontal' %}
+          Gum status: {{ constants.PERIODONTAL_STATES[gum.state][0] }}
+          {% if event.bleeding %} bleeding {% endif %}<br />
+          Location: 
+            {% if event.is_mesio_buccal %}{{ constants.PERIODONTAL_LOCATIONS[constants.PERIODONTAL_LOC_MESIO_BUCCAL][0] }}{% endif %}
+            {% if event.is_buccal %}{{ constants.PERIODONTAL_LOCATIONS[constants.PERIODONTAL_LOC_BUCCAL][0] }}{% endif %}
+            {% if event.is_disto_buccal %}{{ constants.PERIODONTAL_LOCATIONS[constants.PERIODONTAL_LOC_DISTO_BUCCAL][0] }}{% endif %}
+            {% if event.is_disto_lingual %}{{ constants.PERIODONTAL_LOCATIONS[constants.PERIODONTAL_LOC_DISTO_LINGUAL][0] }}{% endif %}
+            {% if event.is_lingual %}{{ constants.PERIODONTAL_LOCATIONS[constants.PERIODONTAL_LOC_LINGUAL][0] }}{% endif %}
+            {% if event.is_mesio_lingual %}{{ constants.PERIODONTAL_LOCATIONS[constants.PERIODONTAL_LOC_MESIO_LINGUAL][0] }}{% endif %}
+            : {% if event.furcation %} Furcation : {{ event.furcation }} {% endif %}
+              {% if event.recession %} Recession : {{ event.recession }} {% endif %}
+              {% if event.pocket_depth %} Pocket Depth: {{ event.pocket_depth }} {% endif %}
         {% endif %}
 
         <br />
