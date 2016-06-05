@@ -30,6 +30,12 @@ class PaymentType(Base):
     name = Column(String, default="")
     alias = Column(String, default="")
 
+class Majoration(Base):
+    """ """
+    __tablename__ = 'majoration'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
+    percentage = Column(Numeric, nullable=False)
 
 class Payment(Base):
     """

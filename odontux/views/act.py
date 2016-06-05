@@ -14,9 +14,9 @@ from gettext import gettext as _
 from odontux.odonweb import app
 from odontux import constants, checks, gnucash_handler
 from odontux.models import ( meta, act, schedule, administration, traceability,
-                            assets )
+                            assets, teeth )
 from odontux.views import cotation as views_cotation
-from odontux.views import teeth
+
 from odontux.views.log import index
 from odontux.views.patient import list_acts
 
@@ -39,10 +39,12 @@ class GestureForm(Form):
 
 class AppointmentGestureReferenceForm(Form):
     appointment_id = SelectField(_('appointment'), coerce=int)
-    gesture_code = TextField(_('gesture_code'))
     gesture_id = SelectField(_('Choose gesture in list'), coerce=int)
+    code = TextField(_('gesture_code'))
     anatomic_location = TextField(_('Teeth / Anatomic location'), 
                                                     [validators.Required()] )
+    healthcare_plan_id = SelectField(_('Healthcare plan'), coerce=int)
+    price = DecimalField(_('Price'), [validators.Optional()] )
     majoration = SelectField(_('Majoration'), coerce=int)
 
 class PriceForm(Form):
@@ -93,13 +95,14 @@ def get_gesture_choices():
     )
     return [ (gesture.id, gesture.alias) for gesture in gestures ]
 
-def get_appointment_gesture_reference_choice_lists(patient_id):
-    """ """
-    return ( get_appointment_choice_list(patient_id), 
-            get_gesture_choice_list(),
-            teeth.get_tooth_id_choice_list(patient_id))
-
-
+#def get_appointment_gesture_reference_choice_lists(patient_id):
+#    """ """
+#    return ( get_appointment_choice_list(patient_id), 
+#            get_gesture_choice_list(),
+#            #teeth.get_tooth_id_choice_list(patient_id))
+#            )
+#
+#
 ####
 # Specialties
 ####
@@ -395,14 +398,16 @@ def update_cotation():
 def _add_administrativ_gesture(gesture_id, appointment_id, anatomic_location):
     """ """
     values = {}
-    gesture = meta.session.query(act.Gesture).filter(
-              act.Gesture.id == gesture_id).one()
+    gesture = ( meta.session.query(act.Gesture)
+                    .filter(act.Gesture.id == gesture_id)
+                    .one()
+    )
 
     patient = (
         meta.session.query(administration.Patient)
             .filter(administration.Patient.id == session['patient_id'])
             .one()
-        )
+    )
 #    cotation = (
 #        meta.session.query(act.Cotation)
 #            .filter(act.Cotation.id.in_(
@@ -421,7 +426,7 @@ def _add_administrativ_gesture(gesture_id, appointment_id, anatomic_location):
             .one_or_none()
         )
     if tooth_id:
-        values['tooth_id'] = tooth_id
+        values['tooth_id'] = tooth_id[0]
     # the act code
 
     new_gesture = act.AppointmentGestureReference(**values)
@@ -450,7 +455,7 @@ def add_administrativ_gesture(patient_id, appointment_id):
         return redirect(url_for('index'))
 
     # Prepare the formulary dealing with the act of adding an administrativ
-    # act
+    # gesture
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment(appointment_id)
     gesture_form = AppointmentGestureReferenceForm(request.form)
@@ -466,8 +471,8 @@ def add_administrativ_gesture(patient_id, appointment_id):
                                         gesture_form.gesture_code_data)
                     .one_or_none()
                 )
-            if act_id:
-                gesture_form.gesture_id.data = gesture_id
+            if gesture_id:
+                gesture_form.gesture_id.data = gesture_id[0]
         
         new_gesture_id = _add_administrativ_gesture(
                                     gesture_form.gesture_id.data,

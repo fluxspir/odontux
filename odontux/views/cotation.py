@@ -15,7 +15,7 @@ from sqlalchemy import or_, and_
 
 from odontux import constants, checks
 from odontux.odonweb import app
-from odontux.models import meta, act
+from odontux.models import meta, act, compta
 
 class HealthCarePlanForm(Form):
     healthcare_plan_id = HiddenField(_('id'))
@@ -27,6 +27,11 @@ class CotationForm(Form):
     gesture_id = SelectField(_('Gesture'), coerce=int)
     price = DecimalField(_('price'), [validators.Optional()])
     active = BooleanField(_('active'))
+
+class MajorationForm(Form):
+    majoration_id = HiddenField(_('id'))
+    reason = TextField(_('Majoration reason'), [validators.Required()] )
+    percentage = DecimalField(_('Percentage'), [validators.Required()] )
 
 @app.route('/cotation?keywords=<keywords>&ordering=<ordering>')
 def list_cotations(keywords="", ordering=""):
@@ -62,8 +67,6 @@ def add_healthcare_plan():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     healthcare_plan_form = HealthCarePlanForm(request.form)
 
     if request.method == 'POST' and healthcare_plan_form.validate():
@@ -79,9 +82,30 @@ def add_healthcare_plan():
     return render_template('add_healthcare_plan.html', 
                                 healthcare_plan_form=healthcare_plan_form)
 
+@app.route('/add/majoration', methods=['GET', 'POST'])
+def add_majoration():
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    majoration_form = MajorationForm(request.form)
+    if request.method == 'POST' and majoration_form.validate():
+        values = {
+            'name': majoration_form.name.data,
+            'percentage': majoration_form.percentage.data,
+        }
+        new_majoration = compta.Majoration(**values)
+        meta.session.add(new_majoration)
+        meta.session.commit()
+        return redirect(url_for('list_healthcare_plan') )
+
+    return render_template('add_majoration.html',
+                                    majoration_form=majoration_form)
+
 @app.route('/list/healthcare_plan')
 def list_healthcare_plan():
     healthcare_plans = meta.session.query(act.HealthCarePlan).all()
+    majorations = meta.session.query(compta.Majoration).all()
     return render_template('list_healthcare_plan.html', 
                                             healthcare_plans=healthcare_plans)
 
@@ -93,9 +117,6 @@ def update_healthcare_plan(healthcare_plan_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     healthcare_plan = ( meta.session.query(act.HealthCarePlan)
                         .filter(act.HealthCarePlan.id == healthcare_plan_id)
                         .one()
@@ -114,6 +135,31 @@ def update_healthcare_plan(healthcare_plan_id):
                                 healthcare_plan_form=healthcare_plan_form,
                                 healthcare_plan=healthcare_plan)
 
+@app.route('/update/majoration?mid=<int:majoration_id>', methods=['GET', 'POST'])
+def update_majoration(majoration_id):
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    majoration = ( meta.session.query(compta.Majoration)
+                        .filter(compta.Majoration.id == majoration_id)
+                        .one()
+    )
+    majoration_form = MajorationForm(request.Form)
+    
+    if request.method == 'POST' and majoration_form.validate():
+        majoration.name = majoration_form.name.data
+        majoration.percentage = majoration_form.percentage.data
+        meta.session.commit()
+        return redirect(url_for('view_majoration'))
+
+    majoration_form.name.data = majoration.name
+    majoration_form.percentage.data = majoration.percentage
+    majoration_form.majoration_id.data = majoration.id
+    return render_template('update_majoration.html',
+                                    majoration_form=majoration_form)
+
+
 @app.route('/view/healthcare_plan?id=<int:healthcare_plan_id>')
 def view_healthcare_plan(healthcare_plan_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
@@ -121,14 +167,26 @@ def view_healthcare_plan(healthcare_plan_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     healthcare_plan = ( meta.session.query(act.HealthCarePlan)
                         .filter(act.HealthCarePlan.id == healthcare_plan_id)
                         .one()
                     )
     return render_template('view_healthcare_plan.html', 
                                 healthcare_plan=healthcare_plan)
+
+@app.route('/view/majoration?id=<int:majoration_id>')
+def view_majoration(majoration_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    majoration = ( meta.session.query(compta.Majoration)
+                        .filter(compta.Majoration.id == majoration_id)
+                        .one()
+    )
+    return render_template('view_majoration.html', majoration=majoration)
+
 
 @app.route('/add/cotation', methods=['GET','POST'])
 def add_cotation():
