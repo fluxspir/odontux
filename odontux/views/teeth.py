@@ -198,7 +198,7 @@ class PeriodontalEventForm(Form):
     is_lingual = BooleanField(_('lingual'))
     is_mesio_lingual = BooleanField(_('mesio lingual'))
 
-def tooth_sides():
+def crown_sides():
     return [ 'is_occlusal', 'is_buccal', 'is_lingual', 'is_mesial', 
                                                                 'is_distal' ]
 
@@ -314,7 +314,6 @@ def add_event_tooth_located(patient_id, appointment_id):
                             for id, state in constants.ROOT_STATES.items() ]
     periodontal_event_form.choose_periodontal_state.choices = [ (id, state[0]) 
                         for id, state in constants.PERIODONTAL_STATES.items() ]
-    
     if ( request.method == 'POST' and event_form.validate() 
                                                 and tooth_form.validate() ):
 
@@ -329,7 +328,7 @@ def add_event_tooth_located(patient_id, appointment_id):
             'state': tooth_form.choose_tooth_state.data,
             'surveillance': tooth_form.surveillance.data,
         }
-        event_values = {
+        values = {
             'appointment_id': event_form.appointment_id.data,
             'description': event_form.description.data,
             'comment': event_form.comment.data,
@@ -347,7 +346,6 @@ def add_event_tooth_located(patient_id, appointment_id):
             for tooth_codename in teeth_to_add:
                 tooth = get_patient_tooth(patient_id, tooth_codename)
                 _update_tooth_datas(tooth, tooth_values)
-                values = event_values
                 values['tooth_id'] = tooth.id
                 new_tooth_event = teeth.ToothEvent(**values)
                 meta.session.add(new_tooth_event)
@@ -356,16 +354,15 @@ def add_event_tooth_located(patient_id, appointment_id):
         elif ( event_form.anatomic_location.data == 
                                         constants.TOOTH_EVENT_LOCATION_CROWN
         and crown_event_form.validate() ):
-            values = {
+            crown_values = {
                 'state': crown_event_form.choose_crown_state.data,
                 'tooth_shade': crown_event_form.tooth_shade.data,
                 }
-            values.update(event_values)
+            values.update(crown_values)
             for tooth_codename in teeth_to_add:
                 tooth = get_patient_tooth(patient_id, tooth_codename)
                 # working with event_values for state !
                 _update_tooth_datas(tooth, tooth_values)
-                values.update(event_values)
                 values['tooth_id'] = tooth.id
                 for side in crown_sides():
                     values[side] = getattr(crown_event_form, side).data
@@ -376,10 +373,10 @@ def add_event_tooth_located(patient_id, appointment_id):
         elif ( event_form.anatomic_location.data == 
                                             constants.TOOTH_EVENT_LOCATION_ROOT
         and root_event_form.validate() ):
-            values = {
+            root_values = {
                 'state': root_event_form.choose_root_state.data,
                 }
-            values.update(event_values)
+            values.update(root_values)
             for tooth_codename in teeth_to_add:
                 tooth = get_patient_tooth(patient_id, tooth_codename)
                 # working with event_values for state !
@@ -394,12 +391,12 @@ def add_event_tooth_located(patient_id, appointment_id):
         elif ( event_form.anatomic_location.data == 
                                     constants.TOOTH_EVENT_LOCATION_PERIODONTAL
         and periodontal_event_form.validate() ):
-            values = {
+            periodontal_values = {
                 'furcation': periodontal_event_form.furcation.data,
                 'recession': periodontal_event_form.recession.data,
                 'pocket_depth': periodontal_event_form.pocket_depth.data,
                 }
-            values.update(event_values)
+            values.update(periodontal_values)
             del values['state'] # As there is no "state" in PeriodontalEvent
             for tooth_codename in teeth_to_add:
                 tooth = get_patient_tooth(patient_id, tooth_codename)
