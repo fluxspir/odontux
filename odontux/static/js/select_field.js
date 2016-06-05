@@ -34,7 +34,7 @@ function ChangementToothAnatomicLocation() {
   var tooth = document.getElementById("tooth");
   var crown = document.getElementById("crown");
   var root = document.getElementById("root");
-  var periodonte = document.getElementById("periodonte");
+  var periodonte = document.getElementById("periodontal");
 
   if (anat_loc_val == 1 ) {
     tooth.style.display = "none";
