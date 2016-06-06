@@ -168,8 +168,12 @@ def list_appointments():
     patient = checks.get_patient(session['patient_id'])
     checks.quit_appointment()
 
-    appointments = meta.session.query(schedule.Appointment)\
-        .filter(schedule.Appointment.patient_id == patient.id).all()
+    appointments = ( meta.session.query(schedule.Appointment)
+                        .filter(schedule.Appointment.patient_id == patient.id)
+                        .join(schedule.Agenda)
+                        .order_by(schedule.Agenda.starttime.desc())
+                        .all()
+    )
 
     return render_template("list_patient_appointments.html",
                             patient=patient,
