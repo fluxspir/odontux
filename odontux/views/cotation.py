@@ -91,7 +91,7 @@ def add_majoration():
     majoration_form = MajorationForm(request.form)
     if request.method == 'POST' and majoration_form.validate():
         values = {
-            'name': majoration_form.name.data,
+            'reason': majoration_form.reason.data,
             'percentage': majoration_form.percentage.data,
         }
         new_majoration = compta.Majoration(**values)
@@ -107,6 +107,7 @@ def list_healthcare_plan():
     healthcare_plans = meta.session.query(act.HealthCarePlan).all()
     majorations = meta.session.query(compta.Majoration).all()
     return render_template('list_healthcare_plan.html', 
+                                            majorations=majorations,
                                             healthcare_plans=healthcare_plans)
 
 @app.route('/update/healthcare_plan?id=<int:healthcare_plan_id>', 
@@ -148,12 +149,12 @@ def update_majoration(majoration_id):
     majoration_form = MajorationForm(request.Form)
     
     if request.method == 'POST' and majoration_form.validate():
-        majoration.name = majoration_form.name.data
+        majoration.reason = majoration_form.reason.data
         majoration.percentage = majoration_form.percentage.data
         meta.session.commit()
         return redirect(url_for('view_majoration'))
 
-    majoration_form.name.data = majoration.name
+    majoration_form.reason.data = majoration.reason
     majoration_form.percentage.data = majoration.percentage
     majoration_form.majoration_id.data = majoration.id
     return render_template('update_majoration.html',
@@ -187,7 +188,3 @@ def view_majoration(majoration_id):
     )
     return render_template('view_majoration.html', majoration=majoration)
 
-
-@app.route('/add/cotation', methods=['GET','POST'])
-def add_cotation():
-    pass

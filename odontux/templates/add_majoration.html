@@ -6,7 +6,7 @@ Adding majoration
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="{{ url_for('add_majoration') }}">
   <dl>
-    {{ render_field(majoration_form.name) }}
+    {{ render_field(majoration_form.reason) }}
     {{ render_field(majoration_form.percentage) }}
   </dl>
   <p><input type="submit" value="Add"></p>

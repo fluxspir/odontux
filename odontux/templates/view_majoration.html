@@ -2,7 +2,7 @@
 {% block main %}
 <br />
 
- {{ majoration.name }} : {{ majoration.percentage }} --
+ {{ majoration.reason }} : {{ majoration.percentage }} --
   <a href="{{ url_for('update_majoration', 
                   majoration_id=majoration.id) }}">Update</a>
 

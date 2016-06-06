@@ -34,7 +34,7 @@ class Majoration(Base):
     """ """
     __tablename__ = 'majoration'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False, unique=True)
+    reason = Column(String, nullable=False, unique=True)
     percentage = Column(Numeric, nullable=False)
 
 class Payment(Base):

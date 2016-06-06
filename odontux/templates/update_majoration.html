@@ -7,7 +7,7 @@ Update majoration
 <form method="post" action="{{ url_for('update_majoration', 
                         majoration_id=majoration_form.majoration_id.data) }}">
   <dl>
-    {{ render_field(majoration_form.name) }}
+    {{ render_field(majoration_form.reason) }}
     {{ render_field(majoration_form.percentage) }}
   </dl>
   <p><input type="submit" value="Update"></p>
