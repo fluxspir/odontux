@@ -67,9 +67,10 @@ function ChangementAnamnesisType() {
   var past_surgery = document.getElementById("past_surgery");
   var allergy = document.getElementById("allergy");
   var oral_hygiene = document.getElementById("oral_hygiene");
-
-  if ( anamnesis_val == 1 ) {
-    medical_history.style.display = "block";
+  
+  //if ( anamnesis_val == constants.ANAMNESIS_MEDICAL_HISTORY ) {
+  if ( anamnesis_val == 1) {
+    medical_history.style.display = "block";  
     addiction.style.display = "none";
     treatment.style.display = "none";
     past_surgery.style.display = "none";

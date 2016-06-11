@@ -9,7 +9,7 @@ import pdb
 from base64 import b64decode
 import scrypt
 
-from flask import session, render_template, request, redirect, url_for
+from flask import session, render_template, request, redirect, url_for, jsonify
 import sqlalchemy
 from odontux.models import meta, users
 from odontux.secret import SECRET_KEY

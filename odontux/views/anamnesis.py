@@ -7,7 +7,7 @@
 
 import pdb
 import datetime
-from flask import session, render_template, request, redirect, url_for
+from flask import session, render_template, request, redirect, url_for, jsonify
 from wtforms import (Form, SelectField, TextField, BooleanField, TextAreaField,
                      IntegerField, HiddenField, DateField, validators )
 from sqlalchemy.orm import with_polymorphic
@@ -255,6 +255,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                     past_surgery_form=past_surgery_form,
                                     allergy_form=allergy_form,
                                     oral_hygiene_form=oral_hygiene_form,
+                                    constants=constants,
                                     clear_form=clear_form)
 
         return redirect(url_for('add_anamnesis_entry', 
@@ -276,6 +277,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                     past_surgery_form=past_surgery_form,
                                     allergy_form=allergy_form,
                                     oral_hygiene_form=oral_hygiene_form,
+                                    constants=constants,
                                     clear_form=clear_form)
 
 @app.route('/patient/anamnesis?pid=<int:patient_id>')

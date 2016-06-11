@@ -59,9 +59,7 @@ class AppointmentGestureReference(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                             nullable=False)
     gesture_id = Column(Integer, ForeignKey(Gesture.id), nullable=False)
-    code = Column(String, nullable=False)
     anatomic_location = Column(Integer, nullable=False)
-    tooth_id = Column(Integer, ForeignKey(teeth.Tooth.id))
     healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id))
     price = Column(Numeric, nullable=False)
     invoice_id = Column(String, default="")

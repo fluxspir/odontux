@@ -1,13 +1,20 @@
+<script type='text/javascript'>
+  
 {% extends "summary_patient.html" %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="{{ url_for('add_administrativ_gesture', patient_id=session.patient_id, appointment_id=session.appointment_id) }}">
   <dl>
     {{ render_field(admin_gesture_form.appointment_id) }}
-    {{ render_field(admin_gesture_form.gesture_code) }}
-    {{ render_field(admin_gesture_form.gesture_id) }}
     {{ render_field(admin_gesture_form.anatomic_location) }}
+    {{ render_field(admin_gesture_form.healthcare_plan_id) }}
+    {{ render_field(admin_gesture_form.gesture_id) }}
+    {{ render_field(admin_gesture_form.price) }}
+    {{ render_field(admin_gesture_form.majoration) }}
+    {{ render_field(admin_gesture_form.new) }}
   </dl>
   <p><input type="submit" value="Add">
 </form>
+<script src="{{ url_for('static', filename='js/gesture.js') }}"></script>
+{#<script>UpdatePrice({{ constants.1 }});</script>#}
 {% endblock %}

@@ -128,7 +128,7 @@ def enter_patient_appointment():
                             body_id=session['patient_id']))
         
         acts = checks.get_patient_acts(patient.id, appointment.id,
-                    [ act.AppointmentGestureReference.tooth_id ]
+                    [ act.AppointmentGestureReference.anatomic_location ]
                     )
         return render_template("patient_appointment.html",
                                 patient=patient,
