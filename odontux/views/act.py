@@ -6,7 +6,7 @@
 #
 
 import pdb
-from flask import session, render_template, request, redirect, url_for
+from flask import session, render_template, request, redirect, url_for, jsonify
 import sqlalchemy
 from sqlalchemy import or_, and_, desc
 from gettext import gettext as _
@@ -14,14 +14,15 @@ from gettext import gettext as _
 from odontux.odonweb import app
 from odontux import constants, checks, gnucash_handler
 from odontux.models import ( meta, act, schedule, administration, traceability,
-                            assets, teeth )
+                            assets, teeth, compta)
 from odontux.views import cotation as views_cotation
 
 from odontux.views.log import index
 from odontux.views.patient import list_acts
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
-                     DecimalField, HiddenField, IntegerField, validators)
+                     DecimalField, HiddenField, IntegerField, validators,
+                     FieldList)
 from odontux.views.forms import ColorField
 
 class SpecialtyForm(Form):
@@ -40,12 +41,13 @@ class GestureForm(Form):
 class AppointmentGestureReferenceForm(Form):
     appointment_id = SelectField(_('appointment'), coerce=int)
     gesture_id = SelectField(_('Choose gesture in list'), coerce=int)
-    code = TextField(_('gesture_code'))
     anatomic_location = TextField(_('Teeth / Anatomic location'), 
                                                     [validators.Required()] )
     healthcare_plan_id = SelectField(_('Healthcare plan'), coerce=int)
-    price = DecimalField(_('Price'), [validators.Optional()] )
+    price = DecimalField(_('Price'), [validators.Optional()],
+                                        description='UpdatePrice()')
     majoration = SelectField(_('Majoration'), coerce=int)
+    new = TextField('bla')
 
 class PriceForm(Form):
     gesture_id = HiddenField(_('gesture_id'))
@@ -70,7 +72,8 @@ def get_gesture_field_list():
     return [ "specialty_id", "code", "alias", 
              "name", "color" ]
 def get_appointmentgesturereference_field_list():
-    return [ "appointment_id", "act_code", "act_id", "tooth_id", "majoration" ]
+    return [ "appointment_id", "gesture_id", "anatomic_location", 
+            'healthcare_plan_id', "price", "majoration" ]
 
 def get_specialty_choice_list():
     return [ (choice.id, choice.name) for choice in 
@@ -95,17 +98,12 @@ def get_gesture_choices():
     )
     return [ (gesture.id, gesture.alias) for gesture in gestures ]
 
-#def get_appointment_gesture_reference_choice_lists(patient_id):
-#    """ """
-#    return ( get_appointment_choice_list(patient_id), 
-#            get_gesture_choice_list(),
-#            #teeth.get_tooth_id_choice_list(patient_id))
-#            )
-#
-#
-####
-# Specialties
-####
+def get_majoration_choices():
+    majorations =  meta.session.query(compta.Majoration).all()
+    maj = [ (0, _('None') ) ] + [ (m.id, m.reason + " " + 
+                                    str(m.percentage) + "%") 
+                                                        for m in majorations ]
+    return maj
 
 @app.route('/specialty/')
 @app.route('/specialties/')
@@ -419,16 +417,6 @@ def _add_administrativ_gesture(gesture_id, appointment_id, anatomic_location):
     values['gesture_id'] = gesture_id
     values['anatomic_location'] = anatomic_location
 
-    tooth_id = (
-        meta.session.query(teeth.Tooth.id)
-            .filter(teeth.Tooth.patient_id == patient.id,
-                    teeth.Tooth.codename == anatomic_location)
-            .one_or_none()
-        )
-    if tooth_id:
-        values['tooth_id'] = tooth_id[0]
-    # the act code
-
     new_gesture = act.AppointmentGestureReference(**values)
     meta.session.add(new_gesture)
     meta.session.commit()
@@ -458,37 +446,43 @@ def add_administrativ_gesture(patient_id, appointment_id):
     # gesture
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment(appointment_id)
-    gesture_form = AppointmentGestureReferenceForm(request.form)
+    appointment_gesture_form = AppointmentGestureReferenceForm(request.form)
 
-    gesture_form.appointment_id.choices = get_appointment_choices(patient_id) 
-    gesture_form.gesture_id.choices = get_gesture_choices() 
+    appointment_gesture_form.appointment_id.choices =\
+                                            get_appointment_choices(patient_id)
+    appointment_gesture_form.gesture_id.choices = get_gesture_choices() 
+    appointment_gesture_form.healthcare_plan_id.choices = [
+                    (hcs.id, hcs.name) for hcs in patient.hcs ]
+    appointment_gesture_form.majoration.choices =\
+                                            get_majoration_choices()
 
-    if request.method == 'POST' and gesture_form.validate():
-        if gesture_form.gesture_code.data:
-            gesture_id = (
-                meta.session.query(act.Gesture.id)
-                    .filter(act.Gesture.code ==\
-                                        gesture_form.gesture_code_data)
-                    .one_or_none()
+    if request.method == 'POST' and appointment_gesture_form.validate():
+        gesture_id = (
+            meta.session.query(act.Gesture.id)
+                .filter(act.Gesture.code ==\
+                                    appointment_gesture_form.gesture_code_data)
+                .one_or_none()
                 )
-            if gesture_id:
-                gesture_form.gesture_id.data = gesture_id[0]
+        if gesture_id:
+            appointment_gesture_form.gesture_id.data = gesture_id[0]
         
         new_gesture_id = _add_administrativ_gesture(
-                                    gesture_form.gesture_id.data,
-                                    gesture_form.appointment_id.data,
-                                    gesture_form.anatomic_location.data)
+                            appointment_gesture_form.gesture_id.data,
+                            appointment_gesture_form.appointment_id.data,
+                            appointment_gesture_form.anatomic_location.data)
+
         if not new_gesture_id:
             return redirect(url_for("list_gesture"))
         else:
             return redirect(url_for("view_gesture", gesture_id=new_gesture_id))
 
-    gesture_form.appointment_id.data = appointment_id
+    appointment_gesture_form.appointment_id.data = appointment_id
 
     return render_template("add_administrativ_gesture.html",
                             patient=patient,
                             appointment=appointment,
-                            admin_gesture_form=gesture_form)
+                            result=jsonify(results = {1: 'bla', 2:"blo"}),
+                            admin_gesture_form=appointment_gesture_form)
 
 @app.route('/remove/gesture?pid=<int:patient_id>'
            '&aid=<int:appointment_id>&gid=<int:gesture_id>'
