@@ -55,8 +55,9 @@ def _get_drug_prescribed_fields():
 def list_drugs():
     # Administrator and secretaries shouldn't be allowed to sneak into
     # medications, as it isn't in their area of work.
-    if (session['role'] == constants.ROLE_SECRETARY 
-        or session['role'] == constants.ROLE_ADMIN):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     drugs = meta.session.query(medication.DrugPrescribed).all()
     if session['patient_id']:
@@ -74,7 +75,7 @@ def update_drug():
     if session['patient_id']:
         patient = checks.get_patient(session['patient_id'])
     else:
-        patient=""
+        patient = None
 
     drug_fields = _get_drug_prescribed_fields()
     drug_form = DrugPrescribedForm(request.form)
