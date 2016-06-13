@@ -291,14 +291,15 @@ class GnuCashInvoice(GnuCash):
         self.owner = self.book.CustomerLookupByID(self.gcpatient_id)
         # invoice_id is build as
         # Date + appointment_id
-        self.date = meta.session.query(schedule.Appointment).filter(
-                schedule.Appointment.id ==appointment_id).one().agenda.endtime
+        self.date = (
+            meta.session.query(schedule.Appointment)
+                .filter(schedule.Appointment.id ==appointment_id)
+                .one().agenda.endtime.date()
+            )
 
         if not invoice_id:
-            self.invoice_id = "inv_" + str(self.date.year)+\
-                                   str(self.date.month) +\
-                                   str(self.date.day) + "_" +\
-                                   str(appointment_id)
+            self.invoice_id = "inv_" + self.date.isoformat() + "_" +\
+                                                            str(appointment_id)
         else:
             self.invoice_id = invoice_id
 
@@ -349,7 +350,7 @@ class GnuCashInvoice(GnuCash):
             number_of_entries = len(invoice.GetEntries())
             
             for entry in invoice.GetEntries():
-                if gnc_core_c.gncEntryGetDescription(entry) == description:
+                if entry.GetDescription() == description:
                     if number_of_entries > 1 :
                         invoice.Unpost(True)
                         invoice.BeginEdit()

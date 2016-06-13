@@ -466,7 +466,6 @@ def add_administrativ_gesture(patient_id, appointment_id):
         values['healthcare_plan_id'] =\
                             appointment_gesture_form.healthcare_plan_id.data
 
-        pdb.set_trace()
         if ( 
             appointment_gesture_form.anatomic_location.data not in 
                                 constants.ANATOMIC_LOCATION_SOFT_TISSUES.keys()
@@ -523,8 +522,7 @@ def remove_administrativ_gesture(patient_id, appointment_id, gesture_id, code):
     invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
                                              appointment.dentist_id)
     
-    remove_from_gnucash = invoice.remove_act(gesture.invoice_id)
-    #remove_from_gnucash = invoice.remove_act(code, gesture_id)
+    remove_from_gnucash = invoice.remove_act(gesture.gesture.code, gesture_id)
     if remove_from_gnucash:
         pass
         # was first made to be sure that all fit together with gnucash.
