@@ -15,7 +15,6 @@
                               patient_id=session.patient_id, 
                               appointment_id=session.appointment_id) }}">
   <dl>
-    {{ render_field(admin_gesture_form.appointment_id) }}
     {{ render_field(admin_gesture_form.anatomic_location) }}
     <div id='div_healthcare_plan'>
     {{ render_field_js_onchange(admin_gesture_form.healthcare_plan_id) }}

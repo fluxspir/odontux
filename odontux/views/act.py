@@ -25,6 +25,9 @@ from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      FieldList)
 from odontux.views.forms import ColorField
 
+def get_code_list():
+    return [ gesture.code for gesture in meta.session.query(act.Gesture).all() ]
+
 class SpecialtyForm(Form):
     name = TextField('name', [validators.Required(), 
                      validators.Length(min=1, max=20, 
@@ -39,16 +42,14 @@ class GestureForm(Form):
     color = ColorField('color')
 
 class AppointmentGestureReferenceForm(Form):
-    appointment_id = SelectField(_('appointment'), coerce=int)
-    anatomic_location = TextField(_('Teeth / Anatomic location'), 
-                                                    [validators.Required()] )
+    anatomic_location = IntegerField(_('Teeth / Anatomic location'), 
+                                            [validators.Optional()] )
     healthcare_plan_id = SelectField(_('Healthcare plan'), coerce=int,
                                     description='UpdateGesture()')
     gesture_id = SelectField(_('Choose gesture in list'), coerce=int,
                                         description='UpdateCodePrice()')
     code = TextField(_('Code'), validators=[validators.Optional(),
-                    validators.AnyOf(meta.session.query(act.Gesture.code).all()
-                    )])
+                validators.AnyOf(get_code_list())])
     price = DecimalField(_('Price'), [validators.Optional()])
     majoration = SelectField(_('Majoration'), coerce=int)
 
@@ -408,51 +409,6 @@ def update_cotation():
     return redirect(url_for('view_gesture', 
                             gesture_id=price_form.gesture_id.data))
 
-#@app.route('/get_cotations_for_healthcare_plan')
-#def get_cotations_for_healthcare_plan():
-#    healthcare_plan_id = request.args.get('healthcare_plan_id', None)
-#    if not healthcare_plan_id:
-#        return jsonify(success=False)
-#    
-#
-
-def _add_administrativ_gesture(gesture_id, appointment_id, anatomic_location):
-    """ """
-    values = {}
-    gesture = ( meta.session.query(act.Gesture)
-                    .filter(act.Gesture.id == gesture_id)
-                    .one()
-    )
-
-    patient = (
-        meta.session.query(administration.Patient)
-            .filter(administration.Patient.id == session['patient_id'])
-            .one()
-    )
-    
-    # In the appointment_act_reference table, we'll store
-    # appointment, act, and if any, the tooth
-    values['appointment_id'] = appointment_id
-    values['gesture_id'] = gesture_id
-    values['anatomic_location'] = anatomic_location
-
-    new_gesture = act.AppointmentGestureReference(**values)
-    meta.session.add(new_gesture)
-    meta.session.commit()
-
-    if session['role'] == constants.ROLE_DENTIST:
-        user_id = session['user_id']
-    else:
-        user_id = ""
-    invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
-                                             user_id)
-    invoice_id = invoice.add_act(values['code'], values['price'],
-                                                                new_gesture.id)
-
-    new_gesture.invoice_id = invoice_id
-    meta.session.commit()
-    return new_gesture.id
-
 @app.route('/add/gesture?pid=<int:patient_id>&_id=<int:appointment_id>', 
                                                     methods=['GET', 'POST'])
 def add_administrativ_gesture(patient_id, appointment_id):
@@ -462,7 +418,6 @@ def add_administrativ_gesture(patient_id, appointment_id):
         and a cotation_dict that we'll be use to select what will be 
         javascript's displayed.
     """
-
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
                         constants.ROLE_NURSE ]
     if session['role'] not in authorized_roles:
@@ -474,8 +429,6 @@ def add_administrativ_gesture(patient_id, appointment_id):
     appointment = checks.get_appointment(appointment_id)
     appointment_gesture_form = AppointmentGestureReferenceForm(request.form)
 
-    appointment_gesture_form.appointment_id.choices =\
-                                            get_appointment_choices(patient_id)
     # Patient is linked to some healthcare plans. Won't be included other plans
     appointment_gesture_form.healthcare_plan_id.choices = [
                     (hcs.id, hcs.name) for hcs in patient.hcs ]
@@ -487,27 +440,64 @@ def add_administrativ_gesture(patient_id, appointment_id):
                                             get_majoration_choices()
 
     if request.method == 'POST' and appointment_gesture_form.validate():
+        # if gesture_form comes with a code, upade form.gesture_id with the 
+        # code provided by user. 
         if appointment_gesture_form.code.data:
             gesture = (
                 meta.session.query(act.Gesture)
                     .filter(act.Gesture.code ==\
-                                    appointment_gesture_form.gesture_code.data)
+                                            appointment_gesture_form.code.data)
                     .one_or_none()
             )
-        if gesture_id:
-            appointment_gesture_form.gesture_id.data = gesture.id
-        
-        new_gesture_id = _add_administrativ_gesture(
-                            appointment_gesture_form.gesture_id.data,
-                            appointment_gesture_form.appointment_id.data,
-                            appointment_gesture_form.anatomic_location.data)
-
-        if not new_gesture_id:
-            return redirect(url_for("list_gesture"))
         else:
-            return redirect(url_for("view_gesture", gesture_id=new_gesture_id))
+            gesture = ( meta.session.query(act.Gesture)
+                        .filter(act.Gesture.id == gesture_id)
+                        .one()
+        )
+        if not gesture:
+            # TODO : redirect error + message
+            return redirect(url_for('index'))
 
-    appointment_gesture_form.appointment_id.data = appointment_id
+        values = {}
+        # In the appointment_gesture_reference table, we'll store
+        # appointment, act, and anatomic_location
+        values['appointment_id'] = appointment.id
+        values['gesture_id'] = gesture.id
+        values['healthcare_plan_id'] =\
+                            appointment_gesture_form.healthcare_plan_id.data
+
+        pdb.set_trace()
+        if ( 
+            appointment_gesture_form.anatomic_location.data not in 
+                                constants.ANATOMIC_LOCATION_SOFT_TISSUES.keys()
+            and appointment_gesture_form.anatomic_location.data not in 
+                                constants.ANATOMIC_LOCATION_TEETH_SET.keys()
+            and appointment_gesture_form.anatomic_location.data not in
+                                constants.ANATOMIC_LOCATION_TEETH.keys() ):
+            # TODO redirect error + message
+            return redirect(url_for('index'))
+        if appointment_gesture_form.anatomic_location.data is None:
+            appointment_gesture_form.anatomic_location.data = 0
+        values['anatomic_location'] =\
+                                appointment_gesture_form.anatomic_location.data
+
+        values['price'] = appointment_gesture_form.price.data
+
+        new_gesture = act.AppointmentGestureReference(**values)
+        meta.session.add(new_gesture)
+        meta.session.commit()
+
+        invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
+                                                        appointment.dentist_id)
+        invoice_id = invoice.add_act(gesture.code, values['price'],
+                                                                new_gesture.id)
+
+        new_gesture.invoice_id = invoice_id
+        meta.session.commit()
+
+        return redirect(url_for("add_administrativ_gesture", 
+                        patient_id=patient_id, appointment_id=appointment_id))
+
     cotations = create_cotation_dictionnary(patient)
     return render_template("add_administrativ_gesture.html",
                             patient=patient,
@@ -526,17 +516,15 @@ def remove_administrativ_gesture(patient_id, appointment_id, gesture_id, code):
         return redirect(url_for('index'))
     
     patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(appointment_id)
     gesture = meta.session.query(act.AppointmentGestureReference).filter(
             act.AppointmentGestureReference.id == gesture_id).one()
 
-    if session['role'] == constants.ROLE_DENTIST:
-        user_id = session['user_id']
-    else:
-        user_id = ""
     invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
-                                             user_id)
+                                             appointment.dentist_id)
     
-    remove_from_gnucash = invoice.remove_act(code, gesture_id)
+    remove_from_gnucash = invoice.remove_act(gesture.invoice_id)
+    #remove_from_gnucash = invoice.remove_act(code, gesture_id)
     if remove_from_gnucash:
         pass
         # was first made to be sure that all fit together with gnucash.

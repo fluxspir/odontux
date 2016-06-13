@@ -17,8 +17,8 @@
     {% block appointment_acts %}
       {{ act_table_opening_tag("acts done in this appointment") }}
       {{ act_table_header(session) }}
-      {% for gesture, tooth, appointment, act_info, specialty in acts %}
-        {{ act_table_rows(session, gesture, tooth, appointment, act_info, specialty) }}
+      {% for gesture, appointment, act_info, specialty in acts %}
+        {{ act_table_rows(session, gesture, appointment, act_info, specialty) }}
       {% endfor %}
       {{ act_table_closing_tag() }}
 

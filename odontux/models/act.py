@@ -62,4 +62,4 @@ class AppointmentGestureReference(Base):
     price = Column(Numeric, nullable=False)
     invoice_id = Column(String, default="")
     paid = Column(Boolean, default=False)
-
+    gesture = relationship('Gesture')

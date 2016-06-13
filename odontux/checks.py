@@ -154,20 +154,14 @@ def get_patient_acts(patient_id, appointment_id=None, ordering=[]):
     for gesture in query.all():
         # First, identify if the act was made on a tooth, and gives info about
         # that tooth
-        if gesture.tooth_id:
-            tooth = meta.session.query(teeth.Tooth)\
-                .filter(teeth.Tooth.id == gesture.tooth_id).one()
-        else:
-            tooth = None
-
         # We need to know in which appointment this act occurs, for the date
         appointment = meta.session.query(schedule.Appointment)\
             .filter(schedule.Appointment.id == gesture.appointment_id).one()
 
         # Then, we need some human readable infos about the act, instead of 
         # an obscur ID
-        act_info = meta.session.query(act.ActType)\
-            .filter(act.ActType.id == gesture.act_id).one()
+        act_info = meta.session.query(act.Gesture)\
+            .filter(act.Gesture.id == gesture.gesture_id).one()
 
         # And eventually, get the specialty for knowing in which area the 
         # patient is treated for.
@@ -179,7 +173,7 @@ def get_patient_acts(patient_id, appointment_id=None, ordering=[]):
         
 
         # Fill in the acts_list with a tuple
-        acts.append( ( gesture, tooth, appointment, act_info, specialty) )
+        acts.append( ( gesture, appointment, act_info, specialty) )
 
     return acts
 
