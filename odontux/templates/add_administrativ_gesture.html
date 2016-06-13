@@ -1,20 +1,72 @@
-<script type='text/javascript'>
-  
+{#
+  only needed if I want to use a function in a view. See asset.py  test_barcode()
+
+<script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+<script type="text/javascript">
+  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+#}
+
+
 {% extends "summary_patient.html" %}
 {% block main %}
-{% from "_formhelpers.html" import render_field %}
-<form method="post" action="{{ url_for('add_administrativ_gesture', patient_id=session.patient_id, appointment_id=session.appointment_id) }}">
+{% from "_formhelpers.html" import render_field, render_field_js_onchange %}
+<form method="post" action="{{ url_for('add_administrativ_gesture', 
+                              patient_id=session.patient_id, 
+                              appointment_id=session.appointment_id) }}">
   <dl>
     {{ render_field(admin_gesture_form.appointment_id) }}
     {{ render_field(admin_gesture_form.anatomic_location) }}
-    {{ render_field(admin_gesture_form.healthcare_plan_id) }}
-    {{ render_field(admin_gesture_form.gesture_id) }}
+    <div id='div_healthcare_plan'>
+    {{ render_field_js_onchange(admin_gesture_form.healthcare_plan_id) }}
+    </div>
+    <div id='div_gesture'>
+    {{ render_field_js_onchange(admin_gesture_form.gesture_id) }}
+    </div>
+    <div id='div_code'>
+    {{ render_field(admin_gesture_form.code) }}
+    </div>
+    <div id='div_price'>
     {{ render_field(admin_gesture_form.price) }}
+    </div>
     {{ render_field(admin_gesture_form.majoration) }}
-    {{ render_field(admin_gesture_form.new) }}
   </dl>
   <p><input type="submit" value="Add">
 </form>
-<script src="{{ url_for('static', filename='js/gesture.js') }}"></script>
-{#<script>UpdatePrice({{ constants.1 }});</script>#}
+
+<script type='text/javascript'>
+
+function UpdateGesture() {
+
+  var cotations = {{ cotations|tojson }};
+
+  var healthcare_plan_value = document.getElementById('healthcare_plan_id').value;
+  var healthcare_plan_list = cotations[healthcare_plan_value];
+
+  var gesture = document.getElementById('gesture_id');
+
+  gesture.options.length = 0;
+  for (i = 1 ; i <= Object.keys(healthcare_plan_list).length; i++) {
+    gesture.options[i]=new Option(healthcare_plan_list[i][0], i)
+  }
+
+  
+}
+
+function UpdateCodePrice() {
+
+  var cotations = {{ cotations|tojson }};
+  
+  var healthcare_plan_value = document.getElementById('healthcare_plan_id').value;
+  var gesture_value = document.getElementById('gesture_id').value;
+
+  var code = document.getElementById('code');
+  var price = document.getElementById('price');
+
+  code.value = cotations[healthcare_plan_value][gesture_value][1];
+  price.value = cotations[healthcare_plan_value][gesture_value][2];
+
+}
+</script>
+
 {% endblock %}

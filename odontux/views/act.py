@@ -40,14 +40,17 @@ class GestureForm(Form):
 
 class AppointmentGestureReferenceForm(Form):
     appointment_id = SelectField(_('appointment'), coerce=int)
-    gesture_id = SelectField(_('Choose gesture in list'), coerce=int)
     anatomic_location = TextField(_('Teeth / Anatomic location'), 
                                                     [validators.Required()] )
-    healthcare_plan_id = SelectField(_('Healthcare plan'), coerce=int)
-    price = DecimalField(_('Price'), [validators.Optional()],
-                                        description='UpdatePrice()')
+    healthcare_plan_id = SelectField(_('Healthcare plan'), coerce=int,
+                                    description='UpdateGesture()')
+    gesture_id = SelectField(_('Choose gesture in list'), coerce=int,
+                                        description='UpdateCodePrice()')
+    code = TextField(_('Code'), validators=[validators.Optional(),
+                    validators.AnyOf(meta.session.query(act.Gesture.code).all()
+                    )])
+    price = DecimalField(_('Price'), [validators.Optional()])
     majoration = SelectField(_('Majoration'), coerce=int)
-    new = TextField('bla')
 
 class PriceForm(Form):
     gesture_id = HiddenField(_('gesture_id'))
@@ -104,6 +107,18 @@ def get_majoration_choices():
                                     str(m.percentage) + "%") 
                                                         for m in majorations ]
     return maj
+
+def create_cotation_dictionnary(patient):
+    cotations = {}
+    for healthcare_plan in patient.hcs:
+        cotations[healthcare_plan.id] = {}
+        for cotation in healthcare_plan.cotations:
+            if not cotation.active:
+                continue
+            cotations[healthcare_plan.id][cotation.gesture_id] =\
+                            ( cotation.gesture.name, cotation.gesture.code, 
+                                                        str(cotation.price) )
+    return cotations
 
 @app.route('/specialty/')
 @app.route('/specialties/')
@@ -393,6 +408,14 @@ def update_cotation():
     return redirect(url_for('view_gesture', 
                             gesture_id=price_form.gesture_id.data))
 
+#@app.route('/get_cotations_for_healthcare_plan')
+#def get_cotations_for_healthcare_plan():
+#    healthcare_plan_id = request.args.get('healthcare_plan_id', None)
+#    if not healthcare_plan_id:
+#        return jsonify(success=False)
+#    
+#
+
 def _add_administrativ_gesture(gesture_id, appointment_id, anatomic_location):
     """ """
     values = {}
@@ -406,11 +429,7 @@ def _add_administrativ_gesture(gesture_id, appointment_id, anatomic_location):
             .filter(administration.Patient.id == session['patient_id'])
             .one()
     )
-#    cotation = (
-#        meta.session.query(act.Cotation)
-#            .filter(act.Cotation.id.in_(
-#                patient.healthcare_plans.
-#    
+    
     # In the appointment_act_reference table, we'll store
     # appointment, act, and if any, the tooth
     values['appointment_id'] = appointment_id
@@ -437,6 +456,13 @@ def _add_administrativ_gesture(gesture_id, appointment_id, anatomic_location):
 @app.route('/add/gesture?pid=<int:patient_id>&_id=<int:appointment_id>', 
                                                     methods=['GET', 'POST'])
 def add_administrativ_gesture(patient_id, appointment_id):
+    """
+        On the GET method, all possible gesture are sent,
+        only healthcare_plans that patient belong to are sent,
+        and a cotation_dict that we'll be use to select what will be 
+        javascript's displayed.
+    """
+
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
                         constants.ROLE_NURSE ]
     if session['role'] not in authorized_roles:
@@ -450,21 +476,26 @@ def add_administrativ_gesture(patient_id, appointment_id):
 
     appointment_gesture_form.appointment_id.choices =\
                                             get_appointment_choices(patient_id)
-    appointment_gesture_form.gesture_id.choices = get_gesture_choices() 
+    # Patient is linked to some healthcare plans. Won't be included other plans
     appointment_gesture_form.healthcare_plan_id.choices = [
                     (hcs.id, hcs.name) for hcs in patient.hcs ]
+    # Create a list of all existing gestures.
+    appointment_gesture_form.gesture_id.choices = [
+                                (gesture.id, gesture.name) for gesture in 
+                                        meta.session.query(act.Gesture).all() ]
     appointment_gesture_form.majoration.choices =\
                                             get_majoration_choices()
 
     if request.method == 'POST' and appointment_gesture_form.validate():
-        gesture_id = (
-            meta.session.query(act.Gesture.id)
-                .filter(act.Gesture.code ==\
-                                    appointment_gesture_form.gesture_code_data)
-                .one_or_none()
-                )
+        if appointment_gesture_form.code.data:
+            gesture = (
+                meta.session.query(act.Gesture)
+                    .filter(act.Gesture.code ==\
+                                    appointment_gesture_form.gesture_code.data)
+                    .one_or_none()
+            )
         if gesture_id:
-            appointment_gesture_form.gesture_id.data = gesture_id[0]
+            appointment_gesture_form.gesture_id.data = gesture.id
         
         new_gesture_id = _add_administrativ_gesture(
                             appointment_gesture_form.gesture_id.data,
@@ -477,11 +508,11 @@ def add_administrativ_gesture(patient_id, appointment_id):
             return redirect(url_for("view_gesture", gesture_id=new_gesture_id))
 
     appointment_gesture_form.appointment_id.data = appointment_id
-
+    cotations = create_cotation_dictionnary(patient)
     return render_template("add_administrativ_gesture.html",
                             patient=patient,
                             appointment=appointment,
-                            result=jsonify(results = {1: 'bla', 2:"blo"}),
+                            cotations=cotations,
                             admin_gesture_form=appointment_gesture_form)
 
 @app.route('/remove/gesture?pid=<int:patient_id>'

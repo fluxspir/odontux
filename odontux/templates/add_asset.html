@@ -28,6 +28,7 @@ Add a new asset.
       {{ render_simple_field(asset_category_form.asset_specialty_id) }}
       <a href={{ url_for('add_specialty') }}>Add a Specialty</a>
     Select Provider : {{ render_simple_field(asset_form.provider_id) }} or <a href={{ url_for('add_provider') }}>Add a new provider</a>
+  {{ render_simple_field(asset_category_form.manufacture_sterilization) }}
   </a>
 
     <dl>
@@ -38,7 +39,6 @@ Add a new asset.
       <th>Description</th>
       {{ render_table_field(asset_category_form.description) }}
   </div>
-  {{ render_simple_field(asset_category_form.manufacture_sterilization) }}
   <div id="device_category">
     <dl>
       <th>Sterilizable</th>
@@ -91,7 +91,7 @@ Add a new asset.
 <script type="text/javascript" src="/static/js/find_db.js"></script>
 <script type="text/javascript" src="/static/js/select_field.js"></script>
 {% if clear_form %}
-    <script type="text/javascript" src="/static/js/reset_asset_on_load.js"></script>;
+    <script type="text/javascript" src="/static/js/reset_asset_on_load.js"></script>
 {% endif %}
 {% endblock %}
 

@@ -45,8 +45,6 @@ class Cotation(Base):
                                                             primary_key=True)
     price = Column(Numeric, nullable=True, default=0)
     active = Column(Boolean, default=True)
-    code = Column(String)
-
     gesture = relationship("Gesture", backref=backref("cotations"))
     healthcare_plan = relationship('HealthCarePlan', backref="cotations")
 

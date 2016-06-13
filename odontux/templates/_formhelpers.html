@@ -46,7 +46,7 @@
   {% endif %}
 {% endmacro %}
 
-{% macro render_sfl_wol(field) %}
+{% macro render_sfl_wol(field) %}  {# simple field line without label #}
   {{ field(**kwargs)|safe }}
   {% if field.errors %}
     <ul class=errors>

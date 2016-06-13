@@ -3,6 +3,7 @@
 $(function () {
 
   var today = new Date();
+
   var set_default_asset_category = function() {
     document.getElementById( "brand" ).value = null;
     $('#commercial_name').val(null);
