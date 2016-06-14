@@ -60,15 +60,12 @@
       {% block nav %}
         <a href="{{ url_for('allpatients') }}">Patients</a>
         <a href="{{ url_for('agenda') }}">Agenda</a>
-      	<a href="{{ url_for('list_md') }}">MD</a>
-      	<a href="{{ url_for('list_gesture', keywords=" ", ordering=" ") }}">Gestures</a>
-      	<a href="{{ url_for('list_specialty') }}">Specialties</a>
+      	<a href="{{ url_for('portal_gesture', keywords=" ", ordering=" ") }}">Gestures</a>
         <a href="{{ url_for('list_healthcare_plan', keywords=" ", ordering=" ") }}">Healthcare</a>
-      	<a href="{{ url_for('list_users') }}">Users</a>
-        <a href="{{ url_for('list_dental_offices') }}">Dental Offices</a>
+      	<a href="{{ url_for('portal_users') }}">Users</a>
         <a href="{{ url_for('my_assets') }}">Assets</a>
         <a href="{{ url_for('traceability_portal') }}">Traceability</a>
-        <a href="{{ url_for('anamnesis_portal') }}">Survey</a>
+        <a href="{{ url_for('portal_anamnesis') }}">Survey</a>
         <div id="search">
         {% block search %}
           <form action="/search/" method="post" autocomplete="on">

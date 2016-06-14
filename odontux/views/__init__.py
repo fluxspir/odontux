@@ -37,7 +37,7 @@ from users import (
                 )
 from anamnesis import (
                 add_anamnesis_entry,
-                anamnesis_portal,
+                portal_anamnesis,
                 add_survey, add_question, list_survey, list_question,
                 view_survey, view_question, add_question_to_survey,
                 remove_question_from_survey, update_survey_name,

@@ -121,6 +121,10 @@ def create_cotation_dictionnary(patient):
                                                         str(cotation.price) )
     return cotations
 
+@app.route('/portal/gesture/')
+def portal_gesture():
+    return render_template('portal_gestures.html')
+
 @app.route('/specialty/')
 @app.route('/specialties/')
 def list_specialty(ordering=[]):

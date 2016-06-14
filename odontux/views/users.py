@@ -142,6 +142,9 @@ def get_password_field_list():
 def get_dental_office_field_list():
     return [ "office_name", "owner_lastname", "owner_firstname", "url"]
 
+@app.route('/portal/user/')
+def portal_users():
+    return render_template('portal_users.html')
 
 @app.route('/odontux_user/')
 @app.route('/user/')

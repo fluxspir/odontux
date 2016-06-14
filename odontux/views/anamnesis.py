@@ -330,8 +330,8 @@ def update_anamnesis(patient_id):
     pass
 
 
-@app.route('/anamnesis')
-def anamnesis_portal():
+@app.route('/portal/anamnesis')
+def portal_anamnesis():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
