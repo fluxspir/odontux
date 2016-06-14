@@ -23,7 +23,7 @@ class DrugPrescribed(Base):
     posologia = Column(String, nullable=False)
     dayssupply = Column(String, nullable=False)
     comments = Column(String, default="")
-
+    special = Column(Boolean, default=False)
 
 class Prescription(Base):
     __tablename__ = 'prescription'
