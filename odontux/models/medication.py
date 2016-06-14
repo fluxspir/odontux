@@ -11,12 +11,18 @@ import datetime
 
 from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import MetaData, ForeignKey
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy import func
 
+class DrugFamily(Base):
+    __tablename__ = 'drug_family'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, nullable=False)
 
 class DrugPrescribed(Base):
     __tablename__ = 'drug_prescribed'
     id = Column(Integer, primary_key=True)
+    family_id = Column(Integer, ForeignKey(DrugFamily.id), nullable=False)
     alias = Column(String, unique=True, nullable=False)
     molecule = Column(String, nullable=False)
     packaging = Column(String, nullable=False)
@@ -24,6 +30,7 @@ class DrugPrescribed(Base):
     dayssupply = Column(String, nullable=False)
     comments = Column(String, default="")
     special = Column(Boolean, default=False)
+    family = relationship('DrugFamily', backref='drugs')
 
 class Prescription(Base):
     __tablename__ = 'prescription'

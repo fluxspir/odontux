@@ -1,0 +1,14 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+Update drug family
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="{{ url_for('update_drug_family', 
+                      drug_family_id=drug_family_form.drug_family_id.data) }}">
+  <dl>
+    {{ render_field(drug_family_form.name) }}
+  </dl>
+  <p><input type="submit" value="Update"></p>
+</form>
+{% endblock %}

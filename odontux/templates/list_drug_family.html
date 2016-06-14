@@ -1,0 +1,18 @@
+{% extends 'header.html' %}
+{% block main %}
+<div id="list_drug_family">
+<a href="{{ url_for('add_drug_family') }}">Add drug family</a><br />
+<table border=1>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th></th>
+{% for family in drug_families %}
+  <tr>
+    <td>{{ family.id }}</td><td>{{ family.name }}</td>
+      <td><a href="{{ url_for('update_drug_family', drug_family_id=family.id) }}">
+          Update</a></td>
+  </tr>
+</div>
+{% endfor %}
+{% endblock %}

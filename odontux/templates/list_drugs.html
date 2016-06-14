@@ -1,27 +1,32 @@
 {% extends "summary_patient.html" %}
   {% block main %}
-    <a href="{{ url_for('update_drug')}}">Add or update</a>
+    <a href="{{ url_for('update_drug')}}">Add or update</a> -- 
+    <a href="{{ url_for('list_drug_family') }}">Drug families</a>
     <table border=1>
       <caption>Drug list</caption>
       <tr>
         <th class="hidden">Id</th>
+        <th>Family</th>
         <th>Alias</th>
         <th>Molecule</th>
         <th>Packaging</th>
         <th>Posologia</th>
         <th>Day supply</th>
         <th>Comments</th>
+        <th>Special receituary</th>
       </tr>
       {% block drug_prescribed %}
         {% for drug in drugs %}
           <tr>
             <td class="hidden">{{ drug.id }}</td>
+            <td>{{ drug.family.name }}</td>
             <td>{{ drug.alias }}</td>
             <td>{{ drug.molecule }}</td>
             <td>{{ drug.packaging }}</td>
             <td>{{ drug.posologia }}</td>
             <td>{{ drug.dayssupply }}</td>
             <td>{{ drug.comments }}</td>
+            <td>{{ drug.special }}</td>
           </tr>
         {% endfor %}
       {% endblock %}

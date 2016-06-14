@@ -46,6 +46,7 @@ from anamnesis import (
 from medication import (
                     list_drugs,
                     update_drug, delete_drug, add_drug,
+                    choose_drugs_to_prescribe
                     )
 from schedule import (
                     agenda_date,
