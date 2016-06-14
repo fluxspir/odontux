@@ -60,10 +60,10 @@ def list_drugs():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     drugs = meta.session.query(medication.DrugPrescribed).all()
-    if session['patient_id']:
+    if 'patient_id' in session:
         patient = checks.get_patient(session['patient_id'])
     else:
-        patient = ""
+        patient = None
     return render_template('list_drugs.html', drugs=drugs, patient=patient)
 
 @app.route('/drugs/update/', methods=['GET', 'POST'])
@@ -72,7 +72,7 @@ def update_drug():
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('list_drugs'))
 
-    if session['patient_id']:
+    if 'patient_id' in session:
         patient = checks.get_patient(session['patient_id'])
     else:
         patient = None
