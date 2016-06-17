@@ -392,7 +392,7 @@ def view_survey(survey_id):
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    def _new_position_higher(position_form, questions_in_survey):
+    def _new_position_superior(position_form, questions_in_survey):
         for question in questions_in_survey:
             if question.question_id == int(position_form.question_id.data):
                 question.position = position_form.new_position.data
@@ -404,7 +404,7 @@ def view_survey(survey_id):
                 meta.session.commit()
                 continue
 
-    def _new_position_lower(position_form, questions_in_survey):
+    def _new_position_inferior(position_form, questions_in_survey):
         for question in questions_in_survey:
             if question.question_id == int(position_form.question_id.data):
                 question.position = position_form.new_position.data
@@ -432,9 +432,9 @@ def view_survey(survey_id):
 
         if position_form.new_position.data >\
                                         int(position_form.old_position.data):
-            _new_position_higher(position_form, questions_in_survey)
+            _new_position_superior(position_form, questions_in_survey)
         else:
-            _new_position_lower(position_form, questions_in_survey) 
+            _new_position_inferior(position_form, questions_in_survey) 
         
         return redirect(url_for('view_survey', survey_id=survey_id))
 
