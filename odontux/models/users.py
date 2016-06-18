@@ -47,6 +47,7 @@ class DentalUnit(Base):
     dental_office_id = Column(Integer, ForeignKey(DentalOffice.id), 
                                                                 nullable=False)
     name = Column(String)
+    dental_office = relationship('DentalOffice')
 
 class OdontuxUser(Base):
     __tablename__ = 'odontux_user'
