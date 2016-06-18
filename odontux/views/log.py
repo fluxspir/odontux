@@ -73,11 +73,11 @@ def login():
 #                    for AR in constants.ALLERGIC_REACTIONS.items():
 #                        session[AR[1][1]] = AR[0]
 #
-#                    if request.form['password'] == "please_change_password":
-#                        return redirect(url_for('update_user',
-#                                                body_id = user.id,
-#                                                form_to_display = "gen_info"))
-#
+                    if request.form['password'] == "please_change_password":
+                        return redirect(url_for('update_user',
+                                                body_id = user.id,
+                                                form_to_display = "gen_info"))
+
                     else:
                         return redirect(url_for('index'))
             except scrypt.error:
