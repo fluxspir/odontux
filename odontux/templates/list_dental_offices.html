@@ -16,7 +16,7 @@
         <tr>
           <td class="hidden">{{ office.id }}</td>
           {% if office.url %}
-            <td><a href="{{ office.url }}" target="_blank">{{ office.office_name }}</a></td>
+            <td><a href="http://{{ office.url }}" target="_blank">{{ office.office_name }}</a></td>
           {% else %}
             <td>{{ office.office_name }}</td>
           {% endif %}
