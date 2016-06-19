@@ -62,8 +62,10 @@ class GnuCash():
         home = os.path.expanduser("~")
         self.parser.read(os.path.join(home, ".odontuxrc"))
         profissionnalaccounting_url = ( meta.session.query(users.OdontuxUser)
-            .filter(users.OdontuxUser.id == dentist_id).one().gnucash_url
-            .encode("utf_8") )
+            .filter(users.OdontuxUser.id == dentist_id)
+            .one().gnucash_url
+            .encode("utf_8") 
+        )
         if profissionnalaccounting_url.split(".")[-1] == "xml":
             self.gnucashtype = "xml"
         elif "postgresql" in profissionnalaccounting_url.split("://"):
