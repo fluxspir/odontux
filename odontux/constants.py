@@ -640,3 +640,19 @@ UNITIES = {
             UNITY_LENGTH: ( _('length in m'), 'UNITY_LENGTH' ),
         }
 
+# --------------------------------------------------
+# Files
+# --------------------------------------------------
+
+FILE_RADIO = 1
+FILE_PHOTO = 2
+FILE_PRESCRIPTION = 3
+FILE_ATTESTATION = 4
+
+FILES = {
+    FILE_RADIO: _('Radio'),
+    FILE_PHOTO: _('Photo'),
+    FILE_PRESCRIPTION: _('Prescription'),
+    FILE_ATTESTATION: _('Attestation')
+}
+
