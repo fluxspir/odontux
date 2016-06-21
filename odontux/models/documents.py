@@ -6,10 +6,12 @@
 #
 
 from meta import Base
+import schedule
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String, DateTime
 from sqlalchemy import MetaData, ForeignKey
-from sqlalchemy import relationship, func
+from sqlalchemy import func
+from sqlalchemy.orm import relationship
 import datetime
 
 class Files(Base):
@@ -22,7 +24,7 @@ class Files(Base):
 
 class FileAppointmentReference(Base):
     __tablename__ = 'file_appointment_reference'
-    id = Column(Integer, primary_key=True
+    id = Column(Integer, primary_key=True)
     file_id = Column(Integer, ForeignKey(Files.id), nullable=False)
-    appointment_id = Colmun(Integer, ForeingKey(schedule.Appointment.id))
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id))
     file = relationship('Files')

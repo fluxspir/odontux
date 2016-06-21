@@ -181,12 +181,11 @@ def make_prescription(patient_id, appointment_id, prescription_form):
     # Patient's dentification 
     Story.append(Paragraph('Patiente: ' + patient.firstname + " "\
                                     + patient.lastname, styles['patient']))
-    Story.append(Spacer(1, 5 * mm))
     Story.append(Paragraph(patient.family.addresses[-1].street + " " +\
                 patient.family.addresses[-1].complement, styles['patient']))
-    Story.append(Spacer(1, 5 * mm))
     Story.append(Paragraph(patient.family.addresses[-1].city + " " +\
                 patient.family.addresses[-1].zip_code, styles['patient']))
+    Story.append(Spacer(1, 5 * mm))
     for drug in sorted(prescription_form.drugs, key=lambda x: x.position.data):
         if not drug.position.data:
             continue
@@ -229,7 +228,7 @@ def make_prescription(patient_id, appointment_id, prescription_form):
                     [ 'Telefone:', 'Assinatura do Farmacêutico  DATA:']
                     ], 
                     colWidths=( (WIDTH_PAPER - L_MARG - R_MARG - 10*mm) /2),
-                    spaceBefore=(10 * mm)
+                    spaceBefore=(5 * mm)
                 )
         t.setStyle(TableStyle( [
                         ('ALIGN', (0,0), (1,0), 'CENTER'),
