@@ -23,16 +23,34 @@
         <br/><br />
   <div id="anamnesis">
   {% for entry in patient_anamnesis %}
-    {% if entry.anamnesis_type == session['ANAMNESIS_MEDICAL_HISTORY'] %}
-      {{ entry.type }} - {{ entry.disease }} 
-      -- {{ entry.name }} ; ICD10 : {{ entry.icd10 }}<br />
-      {{ entry.comment }}
+    {% if entry.anamnesis_type == constants.ANAMNESIS_MEDICAL_HISTORY %}
+      {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
+      {{ constants.MEDICAL_HISTORIES[entry.type] }} - 
+      {{ constants.MEDICAL_HISTORIES[entry.disease] }} 
+      -- {{ entry.name }} ; ICD10 : {{ entry.icd10 }}
+      {% if entry.comment %}
+        <br />{{ entry.comment }}
+      {% endif %}
       <br />------<br />
-    {% elif entry.anamnesis_type == session['ANAMNESIS_ADDICTION'] %}
-    {% elif entry.anamnesis_type == session['ANAMNESIS_TREATMENT'] %}
-    {% elif entry.anamnesis_type == session['ANAMNESIS_PAST_SURGERY'] %}
-    {% elif entry.anamnesis_type == session['ANAMNESIS_ALLERGY'] %}
-
+    {% elif entry.anamnesis_type == constants.ANAMNESIS_ADDICTION %}
+      {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
+      {{ constants.ADDICTIONS[entry.type] }}
+      <br />------<br />
+    {% elif entry.anamnesis_type == constants.ANAMNESIS_TREATMENT %}
+      {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
+      <br />------<br />
+    {% elif entry.anamnesis_type == constants.ANAMNESIS_PAST_SURGERY %}
+      {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
+      <br />------<br />
+    {% elif entry.anamnesis_type == constants.ANAMNESIS_ALLERGY %}
+      {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
+      {{ constants.ALLERGIES[entry.type] }} -- 
+      {{ constants.ALLERGIC_REACTION[entry.reaction] }}
+      <br />------<br />
+    {% elif entry.anamnesis_type == constants.ANAMNESIS_ORAL_HYGIENE %}
+      {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
+      {{ constants.ORAL_HYGIENE[entry.type] }}
+      <br />------<br />
     {% endif %}
 
   {% endfor %}

@@ -155,8 +155,10 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
             'alert': anamnesis_form.alert.data,
             'document': anamnesis_form.document.data,
             }
-        if question: anamnesis_values['question_id'] = question.id
-        if survey_entry: survey_entry += 1
+        if question: 
+            anamnesis_values['question_id'] = question.id
+        if survey_entry: 
+            survey_entry += 1
         
         if ( anamnesis_form.anamnesis_type.data ==
                                         constants.ANAMNESIS_MEDICAL_HISTORY
@@ -205,9 +207,9 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                         constants.ANAMNESIS_PAST_SURGERY
             and past_surgery_form.validate() ):
             values = {
-                'surgery_type': past_surgery.surgery_type.data,
-                'problem': past_surgery.problem.data,
-                'complication': past_surgery.complication.data,
+                'surgery_type': past_surgery_form.surgery_type.data,
+                'problem': past_surgery_form.problem.data,
+                'complication': past_surgery_form.complication.data,
                 }
             values.update(anamnesis_values)
             new_past_surgery = anamnesis.PastSurgery(**values)
@@ -304,26 +306,15 @@ def list_anamnesis(patient_id):
                         anamnesis.Anamnesis.time_stamp)
             .all()
         )
-    
-    for anam in patient_anamnesis:
-        if anam.anamnesis_type == constants.ANAMNESIS_MEDICAL_HISTORY:
-            anam.type = constants.MEDICAL_HISTORIES[anam.type]
-            anam.disease = constants.DISEASES[anam.disease]
-        elif anam.anamnesis_type == constants.ANAMNESIS_ADDICTION:
-            anam.type = constants.ADDICTIONS[anam.type]           
-        elif anam.anamnesis_type == constants.ANAMNESIS_ALLERGY:
-            anam.type = constants.ALLERGIES[anam.type]
-            anam.reaction = constants.ALLERGIC_REACTIONS[anam.reaction]
-        elif anam.anamnesis_type == constants.ANAMNESIS_ORAL_HYGIENE:
-            anam.type = constants.ORAL_HYGIENE[anam.type]
-    
+  
     doctor = meta.session.query(md.MedecineDoctor).filter(
         md.MedecineDoctor.id == patient.gen_doc_id).one_or_none()
     return render_template("patient_anamnesis.html",
                             patient=patient,
                             patient_anamnesis=patient_anamnesis,
                             doctor=doctor,
-                            survey_form=survey_form)
+                            survey_form=survey_form,
+                            constants=constants)
 
 @app.route('/update/anamnesis?pid=<int:patient_id>')
 def update_anamnesis(patient_id):
