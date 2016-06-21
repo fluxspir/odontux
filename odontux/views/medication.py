@@ -15,12 +15,12 @@ from wtforms import (Form, HiddenField, TextField, TextAreaField, DateField,
 from odontux import constants, checks
 from odontux.pdfhandler import make_prescription
 from odontux.views import forms
-from odontux.models import meta, medication, users
+from odontux.models import meta, medication, users, documents
 from odontux.odonweb import app
 from odontux.views.log import index
 
 import os
-import cStringIO
+import md5
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm, inch
 from reportlab.pdfgen import canvas
@@ -438,13 +438,39 @@ def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
     appointment = checks.get_appointment(appointment_id)
 
     prescription_form = PrescriptionForm(request.form)
-    if ( request.method == 'POST' and prescription_form.validate()
-        and 'update' in request.form ):
-        pass
-
+#    if ( request.method == 'POST' and prescription_form.validate()
+#        and 'update' in request.form ):
+#
     if ( request.method == 'POST' and prescription_form.validate()
         and 'save_print' in request.form ):
-        pass
+        pdf_out = make_prescription(patient_id, appointment_id, 
+                                                            prescription_form)
+        response = make_response(pdf_out)
+        response.mimetype = 'application/pdf'
+        filename = md5.new(pdf_out).hexdigest()
+        document_folder = checks.get_odontux_document_folder()
+        # Save file in odontux folder
+        with open(os.path.join(document_folder, filename), 'w') as f:
+            f.write(pdf_out)
+        # Keep trace in database
+        file_values = {
+            'md5': filename,
+            'file_type': constants.FILE_PRESCRIPTION,
+            'mimetype': 'application/pdf',
+        }
+        new_file = documents.Files(**file_values)
+        meta.session.add(new_file)
+        meta.session.commit()
+
+        file_appointment_ref_values = {
+            'file_id': new_file.id,
+            'appointment_id': appointment_id,
+        }
+        new_file_appointment_ref = documents.Files(**file_appointment_ref_values)
+        meta.session.add(new_file_appointment_ref)
+        meta.session.commit()
+
+        return response
 
     if ( request.method == 'POST' and prescription_form.validate()
         and 'preview' in request.form ):
@@ -457,11 +483,9 @@ def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
     if request.method == 'GET':
         prescription_form = _populate_prescription_form(drug_list)
 
-    pdf_out = make_prescription(patient_id, appointment_id, prescription_form)
     return render_template('manual_adjustment_in_prescription.html',
                                         patient=patient,
                                         appointment=appointment,
                                         drug_list=drug_list,
-                                        pdf_out=pdf_out,
                                         prescription_form=prescription_form)
 

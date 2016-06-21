@@ -5,6 +5,7 @@ url = postgresql+psycopg2://my_user:password@127.0.0.1/odontux
 locale = br
 odontux_folder = /home/odontuxuser/odontuxfolder
 odontux_logo = img/logo.png
+document_folder = doc
 
 [gnucashdb]
 currency = EUR

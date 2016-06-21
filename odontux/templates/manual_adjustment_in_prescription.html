@@ -23,8 +23,6 @@
     <br /><br />
     {% endif %}
   {% endfor %}
-    <object data='{{ pdf_output|safe }}' type="application/pdf"></object>
-    {{ prescription_form.update }}
     {{ prescription_form.save_print }}
     {{ prescription_form.preview }}
 </form>

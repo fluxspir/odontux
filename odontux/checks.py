@@ -32,7 +32,21 @@ def get_odontux_folder():
     parser = ConfigParser.ConfigParser()
     home = os.path.expanduser("~")
     parser.read(os.path.join(home, ".odontuxrc"))
-    return parser.get("environment", "odontux_folder")
+    odontux_folder = parser.get("environment", "odontux_folder")
+    if not os.path.exists(odontux_folder):
+        os.makedirs(odontux_folder)
+    return odontux_folder
+
+def get_odontux_document_folder():
+    parser = ConfigParser.ConfigParser()
+    home = os.path.expanduser("~")
+    parser.read(os.path.join(home, ".odontuxrc"))
+    odontux_folder = get_odontux_folder()
+    document_folder_name = parser.get("environment", "document_folder")
+    document_folder = os.path.join(odontux_folder, document_folder_name)
+    if not os.path.exists(document_folder):
+        os.makedirs(document_folder)
+    return document_folder
 
 def get_dental_office_logo():
     parser = ConfigParser.ConfigParser()
