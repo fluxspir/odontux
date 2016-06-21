@@ -6,53 +6,74 @@
 #
 
 import pdb
-from flask import session, redirect, url_for, request, render_template
+from flask import ( session, redirect, url_for, request, render_template, 
+                    abort, make_response )
 from wtforms import (Form, HiddenField, TextField, TextAreaField, DateField,
-                    BooleanField, SelectField, validators )
+                    BooleanField, SelectField, IntegerField,
+                    FieldList, FormField, SubmitField, validators )
 
 from odontux import constants, checks
+from odontux.pdfhandler import make_prescription
 from odontux.views import forms
-from odontux.models import meta, medication
+from odontux.models import meta, medication, users
 from odontux.odonweb import app
 from odontux.views.log import index
 
+import os
+import cStringIO
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm, inch
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+
 from gettext import gettext as _
+
 
 class DrugFamilyForm(Form):
     drug_family_id = HiddenField(_('id'))
     name = TextField(_('Name'), [validators.Required()] )
 
-class DrugPrescribedForm(Form):
+class DrugForm(Form):
     drug_id = HiddenField(_('id'))
     family_id = SelectField(_('Family'), coerce=int)
     alias = TextField(_('alias'), render_kw={'size':'8'})
     molecule = TextField(_('molecule'), [validators.Required(_("Specify drug "
                                         "name please"))])
-    packaging = TextField(_('packaging'), [validators.Required(_("Please tell "
+    packaging = TextAreaField(_('packaging'), 
+                            [validators.Required(_("Please tell "
                                         "how the drug in packaged"))])
-    posologia = TextField(_('posologia'), [validators.Required(_("Please tell "
+    posologia = TextAreaField(_('posologia'), 
+                            [validators.Required(_("Please tell "
                             "the posologia the patient might take"))])
     dayssupply = TextField(_('daysupply'), [validators.Required(_("Please tell"
                             " for how long the patient need to be under "
                             "medication"))], render_kw={'size':'4'})
-    comments = TextField(_('comments'))
+    comments = TextAreaField(_('comments'))
     special = BooleanField(_('special'))
 
-class PrescriptionForm(Form):
-    dentist_id = HiddenField(_('dentist_id'), [validators.Required(_(
-                                "Dentist_id must be provide to make a "
-                                "prescription"))])
-    patient_id = HiddenField(_('patient_id'), [validators.Required(_(
-                                "Patient_id must be provide to make a "
-                                "prescription"))])
-    appointment_id = HiddenField(_("appointment_id"))
-    time_stamp = DateField(_('time_stamp'), [validators.Optional()])
+class DrugPrescribedForm(Form):
+    drug_id = HiddenField(_('id'))
+    position = HiddenField(_('position'))
+    molecule = TextField(_('molecule'))
+    packaging = TextAreaField(_('packaging'), [validators.Required(_("tell how"
+                                                        "drug is packaged"))])
+    posologia = TextAreaField(_('posologia'), [validators.Required()])
+    dayssupply = TextField(_('day supply'), render_kw={'size':"4px"})
+    comments = TextAreaField(_('comments'))
+    special = BooleanField(_('Special'))
 
-class PrescribedDrugReference(Form):
-    prescription_id = HiddenField(_('prescription_id'), [validators.Required(_(
-                                "Must precise which is the prescription"))])
-    drug_id = HiddenField(_("drug_id"), [validators.Required(_("Must tell the "
-                                        "drug prescribed"))])
+class PrescriptionForm(Form):
+    drugs = FieldList(FormField(DrugPrescribedForm), min_entries=1)
+    update = SubmitField(_('update'))
+    save_print = SubmitField(_('Save and print'))
+    preview = SubmitField(_('Preview'))
+
+class DrugPositionInPrescriptionForm(Form):
+    drug_id = HiddenField(_('Id'))
+    old_position = HiddenField(_('Old position'))
+    new_position = IntegerField(_('Position'), render_kw={'size': '4'})
 
 def _get_drug_prescribed_fields():
     return [ "alias", "molecule", "packaging", "posologia", "dayssupply", 
@@ -128,7 +149,7 @@ def update_drug():
         patient = None
 
     drug_fields = _get_drug_prescribed_fields()
-    drug_form = DrugPrescribedForm(request.form)
+    drug_form = DrugForm(request.form)
     drug_form.family_id.choices = [ (family.id, family.name) for family in
                         meta.session.query(medication.Family).all() ]
     if request.method == 'POST' and drug_form.validate():
@@ -159,7 +180,7 @@ def delete_drug():
     else:
         patient = ""
 
-    drug_form = DrugPrescribedForm(request.form)
+    drug_form = DrugForm(request.form)
     drug = meta.session.query(medication.DrugPrescribed)\
         .filter(medication.DrugPrescribed.id == drug_form.drug_id.data)\
         .one()
@@ -178,7 +199,7 @@ def add_drug():
         patient = None
 
     drug_fields = _get_drug_prescribed_fields()
-    drug_form = DrugPrescribedForm(request.form)
+    drug_form = DrugForm(request.form)
     drug_form.family_id.choices = [ (family.id, family.name) for family in
                         meta.session.query(medication.Family).all() ]
     if (not request.method == 'POST' 
@@ -190,20 +211,373 @@ def add_drug():
     meta.session.commit()
     return redirect(url_for('update_drug', patient=patient))
 
-@app.route('/patient/choose_drugs_to_prescribe/?pid=<int:patient_id>'
-                        '&aid=<int:appointment_id>', methods=['GET', 'POST'])
-def choose_drugs_to_prescribe(patient_id, appointment_id):
+@app.route('/add/drug_to_prescription?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>'
+            '&dida=<int:drug_id_to_add>')
+@app.route('/add/drug_to_prescription?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>'
+            '&dida=<int:drug_id_to_add>&dl=<drug_list>')
+def add_drug_to_prescription(patient_id, appointment_id, drug_id_to_add, 
+                                                                drug_list=""):
+
+    drugs_prescribed = []
+    if drug_list:
+        drugs_prescribed = [ int(drug_id) for drug_id in drug_list.split(",") ]
+    drugs_prescribed.append(drug_id_to_add)
+    drug_list = ",".join( [ str(drug_id) for drug_id in drugs_prescribed ] )
+    return redirect(url_for('choose_drugs_to_prescribe', 
+                                                patient_id=patient_id,
+                                                appointment_id=appointment_id,
+                                                drug_list=drug_list))
+
+@app.route('/remove/drug_from_prescription?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>&dl=<drug_list>'
+            '&didr=<int:drug_id_to_remove>')
+def remove_drug_from_prescription(patient_id, appointment_id, drug_list, 
+                                                            drug_id_to_remove):
+    
+    drugs_prescribed = [ int(drug_id) for drug_id in drug_list.split(",") ]
+    drugs_prescribed.remove(drug_id_to_remove)
+    if drugs_prescribed:
+        drug_list = ",".join( [str(drug_id) for drug_id in drugs_prescribed ] )
+        return redirect(url_for('choose_drugs_to_prescribe', 
+                                                patient_id=patient_id,
+                                                appointment_id=appointment_id,
+                                                drug_list=drug_list))
+    return redirect(url_for('choose_drugs_to_prescribe', 
+                                                patient_id=patient_id,
+                                                appointment_id=appointment_id))
+    
+
+@app.route('/patient/choose_drugs_to_prescribed&pid=<int:patient_id>'
+            '&aid=<int:appointment_id>')
+@app.route('/patient/choose_drugs_to_prescribed&pid=<int:patient_id>'
+            '&aid=<int:appointment_id>&dl=<drug_list>')
+def choose_drugs_to_prescribe(patient_id, appointment_id, drug_list=''):
+    """
+        session['prescription'] = [ drug_id_1, drug_id_2 ]
+    """
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
-        return redirect(url_for('index'))
+        return abort(403)
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment(appointment_id)
 
-    drugs = ( meta.session.query(medication.DrugPrescribed)
-                    .order_by(medication.DrugPrescribed.molecule)
-                    .all()
+    drugs_prescribed = []
+    if drug_list:
+        drugs_prescribed = [ drug_id for drug_id in drug_list.split(",") ]
+
+    prescribed = (
+        meta.session.query(medication.DrugPrescribed)
+            .filter(medication.DrugPrescribed.id.in_(drugs_prescribed))
+            .join(medication.DrugFamily)
+            .order_by(
+                medication.DrugFamily.name,
+                medication.DrugPrescribed.molecule)
+            .all()
     )
-    return render_template('choose_drugs_to_prescribe.html', patient=patient,
-                                                    appointment=appointment,
-                                                    drugs=drugs)
+
+    other_drugs = (
+        meta.session.query(medication.DrugPrescribed)
+            .filter(~medication.DrugPrescribed.id.in_(drugs_prescribed))
+            .join(medication.DrugFamily)
+            .order_by(
+                medication.DrugFamily.name,
+                medication.DrugPrescribed.molecule)
+            .all()
+    )
+   
+    if drug_list:
+        return render_template('choose_drugs_to_prescribe.html', 
+                                        patient=patient,
+                                        appointment=appointment,
+                                        prescribed=prescribed,
+                                        other_drugs=other_drugs,
+                                        drug_list=drug_list)
+
+    return render_template('choose_drugs_to_prescribe.html', 
+                                        patient=patient,
+                                        appointment=appointment,
+                                        prescribed=prescribed,
+                                        other_drugs=other_drugs)
+
+@app.route('/choose/drugs_positions_on_prescription?pid=<int:patient_id>'
+                    '&aid=<int:appointment_id>&dl=<drug_list>', 
+                                                    methods=['GET', 'POST'] )
+def choose_drugs_positions_on_prescription(patient_id, appointment_id, 
+                                                                    drug_list):
+    def _create_drug_list(drug_position):
+        drug_list = ""
+        for drug_pos in drug_position.items():
+            if not drug_list:
+                drug_list = str(drug_pos[0]) + "-" + str(drug_pos[1][0])
+            else:
+                drug_list = drug_list + "," + str(drug_pos[0]) + "-" +\
+                                                        str(drug_pos[1][0])
+        return drug_list
+        
+    def _new_position_superior(drug_position, position_form):
+        for drug_data in drug_position.items():
+            if drug_data[0] == int(position_form.drug_id.data):
+                drug_position[drug_data[0]][0] =\
+                                                position_form.new_position.data
+                continue
+            if ( drug_data[1][0] <= position_form.new_position.data
+                and drug_data[1][0] > int(position_form.old_position.data) ):
+                drug_position[drug_data[0]][0] -= 1
+        return drug_position
+
+    def _new_position_inferior(drug_position, position_form):
+        for drug_data in drug_position.items():
+            if drug_data[0] == int(position_form.drug_id.data):
+                drug_position[drug_data[0]][0] =\
+                                                position_form.new_position.data
+                continue
+            if ( drug_data[1][0] >= position_form.new_position.data
+                and drug_data[1][0] < int(position_form.old_position.data) ):
+                drug_position[drug_data[0]][0] += 1
+        return drug_position
+
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+    
+    # If we're here for the first time, or the dentist went back to change 
+    # add / remove / change drugs in prescription
+    drug_position = {}
+    if len(drug_list.split("-")) == 1:
+        position = 1
+        for drug_id in drug_list.split(","):
+            drug = ( meta.session.query(medication.DrugPrescribed)
+                .filter(medication.DrugPrescribed.id == int(drug_id)).one() )
+            drug_position[int(drug_id)] = [ position, drug.molecule ]
+            position += 1
+    else:
+        drug_position_list = [ dp for dp in drug_list.split(",") ]
+        for drug_pos in drug_position_list:
+            drug_id, position  = drug_pos.split("-")
+            drug = ( meta.session.query(medication.DrugPrescribed)
+                .filter(medication.DrugPrescribed.id == int(drug_id))
+                .one()
+            )
+            drug_position[int(drug_id)] = [ int(position), drug.molecule ]
+
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(appointment_id)
+
+    drug_position_form = DrugPositionInPrescriptionForm(request.form)
+
+    if request.method == 'POST' and drug_position_form.validate():
+        if drug_position_form.new_position.data > len(drug_position):
+            drug_position_form.new_position.data = len(drug_position)
+        elif drug_position_form.new_position.data < 1:
+            drug_position_form.new_position.data = 1
+
+        if drug_position_form.new_position.data >\
+                            int(drug_position_form.old_position.data):
+            drug_position = _new_position_superior(drug_position, 
+                                                            drug_position_form)
+        else:
+            drug_position = _new_position_inferior(drug_position, 
+                                                            drug_position_form)
+        drug_list = _create_drug_list(drug_position)
+        return redirect(url_for('choose_drugs_positions_on_prescription',
+                                                patient_id=patient_id,
+                                                appointment_id=appointment_id,
+                                                drug_list=drug_list))
+    
+    position_order_form = []
+    # sort on position
+    for drug_data in sorted(drug_position.items(), 
+                                key=lambda drug_pos: drug_pos[1][0]):
+        drug_position_form = DrugPositionInPrescriptionForm(request.form)
+        drug_position_form.new_position.data =\
+            drug_position_form.old_position.data = drug_data[1][0]
+        drug_position_form.drug_id.data = drug_data[0]
+        drug = ( meta.session.query(medication.DrugPrescribed)
+                    .filter(medication.DrugPrescribed.id == drug_data[0]).one()
+        )
+        position_order_form.append((drug, drug_position_form))
+
+    drug_list = _create_drug_list(drug_position)
+    return render_template('choose_drugs_positions_on_prescription.html',
+                                    patient=patient,
+                                    appointment=appointment,
+                                    drug_list=drug_list,
+                                    position_order_form=position_order_form)
+
+def generate_prescription_pdf(patient_id, appointment_id, prescription_form):
+    lmarg = rmarg = 20 * mm
+    tmarg = 20 * mm
+    bmarg = 20 * mm
+    width_paper = 210 * mm
+    height_paper = 297 * mm
+
+    hori_start = lmarg
+    hori_stop = width_paper - rmarg
+    vert_start = tmarg
+    vert_stop = height_paper - bmarg
+   
+    def write_string( c, font, fontsize, text, last_height, align='', 
+                                                            new_line=True ):
+        c.setFont(font, fontsize)
+        if align == 'centred':
+            c.drawCentredString( width_paper / 2,
+                                (height_paper - tmarg - last_height),
+                                text
+                            )
+        elif align == 'right':
+            c.drawRightString( width_paper - rmarg,
+                            (height_paper - tmarg - last_height),
+                            text
+                            )
+        else:
+            c.drawString( lmarg, 
+                        (height_paper - tmarg - last_height),
+                        text
+                        )
+
+        if new_line:
+            last_height = last_height + 5 * mm
+        return c, last_height
+
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                    constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(appointment_id)
+    dental_office = (
+        meta.session.query(users.DentalOffice)
+            .filter(users.DentalOffice.id == 
+                                    appointment.dental_unit.dental_office_id)
+            .one()
+    )
+    dentist = ( meta.session.query(users.OdontuxUser)
+        .filter(users.OdontuxUser.id == appointment.dentist_id)
+        .one()
+    )
+
+    output = cStringIO.StringIO()
+    c = canvas.Canvas(output)
+    c.setPageSize(A4)
+
+    font = "Times-Roman"
+    fontsize = 11
+    lines = [
+        'Dr ' + dentist.firstname + " " + dentist.lastname,
+        dentist.registration,
+        dental_office.addresses[-1].street + " " 
+                                    + dental_office.addresses[-1].complement,
+        dental_office.addresses[-1].city + " "
+                                    + dental_office.addresses[-1].zip_code,
+        dentist.mails[-1].email
+    ]
+
+    last_height = 0
+    # Dentist / Dental Office description
+    for text in lines:
+        c, last_height = write_string(c, font, fontsize, text, last_height)
+
+    phones = [ " (" + phone.area_code + ") " + phone.number
+                for phone in dental_office.phones ]
+    for phone in phones:
+        c, last_height = write_string(c, font, fontsize, phone, last_height)
+
+    # Naming the prescription
+    last_height = last_height + 10 * mm
+    
+    font = 'Times-Bold'
+    fontsize = 16
+    if any( [ drug.special for drug in prescription_form.drugs ] ):
+        text = "Receituário controle especial"
+        c, last_height = write_string(c, font, fontsize, text, last_height, 
+                                                            align='centred')
+    else:
+        text = "Receituário"
+        c, last_height = write_string(c, font, fontsize, text, last_height, 
+                                                            align='centred')
+    
+    for drug in sorted(prescription_form.drugs, 
+                                key=lambda drug_form: drug_form.position.data):
+        if not drug.position.data:
+            continue
+        font = 'Times-Bold'
+        fontsize = 11
+        c, last_height = write_string(c, font, fontsize, drug.molecule.data, 
+                                                last_height, new_line=False)
+        font = 'Times-Roman'
+        c, last_height = write_string(c, font, fontsize, drug.packaging.data,
+                                                    last_height, align='right')
+        text = "Tomar" + drug.posologia.data + " durante " +\
+                str(drug.dayssupply.data) + " dias ; " + drug.comments.data
+        c, last_height = write_string(c, font, fontsize, text, last_height)
+
+        last_height = last_height + 5 * mm
+
+    c.showPage()
+    c.save()
+    pdf_out = output.getvalue()
+    output.close()
+    return pdf_out
+
+@app.route('/manual_adjustment_in_prescription?pid=<int:patient_id>'
+                '&aid=<int:appointment_id>&dl=<drug_list>', 
+                                                    methods=['GET', 'POST'])
+def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+    def _populate_prescription_form(drug_list):
+        prescription_form = PrescriptionForm(request.form)
+        drug_prescribed = {}
+        for drug_pos in drug_list.split(','):
+            drug_prescribed_form = DrugPrescribedForm(request.form)
+            drug_id, position = drug_pos.split('-')
+            drug = ( meta.session.query(medication.DrugPrescribed)
+                .filter(medication.DrugPrescribed.id == drug_id).one() )
+            drug_prescribed[drug_id] = ( position, drug )
+            drug_prescribed_form.drug_id = drug_id
+            drug_prescribed_form.position = position
+            drug_prescribed_form.molecule = drug.molecule
+            drug_prescribed_form.packaging = drug.packaging
+            drug_prescribed_form.posologia = drug.posologia
+            drug_prescribed_form.dayssupply = drug.dayssupply
+            drug_prescribed_form.comments = drug.comments
+            drug_prescribed_form.special = drug.special
+
+            prescription_form.drugs.append_entry(drug_prescribed_form)
+        return prescription_form
+
+    patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(appointment_id)
+
+    prescription_form = PrescriptionForm(request.form)
+    if ( request.method == 'POST' and prescription_form.validate()
+        and 'update' in request.form ):
+        pass
+
+    if ( request.method == 'POST' and prescription_form.validate()
+        and 'save_print' in request.form ):
+        pass
+
+    if ( request.method == 'POST' and prescription_form.validate()
+        and 'preview' in request.form ):
+        pdf_out = make_prescription(patient_id, appointment_id, 
+                                                            prescription_form)
+        response = make_response(pdf_out)
+        response.mimetype = 'application/pdf'
+        return response
+
+    if request.method == 'GET':
+        prescription_form = _populate_prescription_form(drug_list)
+
+    pdf_out = make_prescription(patient_id, appointment_id, prescription_form)
+    return render_template('manual_adjustment_in_prescription.html',
+                                        patient=patient,
+                                        appointment=appointment,
+                                        drug_list=drug_list,
+                                        pdf_out=pdf_out,
+                                        prescription_form=prescription_form)
 

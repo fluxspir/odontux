@@ -1,0 +1,31 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_hidden_field %}
+<h3>Manual adjustment in prescription:</h3><br />
+
+<form method="post" action="{{ url_for('manual_adjustment_in_prescription',
+                                        patient_id=patient.id,
+                                        appointment_id=appointment.id,
+                                        drug_list=drug_list) }}">
+
+  {% for drug_form in prescription_form.drugs %}
+    {% if drug_form.molecule.data %}
+    <div style='display:none'>
+      {{ drug_form.special }}
+    </div>
+    {{ render_simple_hidden_field(drug_form.drug_id) }}
+    {{ render_sfl_wol(drug_form.position) }}
+    {{ drug_form.molecule }}
+    {{ render_sfl_wol(drug_form.packaging) }}
+    {{ render_sfl_wol(drug_form.posologia) }}
+    days: {{ render_sfl_wol(drug_form.dayssupply) }}
+    {{ render_sfl_wol(drug_form.comments) }}
+    <br /><br />
+    {% endif %}
+  {% endfor %}
+    <object data='{{ pdf_output|safe }}' type="application/pdf"></object>
+    {{ prescription_form.update }}
+    {{ prescription_form.save_print }}
+    {{ prescription_form.preview }}
+</form>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+<br />
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_hidden_field %}
+<h3>Drugs in prescription:</h3><br />
+{% for drug, drug_position_form in position_order_form %}
+        <form method="post" 
+              action="{{ url_for('choose_drugs_positions_on_prescription', 
+                                            patient_id=patient.id,
+                                            appointment_id=appointment.id,
+                                            drug_list=drug_list) }}">
+          {{ render_simple_hidden_field(drug_position_form.drug_id) }}
+          {{ render_simple_hidden_field(drug_position_form.old_position) }}
+          {{ render_sfl_wol(drug_position_form.new_position) }} 
+          {{ drug.molecule }}
+          <input type="submit" value="change position"> </form>
+              <br />
+{% endfor %}
+<br /><br />
+<a href="{{ url_for('manual_adjustment_in_prescription', patient_id=patient.id,
+                                          appointment_id=appointment.id,
+                                          drug_list=drug_list) }}">
+      Finalize prescription</a>
+{% endblock %}

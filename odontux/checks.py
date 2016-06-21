@@ -10,6 +10,9 @@ import sqlalchemy
 from flask import session
 from gettext import gettext as _
 
+import os
+import ConfigParser
+
 import datetime
 
 import sqlalchemy
@@ -24,6 +27,20 @@ from odontux.models import (
                             users,
                             assets
                            )
+
+def get_odontux_folder():
+    parser = ConfigParser.ConfigParser()
+    home = os.path.expanduser("~")
+    parser.read(os.path.join(home, ".odontuxrc"))
+    return parser.get("environment", "odontux_folder")
+
+def get_dental_office_logo():
+    parser = ConfigParser.ConfigParser()
+    home = os.path.expanduser("~")
+    parser.read(os.path.join(home, ".odontuxrc"))
+    odontux_folder = get_odontux_folder()
+    odontux_logo = parser.get("environment", "odontux_logo")
+    return os.path.join(odontux_folder, odontux_logo)
 
 def in_patient_file():
     try:

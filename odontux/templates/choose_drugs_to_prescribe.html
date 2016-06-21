@@ -1,8 +1,33 @@
 {% extends 'summary_patient.html' %}
 
 {% block main %}
-  {% for drug in drugs %}
-
-    {{ drug.alias }} -- {{ drug.molecule }}<br />
+Drugs in new prescription:</br />
+  {% for drug in prescribed %}
+    <a href="{{ url_for('remove_drug_from_prescription', patient_id=patient.id,
+                      appointment_id=appointment.id, 
+                      drug_id_to_remove=drug.id,
+                      drug_list=drug_list) }}">
+        {{ drug.molecule }}</a><br />
+  {% endfor %}<br />
+  Potential drugs to add:<br />
+  {% for drug in other_drugs %}
+    {% if drug_list %}
+      <a href="{{ url_for('add_drug_to_prescription', patient_id=patient.id,
+                      appointment_id=appointment.id, 
+                      drug_id_to_add=drug.id,
+                      drug_list=drug_list) }}">
+    {% else %}
+      <a href="{{ url_for('add_drug_to_prescription', patient_id=patient.id,
+                      appointment_id=appointment.id, 
+                      drug_id_to_add=drug.id) }}">
+    {% endif %}
+        {{ drug.molecule }}</a><br />
   {% endfor %}
+  <br /><br />
+  <a href="{{ url_for('choose_drugs_positions_on_prescription', 
+                              patient_id=patient.id,
+                              appointment_id=appointment.id,
+                              drug_list=drug_list) }}">
+          Order drugs on prescription
+  </a>
 {% endblock %}
