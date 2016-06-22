@@ -462,19 +462,20 @@ def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
         meta.session.add(new_file)
         meta.session.commit()
 
-        file_appointment_ref_values = {
-            'file_id': new_file.id,
-            'appointment_id': appointment_id,
-        }
-        new_file_appointment_ref = documents.FileAppointmentReference(
-                                                **file_appointment_ref_values)
-        meta.session.add(new_file_appointment_ref)
-        meta.session.commit()
-
+#        file_appointment_ref_values = {
+#            'file_id': new_file.id,
+#            'appointment_id': appointment_id,
+#        }
+#        new_file_appointment_ref = documents.FileAppointmentReference(
+#                                                **file_appointment_ref_values)
+#        meta.session.add(new_file_appointment_ref)
+#        meta.session.commit()
+#
         prescription_values = {
             'dentist_id': appointment.dentist_id,
             'patient_id': patient_id,
             'appointment_id': appointment_id,
+            'file_id': new_file.id,
         }
         new_prescription = medication.Prescription(**prescription_values)
         meta.session.add(new_prescription)
