@@ -129,4 +129,3 @@ kitstructure_superassetcategory_table = Table("kit_structure_superasset_category
 Column("kit_structure_id", Integer, ForeignKey("asset_kit_structure.id")),
 Column("superasset_category_id", Integer, ForeignKey("super_asset_category.id"))
 )
-
