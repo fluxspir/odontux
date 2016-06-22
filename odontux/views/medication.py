@@ -7,7 +7,7 @@
 
 import pdb
 from flask import ( session, redirect, url_for, request, render_template, 
-                    abort, make_response )
+                    abort, make_response, send_from_directory )
 from wtforms import (Form, HiddenField, TextField, TextAreaField, DateField,
                     BooleanField, SelectField, IntegerField,
                     FieldList, FormField, SubmitField, validators )
@@ -448,9 +448,9 @@ def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
         response = make_response(pdf_out)
         response.mimetype = 'application/pdf'
         filename = md5.new(pdf_out).hexdigest()
-        document_folder = checks.get_odontux_document_folder()
         # Save file in odontux folder
-        with open(os.path.join(document_folder, filename), 'w') as f:
+        with open(os.path.join(
+                        app.config['DOCUMENT_FOLDER'], filename), 'w') as f:
             f.write(pdf_out)
         # Keep trace in database
         file_values = {
@@ -462,15 +462,6 @@ def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
         meta.session.add(new_file)
         meta.session.commit()
 
-#        file_appointment_ref_values = {
-#            'file_id': new_file.id,
-#            'appointment_id': appointment_id,
-#        }
-#        new_file_appointment_ref = documents.FileAppointmentReference(
-#                                                **file_appointment_ref_values)
-#        meta.session.add(new_file_appointment_ref)
-#        meta.session.commit()
-#
         prescription_values = {
             'dentist_id': appointment.dentist_id,
             'patient_id': patient_id,
@@ -512,3 +503,17 @@ def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
                                         drug_list=drug_list,
                                         prescription_form=prescription_form)
 
+@app.route('/display/prescription?pfid=<int:prescription_file_id>')
+def display_prescription(prescription_file_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                    constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+
+    prescription_file = ( meta.session.query(documents.Files)
+            .filter(documents.Files.id == prescription_file_id)
+            .one()
+    )
+    return send_from_directory(app.config['DOCUMENT_FOLDER'], 
+                                prescription_file.md5,
+                                mimetype=prescription_file.mimetype)

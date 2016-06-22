@@ -42,6 +42,7 @@ class Prescription(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id))
     file_id = Column(Integer, ForeignKey(documents.Files.id), nullable=False)
     time_stamp = Column(DateTime, nullable=False, default=func.now())
+    prescription_file = relationship('documents.Files')
 
 class PrescribedDrugReference(Base):
     __tablename__ = 'prescribed_drug_reference'

@@ -18,7 +18,7 @@
         <th>Next appointment</th>
         <th>Memo</th>
       {% endif %}
-      <th>Ordonnance</th>
+      <th>Prescription</th>
       <th></th>
     </tr>
 {% endmacro %}
@@ -61,7 +61,16 @@
             <td></td>
           {% endif %}
         {% endif %}
-        <td>{% if appointment.ordonnance %}{{ appointment.ordonnance.id }}{% endif %}</td>
+        <td>
+          {% if appointment.prescriptions %}
+            {% for prescription in appointment.prescriptions %}
+              <a href="{{ url_for('display_prescription', 
+                    prescription_file_id=prescription.prescription_file.id) }}">
+                  Prescription : {{ loop.index }}
+              </a><br />
+            {% endfor %}
+          {% endif %}
+        </td>
         <td>
           <form method="post" action="{{ url }}">
             <input type="hidden" name="appointment_id" value="{{ appointment.id }}" />

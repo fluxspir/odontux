@@ -6,8 +6,8 @@
 
 from flask import Flask
 from flask import Blueprint, g
-#from flask.ext.assets import Environment, Bundle
 import models
+import checks
 
 from gettext import gettext as _
 import sys
@@ -29,6 +29,8 @@ DEBUG = False
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['SESSION_COOKIE_HTTPONLY'] = False
+app.config['ODONTUX_FOLDER'] = checks.get_odontux_folder()
+app.config['DOCUMENT_FOLDER'] = checks.get_odontux_document_folder()
 
 bp = Blueprint('frontend', __name__, url_prefix='/<lang_code>')
 
