@@ -5,7 +5,7 @@
 # licence BSD
 #
 from meta import Base
-import users, administration, schedule
+import users, administration, schedule, documents
 import sqlalchemy
 import datetime
 
@@ -40,6 +40,7 @@ class Prescription(Base):
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                         nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id))
+    file_id = Column(Integer, ForeignKey(documents.Files.id)
     time_stamp = Column(DateTime, nullable=False, default=func.now())
 
 class PrescribedDrugReference(Base):
