@@ -15,7 +15,7 @@ except ImportError:
     from odontux import constants
 
 from sqlalchemy import ( Table, Column, Integer, String, Date, DateTime, 
-                        Boolean, Interval )
+                        Boolean, Interval, Numeric )
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -151,7 +151,7 @@ class OralHygiene(Anamnesis):
     __tablename__ = 'oral_hygiene'
     id = Column(Integer, ForeignKey(Anamnesis.id), primary_key=True)
     type = Column(Integer)
-    frequency = Column(Integer)
+    frequency = Column(Numeric)
     comment = Column(String)
 
     __mapper_args__= {

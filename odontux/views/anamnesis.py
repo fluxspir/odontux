@@ -9,7 +9,8 @@ import pdb
 import datetime
 from flask import session, render_template, request, redirect, url_for, jsonify
 from wtforms import (Form, SelectField, TextField, BooleanField, TextAreaField,
-                     IntegerField, HiddenField, DateField, validators )
+                     IntegerField, HiddenField, DateField, DecimalField, 
+                    validators )
 from sqlalchemy.orm import with_polymorphic
 
 from odontux.views.log import index
@@ -78,7 +79,7 @@ class AllergyForm(Form):
 
 class OralHygieneForm(Form):
     oral_type = SelectField(_('Type'), coerce=int)
-    frequency = IntegerField(_('Frequency per day (per years for dentist)'), 
+    frequency = DecimalField(_('Frequency per day (per years for dentist)'), 
                                                     [validators.Optional()])
     oral_comment = TextAreaField(_('Comment'), 
                                     render_kw={'rows': '2', 'cols': '30'})
@@ -146,7 +147,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
             anamnesis_form.question_id.data = question.id
     else:
         question = None
-
+    
     if request.method == 'POST' and anamnesis_form.validate():
         
         anamnesis_values = {
