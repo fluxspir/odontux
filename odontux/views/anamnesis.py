@@ -44,26 +44,26 @@ class AnamnesisForm(Form):
                             description='ChangementAnamnesisType()')
 
 class MedicalHistoryForm(Form):
-    type = SelectField(_('Type'), coerce=int)
+    medical_type = SelectField(_('Type'), coerce=int)
     disease = SelectField(_('Disease'), coerce=int)
-    name = TextField(_('Name'), [validators.Required()])
+    denomination = TextField(_('Name'), [validators.Required()])
     icd10 = TextField(_('ICD 10'))
-    comment = TextAreaField(_('Comments'))
+    medical_comment = TextAreaField(_('Comments'))
 
 class AddictionForm(Form):
-    type = SelectField(_('Type'), coerce=int)
-    comment = TextAreaField(_('comment'))
-    begin = DateField(_('Begin'), format='%Y-%m-%d', 
+    addiction_type = SelectField(_('Type'), coerce=int)
+    addiction_comment = TextAreaField(_('comment'))
+    begin_addiction = DateField(_('Begin'), format='%Y-%m-%d', 
                     validators=[validators.Optional()])
-    end = DateField(_('End'), format='%Y-%m-%d',
+    end_addiction = DateField(_('End'), format='%Y-%m-%d',
                     validators=[validators.Optional()])
 
 class TreatmentForm(Form):
-    name = TextField(_('Name'), [validators.Required()])
+    molecule = TextField(_('Name'), [validators.Required()])
     posologia = TextAreaField(_('Posologia'))
-    begin = DateField(_('Begin'), format='%Y-%m-%d', 
+    begin_treatment = DateField(_('Begin'), format='%Y-%m-%d', 
                     validators=[validators.Optional()])
-    end = DateField(_('End'), format='%Y-%m-%d',
+    end_treatment = DateField(_('End'), format='%Y-%m-%d',
                     validators=[validators.Optional()])
 
 class PastSurgeryForm(Form):
@@ -72,15 +72,15 @@ class PastSurgeryForm(Form):
     complication = TextAreaField(_('Complication'))
 
 class AllergyForm(Form):
-    type = SelectField(_('Type'), coerce=int)
+    allergy_type = SelectField(_('Type'), coerce=int)
     allergen = TextField(_('Allergen'), [validators.Required()])
     reaction = SelectField(_('Reaction'), coerce=int)
 
 class OralHygieneForm(Form):
-    type = SelectField(_('Type'), coerce=int)
+    oral_type = SelectField(_('Type'), coerce=int)
     frequency = IntegerField(_('Frequency per day (per years for dentist)'), 
                                                     [validators.Optional()])
-    comment = TextAreaField(_('Comment'), 
+    oral_comment = TextAreaField(_('Comment'), 
                                     render_kw={'rows': '2', 'cols': '30'})
 
 class MedecineDoctorForm(Form):
@@ -121,17 +121,18 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
     anamnesis_form.anamnesis_type.choices = [ (id, info[0]) for id, info in
                                             constants.ANAMNESIS.items() ]
     medical_history_form = MedicalHistoryForm(request.form)
-    medical_history_form.type.choices = constants.MEDICAL_HISTORIES.items()
+    medical_history_form.medical_type.choices =\
+                                            constants.MEDICAL_HISTORIES.items()
     medical_history_form.disease.choices = constants.DISEASES.items()
     addiction_form = AddictionForm(request.form)
-    addiction_form.type.choices = constants.ADDICTIONS.items()
+    addiction_form.addiction_type.choices = constants.ADDICTIONS.items()
     treatment_form = TreatmentForm(request.form)
     past_surgery_form = PastSurgeryForm(request.form)
     allergy_form = AllergyForm(request.form)
-    allergy_form.type.choices = constants.ALLERGIES.items()
+    allergy_form.allergy_type.choices = constants.ALLERGIES.items()
     allergy_form.reaction.choices = constants.ALLERGIC_REACTIONS.items()
     oral_hygiene_form = OralHygieneForm(request.form)
-    oral_hygiene_form.type.choices = constants.ORAL_HYGIENE.items()
+    oral_hygiene_form.oral_type.choices = constants.ORAL_HYGIENE.items()
 
     if survey_entry:
         question = (
@@ -164,11 +165,11 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                         constants.ANAMNESIS_MEDICAL_HISTORY
             and medical_history_form.validate() ):
             values = {
-                'type': medical_history_form.type.data,
+                'type': medical_history_form.medical_type.data,
                 'disease': medical_history_form.disease.data,
-                'name': medical_history_form.name.data,
+                'name': medical_history_form.denomination.data,
                 'icd10': medical_history_form.icd10.data,
-                'comment': medical_history_form.comment.data,
+                'comment': medical_history_form.medical_comment.data,
                 }
             values.update(anamnesis_values)
             new_medical_history = anamnesis.MedicalHistory(**values)
@@ -179,10 +180,10 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                         constants.ANAMNESIS_ADDICTION
             and addiction_form.validate() ):
             values = {
-                'type': addiction_form.type.data,
-                'comment': addiction_form.comment_data,
-                'begin': addiction_form.begin.data,
-                'end': addiction_form.end.data
+                'type': addiction_form.addiction_type.data,
+                'comment': addiction_form.addiction_comment.data,
+                'begin': addiction_form.begin_addiction.data,
+                'end': addiction_form.end_addiction.data
                 }
             values.update(anamnesis_values)
             new_addiction = anamnesis.Addiction(**values)
@@ -193,10 +194,10 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                         constants.ANAMNESIS_TREATMENT
             and treatment_form.validate() ):
             values = {
-                'name': treatment_form.name.data,
+                'name': treatment_form.molecule.data,
                 'posologia': treatment_form.posologia.data,
-                'begin': treatment_form.begin.data,
-                'end': treatment_form.end.data
+                'begin': treatment_form.begin_treatment.data,
+                'end': treatment_form.end_treatment.data
                 }
             values.update(anamnesis_values)
             new_treatment = anamnesis.Treatment(**values)
@@ -220,7 +221,7 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                         constants.ANAMNESIS_ALLERGY
             and allergy_form.validate() ):
             values = {
-                'type': allergy_form.type.data,
+                'type': allergy_form.allergy_type.data,
                 'allergen': allergy_form.allergen.data,
                 'reaction': allergy_form.reaction.data,
                 }
@@ -233,9 +234,9 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                         constants.ANAMNESIS_ORAL_HYGIENE
             and oral_hygiene_form.validate() ):
             values = {
-                'type': oral_hygiene_form.type.data,
+                'type': oral_hygiene_form.oral_type.data,
                 'frequency': oral_hygiene_form.frequency.data,
-                'comment': oral_hygiene_form.comment.data
+                'comment': oral_hygiene_form.oral_comment.data
                 }
             values.update(anamnesis_values)
             new_oral_hygiene = anamnesis.OralHygiene(**values)

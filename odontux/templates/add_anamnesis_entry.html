@@ -10,6 +10,12 @@
 <h3>New anamnesis entry</h3>
 {% if question %}
   <h4>{{ question.question }}</h4>
+  <a href="{{ url_for('add_anamnesis_entry', patient_id=patient.id, 
+                    appointment_id=appointment.id,
+                    survey_id=survey_id,
+                    survey_entry=survey_entry + 1) }}">
+      Next Question<a><br />
+      <br />
 {% endif %}
 
 {% if survey_id and survey_entry %}
@@ -34,25 +40,25 @@
   <br />
 
   <div id="medical_history">
-    {{ render_simple_field(medical_history_form.type) }}
+    {{ render_simple_field(medical_history_form.medical_type) }}
     {{ render_simple_field(medical_history_form.disease) }}
     {{ render_simple_field(medical_history_form.icd10) }}
-    {{ render_simple_field(medical_history_form.name) }}
-    {{ render_simple_field(medical_history_form.comment) }}
+    {{ render_simple_field(medical_history_form.denomination) }}
+    {{ render_simple_field(medical_history_form.medical_comment) }}
   </div>
   
   <div id="addiction">
-    {{ render_simple_field(addiction_form.type) }}
-    {{ render_simple_field(addiction_form.comment) }}
-    {{ render_simple_field(addiction_form.begin) }}
-    {{ render_simple_field(addiction_form.end) }}
+    {{ render_simple_field(addiction_form.addiction_type) }}
+    {{ render_simple_field(addiction_form.addiction_comment) }}
+    {{ render_simple_field(addiction_form.begin_addiction) }}
+    {{ render_simple_field(addiction_form.end_addiction) }}
   </div>
   
   <div id="treatment">
-    {{ render_simple_field(treatment_form.name) }}
+    {{ render_simple_field(treatment_form.molecule) }}
     {{ render_simple_field(treatment_form.posologia) }}
-    {{ render_simple_field(treatment_form.begin) }}
-    {{ render_simple_field(treatment_form.end) }}
+    {{ render_simple_field(treatment_form.begin_treatment) }}
+    {{ render_simple_field(treatment_form.end_treatment) }}
   </div>
   
   <div id="past_surgery">
@@ -62,15 +68,15 @@
   </div>
 
   <div id="allergy">
-    {{ render_simple_field(allergy_form.type) }}
+    {{ render_simple_field(allergy_form.allergy_type) }}
     {{ render_simple_field(allergy_form.allergen) }}
     {{ render_simple_field(allergy_form.reaction) }}
   </div>
   
   <div id="oral_hygiene">
-    {{ render_simple_field(oral_hygiene_form.type) }}
+    {{ render_simple_field(oral_hygiene_form.oral_type) }}
     {{ render_simple_field(oral_hygiene_form.frequency) }}
-    {{ render_simple_field(oral_hygiene_form.comment) }}
+    {{ render_simple_field(oral_hygiene_form.oral_comment) }}
   </div>
   <br /><br />
   <input type="submit" value="Add">

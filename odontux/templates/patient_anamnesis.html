@@ -45,7 +45,7 @@
     {% elif entry.anamnesis_type == constants.ANAMNESIS_ALLERGY %}
       {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
       {{ constants.ALLERGIES[entry.type] }} -- 
-      {{ constants.ALLERGIC_REACTION[entry.reaction] }}
+      {{ constants.ALLERGIC_REACTIONS[entry.reaction][0] }}
       <br />------<br />
     {% elif entry.anamnesis_type == constants.ANAMNESIS_ORAL_HYGIENE %}
       {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
