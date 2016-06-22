@@ -41,7 +41,7 @@ class Appointment(Base):
     administrative_gestures = relationship("AppointmentGestureReference",
                                        backref="appointment",
                                        cascade="all, delete, delete-orphan")
-    ordonnance = relationship("Prescription", backref="appointment",
+    ordonnances = relationship("Prescription", backref="appointment",
                               cascade="all, delete, delete-orphan")
     memo = relationship("AppointmentMemo", backref="appointment",
                          cascade="all, delete, delete-orphan")
