@@ -73,6 +73,7 @@ class ScheduleNewPatientForm(Form):
     comment = TextAreaField(_('Name(...)'), [validators.Required()])
 
 class UpdateMeeting(Form):
+    meeting_id = HiddenField(_('meeting_id'))
     date_taker_id = HiddenField(_('date_taker'))
     day = DateField(_('Day'))
     dentist_id = SelectField(_('dentist'))
@@ -329,6 +330,8 @@ def display_day(dateday, dentist_id, dental_unit_id, meeting_id=0):
             meeting_form = UpdateMeetingNewPatientForm(request.form)
             meeting_form.comment.data = meeting.comment
         
+        meeting_form.meeting_id.data = meeting.id
+        
         dentists = ( meta.session.query(users.OdontuxUser)
                     .filter(users.OdontuxUser.role == constants.ROLE_DENTIST)
                     .all()
@@ -368,6 +371,22 @@ def display_day(dateday, dentist_id, dental_unit_id, meeting_id=0):
                             meeting_form=meeting_form
                             )
 
+@app.route('/delete/meeting?meeting_id:<int:meeting_id>'
+            '&dentist_id=<int:dentist_id>&dental_unit_id=<int:dental_unit_id>')
+def delete_meeting(meeting_id, dentist_id, dental_unit_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+    meeting = ( meta.session.query(schedule.Agenda)
+                .filter(schedule.Agenda.id == meeting_id)
+                .one()
+    )
+    dateday = meeting.starttime.date().isoformat()
+    meta.session.delete(meeting)
+    meta.session.commit()
+    return redirect(url_for('display_day', dateday, dentist_id, dental_unit_id))
+
 @app.route('/update/meeting?meeting_id=<int:meeting_id>', methods=['POST'])
 def update_meeting(meeting_id):
     def _get_start_and_end_time(meeting_form):
@@ -391,6 +410,7 @@ def update_meeting(meeting_id):
     else:
         meeting_form = UpdateMeetingNewPatientForm(request.form)
 
+    meeting_form.meeting_id.data = meeting_id
     dentists = ( meta.session.query(users.OdontuxUser)
                 .filter(users.OdontuxUser.role == constants.ROLE_DENTIST)
                 .all()

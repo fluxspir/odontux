@@ -70,7 +70,8 @@
               {% else %}
                 {{ render_simple_field(meeting_form.comment) }}
               {% endif %}
-              {{ render_simple_field(meeting_form.date_taker_id) }}
+              {{ render_simple_hidden_field_line(meeting_form.meeting_id) }}
+              {{ render_simple_hidden_field_line(meeting_form.date_taker_id) }}
               {{ render_simple_field(meeting_form.day) }}
               {{ render_simple_field(meeting_form.starttime) }}
               {{ render_simple_field(meeting_form.duration) }}
@@ -81,9 +82,18 @@
               </div>
             </td>
           </tr>
+          <tr>
+            <td>
+              <a href={{ url_for('delete_meeting', 
+                        meeting_id=meeting_form.meeting_id.data,
+                        dentist_id=meeting_form.dentist_id.data,
+                        dental_unit_id=meeting_form.dental_unit_id.data) }}>
+              Delete</a>
+            </td>
+          </tr>
         </table>
       </form>
-    {% else %}
+      {% else %}
       <form method='post' action="{{ url_for('schedule_new_patient') }}">
         <table>
           <caption>
