@@ -40,7 +40,7 @@ class Prescription(Base):
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                         nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id))
-    file_id = Column(Integer, ForeignKey(documents.Files.id)
+    file_id = Column(Integer, ForeignKey(documents.Files.id), nullable=False)
     time_stamp = Column(DateTime, nullable=False, default=func.now())
 
 class PrescribedDrugReference(Base):
