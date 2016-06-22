@@ -124,7 +124,6 @@ def delete_md(body_id):
     meta.session.commit()
     return redirect(url_for('list_md'))
 
-
 @app.route('/md/update_md_address?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_md_address(body_id, form_to_display):
