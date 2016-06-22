@@ -30,10 +30,6 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.config['SESSION_COOKIE_HTTPONLY'] = False
 
-#assets = Environment(app)
-#pdf = Bundle('barcode.pdf')
-#assets.register('pdf_all', pdf)
-
 bp = Blueprint('frontend', __name__, url_prefix='/<lang_code>')
 
 models.init()
