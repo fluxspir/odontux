@@ -22,9 +22,10 @@ class Files(Base):
     mimetype = Column(String, nullable=False)
     timestamp = Column(DateTime, default=func.now())
 
-class FileAppointmentReference(Base):
-    __tablename__ = 'file_appointment_reference'
-    id = Column(Integer, primary_key=True)
-    file_id = Column(Integer, ForeignKey(Files.id), nullable=False)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id))
-    file = relationship('Files')
+#class FileAppointmentReference(Base):
+#    __tablename__ = 'file_appointment_reference'
+#    id = Column(Integer, primary_key=True)
+#    file_id = Column(Integer, ForeignKey(Files.id), nullable=False)
+#    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id))
+#    file = relationship('Files')
+#
