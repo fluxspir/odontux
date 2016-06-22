@@ -6,11 +6,12 @@
 {% from "_contactformhelper.html" import add_phone_form_fields %}
 {% from "_contactformhelper.html" import add_mail_form_fields %}
 
-<form method="post" action="/add/patient/">
+<form method="post" action="{{ url_for('add_patient', 
+                                        meeting_id=meeting_id) }}">
   <dl>
     {{ render_simple_field(gen_info_form.title, autofocus="autofocus") }}
-    {{ render_simple_field(gen_info_form.lastname) }}
     {{ render_simple_field(gen_info_form.firstname) }}
+    {{ render_simple_field(gen_info_form.lastname) }}
     {{ render_simple_field(gen_info_form.family_id) }}
     {{ render_simple_field(gen_info_form.identity_number_1) }}
     {{ render_simple_field(gen_info_form.identity_number_2) }}

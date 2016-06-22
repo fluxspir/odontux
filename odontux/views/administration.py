@@ -88,7 +88,8 @@ def enter_patient_file(body_id):
         return render_template('patient_file.html', patient=patient)
 
 @app.route('/add/patient/', methods=['GET', 'POST'])
-def add_patient():
+@app.route('/add/patient?meeting_id=<int:meeting_id>', methods=['GET', 'POST'])
+def add_patient(meeting_id=0):
     """ Adding a new patient in database
     """
     # the administrator don't have the right/use to create patient
@@ -242,14 +243,17 @@ def add_patient():
                                                  new_patient.dentist_id)
         new_customer = comptability.add_customer()
         
-        return redirect(url_for('enter_patient_file', body_id=new_patient.id))
+        return redirect(url_for('add_patient_appointment', 
+                                            body_id=new_patient.id,
+                                            meeting_id=meeting_id))
 
     return render_template("add_patient.html",
                             gen_info_form=gen_info_form,
                             address_form=address_form,
                             phone_form=phone_form,
                             mail_form=mail_form,
-                            hcp_patient_form=hcp_patient_form)
+                            hcp_patient_form=hcp_patient_form,
+                            meeting_id=meeting_id)
 
 @app.route('/delete/patient?id=<int:body_id>')
 def delete_patient(body_id):

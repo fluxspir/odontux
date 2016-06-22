@@ -219,33 +219,27 @@ def is_body_already_in_database(data, body_type="patient"):
     we need a trick to change it.
     """
     if body_type == "patient":
-        try:
-            patient = meta.session.query(administration.Patient)\
-                .filter(administration.Patient.lastname == data.lastname.data)\
-                .filter(administration.Patient.firstname == 
-                        data.firstname.data)\
-                .filter(administration.Patient.dob == data.dob.data)\
-                .one()
-            return patient
-        except sqlalchemy.orm.exc.NoResultFound:
-            return False
+        patient = meta.session.query(administration.Patient)\
+            .filter(administration.Patient.lastname == data.lastname.data)\
+            .filter(administration.Patient.firstname == 
+                    data.firstname.data)\
+            .filter(administration.Patient.dob == data.dob.data)\
+            .one_or_none()
+        return patient
 
     elif body_type == "md":
-        try:
-            body = meta.session.query(md.MedecineDoctor).filter(
-                   md.MedecineDoctor.lastname == data.lastname.data).filter(
-                   md.MedecineDoctor.firstname == data.firstname.data).one()
-            return body
-        except sqlalchemy.orm.exc.NoResultFound:
-            return False
+        body = ( meta.session.query(md.MedecineDoctor)
+                .filter(md.MedecineDoctor.lastname == data.lastname.data,
+                md.MedecineDoctor.firstname == data.firstname.data)
+                .one_or_none()
+        )
+        return body
    
     elif body_type == "provider":
-        try:
-            body = meta.session.query(assets.AssetProvider).filter(
-                    assets.AssetProvider.name == data.name.data).one()
-            return body
-        except sqlalchemy.orm.exc.NoResultFound:
-            return False
-
+        body = ( meta.session.query(assets.AssetProvider).filter(
+                assets.AssetProvider.name == data.name.data)
+                .one_or_none()
+        )
+        return body
     else:
-        return False
+        return None

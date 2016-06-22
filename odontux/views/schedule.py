@@ -27,17 +27,22 @@ class AppointmentForm(Form):
     dentist_id = SelectField(coerce=int)
     dental_unit_id = SelectField(coerce=int)
     emergency = BooleanField(_('emergency'))
-    reason = TextAreaField(_('reason'))
-    diagnostic = TextAreaField(_('diagnostic'))
-    treatment = TextAreaField(_('treatment'))
-    prognostic = TextAreaField(_('prognostic'))
-    advise = TextAreaField(_('advise'))
-    next_appointment = TextAreaField(_('next_appointment'))
+    reason = TextAreaField(_('reason'), render_kw={'rows': '2', 'cols': '50'})
+    diagnostic = TextAreaField(_('diagnostic'),
+                                        render_kw={'rows': '2', 'cols': '50'})
+    treatment = TextAreaField(_('treatment'),
+                                        render_kw={'rows': '2', 'cols': '50'})
+    prognostic = TextAreaField(_('prognostic'),
+                                        render_kw={'rows': '2', 'cols': '50'})
+    advise = TextAreaField(_('advise'), render_kw={'rows': '2', 'cols': '50'})
+    next_appointment = TextAreaField(_('next_appointment'),
+                                        render_kw={'rows': '2', 'cols': '50'})
     absent = BooleanField(_('absent'))
     excuse = TextField(_('excuse'))
 
 class AgendaForm(Form):
     """ """
+    meeting_id = HiddenField('meeting_id')
     appointment_id = HiddenField('appointment_id')
     day = DateField(_('day'), format='%Y-%m-%d', 
                             validators=[validators.Optional()],
@@ -568,8 +573,10 @@ def add_appointment():
         return redirect(url_for('index'))
 
 
-@app.route('/agenda/add?id=<int:body_id>', methods=['GET', 'POST'])
-def add_patient_appointment(body_id):
+@app.route('/add/agenda?pid=<int:body_id>', methods=['GET', 'POST'])
+@app.route('/add/agenda?pid=<int:body_id>&meeting_id=<int:meeting_id>',
+                                            methods=['GET', 'POST'])
+def add_patient_appointment(body_id, meeting_id=0):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                 constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
     if session['role'] not in authorized_roles:
@@ -580,6 +587,22 @@ def add_patient_appointment(body_id):
         checks.quit_appointment()
 
     agenda_form = AgendaForm(request.form)
+    meeting = ( meta.session.query(schedule.Agenda)
+                        .filter(schedule.Agenda.id == meeting_id)
+                        .one_or_none()
+    )
+    if meeting:
+        day, starthour, startmin, durationhour, durationmin, endhour, endmin =\
+            reverse_agenda_handler(meeting.starttime, meeting.endtime)
+        agenda_form.meeting_id.data = meeting.id
+        agenda_form.day.data = day
+        agenda_form.starthour.data = starthour
+        agenda_form.startmin.data = startmin
+        agenda_form.durationhour.data = durationhour
+        agenda_form.durationmin.data = durationmin
+        agenda_form.endhour.data = endhour
+        agenda_form.endmin.data = endmin
+    
     appointment_form = AppointmentForm(request.form)
     appointment_form.dentist_id.choices = [ (user.id, user.firstname + " " 
                                            + user.lastname ) for user in
@@ -590,7 +613,7 @@ def add_patient_appointment(body_id):
     appointment_form.dental_unit_id.choices = [ 
                     ( dental_unit.id, dental_unit.name ) for dental_unit in
                                 meta.session.query(users.DentalUnit).all() ]
-
+    
     if (request.method == 'POST' and agenda_form.validate()
         and appointment_form.validate() ):
         # get the appointment agenda schedule first, to raise exception if 
@@ -609,7 +632,22 @@ def add_patient_appointment(body_id):
 
         # if every thing went fine until now, we just have to add to database
         # agenda data, and we're done.
+        if agenda_form.meeting_id.data:
+            appointment_in_agenda = (
+                meta.session.query(schedule.Agenda)
+                    .filter(schedule.Agenda.id == agenda_form.meeting_id.data)
+                    .one_or_none()
+            )
+            if appointment_in_agenda:
+                appointment_in_agenda.appointment_id = new_appointment.id
+                meta.session.commit()
+                session['appointment_id'] = new_appointment.id
+                return redirect(url_for('enter_patient_appointment'))
+
         args = {}
+        args['dentist_id'] = new_appointment.dentist_id
+        args['date_taker_id'] = new_appointment.dentist_id
+        args['dental_unit_id'] = new_appointment.dental_unit_id
         args['appointment_id'] = new_appointment.id
         args['starttime'] = starttime
         args['endtime'] = endtime
@@ -617,21 +655,17 @@ def add_patient_appointment(body_id):
         meta.session.add(new_schedule)
         meta.session.commit()
 
-        session['appointment_id'] = new_schedule.id
+        session['appointment_id'] = new_appointment.id
         return redirect(url_for('enter_patient_appointment'))
 
-    agenda_form.day.data = datetime.date.today()
+    if not agenda_form.day.data:
+        agenda_form.day.data = datetime.date.today()
     
     if session['role'] == constants.ROLE_DENTIST:
         appointment_form.dentist_id.data = session['user_id']
-    if session['patient_id']:
-        patient = checks.get_patient(session['patient_id'])
-        return render_template('add_patient_appointment.html',
+    patient = checks.get_patient(body_id)
+    return render_template('add_patient_appointment.html',
                             patient=patient,
-                            agenda_form=agenda_form,
-                            appointment_form=appointment_form)
-    else:
-        return render_template('add_appointment.html',
                             agenda_form=agenda_form,
                             appointment_form=appointment_form)
 

@@ -146,7 +146,7 @@ def enter_patient_appointment():
             .filter(schedule.Appointment.id == session['appointment_id'])\
             .one()
     acts = checks.get_patient_acts(patient.id, appointment.id,
-                    [ act.AppointmentGestureReference.tooth_id ]
+                    [ act.AppointmentGestureReference.anatomic_location ]
                     )
     return render_template("patient_appointment.html",
                             patient=patient,

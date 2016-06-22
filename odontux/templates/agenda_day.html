@@ -122,7 +122,8 @@
             {{ meeting.appointment.reason }}
             </a>
           {% else %}
-            <a href="{{ url_for('add_patient') }}">{{ meeting.comment }}</a>
+            <a href="{{ url_for('add_patient', meeting_id=meeting.id) }}">
+                      {{ meeting.comment }}</a>
           {% endif %}
            -- <a href="{{ url_for('display_day',
                                     dateday=dateday, dentist_id=dentist.id,

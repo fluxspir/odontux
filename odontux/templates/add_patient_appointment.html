@@ -1,24 +1,30 @@
-{% from "_formhelpers.html" import render_field, render_hidden_field %}
-{% from "_formhelpers.html" import render_time_field %}
+{% from "_formhelpers.html" import render_simple_field_line, 
+                                    render_hidden_field, render_time_field %}
 {% extends "summary_patient.html" %}
   {% block main %}
-    <form method="post" action="{{ url_for('add_appointment', body_id=session.patient_id) }}">
+    <form method="post" action="{{ url_for('add_patient_appointment', body_id=patient.id) }}">
       {% block appointment_data %}
-        {{ render_hidden_field(appointment_form.patient_id, value=session.patient_id) }}
-        {{ render_field(appointment_form.dentist_id) }}
-        {{ render_field(appointment_form.emergency) }}
-        {{ render_field(appointment_form.reason) }}
+        {{ render_hidden_field(appointment_form.patient_id, value=patient.id) }}
+        {{ render_simple_field_line(appointment_form.dentist_id) }}
+        {{ render_simple_field_line(appointment_form.dental_unit_id) }}<br />
+        {{ render_simple_field_line(appointment_form.emergency) }}<br />
+        {{ render_simple_field_line(appointment_form.reason) }}<br />
         {% if session.role == session.ROLE_DENTIST %}
-          {{ render_field(appointment_form.diagnostic) }}
-          {{ render_field(appointment_form.treatment) }}
-          {{ render_field(appointment_form.prognostic) }}
-          {{ render_field(appointment_form.advise) }}
-          {{ render_field(appointment_form.next_appointment) }}
+          {{ render_simple_field_line(appointment_form.diagnostic) }}<br />
+          {{ render_simple_field_line(appointment_form.treatment) }}<br />
+          {{ render_simple_field_line(appointment_form.prognostic) }}<br />
+          {{ render_simple_field_line(appointment_form.advise) }}<br />
+          {{ render_simple_field_line(appointment_form.next_appointment) }}<br />
         {% endif %}
       {% endblock %}
       {% block agenda_schedule %}
         <p>Schedule</p>
-        {{ render_field(agenda_form.day) }} at {{ render_time_field(agenda_form.starthour, style="width:30px;") }}{{render_time_field(agenda_form.startmin, style="width:30px;") }} duration {{ render_time_field(agenda_form.durationhour, style="width:30px;") }}{{ render_time_field(agenda_form.durationmin, style="width:30px;") }}
+        {{ render_simple_field_line(agenda_form.meeting_id) }}
+        {{ render_simple_field_line(agenda_form.day) }} at 
+        {{ render_time_field(agenda_form.starthour, style="width:30px;") }}
+        {{render_time_field(agenda_form.startmin, style="width:30px;") }} 
+        duration {{ render_time_field(agenda_form.durationhour, style="width:30px;") }}
+        {{ render_time_field(agenda_form.durationmin, style="width:30px;") }}
       {% endblock %}
       <input type="submit" value="Add" />
     </form>
