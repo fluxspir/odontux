@@ -385,7 +385,9 @@ def delete_meeting(meeting_id, dentist_id, dental_unit_id):
     dateday = meeting.starttime.date().isoformat()
     meta.session.delete(meeting)
     meta.session.commit()
-    return redirect(url_for('display_day', dateday, dentist_id, dental_unit_id))
+    return redirect(url_for('display_day', dateday=dateday, 
+                                            dentist_id=dentist_id, 
+                                            dental_unit_id=dental_unit_id))
 
 @app.route('/update/meeting?meeting_id=<int:meeting_id>', methods=['POST'])
 def update_meeting(meeting_id):
