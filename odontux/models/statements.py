@@ -47,9 +47,17 @@ class Bill(Invoice):
         'polymorphic_identity': 'bill',
     }
 
-class InvoiceGestureReference(Base):
+class QuotationGestureReference(Base):
     id = Column(Integer, primary_key=True)
     quotation_id = Column(Integer, ForeignKey(Quotation.id), nullable=False)
     gesture_id = Column(Integer, ForeignKey(acts.Gesture.id), nullable=False)
-    realisation_date = Column(Date)                     # Used in case of Bill
+    anatomic_location = Column(Integer, nullable=False)
     price = Column(Numeric, nullable=False)
+    gesture = relationship('acts.Gesture')
+
+class BillAppointmentGestureReference(Base):
+    id = Column(Integer, primary_key=True)
+    bill_id = Column(Integer, ForeignKey(Bill.id), nullable=False)
+    appointment_gesture_id = Column(Integer, nullable=False,
+                            ForeignKey(acts.AppointmentGestureReference.id))
+    gesture = relationship('acts.AppointmentGestureReference')
