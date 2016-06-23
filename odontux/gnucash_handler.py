@@ -226,7 +226,7 @@ class GnuCashCustomer(GnuCash):
             district = ""
             zip_code = ""
             city = ""
-            if self.patient.family.addresses[-1].discrict:
+            if self.patient.family.addresses[-1].district:
                 district = self.patient.family.addresses[-1]\
                             .district.encode("utf_8")
             if self.patient.family.addresses[-1].zip_code:

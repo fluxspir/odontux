@@ -40,6 +40,7 @@ from assets import (AssetProvider, AssetCategory, MaterialCategory,
 from traceability import (SterilizationCycleType, SterilizationCycleMode,
                             SterilizationCycle, AssetSterilized, 
                             MaterioVigilance)
+from certificate import Certificate
 
 def init():
     parser = ConfigParser.ConfigParser()
