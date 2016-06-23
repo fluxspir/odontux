@@ -44,7 +44,8 @@
                                               patient_id=session.patient_id, 
                                               appointment_id=appointment.id, 
                                               gesture_id=gesture.id, 
-                                              code=gesture.gesture.code) }}">
+                                              code=gesture.gesture.code) }}"
+                onclick="return confirm('Are you sure ?')">
               Delete</a></td>
         {% endif %}
       </tr>

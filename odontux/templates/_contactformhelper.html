@@ -2,6 +2,7 @@
 {% from "_formhelpers.html" import render_simple_field %}
 {% from "_formhelpers.html" import render_table_field %}
 {% from "_formhelpers.html" import render_table_hidden_field %}
+{% from "_formhelpers.html" import render_field_js_onblur %}
 
 
 
@@ -13,12 +14,68 @@
 {% endmacro %}
 
 {% macro add_address_form_fields(address_form) %}
+  <script type="text/javascript">
+    function clear_address_form() {
+      document.getElementById('street').value=("");
+      document.getElementById('district').value("");
+      document.getElementById('city').value("");
+      document.getElementById('state').value("");
+      document.getElementById('country').value("");
+    }
+    function my_callback_br(content) {
+      if (!("erro" in content)) {
+        document.getElementById('street').value=(content.logradouro);
+        document.getElementById('district').value=(content.bairro);
+        document.getElementById('city').value=(content.localidade);
+        document.getElementById('state').value=(content.uf);
+        document.getElementById('country').value=('br');
+      }
+      else {
+        clear_address_form();
+        alert("CEP não encontrado")
+      }
+    }
+    
+    function get_content_br(valor) {
+
+      var cep = valor.replace(/\D/g, '');
+
+      if (cep != "") {
+
+        var validacep = /^[0-9]{8}$/;
+        
+        if (validacep.test(cep)) {
+          document.getElementById('street').value="...";
+
+          //Cria um elemento javascript.
+          var script = document.createElement('script');
+
+          //Sincroniza com o callback.
+          script.src = 'http://viacep.com.br/ws/'+ cep + '/json/?callback=my_callback_br';
+
+          //Insere script no documento e carrega o conteúdo.
+          document.body.appendChild(script);
+
+        } else {
+          // invalid cep
+          clear_address_form();
+          alert("Formato de CEP inválido")
+        }
+
+      } else {
+        // CEP sem valor
+        clear_address_form();
+      }
+    }
+  </script>
   {{ render_simple_field(address_form.street) }}
+  {{ render_simple_field(address_form.street_number) }}
   {{ render_simple_field(address_form.building) }}
   {{ render_simple_field(address_form.complement) }}
+  {{ render_simple_field(address_form.district) }}
   {{ render_simple_field(address_form.city) }}
-  {{ render_simple_field(address_form.zip_code) }}
-  {{ render_simple_field(address_form.county) }}
+  {{ render_field_js_onblur(address_form.zip_code) }}
+  {{ render_simple_field(address_form.state) }}
   {{ render_simple_field(address_form.country) }}
 {% endmacro %}
 

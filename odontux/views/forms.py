@@ -22,8 +22,8 @@ from odontux.models import (meta,
                             assets
                             )
 
-address_fields = ["street", "building", "complement", "city", "zip_code", 
-                    "county", "country" ]
+address_fields = ["street", "street_number", "building", "complement", "city",
+                "district", "zip_code", "state", "country" ]
 phone_fields = [ ("phonename", "name"), ("phoneindicatif", "indicatif"), 
                 ("phoneareacode", "area_code"), ("phonenum", "number") ]
 mail_fields = [ "email" ]
@@ -104,15 +104,18 @@ class AddressForm(Form):
                                  validators.Length(max=100, message=_("""Number
                                  and street must be less than 100 characters 
                                  please"""))])
+    street_number = TextField(_('street number'))
     complement = TextField(_('complement'), [validators.Optional()])
     building = TextField(_('building'), validators=[validators.Optional(), 
                                      validators.Length(max=50)])
+    district = TextField(_('district'))
     city = TextField(_('city'), validators=[validators.Optional(),
                              validators.Length(max=25,
                              message=_("City's name"))], 
                              filters=[title_field])
-    zip_code = TextField(_('zip_code'))
-    county = TextField(_('county'), validators=[validators.Optional(), 
+    zip_code = TextField(_('zip_code'), 
+                                    description='get_content_br(this.value);')
+    state = TextField(_('county'), validators=[validators.Optional(), 
                                   validators.Length(max=15)], 
                                  filters=[title_field])
     country = TextField(_('country'), validators=[validators.Optional(),

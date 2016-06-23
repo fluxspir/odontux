@@ -18,7 +18,7 @@ from odontux.models import ( meta, act, schedule, administration, traceability,
 from odontux.views import cotation as views_cotation
 
 from odontux.views.log import index
-from odontux.views.patient import list_acts
+#from odontux.views.patient import list_acts
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      DecimalField, HiddenField, IntegerField, validators,
@@ -454,9 +454,11 @@ def add_administrativ_gesture(patient_id, appointment_id):
                     .one_or_none()
             )
         else:
-            gesture = ( meta.session.query(act.Gesture)
-                        .filter(act.Gesture.id == gesture_id)
-                        .one()
+            gesture = ( 
+                meta.session.query(act.Gesture)
+                    .filter(act.Gesture.id ==\
+                                    appointment_gesture_form.gesture_id.data)
+                    .one()
         )
         if not gesture:
             # TODO : redirect error + message
@@ -534,7 +536,8 @@ def remove_administrativ_gesture(patient_id, appointment_id, gesture_id, code):
 
     meta.session.delete(gesture)
     meta.session.commit()
-    return redirect(url_for('list_gesture'))
+    return redirect(url_for('patient_appointment', 
+                                        appointment_id=appointment_id))
 
 
 @app.route('/sterilized_asset_used?pid=<int:patient_id>'

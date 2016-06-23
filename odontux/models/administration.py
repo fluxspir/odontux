@@ -24,11 +24,13 @@ class Address(Base):
     __tablename__ = 'address'
     id = Column(Integer, primary_key=True)
     street = Column(String, default="")
+    street_number = Column(String, default="")
     building = Column(String, default="")
     complement = Column(String, default="")
+    district = Column(String, default="")
     city = Column(String, default="")
     zip_code = Column(String, default="")
-    county = Column(String, default="")
+    state = Column(String, default="")
     country = Column(String, default="")
     update_date = Column(Date, default=func.current_date())
 

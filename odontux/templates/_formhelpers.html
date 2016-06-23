@@ -83,6 +83,19 @@
   </dd>
 {% endmacro %}
 
+{% macro render_field_js_onblur(field) %}
+  <dt>{{ field.label }}
+  <dd>{{ field(onblur=field.description, **kwargs)|safe }}
+  {% if field.errors %}
+    <ul class=errors>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  </dd>
+{% endmacro %}
+
 {% macro render_hidden_field(field) %}
   <dt class="hidden">{{ field.label }}
   <dd class="hidden">{{ field(**kwargs)|safe }}
