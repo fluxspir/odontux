@@ -17,21 +17,35 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 class Invoice(Base):
     id = Column(Integer, primary_key=True)
-    patient_id = Column(Integer, ForeignKey(administration.Patient.id, 
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
                                                                 nullable=False)
-    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id, 
+    dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), 
                                                                 nullable=False)
-    file_id = Column(Integer, ForeignKey(documents.Files.id, nullable=False)
+    file_id = Column(Integer, ForeignKey(documents.Files.id), nullable=False)
     timestamp = Column(DateTime, default=func.now(), nullable=False)
+    type = Column(String, nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'invoice',
+        'polymorphic_on': type
+    }
 
 class Quotation(Invoice):
     id = Column(Integer, ForeignKey(Invoice.id), nullable=False)
     validity = Column(Date)                         # Or make a Inverval value?
     is_accepted = Column(Boolean, default=False)
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'quotation',
+    }
+
 class Bill(Invoice):
     id = Column(Integer, ForeignKey(Invoice.id), nullable=False)
     date = Column(Date, default=func.current_date(), nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'bill',
+    }
 
 class InvoiceGestureReference(Base):
     id = Column(Integer, primary_key=True)
