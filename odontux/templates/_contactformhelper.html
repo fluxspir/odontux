@@ -134,9 +134,10 @@
         <th>street</th>
         <th>building</th>
         <th>complement</th>
+        <th>district</th>
         <th>city</th>
         <th>zip_code</th>
-        <th>county</th>
+        <th>state</th>
         <th>country</th>
         <th></th>
       </tr>
@@ -145,11 +146,13 @@
         <form method="post" action={{ url_for(url_update, body_id=body.id, form_to_display='address') }}>
           <td class="hidden"><input type="text" name="address_index" value="{{ loop.index0 }}" /></td>
           {{ render_table_field(address_form.street, value=address.street) }}
+          {{ render_table_field(address_form.street_number, value=address.street_number) }}
           {{ render_table_field(address_form.building, value=address.building) }}
           {{ render_table_field(address_form.complement, value=address.complement) }}
+          {{ render_table_field(address_form.street, value=address.district) }}
           {{ render_table_field(address_form.city, value=address.city) }}
           {{ render_table_field(address_form.zip_code, value=address.zip_code) }}
-          {{ render_table_field(address_form.county, value=address.county) }}
+          {{ render_table_field(address_form.state, value=address.state) }}
           {{ render_table_field(address_form.country, value=address.country) }}
           <td><input type=submit value="Update" /></td>
         </form>
@@ -163,11 +166,13 @@
         <form method=post action={{ url_for(url_add, body_id=body.id, form_to_display='address') }}>
           <td class="hidden"></td>
           {{ render_table_field(address_form.street) }}
+          {{ render_table_field(address_form.street_number) }}
           {{ render_table_field(address_form.building) }}
           {{ render_table_field(address_form.complement) }}
+          {{ render_table_field(address_form.district) }}
           {{ render_table_field(address_form.city) }}
           {{ render_table_field(address_form.zip_code) }}
-          {{ render_table_field(address_form.county) }}
+          {{ render_table_field(address_form.state) }}
           {{ render_table_field(address_form.country) }}
           <td><input type=submit value="Add new address" /></td>
         </form>

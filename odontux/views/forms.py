@@ -115,7 +115,7 @@ class AddressForm(Form):
                              filters=[title_field])
     zip_code = TextField(_('zip_code'), 
                                     description='get_content_br(this.value);')
-    state = TextField(_('county'), validators=[validators.Optional(), 
+    state = TextField(_('state'), validators=[validators.Optional(), 
                                   validators.Length(max=15)], 
                                  filters=[title_field])
     country = TextField(_('country'), validators=[validators.Optional(),
