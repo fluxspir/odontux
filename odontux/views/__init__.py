@@ -79,3 +79,6 @@ from traceability import (
 from event import (
                 choose_event_location
                     )
+from certificates import (
+                portal_certificate
+)

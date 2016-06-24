@@ -29,6 +29,6 @@ class Certificate(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                                 nullable=False)
     file_id = Column(Integer, ForeignKey(documents.Files.id), nullable=False)
+    certif_type = Column(Integer, nullable=False)
     timestamp = Column(DateTime, default=func.now())
-    cerfif_type = Column(String, nullable=False)
 

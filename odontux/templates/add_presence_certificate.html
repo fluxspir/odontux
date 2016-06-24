@@ -1,0 +1,22 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_hidden_field %}
+<h3>Create presence certificate:</h3><br />
+
+<form method="post" action="{{ url_for('add_presence_certificate',
+                                        patient_id=patient.id,
+                                        appointment_id=appointment.id) }}">
+ 
+ {{ render_sfl_wol(presence_form.first_part) }}<br />
+ {{ patient.firstname }} {{ patient.lastname }}<br />
+ {{ render_sfl_wol(presence_form.second_part) }}
+ {{ render_sfl_wol(presence_form.identity_number) }}<br />
+ {{ render_sfl_wol(presence_form.third_part) }}<br />
+ {{ render_sfl_wol(presence_form.day) }}
+ das {{ render_sfl_wol(presence_form.starttime) }}
+ às {{ render_sfl_wol(presence_form.endtime) }}
+ <br /><br />
+    {{ presence_form.save_print }}
+    {{ presence_form.preview }}
+</form>
+{% endblock %}

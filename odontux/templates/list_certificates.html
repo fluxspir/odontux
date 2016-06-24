@@ -1,0 +1,23 @@
+{% extends 'header.html' %}
+{% block main %}
+<div id="list_certificates">
+<a href="{{ url_for('add_presence_certificate',
+                        patient_id=patient.id,
+                        appointment_id=appointment.id) }}">
+  Add Presence certificate</a><br />
+<a href="{{ url_for('add_cessation_certificate',
+                        patient_id=patient.id,
+                        appointment_id=appointment.id) }}">
+  Add Cessation certificate</a><br />
+</div>
+<br />
+Presence certificates:<br />
+{% for presence in presences %}
+  <a href=#>{{ presence.appointment.agenda.starttime }}</a><br />
+{% endfor %}
+<br />
+Cessation certificates:<br />
+{% for cessation in cessations %}
+  <a href=#>{{ cessation.appointment.agenda.starttime }}</a><br />
+{% endfor %}
+{% endblock %}
