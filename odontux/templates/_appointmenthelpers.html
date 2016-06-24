@@ -23,7 +23,7 @@
     </tr>
 {% endmacro %}
 
-{% macro appointment_table_rows(session, appointment, url, button_value) %}
+{% macro appointment_table_rows(session, appointment, url, value ) %}
       {% if appointment.emergency %}
         <tr style="background-color:red">
       {% else %}
@@ -72,10 +72,7 @@
           {% endif %}
         </td>
         <td>
-          <form method="post" action="{{ url }}">
-            <input type="hidden" name="appointment_id" value="{{ appointment.id }}" />
-            <input type="submit" value="{{ button_value }}" />
-          </form>
+          <a href="{{ url }}">{{ value }}</a>
         </td>
       </tr>
 {% endmacro %}
