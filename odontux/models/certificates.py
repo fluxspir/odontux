@@ -15,7 +15,7 @@ from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 try : 
-    import odontux.constants
+    from odontux import constants
 except ImportError:
     import constants
 
@@ -32,3 +32,16 @@ class Certificate(Base):
     certif_type = Column(Integer, nullable=False)
     timestamp = Column(DateTime, default=func.now())
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'certificate',
+        'polymorphic_on': certif_type,
+    }
+
+class Cessation(Certificate):
+    __tablename__ = 'cessation'
+    id = Column(Integer, ForeignKey(Certificate.id), primary_key=True)
+    days_number = Column(Numeric, nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': constants.FILE_CESSATION
+    }
