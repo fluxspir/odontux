@@ -7,12 +7,14 @@
     <th>ID</th>
     <th>Name</th>
     <th></th>
+  </tr>
 {% for family in drug_families %}
   <tr>
     <td>{{ family.id }}</td><td>{{ family.name }}</td>
       <td><a href="{{ url_for('update_drug_family', drug_family_id=family.id) }}">
           Update</a></td>
   </tr>
-</div>
 {% endfor %}
+</table>
+</div>
 {% endblock %}

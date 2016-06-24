@@ -650,6 +650,8 @@ FILE_PRESCRIPTION = 3
 FILE_ATTESTATION = 4
 FILE_QUOTATION = 5
 FILE_BILL = 6
+FILE_PRESENCE = 7
+FILE_CESSATION = 8
 
 FILES = {
     FILE_RADIO: _('Radio'),
@@ -658,5 +660,7 @@ FILES = {
     FILE_ATTESTATION: _('Attestation'),
     FILE_QUOTATION: _('Quotation'),
     FILE_BILL: _('Bill'),
+    FILE_PRESENCE: _('Presence'),
+    FILE_CESSATION: _('Cessation'),
 }
 

@@ -216,25 +216,32 @@ class GnuCashCustomer(GnuCash):
         if self.patient.family.addresses:
             if self.patient.family.addresses[-1].street:
                 address.SetAddr1(self.patient.family.addresses[-1]
-                                .street.encode("utf_8"))
+                    .street.encode("utf_8") + ", " +
+                    self.patient.family.addresses[-1]
+                    .street_number.encode("utf_8")
+                )
             if self.patient.family.addresses[-1].building:
                 address.SetAddr2(self.patient.family.addresses[-1]
                                 .building.encode("utf_8"))
+            district = ""
             zip_code = ""
             city = ""
+            if self.patient.family.addresses[-1].district:
+                district = self.patient.family.addresses[-1]\
+                            .district.encode("utf_8")
             if self.patient.family.addresses[-1].zip_code:
                 zip_code = self.patient.family.addresses[-1]\
                             .zip_code.encode("utf_8")
             if self.patient.family.addresses[-1].city:
                 city = self.patient.family.addresses[-1].city.encode("utf_8")
-            address.SetAddr3(zip_code  + " " + city)
-            county = ""
+            address.SetAddr3(district + "\n" + zip_code  + " " + city)
+            state = ""
             country = ""
-            if self.patient.family.addresses[-1].county:
-                county = self.patient.family.addresses[-1].county.encode("utf_8")
+            if self.patient.family.addresses[-1].state:
+                state = self.patient.family.addresses[-1].state.encode("utf_8")
             if self.patient.family.addresses[-1].country:
                 country = self.patient.family.addresses[-1].country.encode("utf_8")
-            address.SetAddr4(county + " " + country)
+            address.SetAddr4(state + " " + country)
             #if self.gnucashtype == "xml":
             #    self.gcsession.save()
 

@@ -43,6 +43,8 @@ class Appointment(Base):
                                        cascade="all, delete, delete-orphan")
     prescriptions = relationship("Prescription", backref="appointment",
                               cascade="all, delete, delete-orphan")
+    certificates = relationship("Certificate", backref="appointment",
+                                cascade="all, delete, delete-orphan")
     memo = relationship("AppointmentMemo", backref="appointment",
                          cascade="all, delete, delete-orphan")
     events = relationship("Event",

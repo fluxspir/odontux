@@ -50,12 +50,17 @@
               </li>
             </ul>
           </li>
-          {% if 'appointment_id' in session %}
+          {% if appointment %}
             <li>
               <a href={{ url_for("choose_drugs_to_prescribe", 
                                                 patient_id=patient.id,
-                                                appointment_id=session['appointment_id']) }}>
+                                                appointment_id=appointment.id) }}>
                     Prescribe</a>
+            </li>
+            <li>
+              <a href="{{ url_for('portal_certificate', patient_id=patient.id,
+                                              appointment_id=appointment.id) }}">
+                    Cerfificate</a>
             </li>
           {% endif %}
           <li>

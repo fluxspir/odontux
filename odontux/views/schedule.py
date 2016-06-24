@@ -23,9 +23,9 @@ from odontux.views.forms import TimeField
 from odontux.views.log import index
 
 class AppointmentForm(Form):
-    patient_id = HiddenField('patient_id')
-    dentist_id = SelectField(coerce=int)
-    dental_unit_id = SelectField(coerce=int)
+    patient_id = HiddenField(_('patient_id'))
+    dentist_id = SelectField(_('dentist'), coerce=int)
+    dental_unit_id = SelectField(_('dental unit'), coerce=int) 
     emergency = BooleanField(_('emergency'))
     reason = TextAreaField(_('reason'), render_kw={'rows': '2', 'cols': '50'})
     diagnostic = TextAreaField(_('diagnostic'),
@@ -76,8 +76,8 @@ class UpdateMeeting(Form):
     meeting_id = HiddenField(_('meeting_id'))
     date_taker_id = HiddenField(_('date_taker'))
     day = DateField(_('Day'))
-    dentist_id = SelectField(_('dentist'))
-    dental_unit_id = SelectField(_('dental_unit'))
+    dentist_id = SelectField(_('dentist'), coerce=int)
+    dental_unit_id = SelectField(_('dental_unit'), coerce=int)
     starttime = TextField(_('Start'), [validators.Required()],
                                         render_kw={'size':'8px'} )
     duration = TextField(_('Duration'), [validators.Required()],
@@ -543,10 +543,11 @@ def update_appointment(body_id, appointment_id):
                             meta.session.query(users.OdontuxUser).filter(
                             users.OdontuxUser.role == constants.ROLE_DENTIST)\
                             .all()
-                                           ]
+    ]
     appointment_form.dental_unit_id.choices = [ 
                         (dental_unit.id, dental_unit.name) for dental_unit in
-                            meta.session.query(users.DentalUnit).all() ]
+                            meta.session.query(users.DentalUnit).all() 
+    ]
 
     if (request.method == 'POST' and agenda_form.validate()
         and appointment_form.validate() ):

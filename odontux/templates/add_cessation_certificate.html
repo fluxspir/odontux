@@ -1,0 +1,23 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_hidden_field %}
+<h3>Create cessation certificate:</h3><br />
+
+<form method="post" action="{{ url_for('add_cessation_certificate',
+                                        patient_id=patient.id,
+                                        appointment_id=appointment.id) }}">
+ 
+ {{ render_sfl_wol(cessation_form.first_part) }}<br />
+ {{ patient.firstname }} {{ patient.lastname }}<br />
+ {{ render_sfl_wol(cessation_form.second_part) }}
+ {{ render_sfl_wol(cessation_form.identity_number) }}<br />
+ {{ render_sfl_wol(cessation_form.third_part) }}<br />
+ {{ render_sfl_wol(cessation_form.day) }}
+ {{ render_sfl_wol(cessation_form.fourth_part) }}
+ {{ render_sfl_wol(cessation_form.days_number) }}
+ dias
+ <br /><br />
+    {{ cessation_form.save_print }}
+    {{ cessation_form.preview }}
+</form>
+{% endblock %}
