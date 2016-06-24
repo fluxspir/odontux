@@ -14,8 +14,13 @@ from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 
+try:
+    from odontux import constants
+except ImportError:
+    import constants
 
 class Invoice(Base):
+    __tablename__ = 'invoice'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
                                                                 nullable=False)
@@ -26,28 +31,31 @@ class Invoice(Base):
     type = Column(String, nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'invoice',
+        'polymorphic_identity': constants.FILE_INVOICE,
         'polymorphic_on': type
     }
 
 class Quotation(Invoice):
+    __tablename__ = 'quotation'
     id = Column(Integer, ForeignKey(Invoice.id), nullable=False)
     validity = Column(Date)                         # Or make a Inverval value?
     is_accepted = Column(Boolean, default=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'quotation',
+        'polymorphic_identity': constants.FILE_QUOTATION,
     }
 
 class Bill(Invoice):
+    __tablename__ = 'bill'
     id = Column(Integer, ForeignKey(Invoice.id), nullable=False)
     date = Column(Date, default=func.current_date(), nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'bill',
+        'polymorphic_identity': constants.FILE_BILL,
     }
 
 class QuotationGestureReference(Base):
+    __tablename__ = 'quotation_gesture_reference'
     id = Column(Integer, primary_key=True)
     quotation_id = Column(Integer, ForeignKey(Quotation.id), nullable=False)
     gesture_id = Column(Integer, ForeignKey(acts.Gesture.id), nullable=False)
@@ -56,8 +64,9 @@ class QuotationGestureReference(Base):
     gesture = relationship('acts.Gesture')
 
 class BillAppointmentGestureReference(Base):
+    __tablename__ = 'bill_appointment_gesture_reference'
     id = Column(Integer, primary_key=True)
     bill_id = Column(Integer, ForeignKey(Bill.id), nullable=False)
     appointment_gesture_id = Column(Integer, nullable=False,
                             ForeignKey(acts.AppointmentGestureReference.id))
-    gesture = relationship('acts.AppointmentGestureReference')
+    appointment_gesture = relationship('acts.AppointmentGestureReference')
