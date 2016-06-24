@@ -10,7 +10,7 @@
       {{ appointment_table_header(session) }}
     {% endblock %}
     {% block appointment_row %}
-      {{ appointment_table_rows(session, appointment, url_for('update_appointment', body_id=session.patient_id, appointment_id=session.appointment_id), "Update") }}
+      {{ appointment_table_rows(session, appointment, url_for('update_appointment', body_id=session.patient_id, appointment_id=session.appointment_id), "Update" ) }}
     {% endblock %}
     {{ appointment_table_closing_tag() }}
   <br />
