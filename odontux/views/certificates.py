@@ -26,7 +26,9 @@ from gettext import gettext as _
 
 from odontux import constants, checks
 
-from odontux.pdfhandler import make_presence_certificate
+from odontux.pdfhandler import ( make_presence_certificate, 
+                                    make_cessation_certificate
+                            )
 
 CERTIFICATE_FIRST_PART = u"Atesto, com o fim específico de dispensa de atividades trabalhistas (ou escolares, ou judiciárias), que "
 CERTIFICATE_SECOND_PART = u", portador(a) do CPF "
@@ -51,8 +53,9 @@ class PresenceForm(CertificateForm):
     endtime = TimeField(_('end time'), [validators.Required()])
 
 class CessationForm(CertificateForm):
+    fourth_part = TextAreaField(_('fourth part'), [validators.Required()])
     days_number = DecimalField(_('Number of days of cessation'), 
-                                                    [validators.Required()])
+                        [validators.Required()], render_kw={'size': 4})
 
 @app.route('/portal/certificate?pid=<int:patient_id>'
             '&aid=<int:appointment_id>')
@@ -172,8 +175,8 @@ def add_cessation_certificate(patient_id, appointment_id):
 
     if ( request.method == 'POST' and cessation_form.validate()
         and 'save_print' in request.form ):
-        pdf_out = make_presence_certificate(patient_id, appointment_id,
-                                                        presence_form)
+        pdf_out = make_cessation_certificate(patient_id, appointment_id,
+                                                        cessation_form)
         response = make_response(pdf_out)
         response.mimetype = 'application/pdf'
         filename = md5.new(pdf_out).hexdigest()
@@ -183,7 +186,7 @@ def add_cessation_certificate(patient_id, appointment_id):
 
         file_values = {
             'md5': filename,
-            'file_type': constants.FILE_PRESENCE,
+            'file_type': constants.FILE_CESSATION,
             'mimetype': 'application/pdf',
         }
         file_in_db = ( meta.session.query(documents.Files)
@@ -203,9 +206,10 @@ def add_cessation_certificate(patient_id, appointment_id):
             'patient_id': patient_id,
             'appointment_id': appointment_id,
             'file_id': new_file.id,
-            'certif_type': constants.FILE_PRESENCE,
+            'certif_type': constants.FILE_CESSATION,
+            'days_number': cessation_form.days_number.data,
         }
-        new_certificate = certificates.Certificate(**certificate_values)
+        new_certificate = certificates.Cessation(**certificate_values)
         meta.session.add(new_certificate)
         meta.session.commit()
 
@@ -225,6 +229,6 @@ def add_cessation_certificate(patient_id, appointment_id):
     cessation_form.fourth_part.data = CESSATION_FOURTH_PART
     cessation_form.identity_number.data = patient.identity_number_2
     cessation_form.day.data = appointment.agenda.starttime.date()
-    return render_template('add_presence_certificate.html', patient=patient,
+    return render_template('add_cessation_certificate.html', patient=patient,
                                                 appointment=appointment,
                                                 cessation_form=cessation_form)

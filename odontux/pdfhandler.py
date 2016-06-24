@@ -163,6 +163,38 @@ def get_document_base(patient_id, appointment_id):
     return ( output, doc, Story, styles, patient, appointment, dentist, 
             dental_office )
  
+def make_cessation_certificate(patient_id, appointment_id, cessation_form):
+
+    output, doc, Story, styles, patient, appointment, dentist, dental_office =\
+                                get_document_base(patient_id, appointment_id)
+    styles.add(ParagraphStyle(name='certificate_title', fontName='Times-Bold',
+                            fontSize=16, alignment=TA_CENTER))
+    styles.add(ParagraphStyle(name='signature', fontName='Times-Roman',
+                            fontSize=11, alignment=TA_CENTER))
+
+    Story.append(Paragraph('Atestado odontológico', 
+                                                styles['certificate_title']))
+    Story.append(Spacer(1, 30 * mm))
+    text = ( cessation_form.first_part.data + patient.firstname + " " +
+        patient.lastname + cessation_form.second_part.data + 
+        cessation_form.identity_number.data + cessation_form.third_part.data +
+        cessation_form.day.data.isoformat() + cessation_form.fourth_part.data +
+        str(cessation_form.days_number.data) + u" dias.") 
+
+    Story.append(Paragraph(text, styles['Normal']))
+    Story.append(Spacer(1, 20 * mm))
+    Story.append(Paragraph('Atenciosamente,', styles['Normal']))
+    Story.append(Spacer(1, 40 * mm))
+    Story.append(Paragraph('Dr ' + dentist.firstname + " " + dentist.lastname,
+                                            styles['signature']))
+    Story.append(Paragraph(u'Cirurgião-Dentista - ' + dentist.registration, 
+                                                        styles['signature']))
+
+    doc.build(Story, onFirstPage=generate_dental_office_informations)
+    pdf_out = output.getvalue()
+    output.close()
+    return pdf_out
+
 def make_presence_certificate(patient_id, appointment_id, presence_form):
 
     output, doc, Story, styles, patient, appointment, dentist, dental_office =\
@@ -195,7 +227,6 @@ def make_presence_certificate(patient_id, appointment_id, presence_form):
     pdf_out = output.getvalue()
     output.close()
     return pdf_out
-
 
 def make_prescription(patient_id, appointment_id, prescription_form):
 
