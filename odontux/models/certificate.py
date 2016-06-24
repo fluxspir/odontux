@@ -14,7 +14,10 @@ from sqlalchemy import ( Table, Column, Integer, String, Numeric, Boolean,
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
-import constants
+try : 
+    import odontux.constants
+except ImportError:
+    import constants
 
 class Certificate(Base):
     __tablename__ = 'certificate'
