@@ -93,6 +93,7 @@ class Patient(Base):
                         secondary=patient_healthcare_plan_table,
                         backref="patients",
                         cascade="all, delete")
+    healthcare_plans_id = association_proxy('hcs', 'id')
     healthcare_plans = association_proxy('hcs', 'name')
     
     teeth = relationship("Tooth")

@@ -646,21 +646,26 @@ UNITIES = {
 
 FILE_RADIO = 1
 FILE_PHOTO = 2
+
 FILE_PRESCRIPTION = 3
+
 FILE_ATTESTATION = 4
-FILE_QUOTATION = 5
-FILE_BILL = 6
 FILE_PRESENCE = 7
 FILE_CESSATION = 8
+
+FILE_INVOICE = 20
+FILE_QUOTATION = 21
+FILE_BILL = 22
 
 FILES = {
     FILE_RADIO: _('Radio'),
     FILE_PHOTO: _('Photo'),
     FILE_PRESCRIPTION: _('Prescription'),
     FILE_ATTESTATION: _('Attestation'),
-    FILE_QUOTATION: _('Quotation'),
-    FILE_BILL: _('Bill'),
     FILE_PRESENCE: _('Presence'),
     FILE_CESSATION: _('Cessation'),
+    FILE_INVOICE: _('Invoice'),
+    FILE_QUOTATION: _('Quotation'),
+    FILE_BILL: _('Bill'),
 }
 

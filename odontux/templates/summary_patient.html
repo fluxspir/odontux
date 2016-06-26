@@ -62,6 +62,11 @@
                                               appointment_id=appointment.id) }}">
                     Cerfificate</a>
             </li>
+            <li>
+              <a href="{{ url_for('list_statement', patient_id=patient.id,
+                                              appointment_id=appointment.id) }}">
+                    Statement</a>
+            </li>
           {% endif %}
           <li>
             <a href={{ url_for('index') }}>Exit</a>

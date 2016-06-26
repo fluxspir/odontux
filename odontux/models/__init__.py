@@ -41,6 +41,8 @@ from traceability import (SterilizationCycleType, SterilizationCycleMode,
                             SterilizationCycle, AssetSterilized, 
                             MaterioVigilance)
 from certificates import Certificate
+from statements import ( Invoice, Quotation, Bill, QuotationGestureReference,
+                        BillAppointmentGestureReference )
 
 def init():
     parser = ConfigParser.ConfigParser()

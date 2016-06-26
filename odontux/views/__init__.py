@@ -82,3 +82,4 @@ from event import (
 from certificates import (
                 portal_certificate
 )
+from statements import ( list_statement, find_gesture )

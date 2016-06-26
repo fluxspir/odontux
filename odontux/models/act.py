@@ -35,6 +35,7 @@ class Gesture(Base):
     alias = Column(String, default="", unique=True)
     code = Column(String, unique=True)
     color = Column(String, default="#000000")
+    cotations = relationship('Cotation')
     healthcare_plans = association_proxy('cotations', 'healthcare_plan')
     
 class Cotation(Base):
@@ -45,7 +46,7 @@ class Cotation(Base):
                                                             primary_key=True)
     price = Column(Numeric, nullable=True, default=0)
     active = Column(Boolean, default=True)
-    gesture = relationship("Gesture", backref=backref("cotations"))
+    gesture = relationship("Gesture")
     healthcare_plan = relationship('HealthCarePlan', backref="cotations")
 
 class AppointmentGestureReference(Base):

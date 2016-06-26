@@ -6,10 +6,11 @@
 #
 
 from meta import Base
-import administration, acts, documents
+import administration, act, documents, users, schedule
 
 import sqlalchemy
-from sqlalchemy import Table, Column, Integer, String, Numeric, Boolean
+from sqlalchemy import ( Table, Column, Integer, String, Numeric, Boolean, 
+                        DateTime, Date )
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -26,6 +27,8 @@ class Invoice(Base):
                                                                 nullable=False)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), 
                                                                 nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
     file_id = Column(Integer, ForeignKey(documents.Files.id), nullable=False)
     timestamp = Column(DateTime, default=func.now(), nullable=False)
     type = Column(String, nullable=False)
@@ -37,7 +40,7 @@ class Invoice(Base):
 
 class Quotation(Invoice):
     __tablename__ = 'quotation'
-    id = Column(Integer, ForeignKey(Invoice.id), nullable=False)
+    id = Column(Integer, ForeignKey(Invoice.id), primary_key=True)
     validity = Column(Date)                         # Or make a Inverval value?
     is_accepted = Column(Boolean, default=False)
 
@@ -47,7 +50,7 @@ class Quotation(Invoice):
 
 class Bill(Invoice):
     __tablename__ = 'bill'
-    id = Column(Integer, ForeignKey(Invoice.id), nullable=False)
+    id = Column(Integer, ForeignKey(Invoice.id), primary_key=True)
     date = Column(Date, default=func.current_date(), nullable=False)
 
     __mapper_args__ = {
@@ -58,15 +61,17 @@ class QuotationGestureReference(Base):
     __tablename__ = 'quotation_gesture_reference'
     id = Column(Integer, primary_key=True)
     quotation_id = Column(Integer, ForeignKey(Quotation.id), nullable=False)
-    gesture_id = Column(Integer, ForeignKey(acts.Gesture.id), nullable=False)
+    cotation_id = Column(Integer, ForeignKey(act.Cotation.id), nullable=False)
+    gesture_id = Column(Integer, ForeignKey(act.Gesture.id), nullable=False)
     anatomic_location = Column(Integer, nullable=False)
     price = Column(Numeric, nullable=False)
-    gesture = relationship('acts.Gesture')
+    gesture = relationship('act.Gesture')
 
 class BillAppointmentGestureReference(Base):
     __tablename__ = 'bill_appointment_gesture_reference'
     id = Column(Integer, primary_key=True)
     bill_id = Column(Integer, ForeignKey(Bill.id), nullable=False)
-    appointment_gesture_id = Column(Integer, nullable=False,
-                            ForeignKey(acts.AppointmentGestureReference.id))
-    appointment_gesture = relationship('acts.AppointmentGestureReference')
+    appointment_gesture_id = Column(Integer,
+                            ForeignKey(act.AppointmentGestureReference.id),
+                            nullable=False)
+    appointment_gesture = relationship('act.AppointmentGestureReference')

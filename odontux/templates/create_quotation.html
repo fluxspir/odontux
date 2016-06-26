@@ -1,0 +1,52 @@
+<!--
+<script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>-->
+<script type="text/javascript"src="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
+{% extends "summary_patient.html" %}
+{% block main %}
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_field_line %}
+<h3>Create quotation:</h3><br />
+
+<form method="post" action="{{ url_for('create_quotation',
+                                        patient_id=patient.id,
+                                        appointment_id=appointment.id) }}">
+
+    {{ quotation_form.quotation }}
+    {{ render_simple_field_line(quotation_form.validity) }}<br />
+    {{ quotation_form.preview }}
+    {{ quotation_form.submit_quotation }}
+</form>
+<script type='text/javascript'>
+
+//  document.getElementById("quotation-0-project-0-gesture_code").onkeyup = function() {GetGestureCode(this.value)};
+
+  $(function() {
+    // When enter a new letter in the code
+    $('#quotation-0-project-0-gesture_code').keyup(function() {
+      // call the method "find_gesture" in views.statement
+      $.getJSON($SCRIPT_ROOT + '/find_gesture/', {
+        // define variables to pass to the "find_gesture" method
+        gesture: $('input[id="quotation-0-project-0-gesture_code"]').val(),
+        healthcare_plan_id: $('#quotation-0-healthcare_plan_id').val(),
+        patient_id: {{ patient.id }},
+      }, function(data) {
+        if ( data.success = true ) {
+          var data = data;
+          console.log(data[1][2])
+          $('#quotation-0-project-0-gesture_code').autocomplete({
+            source : data;
+              
+          });
+          $('#quotation-0-project-0-price').val(data[1][2]);
+        } else {
+          return false;
+        }
+      });
+      return false;
+    });
+  });
+</script>
+{% endblock %}

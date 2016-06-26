@@ -32,13 +32,12 @@
   </dl>
   <p><input type="submit" value="Add">
 </form>
-
+{{ cotations }}
 <script type='text/javascript'>
 
 function UpdateGesture() {
 
   var cotations = {{ cotations|tojson }};
-
   var healthcare_plan_value = document.getElementById('healthcare_plan_id').value;
   var healthcare_plan_list = cotations[healthcare_plan_value];
 
