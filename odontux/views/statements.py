@@ -31,6 +31,7 @@ from odontux import constants, checks
 #from odontux.pdfhandler import ( )
 
 class QuotationGestureForm(Form):
+    cotation_id = HiddenField(_('cotation_id'))
     anatomic_location = IntegerField(_('Anatomic location'), 
                                                     [validators.Required()])
 #    specialty = SelectField(_('Specialty', coerce=int)

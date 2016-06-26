@@ -1,6 +1,8 @@
 <!--
-<script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>-->
-<script type="text/javascript"src="/static/js/jquery.min.js"></script>
+<script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script> -->
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui.js"></script>
+<link href=https://code.jquery.com/ui/1.11.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
 <script type="text/javascript">
   var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
@@ -19,8 +21,8 @@
     {{ quotation_form.preview }}
     {{ quotation_form.submit_quotation }}
 </form>
-<script type='text/javascript'>
 
+<script type='text/javascript'>
 //  document.getElementById("quotation-0-project-0-gesture_code").onkeyup = function() {GetGestureCode(this.value)};
 
   $(function() {
@@ -33,14 +35,29 @@
         healthcare_plan_id: $('#quotation-0-healthcare_plan_id').val(),
         patient_id: {{ patient.id }},
       }, function(data) {
-        if ( data.success = true ) {
-          var data = data;
-          console.log(data[1][2])
+//        console.log(data.success)
+        if ( data.success == true ) {
+          // remove from data success information
+          delete data["success"]
+//          console.log(data)
+          var choices = []
+          for ( gest in data ) {
+//            console.log(gest)
+            console.log(data[gest][0]);
+            gest_option = { label: data[gest][0], value: data[gest][1], price: data[gest][2]} 
+            console.log(gest_option['label'], gest_option[1])
+            choices.push(gest_option);
+            //choices.push(data[gest][0])
+          }
+//          console.log(choices)
           $('#quotation-0-project-0-gesture_code').autocomplete({
-            source : data;
-              
+            source : choices,
+            select : function(event, ui){
+              $('#quotation-0-project-0-gesture_code').val(ui.item.value);
+              $('#quotation-0-project-0-price').val(ui.item.price);
+            }
           });
-          $('#quotation-0-project-0-price').val(data[1][2]);
+//          $('#quotation-0-project-0-price').val(data[1][2]);
         } else {
           return false;
         }
