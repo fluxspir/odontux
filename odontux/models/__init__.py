@@ -40,9 +40,9 @@ from assets import (AssetProvider, AssetCategory, MaterialCategory,
 from traceability import (SterilizationCycleType, SterilizationCycleMode,
                             SterilizationCycle, AssetSterilized, 
                             MaterioVigilance)
-from certificates import Certificate
 from statements import ( Invoice, Quotation, Bill, QuotationGestureReference,
-                        BillAppointmentGestureReference )
+                            BillAppointmentGestureReference )
+from certificates import Certificate
 
 def init():
     parser = ConfigParser.ConfigParser()

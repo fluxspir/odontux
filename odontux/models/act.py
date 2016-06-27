@@ -41,9 +41,9 @@ class Gesture(Base):
 class Cotation(Base):
     __tablename__ = "cotation"
     id = Column(Integer, primary_key=True)
-    gesture_id = Column(Integer, ForeignKey(Gesture.id), primary_key=True)
+    gesture_id = Column(Integer, ForeignKey(Gesture.id), nullable=False)
     healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id), 
-                                                            primary_key=True)
+                                                            nullable=False)
     price = Column(Numeric, nullable=True, default=0)
     active = Column(Boolean, default=True)
     gesture = relationship("Gesture")
