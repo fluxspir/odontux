@@ -2,7 +2,6 @@
 <script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script> -->
 <script type="text/javascript" src="/static/js/jquery.min.js"></script>
 <script type="text/javascript" src="/static/js/jquery-ui.js"></script>
-<link href=https://code.jquery.com/ui/1.11.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
 <script type="text/javascript">
   var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
@@ -24,8 +23,11 @@
 
 <script type='text/javascript'>
 //  document.getElementById("quotation-0-project-0-gesture_code").onkeyup = function() {GetGestureCode(this.value)};
-
   $(function() {
+    $('#quotation-0-project-0-cotation_id').val(null)
+    $('#quotation-0-project-0-anatomic_location').val(null)
+    $('#quotation-0-project-0-gesture_code').val(null);
+    $('#quotation-0-project-0-price').val(0);
     // When enter a new letter in the code
     $('#quotation-0-project-0-gesture_code').keyup(function() {
       // call the method "find_gesture" in views.statement
@@ -43,9 +45,7 @@
           var choices = []
           for ( gest in data ) {
 //            console.log(gest)
-            console.log(data[gest][0]);
-            gest_option = { label: data[gest][0], value: data[gest][1], price: data[gest][2]} 
-            console.log(gest_option['label'], gest_option[1])
+            gest_option = { label: data[gest][0], value: data[gest][1], price: data[gest][2], cotation: gest } 
             choices.push(gest_option);
             //choices.push(data[gest][0])
           }
@@ -53,12 +53,15 @@
           $('#quotation-0-project-0-gesture_code').autocomplete({
             source : choices,
             select : function(event, ui){
+              $('#quotation-0-project-0-cotation_id').val(ui.item.cotation)
               $('#quotation-0-project-0-gesture_code').val(ui.item.value);
               $('#quotation-0-project-0-price').val(ui.item.price);
             }
           });
-//          $('#quotation-0-project-0-price').val(data[1][2]);
         } else {
+          $('#quotation-0-project-0-cotation_id').val(null)
+          $('#quotation-0-project-0-gesture_code').val(null);
+          $('#quotation-0-project-0-price').val(0);
           return false;
         }
       });
