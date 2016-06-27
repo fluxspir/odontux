@@ -5,6 +5,7 @@
 # Licence BSD
 #
 
+import pdb
 from meta import Base
 import administration, act, documents, users, schedule
 
@@ -20,6 +21,7 @@ try:
 except ImportError:
     import constants
 
+
 class Invoice(Base):
     __tablename__ = 'invoice'
     id = Column(Integer, primary_key=True)
@@ -29,7 +31,7 @@ class Invoice(Base):
                                                                 nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                                 nullable=False)
-    file_id = Column(Integer, ForeignKey(documents.Files.id), nullable=False)
+    file_id = Column(Integer, ForeignKey(documents.Files.id))
     timestamp = Column(DateTime, default=func.now(), nullable=False)
     type = Column(String, nullable=False)
 
@@ -65,6 +67,7 @@ class QuotationGestureReference(Base):
     gesture_id = Column(Integer, ForeignKey(act.Gesture.id), nullable=False)
     anatomic_location = Column(Integer, nullable=False)
     price = Column(Numeric, nullable=False)
+    quotation = relationship('Quotation', backref='gestures')
     gesture = relationship('act.Gesture')
 
 class BillAppointmentGestureReference(Base):

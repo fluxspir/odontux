@@ -1,8 +1,9 @@
 {% extends 'summary_patient.html' %}
 {% block main %}
-<div id="list_statements"><a href="{{ url_for('create_quotation',
+<div id="list_statements"><a href="{{ url_for('create_quotation_proposition',
                         patient_id=patient.id,
-                        appointment_id=appointment.id) }}">
+                        appointment_id=appointment.id,
+                        quotation_id=0) }}">
   Create Quotation</a><br />
 <a href="{{ url_for('add_bill',
                         patient_id=patient.id,

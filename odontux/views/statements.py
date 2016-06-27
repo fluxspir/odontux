@@ -34,30 +34,37 @@ class QuotationGestureForm(Form):
     cotation_id = HiddenField(_('cotation_id'))
     anatomic_location = IntegerField(_('Anatomic location'), 
                                                     [validators.Optional()])
-    gesture_code = TextField(_('Technical gesture code'), 
+    gesture_code = HiddenField(_('Technical gesture code'), 
+                                                    [validators.Required()])
+    gesture_name = TextField(_('Technical gesture denomination'),
                                                     [validators.Required()])
     price = DecimalField(_('Price'), [validators.Optional()])
     add_gesture = SubmitField(_('Add gesture'))
 
-class QuotationProjectForm(Form):
+class QuotationPropositionForm(Form):
     healthcare_plan_id = SelectField(_('HealthCare Plan'), coerce=int)
-    project = FieldList(FormField(QuotationGestureForm), min_entries=1)
-    add_project = SubmitField(_('Add project'))
-
-class QuotationForm(Form):
-    quotation = FieldList(FormField(QuotationProjectForm), min_entries=1)
     validity = IntegerField(_('Validity in months'), [validators.Required()],
                                         render_kw={'size': 4})
+    proposition = FieldList(FormField(QuotationGestureForm), min_entries=1)
+    remove_last = SubmitField(_('Remove last gesture'))
+    add_proposition = SubmitField(_('Make another proposition'))
     preview = SubmitField(_('Preview'))
-    submit_quotation = SubmitField(_('Save and print'))
+    save_and_print = SubmitField(_('Save and Print'))
+#    add_proposition = SubmitField(_('Add proposition'))
 
+#class QuotationForm(Form):
+#    quotation = FieldList(FormField(QuotationProjectForm), min_entries=1)
+#    validity = IntegerField(_('Validity in months'), [validators.Required()],
+#                                        render_kw={'size': 4})
+#    preview = SubmitField(_('Preview'))
+#    submit_quotation = SubmitField(_('Save and print'))
+#
 @app.route('/find_gesture/')
 def find_gesture():
     gest_code = request.args.get('gesture', None)
     healthcare_plan_id = request.args.get('healthcare_plan_id', None)
     patient_id = int(request.args.get('patient_id', None))
     patient = checks.get_patient(patient_id)
-
     if gest_code:
         gest_code = u'%{}%'.format(gest_code)
 
@@ -86,78 +93,143 @@ def find_gesture():
 
     return jsonify(success=False)
 
-@app.route('/create_quotation?pid=<int:patient_id>&aid=<int:appointment_id>',
-                                                    methods=['GET', 'POST'])
-def create_quotation(patient_id, appointment_id):
 
-    def _make_healthcare_plan_id_choices(quotation_form):
-        for quote_form in quotation_form.quotation:
-            quote_form.healthcare_plan_id.choices = [ (hcp.id, hcp.name) 
-                for hcp in meta.session.query(act.HealthCarePlan)
-                .filter(act.HealthCarePlan.id.in_(patient.healthcare_plans_id))
-                .all()
-        ]
-        return quotation_form
- 
+#@app.route('/create_quotation_proposition?pid=<int:patient_id>'
+#            '&aid=<int:appointment_id>', methods=['GET', 'POST'])
+@app.route('/create_quotation_proposition?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>&qid=<int:quotation_id>', 
+                                                    methods=['GET', 'POST'])
+def create_quotation_proposition(patient_id, appointment_id, quotation_id=0):
+
+#    def _make_healthcare_plan_id_choices(quotation_form):
+#        for quote_form in quotation_form.quotation:
+#            quote_form.healthcare_plan_id.choices = [ (hcp.id, hcp.name) 
+#                for hcp in meta.session.query(act.HealthCarePlan)
+#                .filter(act.HealthCarePlan.id.in_(patient.healthcare_plans_id))
+#                .all()
+#        ]
+#        return quotation_form
+# 
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return abort(403)
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment(appointment_id)
-    quotation_form = QuotationForm(request.form)
-    quotation_form = _make_healthcare_plan_id_choices(quotation_form)
+    quotation = ( meta.session.query(statements.Quotation)
+                    .filter(statements.Quotation.id == quotation_id)
+                    .one_or_none()
+    )
+    quotation_form = QuotationPropositionForm(request.form)
+    quotation_form.healthcare_plan_id.choices = [ (hcp.id, hcp.name) for hcp in
+        meta.session.query(act.HealthCarePlan)
+        .filter(act.HealthCarePlan.id.in_(patient.healthcare_plans_id))
+        .all() ]
     quotation_gesture_form = QuotationGestureForm(request.form)
-    quotation_project_form = QuotationProjectForm(request.form)
-   
+
     if request.method == 'POST':
-        if ( 'quotation-0-project-0-add_gesture' in request.form
+
+        if ( 'proposition-0-add_gesture' in request.form
                                             and quotation_form.validate() ):
             quotation_gesture_form.cotation_id =\
-                quotation_form.quotation[0].project[0].cotation_id.data
+                                quotation_form.proposition[0].cotation_id.data
             quotation_gesture_form.anatomic_location =\
-                quotation_form.quotation[0].project[0].anatomic_location.data
+                        quotation_form.proposition[0].anatomic_location.data
             quotation_gesture_form.gesture_code =\
-                quotation_form.quotation[0].project[0].gesture_code.data
+                                quotation_form.proposition[0].gesture_code.data
+            quotation_gesture_form.gesture_name =\
+                                quotation_form.proposition[0].gesture_name.data
             quotation_gesture_form.price =\
-                quotation_form.quotation[0].project[0].price.data
-            quotation_form.quotation[0].project.append_entry(
-                                                        quotation_gesture_form)
-            
-        elif 'quotation-0-add_project' in request.form:
-            quotation_project_form.healthcare_plan_id.choices = [ 
-                (hcp.id, hcp.name) for hcp in 
-                    meta.session.query(act.HealthCarePlan)
-                        .filter(act.HealthCarePlan.id.in_(
-                                                patient.healthcare_plans_id))
-                        .all() 
-            ]
-            quotation_project_form.healthcare_plan_id =\
-                quotation_form.quotation[0].healthcare_plan_id.data
-            new_quotation_project_form = QuotationProjectForm(request.form)
-            while quotation_form.quotation[0].project.entries:
-                entry = quotation_form.quotation[0].project.pop_entry
-                pdb.set_trace()
-            quotation_project_form.project =\
-                                            quotation_form.quotation[0].project
+                                quotation_form.proposition[0].price.data
+            quotation_form.proposition.append_entry(quotation_gesture_form)
+           
+        elif 'remove_last' in request.form:
+            quotation_form.proposition.pop_entry()
 
-            quotation_form.quotation.append_entry(quotation_project_form)
-            
-            while quotation_form.quotation[0].project.entries:
-                quotation_form.quotation[0].project.pop_entry()
-            
-            quotation_form.quotation[0].project.append_entry(
-                                                        quotation_gesture_form)
+        elif 'add_proposition' in request.form:
+            if not quotation_id:
+                values = {
+                    'patient_id': patient_id,
+                    'dentist_id': appointment.dentist_id,
+                    'appointment_id': appointment_id,
+                    'type': constants.FILE_QUOTATION,
+                    'validity': appointment.agenda.starttime +\
+                    datetime.timedelta(days=quotation_form.validity.data * 30),
+                }
+                new_proposition_quotation = statements.Quotation(**values)
+                meta.session.add(new_proposition_quotation)
+                meta.session.commit()
+                quotation_id = new_proposition_quotation.id
 
-            quotation_form = _make_healthcare_plan_id_choices(quotation_form)
-        
-        return render_template('create_quotation.html', patient=patient,
+#            for ( cotation_id, anatomic_location, gesture_code, gesture_name,
+#                price ) in quotation_form.proposition.pop_entry():
+            while quotation_form.proposition.entries:
+                entry = quotation_form.proposition.pop_entry().data
+                gesture = ( meta.session.query(act.Gesture)
+                    .filter(act.Gesture.code == entry['gesture_code'],
+                            act.Gesture.cotations.any(
+                                act.Cotation.id == entry['cotation_id'])
+                    )
+                    .one_or_none()
+                )
+                if not gesture:
+                    continue
+                gesture_entry = {
+                    'quotation_id': quotation_id,
+                    'cotation_id': entry['cotation_id'],
+                    'gesture_id': gesture.id,
+                    'anatomic_location': entry['anatomic_location'],
+                    'price': entry['price'],
+                }
+                new_gesture_in_proposition =\
+                        statements.QuotationGestureReference(**gesture_entry)
+                meta.session.add(new_gesture_in_proposition)
+                meta.session.commit()
+
+            # We want to reload entirely the 
+            return redirect(url_for('create_quotation_proposition',
+                                            patient_id=patient_id,
+                                            appointment_id=appointment_id,
+                                            quotation_id=quotation_id))
+
+#        elif 'quotation-0-add_project' in request.form:
+#            quotation_project_form.healthcare_plan_id.choices = [ 
+#                (hcp.id, hcp.name) for hcp in 
+#                    meta.session.query(act.HealthCarePlan)
+#                        .filter(act.HealthCarePlan.id.in_(
+#                                                patient.healthcare_plans_id))
+#                        .all() 
+#            ]
+#            quotation_project_form.healthcare_plan_id =\
+#                quotation_form.quotation[0].healthcare_plan_id.data
+#            new_quotation_project_form = QuotationProjectForm(request.form)
+#            while quotation_form.quotation[0].project.entries:
+#                entry = quotation_form.quotation[0].project.pop_entry
+#                pdb.set_trace()
+#            quotation_project_form.project =\
+#                                            quotation_form.quotation[0].project
+#
+#            quotation_form.quotation.append_entry(quotation_project_form)
+#            
+#            while quotation_form.quotation[0].project.entries:
+#                quotation_form.quotation[0].project.pop_entry()
+#            
+#            quotation_form.quotation[0].project.append_entry(
+#                                                        quotation_gesture_form)
+#
+#            quotation_form = _make_healthcare_plan_id_choices(quotation_form)
+#        
+        return render_template('create_quotation_proposition.html', patient=patient,
                                     appointment=appointment,
+                                    quotation=quotation,
                                     quotation_form=quotation_form)
     
+    quotation_form.healthcare_plan_id.data =\
+                                        quotation_form.healthcare_plan_id.data
     quotation_form.validity.data = 6
-    return render_template('create_quotation.html', patient=patient,
+    return render_template('create_quotation_proposition.html', patient=patient,
                                     appointment=appointment,
+                                    quotation=quotation,
                                     quotation_form=quotation_form)
 
 
