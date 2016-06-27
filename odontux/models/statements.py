@@ -11,7 +11,7 @@ import administration, act, documents, users, schedule
 
 import sqlalchemy
 from sqlalchemy import ( Table, Column, Integer, String, Numeric, Boolean, 
-                        DateTime, Date )
+                        DateTime, Date, Interval )
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -33,7 +33,7 @@ class Invoice(Base):
                                                                 nullable=False)
     file_id = Column(Integer, ForeignKey(documents.Files.id))
     timestamp = Column(DateTime, default=func.now(), nullable=False)
-    type = Column(String, nullable=False)
+    type = Column(Integer, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': constants.FILE_INVOICE,
@@ -44,6 +44,7 @@ class Quotation(Invoice):
     __tablename__ = 'quotation'
     id = Column(Integer, ForeignKey(Invoice.id), primary_key=True)
     validity = Column(Date)                         # Or make a Inverval value?
+    treatment_duration = Column(Interval)
     is_accepted = Column(Boolean, default=False)
 
     __mapper_args__ = {
@@ -67,6 +68,7 @@ class QuotationGestureReference(Base):
     gesture_id = Column(Integer, ForeignKey(act.Gesture.id), nullable=False)
     anatomic_location = Column(Integer, nullable=False)
     price = Column(Numeric, nullable=False)
+    appointment_number = Column(Integer, default=0)
     quotation = relationship('Quotation', backref='gestures')
     gesture = relationship('act.Gesture')
 

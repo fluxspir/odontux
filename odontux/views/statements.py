@@ -39,12 +39,19 @@ class QuotationGestureForm(Form):
     gesture_name = TextField(_('Technical gesture denomination'),
                                                     [validators.Required()])
     price = DecimalField(_('Price'), [validators.Optional()])
+    appointment_number = IntegerField(_('Appointment number'), 
+                                                    [validators.Optional()])
     add_gesture = SubmitField(_('Add gesture'))
 
 class QuotationPropositionForm(Form):
     healthcare_plan_id = SelectField(_('HealthCare Plan'), coerce=int)
     validity = IntegerField(_('Validity in months'), [validators.Required()],
                                         render_kw={'size': 4})
+    treatment_duration = IntegerField(_('Treatment duration'), 
+                                                    [validators.Optional()])
+    duration_unity = SelectField(_('Duration in'),
+                choices=[ ( 'month', _('Months')), ('week', _('Weeks')), 
+                            ('day', _('Days')) ] )
     proposition = FieldList(FormField(QuotationGestureForm), min_entries=1)
     remove_last = SubmitField(_('Remove last gesture'))
     add_proposition = SubmitField(_('Make another proposition'))
@@ -67,7 +74,6 @@ def find_gesture():
     patient = checks.get_patient(patient_id)
     if gest_code:
         gest_code = u'%{}%'.format(gest_code)
-
         cotations = (
             meta.session.query(act.Cotation)
                 .join(act.Gesture)
@@ -93,13 +99,29 @@ def find_gesture():
 
     return jsonify(success=False)
 
+@app.route('/remove_proposition?pid=<int:patient_id>&aid=<int:appointment_id>'
+            '&qid=<quotations_id>&qrm=<int:quotation_to_remove>')
+def remove_quotation_proposition(patient_id, appointment_id, quotations_id,
+                                                        quotation_to_remove):
+    quotations_id = quotations_id.split(",")
+    quotations_id.remove(str(quotation_to_remove))
+    if quotations_id:
+        quotations_id = ",".join(quotations_id)
+        return redirect(url_for('create_quotation_proposition',
+                                    patient_id=patient_id, 
+                                    appointment_id=appointment_id,
+                                    quotations_id=quotations_id))
+    else:
+        return redirect(url_for('create_quotation_proposition',
+                                                patient_id=patient_id,
+                                                appointment_id=appointment_id))
 
-#@app.route('/create_quotation_proposition?pid=<int:patient_id>'
-#            '&aid=<int:appointment_id>', methods=['GET', 'POST'])
 @app.route('/create_quotation_proposition?pid=<int:patient_id>'
-            '&aid=<int:appointment_id>&qid=<int:quotation_id>', 
+            '&aid=<int:appointment_id>', methods=['GET', 'POST'])
+@app.route('/create_quotation_proposition?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>&qid=<quotations_id>', 
                                                     methods=['GET', 'POST'])
-def create_quotation_proposition(patient_id, appointment_id, quotation_id=0):
+def create_quotation_proposition(patient_id, appointment_id, quotations_id=''):
 
 #    def _make_healthcare_plan_id_choices(quotation_form):
 #        for quote_form in quotation_form.quotation:
@@ -116,10 +138,14 @@ def create_quotation_proposition(patient_id, appointment_id, quotation_id=0):
         return abort(403)
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment(appointment_id)
-    quotation = ( meta.session.query(statements.Quotation)
-                    .filter(statements.Quotation.id == quotation_id)
-                    .one_or_none()
-    )
+    if not quotations_id:
+        quotations = []
+    else:
+        quotations = ( meta.session.query(statements.Quotation)
+                    .filter(statements.Quotation.id.in_(
+                            [ int(i) for i in quotations_id.split(",") ] ))
+                    .all()
+        )
     quotation_form = QuotationPropositionForm(request.form)
     quotation_form.healthcare_plan_id.choices = [ (hcp.id, hcp.name) for hcp in
         meta.session.query(act.HealthCarePlan)
@@ -128,7 +154,6 @@ def create_quotation_proposition(patient_id, appointment_id, quotation_id=0):
     quotation_gesture_form = QuotationGestureForm(request.form)
 
     if request.method == 'POST':
-
         if ( 'proposition-0-add_gesture' in request.form
                                             and quotation_form.validate() ):
             quotation_gesture_form.cotation_id =\
@@ -141,30 +166,54 @@ def create_quotation_proposition(patient_id, appointment_id, quotation_id=0):
                                 quotation_form.proposition[0].gesture_name.data
             quotation_gesture_form.price =\
                                 quotation_form.proposition[0].price.data
+            quotation_gesture_form.appointment_number =\
+                        quotation_form.proposition[0].appointment_number.data
             quotation_form.proposition.append_entry(quotation_gesture_form)
            
         elif 'remove_last' in request.form:
             quotation_form.proposition.pop_entry()
 
         elif 'add_proposition' in request.form:
-            if not quotation_id:
-                values = {
-                    'patient_id': patient_id,
-                    'dentist_id': appointment.dentist_id,
-                    'appointment_id': appointment_id,
-                    'type': constants.FILE_QUOTATION,
-                    'validity': appointment.agenda.starttime +\
-                    datetime.timedelta(days=quotation_form.validity.data * 30),
-                }
-                new_proposition_quotation = statements.Quotation(**values)
-                meta.session.add(new_proposition_quotation)
-                meta.session.commit()
-                quotation_id = new_proposition_quotation.id
+            if ( len(quotation_form.proposition.entries) == 0 or
+                len(quotation_form.proposition.entries) == 1 and
+                not quotation_form.proposition.entries[0].gesture_code.data ):
+                return redirect(url_for('create_quotation_proposition',
+                                            patient_id=patient_id,
+                                            appointment_id=appointment_id,
+                                            quotations_id=quotations_id))
 
-#            for ( cotation_id, anatomic_location, gesture_code, gesture_name,
-#                price ) in quotation_form.proposition.pop_entry():
+            # create new proposition of quotation
+            if quotation_form.treatment_duration.data:
+                if quotation_form.duration_unity.data == 'month':
+                    treatment_duration =\
+                                    quotation_form.treatment_duration.data * 30
+                elif quotation_form.duration_unity.data == 'week':
+                    treatment_duration =\
+                                    quotation_form.treatment_duration.data * 7
+                else:
+                    treatment_duration =\
+                                    quotation_form.treatment_duration.data
+                treatment_duration =\
+                                    datetime.timedelta(days=treatment_duration)
+            else:
+                treatment_duration = None
+            values = {
+                'patient_id': patient_id,
+                'dentist_id': appointment.dentist_id,
+                'appointment_id': appointment_id,
+                'type': constants.FILE_QUOTATION,
+                'validity': appointment.agenda.starttime +\
+                datetime.timedelta(days=quotation_form.validity.data * 30),
+                'treatment_duration': treatment_duration,
+            }
+            new_proposition_quotation = statements.Quotation(**values)
+            meta.session.add(new_proposition_quotation)
+            meta.session.commit()
+            # insert gesture in this proposition of quotation
             while quotation_form.proposition.entries:
                 entry = quotation_form.proposition.pop_entry().data
+                if not entry['cotation_id']:
+                    continue
                 gesture = ( meta.session.query(act.Gesture)
                     .filter(act.Gesture.code == entry['gesture_code'],
                             act.Gesture.cotations.any(
@@ -175,22 +224,28 @@ def create_quotation_proposition(patient_id, appointment_id, quotation_id=0):
                 if not gesture:
                     continue
                 gesture_entry = {
-                    'quotation_id': quotation_id,
+                    'quotation_id': new_proposition_quotation.id,
                     'cotation_id': entry['cotation_id'],
                     'gesture_id': gesture.id,
                     'anatomic_location': entry['anatomic_location'],
                     'price': entry['price'],
+                    'appointment_number': entry['appointment_number'],
                 }
                 new_gesture_in_proposition =\
                         statements.QuotationGestureReference(**gesture_entry)
                 meta.session.add(new_gesture_in_proposition)
                 meta.session.commit()
-
-            # We want to reload entirely the 
+            
+            if not quotations_id:
+                quotations_id = str(new_proposition_quotation.id)
+            else:
+                quotations_id = quotations_id + "," +\
+                                            str(new_proposition_quotation.id)
+            # We reload the create_quotation_proposition to enter in a new GET
             return redirect(url_for('create_quotation_proposition',
                                             patient_id=patient_id,
                                             appointment_id=appointment_id,
-                                            quotation_id=quotation_id))
+                                            quotations_id=quotations_id))
 
 #        elif 'quotation-0-add_project' in request.form:
 #            quotation_project_form.healthcare_plan_id.choices = [ 
@@ -219,18 +274,22 @@ def create_quotation_proposition(patient_id, appointment_id, quotation_id=0):
 #
 #            quotation_form = _make_healthcare_plan_id_choices(quotation_form)
 #        
-        return render_template('create_quotation_proposition.html', patient=patient,
-                                    appointment=appointment,
-                                    quotation=quotation,
-                                    quotation_form=quotation_form)
+        return render_template('create_quotation_proposition.html', 
+                                                patient=patient,
+                                                appointment=appointment,
+                                                quotations=quotations,
+                                                quotation_form=quotation_form,
+                                                quotations_id=quotations_id)
     
     quotation_form.healthcare_plan_id.data =\
                                         quotation_form.healthcare_plan_id.data
     quotation_form.validity.data = 6
-    return render_template('create_quotation_proposition.html', patient=patient,
-                                    appointment=appointment,
-                                    quotation=quotation,
-                                    quotation_form=quotation_form)
+    return render_template('create_quotation_proposition.html', 
+                                                patient=patient,
+                                                appointment=appointment,
+                                                quotations=quotations,
+                                                quotation_form=quotation_form,
+                                                quotations_id=quotations_id)
 
 
 @app.route('/list_statement&pid=<int:patient_id>&aid=<int:appointment_id>')
@@ -258,6 +317,7 @@ def list_statement(patient_id, appointment_id):
 
     return render_template('list_statements.html', patient=patient,
                                         appointment=appointment,
+                                        quotations_id='',
                                         quotations=quotations,
                                         bills=bills)
 

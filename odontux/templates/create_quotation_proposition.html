@@ -10,32 +10,46 @@
 {% block main %}
 {% from "_formhelpers.html" import render_sfl_wol, render_simple_field_line %}
 <h3>Create quotation:</h3><br />
+{% if quotations_id %}
+  <form method="post" action="{{ url_for('create_quotation_proposition',
+                                        patient_id=patient.id,
+                                        appointment_id=appointment.id,
+                                        quotations_id=quotations_id) }}">
 
-{% if quotation %}
-<form method="post" action="{{ url_for('create_quotation_proposition',
-                                        patient_id=patient.id,
-                                        appointment_id=appointment.id,
-                                        quotation_id=quotation.id) }}">
 {% else %}
-<form method="post" action="{{ url_for('create_quotation_proposition',
+  <form method="post" action="{{ url_for('create_quotation_proposition',
                                         patient_id=patient.id,
-                                        appointment_id=appointment.id,
-                                        quotation_id=0) }}">
+                                        appointment_id=appointment.id) }}">
 {% endif %}
 
     {{ quotation_form.add_proposition }} {{ quotation_form.preview }} 
     {{ quotation_form.save_and_print }}<br /><br />
+    {{ quotation_form.treatment_duration }}
+    {{ quotation_form.duration_unity }}<br />
     {{ quotation_form.healthcare_plan_id }}
     {{ quotation_form.proposition }}
     {{ quotation_form.remove_last }}<br />
     {{ render_simple_field_line(quotation_form.validity) }}
 </form>
 
-{% if quotation %}
-  {% for gesture in quotation.gestures %}
-    {{ gesture.anatomic_location }} {{ gesture.gesture.name }} {{ gesture.price }}<br />
+{% if quotations %}
+  <ol>
+  {% for quotation in quotations %}
+    <li>Proposition :
+    <ul>
+    {% for gesture in quotation.gestures %}
+      <li>{{ gesture.anatomic_location }} {{ gesture.gesture.name }} {{ gesture.price }}</li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('remove_quotation_proposition', patient_id=patient.id, 
+                                                        appointment_id=appointment.id,
+                                                        quotations_id=quotations_id,
+                                                        quotation_to_remove=quotation.id) }}">
+    Remove this proposition</a>
   {% endfor %}
+  </ol>
 {% endif %}
+
 <script type='text/javascript'>
 //  document.getElementById("quotation-0-project-0-gesture_code").onkeyup = function() {GetGestureCode(this.value)};
   $(function() {
@@ -54,7 +68,7 @@
         healthcare_plan_id: $('#healthcare_plan_id').val(),
         patient_id: {{ patient.id }},
       }, function(data) {
-//        console.log(data.success)
+        console.log(data.success)
         if ( data.success == true ) {
           // remove from data success information
           delete data["success"]

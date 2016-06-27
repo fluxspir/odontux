@@ -2,8 +2,7 @@
 {% block main %}
 <div id="list_statements"><a href="{{ url_for('create_quotation_proposition',
                         patient_id=patient.id,
-                        appointment_id=appointment.id,
-                        quotation_id=0) }}">
+                        appointment_id=appointment.id) }}">
   Create Quotation</a><br />
 <a href="{{ url_for('add_bill',
                         patient_id=patient.id,
@@ -11,12 +10,12 @@
   Add Bill</a><br />
 </div>
 <br />
-Bills:<br />
+Quotations:<br />
 {% for quotation in quotations %}
   <a href=#>{{ quotation.appointment.agenda.starttime }}</a><br />
 {% endfor %}
 <br />
-Quotations:<br />
+Bills:<br />
 {% for bill in bills %}
   <a href=#>{{ bill.appointment.agenda.starttime }}</a><br />
 {% endfor %}
