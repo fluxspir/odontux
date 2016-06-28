@@ -9,6 +9,7 @@ import pdb
 import datetime
 import os
 import md5
+from base64 import b64encode
 from flask import ( session, render_template, request, redirect, url_for, 
                     abort, make_response, jsonify)
 
@@ -297,16 +298,29 @@ def create_quotation_proposition(patient_id, appointment_id, quotations_id=''):
                                                 quotations=quotations,
                                                 quotation_form=quotation_form,
                                                 quotations_id=quotations_id)
-    
+
     quotation_form.healthcare_plan_id.data =\
                                         quotation_form.healthcare_plan_id.data
     quotation_form.validity.data = 6
+    
+    if quotations:
+        pdf_out = make_quotation(patient_id, appointment_id, quotations)
+        pdf_out = b64encode(pdf_out)
+        return render_template('create_quotation_proposition.html', 
+                                                patient=patient,
+                                                appointment=appointment,
+                                                quotations=quotations,
+                                                quotation_form=quotation_form,
+                                                quotations_id=quotations_id,
+                                                pdf_out=pdf_out)
+
     return render_template('create_quotation_proposition.html', 
                                                 patient=patient,
                                                 appointment=appointment,
                                                 quotations=quotations,
                                                 quotation_form=quotation_form,
-                                                quotations_id=quotations_id)
+                                                quotations_id=quotations_id,
+                                                pdf_out=None)
 
 
 @app.route('/list_statement&pid=<int:patient_id>&aid=<int:appointment_id>')
