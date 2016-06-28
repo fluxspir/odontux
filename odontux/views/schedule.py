@@ -665,7 +665,8 @@ def add_patient_appointment(body_id, meeting_id=0):
                 appointment_in_agenda.appointment_id = new_appointment.id
                 meta.session.commit()
                 session['appointment_id'] = new_appointment.id
-                return redirect(url_for('enter_patient_appointment'))
+                return redirect(url_for('patient_appointment',
+                                            appointment_id=new_appointment.id))
 
         args = {}
         args['dentist_id'] = new_appointment.dentist_id
@@ -679,7 +680,8 @@ def add_patient_appointment(body_id, meeting_id=0):
         meta.session.commit()
 
         session['appointment_id'] = new_appointment.id
-        return redirect(url_for('enter_patient_appointment'))
+        return redirect(url_for('patient_appointment',
+                                            appointment_id=new_appointment.id))
 
     if not agenda_form.day.data:
         agenda_form.day.data = datetime.date.today()
