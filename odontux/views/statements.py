@@ -27,6 +27,7 @@ from odontux.odonweb import app
 from gettext import gettext as _
 
 from odontux import constants, checks
+from odontux.pdfhandler import make_quotation
 
 #from odontux.pdfhandler import ( )
 
@@ -139,7 +140,17 @@ def create_quotation_proposition(patient_id, appointment_id, quotations_id=''):
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment(appointment_id)
     if not quotations_id:
-        quotations = []
+        quotations = ( 
+            meta.session.query(statements.Quotation)
+                .filter(statements.Quotation.appointment_id == appointment_id,
+                        statements.Quotation.file_id.is_(None) )
+                .all()
+        )
+        for quotation in quotations:
+            if not quotations_id:
+                quotations_id = str(quotation.id)
+                continue
+            quotations_id = quotations_id + "," + str(quotation.id)
     else:
         quotations = ( meta.session.query(statements.Quotation)
                     .filter(statements.Quotation.id.in_(
@@ -246,7 +257,13 @@ def create_quotation_proposition(patient_id, appointment_id, quotations_id=''):
                                             patient_id=patient_id,
                                             appointment_id=appointment_id,
                                             quotations_id=quotations_id))
-
+        
+        elif 'preview' in request.form:
+            pdf_out = make_quotation(patient_id, appointment_id, quotations)
+            response = make_response(pdf_out)
+            response.mimetype = 'application/pdf'
+            return response
+            
 #        elif 'quotation-0-add_project' in request.form:
 #            quotation_project_form.healthcare_plan_id.choices = [ 
 #                (hcp.id, hcp.name) for hcp in 

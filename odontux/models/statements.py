@@ -46,6 +46,12 @@ class Quotation(Invoice):
     validity = Column(Date)                         # Or make a Inverval value?
     treatment_duration = Column(Interval)
     is_accepted = Column(Boolean, default=False)
+    
+    def total_price(self):
+        price = 0
+        for gesture in self.gestures:
+            price += gesture.price
+        return price
 
     __mapper_args__ = {
         'polymorphic_identity': constants.FILE_QUOTATION,

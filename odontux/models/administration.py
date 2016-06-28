@@ -23,15 +23,15 @@ from sqlalchemy.ext.associationproxy import association_proxy
 class Address(Base):
     __tablename__ = 'address'
     id = Column(Integer, primary_key=True)
-    street = Column(String, default="")
-    street_number = Column(String, default="")
-    building = Column(String, default="")
-    complement = Column(String, default="")
-    district = Column(String, default="")
-    city = Column(String, default="")
-    zip_code = Column(String, default="")
-    state = Column(String, default="")
-    country = Column(String, default="")
+    street = Column(String, default="", nullable=False)
+    street_number = Column(String, default="", nullable=False)
+    building = Column(String, default="", nullable=False)
+    complement = Column(String, default="", nullable=False)
+    district = Column(String, default="", nullable=False)
+    city = Column(String, default="", nullable=False)
+    zip_code = Column(String, default="", nullable=False)
+    state = Column(String, default="", nullable=False)
+    country = Column(String, default="", nullable=False)
     update_date = Column(Date, default=func.current_date())
 
 
