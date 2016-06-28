@@ -50,6 +50,10 @@
   </ol>
 {% endif %}
 
+{% if pdf_out %}
+  <embed src="data:application/pdf;base64,{{ pdf_out }}" type="application/pdf" width='30%'>
+{% endif %}
+
 <script type='text/javascript'>
 //  document.getElementById("quotation-0-project-0-gesture_code").onkeyup = function() {GetGestureCode(this.value)};
   $(function() {
