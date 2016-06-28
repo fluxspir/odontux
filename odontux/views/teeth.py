@@ -362,7 +362,7 @@ def add_event_tooth_located(patient_id, appointment_id):
 
         elif ( event_form.anatomic_location.data == 
                                         constants.TOOTH_EVENT_LOCATION_CROWN
-        and crown_event_form.validate() ):
+                                            and crown_event_form.validate() ):
             crown_values = {
                 'state': crown_event_form.choose_crown_state.data,
                 'tooth_shade': crown_event_form.tooth_shade.data,
@@ -381,7 +381,7 @@ def add_event_tooth_located(patient_id, appointment_id):
 
         elif ( event_form.anatomic_location.data == 
                                             constants.TOOTH_EVENT_LOCATION_ROOT
-        and root_event_form.validate() ):
+                                            and root_event_form.validate() ):
             root_values = {
                 'state': root_event_form.choose_root_state.data,
                 }
@@ -392,14 +392,15 @@ def add_event_tooth_located(patient_id, appointment_id):
                 _update_tooth_datas(tooth, tooth_values)
                 values['tooth_id'] = tooth.id
                 for root_canal in root_canals():
-                    values[root_canal] = getattr(root_event_form, root_canal).data
+                    values[root_canal] =\
+                                    getattr(root_event_form, root_canal).data
                 new_root_event = teeth.RootCanalEvent(**values)
                 meta.session.add(new_root_event)
                 meta.session.commit()
         
         elif ( event_form.anatomic_location.data == 
                                     constants.TOOTH_EVENT_LOCATION_PERIODONTAL
-        and periodontal_event_form.validate() ):
+                                    and periodontal_event_form.validate() ):
             periodontal_values = {
                 'furcation': periodontal_event_form.furcation.data,
                 'recession': periodontal_event_form.recession.data,

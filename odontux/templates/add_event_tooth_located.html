@@ -1,9 +1,10 @@
 
+<!--
 <script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 <script type="text/javascript">
   var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
-
+-->
 {% extends 'summary_patient.html' %}
 
 {% block main %}
@@ -30,7 +31,7 @@
   <div id="tooth">
   </div>
   
-  <div id="crown">
+  <div id="crown" style="display:none">
     {{ render_simple_field(crown_event_form.choose_crown_state) }}
     {{ render_simple_field(crown_event_form.tooth_shade) }}
     
@@ -41,7 +42,7 @@
     {{ render_simple_field_line(crown_event_form.is_distal) }}
   </div>
   
-  <div id="root">
+  <div id="root" style="display:none">
     {{ render_simple_field(root_event_form.choose_root_state) }}
     {{ render_simple_field_line(root_event_form.is_central) }}
     {{ render_simple_field_line(root_event_form.is_buccal) }}
@@ -55,7 +56,7 @@
     {{ render_simple_field_line(root_event_form.is_mesio_buccal_2) }}
   </div>
   
-  <div id="periodontal">
+  <div id="periodontal" style="display:none">
     {{ render_simple_field(periodontal_event_form.choose_periodontal_state) }}
     {{ render_simple_field(periodontal_event_form.bleeding) }}
     {{ render_simple_field(periodontal_event_form.furcation) }}
@@ -81,6 +82,15 @@
 </form>
 
 <script type="text/javascript" src="/static/js/select_field.js"></script>
+<script type="text/javascript">
+//  function show_only_tooth() {
+    document.GetElementById("tooth").style.display = "block";
+    document.GetElementById("crown").style.display = "none";
+    document.GetElementById("root").style.display = "none";
+    document.GetElementById("periodonte").style.display = "none";
+//  }
+</script>
+
 
 {% if clear_form %}
   <script type="text/javascript" src="/static/js/reset_teeth_event_on_load.js">
