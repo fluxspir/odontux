@@ -226,7 +226,7 @@ def make_cessation_certificate(patient_id, appointment_id, cessation_form):
     output.close()
     return pdf_out
 
-def make_quotation(patient_id, appointment_id, quotations):
+def make_quote(patient_id, appointment_id, quotes):
 
     output, doc, Story, styles, patient, appointment, dentist, dental_office =\
                                 get_document_base(patient_id, appointment_id)
@@ -235,9 +235,9 @@ def make_quotation(patient_id, appointment_id, quotations):
     Story.append(Spacer(1, -10 * mm))
     Story.append(Paragraph('Orçamento odontológico', styles['my_title']))
     Story.append(Spacer(1, 10 * mm))
-    for index, quotation in enumerate(quotations, start = 1):
+    for index, quote in enumerate(quotes, start = 1):
         t = Table( [ [str(index) + "a" + " " + "Proposta:", 
-                        "(" + str(quotation.id) + ")" ] ], 
+                        "(" + str(quote.id) + ")" ] ], 
                     colWidths=( (WIDTH_PAPER - L_MARG - R_MARG) / 2) 
         )
         t.setStyle(TableStyle( [ 
@@ -268,17 +268,17 @@ def make_quotation(patient_id, appointment_id, quotations):
                             ])
         )
         Story.append(t)
-        quotation_gestures = []
-        for gesture in sorted(quotation.gestures, key=lambda 
+        quote_gestures = []
+        for gesture in sorted(quote.gestures, key=lambda 
                                     x: x.appointment_number):
-            quotation_gestures.append( (
+            quote_gestures.append( (
                 str(gesture.appointment_number),
                 str(gesture.anatomic_location),
                 gesture.gesture.name,
                 str(gesture.price) )
             )
 
-        t = Table( quotation_gestures, colWidths = (appointment_width,
+        t = Table( quote_gestures, colWidths = (appointment_width,
                 location_width, technical_gesture_width, price_width)
         )
         t.setStyle(TableStyle( [
@@ -290,7 +290,7 @@ def make_quotation(patient_id, appointment_id, quotations):
                             ] )
         )
         Story.append(t)
-        t = Table( [ [ u"Total", str(quotation.total_price() ) ] ],
+        t = Table( [ [ u"Total", str(quote.total_price() ) ] ],
                     colWidths = ( WIDTH_PAPER - L_MARG - R_MARG - price_width,
                                     price_width )
         )
@@ -304,20 +304,20 @@ def make_quotation(patient_id, appointment_id, quotations):
         )
         Story.append(t)
         years = months = weeks = 0
-        if quotation.treatment_duration:
-            years = quotation.treatment_duration.days / 365
+        if quote.treatment_duration:
+            years = quote.treatment_duration.days / 365
             # if treatment last for one year or more, we'll print the treatment
             # duration in years and months.
             if years:
-                months = ( (quotation.treatment_duration.days - 
+                months = ( (quote.treatment_duration.days - 
                                                         years * 365 ) / 30 )
             else:
-                months = quotation.treatment_duration.days / 30
+                months = quote.treatment_duration.days / 30
                 # if treatment last for more than 3 months, print treatment 
                 # duration in months; else, print in weeks.
                 if months < 3:
                     months = 0
-                    weeks = 52 / quotation.treatment_duration.days
+                    weeks = 52 / quote.treatment_duration.days
                     
 #        if any(years, months, weeks):
         if years and months:   
@@ -342,7 +342,7 @@ def make_quotation(patient_id, appointment_id, quotations):
             )
         Story.append(Spacer(1, 10 * mm))
     Story.append(Paragraph(u'Orçamento aplicável até dia ' + 
-                        str(quotation.validity.isoformat()), styles['normal'])
+                        str(quote.validity.isoformat()), styles['normal'])
     )
     t = Table( [
             [ '', '', ],
@@ -351,7 +351,7 @@ def make_quotation(patient_id, appointment_id, quotations):
             [ u"CPF: " + patient.identity_number_2, dentist.registration ],
         ], 
         colWidths=( ( WIDTH_PAPER - L_MARG - R_MARG ) / 2 ),
-        rowHeights=( 20 * mm, 5 * mm, 5 * mm )
+        rowHeights=( 30 * mm, 5 * mm, 5 * mm )
     )
     t.setStyle(TableStyle( [ 
                             ('FONTSIZE', (0,0), (-1,-1), 11),

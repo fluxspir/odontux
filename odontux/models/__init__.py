@@ -40,7 +40,7 @@ from assets import (AssetProvider, AssetCategory, MaterialCategory,
 from traceability import (SterilizationCycleType, SterilizationCycleMode,
                             SterilizationCycle, AssetSterilized, 
                             MaterioVigilance)
-from statements import ( Invoice, Quotation, Bill, QuotationGestureReference,
+from statements import ( Invoice, Quote, Bill, QuoteGestureReference,
                             BillAppointmentGestureReference )
 from certificates import Certificate
 

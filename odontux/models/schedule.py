@@ -51,7 +51,7 @@ class Appointment(Base):
                         cascade="all, delete, delete-orphan")
     materiovigilance = relationship("traceability.MaterioVigilance", 
                                                         backref="appointments")
-    quotations = relationship("Quotation", backref='appointment',
+    quotes = relationship("Quote", backref='appointment',
                         cascade="all, delete, delete-orphan")
     bills = relationship("Bill", backref='appointment',
                         cascade="all, delete, delete-orphan")

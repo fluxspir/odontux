@@ -40,8 +40,8 @@ class Invoice(Base):
         'polymorphic_on': type
     }
 
-class Quotation(Invoice):
-    __tablename__ = 'quotation'
+class Quote(Invoice):
+    __tablename__ = 'quote'
     id = Column(Integer, ForeignKey(Invoice.id), primary_key=True)
     validity = Column(Date)                         # Or make a Inverval value?
     treatment_duration = Column(Interval)
@@ -54,7 +54,7 @@ class Quotation(Invoice):
         return price
 
     __mapper_args__ = {
-        'polymorphic_identity': constants.FILE_QUOTATION,
+        'polymorphic_identity': constants.FILE_QUOTE,
     }
 
 class Bill(Invoice):
@@ -66,16 +66,16 @@ class Bill(Invoice):
         'polymorphic_identity': constants.FILE_BILL,
     }
 
-class QuotationGestureReference(Base):
-    __tablename__ = 'quotation_gesture_reference'
+class QuoteGestureReference(Base):
+    __tablename__ = 'quote_gesture_reference'
     id = Column(Integer, primary_key=True)
-    quotation_id = Column(Integer, ForeignKey(Quotation.id), nullable=False)
+    quote_id = Column(Integer, ForeignKey(Quote.id), nullable=False)
     cotation_id = Column(Integer, ForeignKey(act.Cotation.id), nullable=False)
     gesture_id = Column(Integer, ForeignKey(act.Gesture.id), nullable=False)
     anatomic_location = Column(Integer, nullable=False)
     price = Column(Numeric, nullable=False)
     appointment_number = Column(Integer, default=0)
-    quotation = relationship('Quotation', backref='gestures')
+    quote = relationship('Quote', backref='gestures')
     gesture = relationship('act.Gesture')
 
 class BillAppointmentGestureReference(Base):
