@@ -128,7 +128,8 @@ def update_healthcare_plan(healthcare_plan_id):
     if request.method == 'POST' and healthcare_plan_form.validate():
         healthcare_plan.name = healthcare_plan_form.name.data
         meta.session.commit()
-        return redirect(url_for('view_healthcare_plan'))
+        return redirect(url_for('view_healthcare_plan', 
+                                    healthcare_plan_id=healthcare_plan_id))
 
     healthcare_plan_form.name.data = healthcare_plan.name
 

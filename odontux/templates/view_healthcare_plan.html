@@ -1,13 +1,19 @@
 {% extends "header.html" %}
 {% block main %}
 <br />
-
-{% for gesture in healthcare_plan.gestures %}
-  {{ gesture.price }} -- {{gesture.active }} || {{ gesture.specialty.name }}
+<h3>{{ healthcare_plan.name }}</h3>
+  <a href="{{ url_for('update_healthcare_plan', 
+                  healthcare_plan_id=healthcare_plan.id) }}">
+    Update healthcare_plan name
+  </a><br /><br />
+{% for cotation in healthcare_plan.cotations %}
+  <a href="{{ url_for('view_gesture', gesture_id=cotation.gesture.id) }}">
+    {{ cotation.gesture.name }}</a>: 
+    {{ cotation.price }} -- 
+    {{ cotation.active }} || {{ cotation.gesture.specialty.name }}
+  <br />
 
 {% endfor %}
 
-  <a href="{{ url_for('update_healthcare_plan', 
-                  healthcare_plan_id=healthcare_plan.id) }}">Update</a>
 
 {% endblock %}
