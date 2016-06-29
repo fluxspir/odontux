@@ -10,6 +10,7 @@
 {% block main %}
 {% from "_formhelpers.html" import render_sfl_wol, render_simple_field_line %}
 <h3>Create quote:</h3><br />
+<div id="quote_propositions" style="float:left;width:55%">
 {% if quotes_id %}
   <form method="post" action="{{ url_for('create_quote_proposition',
                                         patient_id=patient.id,
@@ -23,7 +24,7 @@
 {% endif %}
 
     {{ quote_form.add_proposition }} {{ quote_form.preview }} 
-    {{ quote_form.save_and_print }}<br /><br />
+    {{ quote_form.save_print }}<br /><br />
     {{ quote_form.treatment_duration }}
     {{ quote_form.duration_unity }}<br />
     {{ quote_form.healthcare_plan_id }}
@@ -49,9 +50,11 @@
   {% endfor %}
   </ol>
 {% endif %}
-
+</div>
 {% if pdf_out %}
-  <embed src="data:application/pdf;base64,{{ pdf_out }}" type="application/pdf" width='30%'>
+  <div id="pdf_out" style="align:right">
+    <embed src="data:application/pdf;base64,{{ pdf_out }}" type="application/pdf" width='43%' height='100%'>
+  </div>
 {% endif %}
 
 <script type='text/javascript'>

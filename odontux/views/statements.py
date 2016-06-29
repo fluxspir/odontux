@@ -246,6 +246,32 @@ def create_quote_proposition(patient_id, appointment_id, quotes_id=''):
            
         elif 'save_print' in request.form:
             pdf_out = make_quote(patient_id, appointment_id, quotes)
+            response = make_response(pdf_out)
+            response.mimetype = 'application/pdf'
+            filename = md5.new(pdf_out).hexdigest()
+            with open(os.path.join(
+                            app.config['DOCUMENT_FOLDER'], filename), 'w') as f:
+                f.write(pdf_out)
+
+            file_values = {
+                'md5': filename,
+                'file_type': constants.FILE_QUOTE,
+                'mimetype': 'application/pdf',
+            }
+            file_in_db = ( meta.session.query(documents.Files)
+                .filter(documents.Files.md5 == filename)
+                .one_or_none()
+            )
+
+            new_file = documents.Files(**file_values)
+            meta.session.add(new_file)
+            meta.session.commit()
+            
+            for quote in quotes:
+                quote.file_id = new_file.id
+            meta.session.commit()
+
+            return response
         
         return render_template('create_quote_proposition.html', 
                                                 patient=patient,
