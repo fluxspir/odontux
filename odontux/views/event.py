@@ -93,6 +93,9 @@ def add_endo_buccal_event(patient_id, appointment_id):
             'comments': endo_buccal_event_form.comments.data,
 #            'docs': endo_buccal_event_form.docs.data,
             }
+        if LocationEvent == endobuccal.VestibuleEvent:
+            values['location'] = loc
+
         new_event = LocationEvent(**values)
         meta.session.add(new_event)
         meta.session.commit()

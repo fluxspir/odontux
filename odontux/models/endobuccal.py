@@ -26,11 +26,25 @@ class MouthEvent(Base):
     x_ray = Column(Boolean, default=False)
     document = Column(Boolean, default=False)
 
+class VestibuleEvent(Base):
+    __tablename__ = "vestibule_event"
+    id = Column(Integer, primary_key=True)
+    patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                                nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
+    location = Column(Integer, nullable=False)
+    name = Column(String, default="")
+    comments = Column(String, default="")
+    pic = Column(Boolean, default=False)
+    x_ray = Column(Boolean, default=False)
+    document = Column(Boolean, default=False)
+
 class SuperiorLipEvent(Base):
     __tablename__ = 'superior_lip_event'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
-                                                    nullable=False)
+                                                                nullable=False)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                                 nullable=False)
     name = Column(String, default="")
@@ -38,7 +52,6 @@ class SuperiorLipEvent(Base):
     pic = Column(Boolean, default=False)
     x_ray = Column(Boolean, default=False)
     document = Column(Boolean, default=False)
-
 
 class InferiorLipEvent(Base):
     __tablename__ = 'inferior_lip_event'

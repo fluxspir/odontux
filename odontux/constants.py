@@ -234,6 +234,12 @@ HEAD = 900
 NECK = 910
 SUPERIORLIP = 930
 INFERIORLIP = 931
+SUPERIOR_RIGHT_VESTIBULE = 923
+SUPERIOR_CENTRAL_VESTIBULE = 924
+SUPERIOR_LEFT_VESTIBULE = 925
+INFERIOR_LEFT_VESTIBULE = 920
+INFERIOR_CENTRAL_VESTIBULE = 927
+INFERIOR_RIGHT_VESTIBULE = 928
 LEFTCHEEK = 940
 RIGHTCHEEK = 941
 HARDPALATE = 950
@@ -378,6 +384,24 @@ ANATOMIC_LOCATION_SOFT_TISSUES = {
             HEAD: ( _("head"), str(HEAD), "headneck", "HeadEvent" ),
             NECK: ( _("neck"), str(NECK), "headneck", "NeckEvent" ),
             MOUTH: ( _("mouth"), str(MOUTH), "headneck", "MouthEvent" ),
+            SUPERIOR_RIGHT_VESTIBULE: ( _('Vestibule Right Superior'), 
+                                            str(SUPERIOR_RIGHT_VESTIBULE), 
+                                            "endobuccal", "VestibuleEvent"),
+            SUPERIOR_CENTRAL_VESTIBULE: ( _('Vestibule Central Superior'), 
+                                            str(SUPERIOR_CENTRAL_VESTIBULE), 
+                                            "endobuccal", "VestibuleEvent"),
+            SUPERIOR_LEFT_VESTIBULE: ( _('Vestibule Left Superior'), 
+                                            str(SUPERIOR_LEFT_VESTIBULE), 
+                                            "endobuccal", "VestibuleEvent"),
+            INFERIOR_LEFT_VESTIBULE: ( _('Vestibule Left Inferior'), 
+                                            str(INFERIOR_LEFT_VESTIBULE),
+                                            "endobuccal", "VestibuleEvent"),
+            INFERIOR_CENTRAL_VESTIBULE: ( _('Vestibule Central Inferior'), 
+                                            str(INFERIOR_CENTRAL_VESTIBULE),
+                                            "endobuccal", "VestibuleEvent"),
+            INFERIOR_RIGHT_VESTIBULE: ( _('Vestibule Right Inferior'), 
+                                            str(INFERIOR_RIGHT_VESTIBULE),
+                                            "endobuccal", "VestibuleEvent"),
             SUPERIORLIP: ( _("superior lip"), str(SUPERIORLIP), "endobuccal", 
                                                         "SuperiorLipEvent"),
             INFERIORLIP: ( _("inferior lip"), str(INFERIORLIP),"endobuccal", 
