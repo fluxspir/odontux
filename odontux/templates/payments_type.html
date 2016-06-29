@@ -1,0 +1,18 @@
+{% from "_formhelpers.html" import render_simple_field %}
+{% extends 'header.html' %}
+{% block main %}
+<h3>Payment's type</h3>
+
+{% for payments_type in payments_types %}
+  <a href="{{ url_for('show_payments_type', 
+                                  payments_type_id=payments_type.id) }}">
+  {{ payments_type.name }} ({{ payments_type.alias }})</a><br />
+{% endfor %}
+<br />
+<h3>Add new payment type</h3>
+  <form method='post' action={{ url_for('payments_type') }}
+    {{ render_simple_field(payment_type_form.name) }}
+    {{ render_simple_field(payment_type_form.alias) }}<br />
+    {{ payment_type_form.add }}
+  </form>
+{% endblock %}

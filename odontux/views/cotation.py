@@ -176,6 +176,17 @@ def view_healthcare_plan(healthcare_plan_id):
     return render_template('view_healthcare_plan.html', 
                                 healthcare_plan=healthcare_plan)
 
+@app.route('/list_majoration')
+def list_majoration():
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    majorations = meta.session.query(compta.Majoration).all()
+    return render_template('list_majoration.html', majorations=majorations)
+   
+
 @app.route('/view/majoration?id=<int:majoration_id>')
 def view_majoration(majoration_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 

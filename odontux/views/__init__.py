@@ -83,3 +83,4 @@ from certificates import (
                 portal_certificate
 )
 from statements import ( list_statement, find_gesture )
+from compta import portal_comptability
