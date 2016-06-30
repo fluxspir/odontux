@@ -81,3 +81,4 @@ from certificates import (
 )
 from statements import ( list_statement, find_gesture )
 from compta import portal_comptability
+from patient import patient_appointment
