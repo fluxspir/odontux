@@ -360,10 +360,11 @@ class GnuCashInvoice(GnuCash):
             
             for entry in invoice.GetEntries():
                 if entry.GetDescription() == description:
+                    pdb.set_trace() 
                     if number_of_entries > 1 :
                         invoice.Unpost(True)
                         invoice.BeginEdit()
-                        gnc_core_c.gncEntryBeginEdit(entry)
+                        entry.BeginEdit()
 #                        gnc_core_c.gncInvoiceRemoveEntry(invoice, entry)
                         invoice.RemoveEntry(entry)
                         invoice.CommitEdit()
