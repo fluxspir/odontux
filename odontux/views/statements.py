@@ -68,15 +68,18 @@ def find_gesture():
     patient_id = int(request.args.get('patient_id', None))
     patient = checks.get_patient(patient_id)
     if gest_code:
-        gest_code = u'%{}%'.format(gest_code)
+        gest_code = gest_code.split(" ")
+        words = u"%"
+        for word in gest_code:
+            words = words + u'{}%'.format(word)
         cotations = (
             meta.session.query(act.Cotation)
                 .join(act.Gesture)
                 .filter(act.Cotation.healthcare_plan_id == healthcare_plan_id)
                 .filter(or_(
-                    act.Gesture.alias.ilike(gest_code),
-                    act.Gesture.code.ilike(gest_code),
-                    act.Gesture.name.ilike(gest_code)
+                    act.Gesture.alias.ilike(words),
+                    act.Gesture.code.ilike(words),
+                    act.Gesture.name.ilike(words)
                     )
                 )
                 .all()
