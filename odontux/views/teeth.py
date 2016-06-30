@@ -212,13 +212,16 @@ def periodontal_locations():
             'is_disto_lingual', 'is_lingual', 'is_mesio_lingual' ]
 
 @app.route('/patient/teeth?pid=<int:patient_id>')
-def list_teeth(patient_id):
+@app.route('/patient/teeth?pid=<int:patient_id>&aid=<int:appointment_id>')
+def list_teeth(patient_id, appointment_id=None):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     
     patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment()
+    if not appointment_id:
+        appointment_id = patient.appointments[-1].id
+    appointment = checks.get_appointment(appointment_id)
     teeth = []
     for tooth in patient.teeth:
         teeth.append( ( tooth.id, 
@@ -229,16 +232,15 @@ def list_teeth(patient_id):
     return render_template('list_teeth.html', patient=patient, 
                             appointment=appointment, teeth=teeth)
 
-@app.route('/show/tooth?pid=<int:patient_id>&tcn=<int:tooth_codename>')
-def show_tooth(patient_id, tooth_codename):
+@app.route('/show/tooth?pid=<int:patient_id>&aid=<int:appointment_id>'
+            '&tcn=<int:tooth_codename>')
+def show_tooth(patient_id, appointment_id, tooth_codename):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
     patient = checks.get_patient(patient_id)
-    actual_appointment = checks.get_appointment()
-    if not actual_appointment:
-        actual_appointment = patient.appointments[-1]
+    appointment = checks.get_appointment(appointment_id)
     
     tooth = ( 
         meta.session.query(teeth.Tooth)
@@ -263,7 +265,7 @@ def show_tooth(patient_id, tooth_codename):
                     meta.session.query(schedule.Agenda.appointment_id)
                         .filter(
                             schedule.Agenda.starttime <=
-                                        actual_appointment.agenda.starttime
+                                        appointment.agenda.starttime
                         )
                     )
             )
@@ -275,7 +277,7 @@ def show_tooth(patient_id, tooth_codename):
             .all()
         )
     return render_template('show_tooth.html', patient=patient,
-                                              appointment=actual_appointment,
+                                              appointment=appointment,
                                               tooth=tooth,
                                               gum=gum,
                                               constants=constants,
@@ -291,7 +293,7 @@ def add_event_tooth_located(patient_id, appointment_id):
         return redirect(url_for('index'))
 
     patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment()
+    appointment = checks.get_appointment(appointment_id)
 
     tooth_form = ToothForm(request.form)
     event_form = EventForm(request.form)

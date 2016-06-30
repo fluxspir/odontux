@@ -65,7 +65,7 @@ def get_patient(patient_id):
     except sqlalchemy.orm.exc.NoResultFound:
         return False
 
-def get_appointment():
+def get_appointment(appointment_id):
     appointment = (
         meta.session.query(schedule.Appointment)
             .filter(schedule.Appointment.id == appointment_id

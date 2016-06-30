@@ -605,8 +605,6 @@ def add_patient_appointment(body_id, meeting_id=0):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    if not body_id:
-
     agenda_form = AgendaForm(request.form)
     meeting = ( meta.session.query(schedule.Agenda)
                         .filter(schedule.Agenda.id == meeting_id)
