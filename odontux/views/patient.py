@@ -18,10 +18,6 @@ import pdb
 @app.route('/patient_appointment/?aid=<int:appointment_id>')
 def patient_appointment(appointment_id):
     """
-    This method must be rewritten with the one below 
-     "enter_patient_appointment" to make one "big" method who will
-     work "always".
-     # TODO bug 10001
     """
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:

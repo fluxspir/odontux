@@ -55,9 +55,6 @@ from schedule import (
                     display_day,
                     add_appointment,
                     )
-from patient import (
-                    enter_patient_appointment,
-                    )
 from teeth import (
                     list_teeth
                   )

@@ -239,7 +239,6 @@ def show_tooth(patient_id, tooth_codename):
     actual_appointment = checks.get_appointment()
     if not actual_appointment:
         actual_appointment = patient.appointments[-1]
-        session['appointment_id'] = actual_appointment.id
     
     tooth = ( 
         meta.session.query(teeth.Tooth)
