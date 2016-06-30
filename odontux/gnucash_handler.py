@@ -242,8 +242,8 @@ class GnuCashCustomer(GnuCash):
             if self.patient.family.addresses[-1].country:
                 country = self.patient.family.addresses[-1].country.encode("utf_8")
             address.SetAddr4(state + " " + country)
-            #if self.gnucashtype == "xml":
-            #    self.gcsession.save()
+            if self.gnucashtype == "xml":
+                self.gcsession.save()
 
     def add_customer(self):
         try:
@@ -339,7 +339,8 @@ class GnuCashInvoice(GnuCash):
             invoice.CommitEdit()
             invoice.PostToAccount(self.receivables, self.date, self.date,
                                     description.encode("utf_8"), True, False)
-            self.gcsession.save()
+            if self.gnucashtype == 'xml':
+                self.gcsession.save()
             self.gcsession.end()
             return self.invoice_id
             
@@ -360,7 +361,6 @@ class GnuCashInvoice(GnuCash):
             
             for entry in invoice.GetEntries():
                 if entry.GetDescription() == description:
-                    pdb.set_trace() 
                     if number_of_entries > 1 :
                         invoice.Unpost(True)
                         invoice.BeginEdit()
@@ -372,13 +372,15 @@ class GnuCashInvoice(GnuCash):
                                             self.date, 
                                             description.encode("utf_8"),
                                             True, False)
-                        self.gcsession.save()
+                        if self.gnucashtype == 'xml':
+                            self.gcsession.save()
                         self.gcsession.end()
                         return True
                     if number_of_entries == 1:
                         invoice.Unpost(True)
                         invoice.Destroy()
-                        self.gcsession.save()
+                        if self.gnucashtype == 'xml':
+                            self.gcsession.save()
                         self.gcsession.end()
                         return True
             return False

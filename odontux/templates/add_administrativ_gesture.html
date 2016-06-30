@@ -1,13 +1,3 @@
-{#
-  only needed if I want to use a function in a view. See asset.py  test_barcode()
-
-<script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-<script type="text/javascript">
-  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
-#}
-
-
 {% extends "summary_patient.html" %}
 {% block main %}
 {% from "_formhelpers.html" import render_field, render_field_js_onchange %}

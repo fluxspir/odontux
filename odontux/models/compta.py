@@ -51,7 +51,6 @@ class Payment(Base):
                         nullable=False)
     mean_id = Column(Integer, ForeignKey(PaymentType.id), nullable=False)
     amount = Column(Numeric, nullable=False)
-    advance = Column(Boolean, default=False, nullable=False)
     comments = Column(String, default="")
     cashin_date = Column(Date, default=func.current_date())
     gestures = relationship("AppointmentGestureReference",
