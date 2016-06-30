@@ -529,9 +529,8 @@ def update_appointment(body_id, appointment_id):
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 
-    session['patient_id'] = body_id
     session['appointment_id'] = appointment_id
-    patient = checks.get_patient(session['patient_id'])
+    patient = checks.get_patient(body_id)
     appointment = meta.session.query(schedule.Appointment)\
             .filter(schedule.Appointment.id == session['appointment_id'])\
             .one()
