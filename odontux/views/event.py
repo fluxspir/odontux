@@ -41,8 +41,6 @@ def choose_event_location(patient_id, appointment_id):
         return redirect(url_for('index'))
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment(appointment_id)
-    if not appointment:
-        appointment = checks.enter_patient_last_appointment(patient_id)
     return render_template('choose_event_location.html',
                                             patient=patient,
                                             appointment=appointment)

@@ -29,14 +29,6 @@ def patient_appointment(appointment_id):
             )
     patient = checks.get_patient(appointment.patient_id)
 
-    # Verify if this patient is really the one who have this appointment
-    # because if it isn't, things could get very nasty after...
-    # This function should be frequently used.
-    if not checks.is_patient_self_appointment():
-        session.pop('appointment_id', None)
-        return redirect(url_for('enter_patient_file',
-                        body_id=patient.id))
-    
     acts = checks.get_patient_acts(patient.id, appointment.id,
                 [ act.AppointmentGestureReference.anatomic_location ]
                 )
