@@ -1,10 +1,11 @@
 {% extends "layout.html" %}
 {% block pagetitle %}
-  {% if session.patient_id and patient %}
+  {% if patient %}
 
     {% if appointment %}
       <span class="left">
-        <form method="post" action="{{ url_for( 'enter_patient_appointment') }}">
+        <form method="post" action="{{ url_for( 'patient_appointment', 
+                                                      appointment_id=appointment.id) }}">
           <input type="hidden" name="appointment_id" value="{{ appointment.id -1 }}" />
           <input type="submit" value="Previous RV" />
         </form>
@@ -12,7 +13,7 @@
     {% endif %}
 
     <a href="{{url_for('enter_patient_file', body_id=patient.id)}}">
-            {{ patient['lastname'] }} {{ patient['firstname'] }}</a>, 
+            {{ patient.firstname }} {{ patient.lastname }}</a>, 
             {{ patient.age() }} years old, 
     
     {% if appointment %}
@@ -26,7 +27,8 @@
                           the {{ appointment.agenda.starttime.date() }}
       </a>
       <span class="right">
-        <form method="post" action="{{ url_for( 'enter_patient_appointment') }}">
+        <form method="post" action="{{ url_for( 'patient_appointment', 
+                                                    appointment_id=appointment.id) }}">
           <input type="hidden" name="appointment_id" value="{{ appointment.id + 1 }}" />
           <input type="submit" value="Next RV" />
         </form>

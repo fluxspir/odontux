@@ -2,9 +2,9 @@
 {% from "_formhelpers.html" import render_time_field %}
 {% extends "summary_patient.html" %}
   {% block main %}
-    <form method="post" action="{{ url_for('update_appointment', body_id=session.patient_id, appointment_id=session.appointment_id) }}">
+    <form method="post" action="{{ url_for('update_appointment', body_id=patient.id, appointment_id=appointment.id) }}">
       {% block appointment_data %}
-        {{ render_hidden_field(appointment_form.patient_id, value=session.patient_id) }}
+        {{ render_hidden_field(appointment_form.patient_id, value=patient.id) }}
         {{ render_simple_field_line(appointment_form.dentist_id) }}
         {{ render_simple_field_line(appointment_form.dental_unit_id) }}
         {{ render_field(appointment_form.emergency) }}

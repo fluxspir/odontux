@@ -10,7 +10,7 @@
 
 <h3>Add an event on a tooth (or set of teeth).</h3>
 <form method="post" action={{ url_for('add_event_tooth_located',
-                              patient_id=session.patient_id,
+                              patient_id=patient.id,
                               appointment_id=session.appointment_id) }}>
 
   <div id="anat_loc">
