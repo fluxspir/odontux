@@ -56,27 +56,14 @@ def get_dental_office_logo():
     odontux_logo = parser.get("environment", "odontux_logo")
     return os.path.join(odontux_folder, odontux_logo)
 
-def in_patient_file():
-    try:
-        if session['patient_id']:
-            return True
-    except KeyError:
-        return False
-    return False
-
-def quit_patient_file():
-    try:
-        if session['patient_id']:
-            session.pop('patient_id', None)
-    except KeyError:
-        pass
-
-def quit_appointment():
-    try:
-        if session['appointment_id']:
-            session.pop('appointment_id', None)
-    except KeyError:
-        pass
+#def in_patient_file():
+#    try:
+#        if session['patient_id']:
+#            return True
+#    except KeyError:
+#        return False
+#    return False
+#
 
 def get_patient(patient_id):
     try:
