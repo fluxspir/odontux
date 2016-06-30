@@ -87,8 +87,8 @@ def add_endo_buccal_event(patient_id, appointment_id):
             return redirect(url_for('index'))
 
         values = {
-            'patient_id': session['patient_id'],
-            'appointment_id': session['appointment_id'],
+            'patient_id': patient_id,
+            'appointment_id': appointment_id,
             'name': endo_buccal_event_form.name.data,
             'comments': endo_buccal_event_form.comments.data,
 #            'docs': endo_buccal_event_form.docs.data,
@@ -98,8 +98,8 @@ def add_endo_buccal_event(patient_id, appointment_id):
         meta.session.commit()
 
         return redirect(url_for('choose_event_location',
-                                patient_id=session['patient_id'],
-                                appointment_id=session['appointment_id']))
+                                patient_id=patient_id,
+                                appointment_id=appointment_id))
 
     return render_template('add_endobuccal_event.html',
                             select_location_form=select_location_form,
