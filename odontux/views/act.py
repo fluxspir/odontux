@@ -454,7 +454,6 @@ def add_administrativ_gesture(patient_id, appointment_id):
                     act.Gesture.id == appointment_gesture_form.gesture_id.data)
                     ).one_or_none()
             )
-        pdb.set_trace() 
         if not gesture:
             # TODO : redirect error + message
             return redirect(url_for('index'))

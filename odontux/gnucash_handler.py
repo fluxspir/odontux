@@ -7,6 +7,7 @@
 
 import pdb
 
+import time
 
 from models import meta, administration, users, compta, schedule
 import constants
@@ -61,12 +62,12 @@ class GnuCash():
         self.parser = ConfigParser.ConfigParser()
         home = os.path.expanduser("~")
         self.parser.read(os.path.join(home, ".odontuxrc"))
-        profissionnalaccounting_url = ( meta.session.query(users.OdontuxUser)
+        self.dentist = ( meta.session.query(users.OdontuxUser)
             .filter(users.OdontuxUser.id == dentist_id)
-            .one().gnucash_url
-            .encode("utf_8") 
+            .one()
         )
-        if profissionnalaccounting_url.split(".")[-1] == "xml":
+        profissionnalaccounting_url = self.dentist.gnucash_url.encode("utf_8")
+        if profissionnalaccounting_url[-3:] == "xml":
             self.gnucashtype = "xml"
         elif "postgresql" in profissionnalaccounting_url.split("://"):
             self.gnucashtype = "postgresql"
@@ -234,7 +235,7 @@ class GnuCashCustomer(GnuCash):
                             .zip_code.encode("utf_8")
             if self.patient.family.addresses[-1].city:
                 city = self.patient.family.addresses[-1].city.encode("utf_8")
-            address.SetAddr3(district + "\n" + zip_code  + " " + city)
+            address.SetAddr3(district + " " + zip_code  + " " + city)
             state = ""
             country = ""
             if self.patient.family.addresses[-1].state:
@@ -242,7 +243,9 @@ class GnuCashCustomer(GnuCash):
             if self.patient.family.addresses[-1].country:
                 country = self.patient.family.addresses[-1].country.encode("utf_8")
             address.SetAddr4(state + " " + country)
+            address.CommitEdit()
             if self.gnucashtype == "xml":
+                time.sleep(1) # obrigatory to avoid a FILE IOERROR
                 self.gcsession.save()
 
     def add_customer(self):
@@ -300,11 +303,12 @@ class GnuCashInvoice(GnuCash):
         self.owner = self.book.CustomerLookupByID(self.gcpatient_id)
         # invoice_id is build as
         # Date + appointment_id
-        self.date = (
+        self.datetime = (
             meta.session.query(schedule.Appointment)
                 .filter(schedule.Appointment.id ==appointment_id)
-                .one().agenda.endtime.date()
+                .one().agenda.endtime
             )
+        self.date = self.datetime.date()
 
         if not invoice_id:
             self.invoice_id = "inv_" + self.date.isoformat() + "_" +\
@@ -331,13 +335,14 @@ class GnuCashInvoice(GnuCash):
             invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
             invoice_entry = Entry(self.book, invoice)
             invoice_entry.BeginEdit()
+            invoice_entry.SetDateEntered(self.datetime)
             invoice_entry.SetDescription(description.encode("utf_8"))
             invoice_entry.SetQuantity( GncNumeric(1) )
             invoice_entry.SetInvAccount(self.dentalincomes)
             invoice_entry.SetInvPrice(invoice_value)
             invoice_entry.CommitEdit()
             invoice.CommitEdit()
-            invoice.PostToAccount(self.receivables, self.date, self.date,
+            invoice.PostToAccount(self.receivables, self.datetime, self.date,
                                     description.encode("utf_8"), True, False)
             if self.gnucashtype == 'xml':
                 self.gcsession.save()
