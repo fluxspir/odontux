@@ -3,7 +3,7 @@
 {% from "_formhelpers.html" import render_field, render_field_js_onchange %}
 <form method="post" action="{{ url_for('add_administrativ_gesture', 
                               patient_id=patient.id, 
-                              appointment_id=session.appointment_id) }}">
+                              appointment_id=appointment.id) }}">
   <dl>
     {{ render_field(admin_gesture_form.anatomic_location) }}
     <div id='div_healthcare_plan'>
