@@ -21,11 +21,11 @@
             {% endif %}
           </li>
           <li>
-            <a href={{ url_for("list_appointments") }}>Appointments</a>
+            <a href={{ url_for("list_appointments", patient_id=patient.id) }}>Appointments</a>
           </li>
           <li>
             {% if session.appointment_id %}
-            <a href="{{ url_for("list_acts") }}" onmouseover="mopen('act_open')" onmouseout="mclosetime()">Acts</a>
+            <a href="{{ url_for("list_acts", patient_id=patient.id) }}" onmouseover="mopen('act_open')" onmouseout="mclosetime()">Acts</a>
               <ul class="options_nav">
                 <li>
                   <div id="act_open" class="options_nav" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
@@ -34,7 +34,7 @@
                 </li>
               </ul>
             {% else %}
-              <a href="{{ url_for("list_acts") }}">Acts</a>
+              <a href="{{ url_for("list_acts", patient_id=patient.id) }}">Acts</a>
             {% endif %}
           </li>
           <li>
