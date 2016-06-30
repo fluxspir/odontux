@@ -487,6 +487,8 @@ def add_administrativ_gesture(patient_id, appointment_id):
                                 appointment_gesture_form.anatomic_location.data
 
         values['price'] = appointment_gesture_form.price.data
+        if not appointment_gesture_form.price.data:
+            values['paid'] = True
 
         new_gesture = act.AppointmentGestureReference(**values)
         meta.session.add(new_gesture)
