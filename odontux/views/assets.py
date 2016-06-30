@@ -300,8 +300,6 @@ def add_provider():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     general_form = AssetProviderForm(request.form)
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
@@ -353,18 +351,12 @@ def add_provider():
 
 @app.route('/list_providers/')
 def list_providers():
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     providers = meta.session.query(assets.AssetProvider).all()
     return render_template('list_providers.html', providers=providers)
 
 @app.route('/update/provider?id=<int:body_id>&'
             'form_to_display=<form_to_display>/', methods=['GET', 'POST'])
 def update_provider(body_id, form_to_display):
-    checks.quit_patient_file()
-    checks.quit_appointment()
-
     provider = forms._get_body(body_id, "provider")
     if not forms._check_body_perm(provider, "provider"):
         return redirect(url_for('list_providers'))
@@ -475,16 +467,10 @@ def delete_provider_mail(body_id, form_to_display):
 
 @app.route('/my_assets/')
 def my_assets():
-    checks.quit_patient_file()
-    checks.quit_appointment()
-
     return render_template('my_assets.html')
 
 @app.route('/list_assets?asset_type=<asset_type>/')
 def list_assets(asset_type="all"):
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     if asset_type == "device":
         query = meta.session.query(assets.Device)
     elif asset_type == "material":
@@ -1336,8 +1322,6 @@ def list_kit_type():
 def list_kits(kit_types=0):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
-    checks.quit_patient_file()
-    checks.quit_appointment()
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
@@ -1367,8 +1351,6 @@ def list_kits(kit_types=0):
 def view_kit(kit_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
-    checks.quit_patient_file()
-    checks.quit_appointment()
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 

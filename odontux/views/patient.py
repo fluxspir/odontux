@@ -51,12 +51,9 @@ def list_appointments(patient_id):
     # or if we aren't in a patient file.
     if session['role'] == constants.ROLE_ADMIN:
         return abort(403)
-    if not checks.in_patient_file():
-        return abort(404)
     
     # Get the patient in database, and the list of his appointments.
     patient = checks.get_patient(patient_id)
-    checks.quit_appointment()
 
     appointments = ( meta.session.query(schedule.Appointment)
                         .filter(schedule.Appointment.patient_id == patient_id)
@@ -79,9 +76,6 @@ def list_acts(patient_id):
     # what is displayed should depends on whom is looking.
     # This will be taken care of in the html_template, by jinja.
     if session['role'] == constants.ROLE_ADMIN:
-        return redirect(url_for('index'))
-
-    if not checks.in_patient_file():
         return redirect(url_for('index'))
 
     patient = checks.get_patient(patient_id)

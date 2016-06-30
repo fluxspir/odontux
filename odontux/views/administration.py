@@ -72,8 +72,6 @@ class HealthCarePlanPatientForm(Form):
 
 @app.route('/patients/')
 def allpatients():
-    checks.quit_patient_file()
-    checks.quit_appointment()
     patients = meta.session.query(administration.Patient)\
                .order_by(administration.Patient.lastname).all()
     return render_template('list_patients.html', patients=patients)
@@ -81,10 +79,7 @@ def allpatients():
 @app.route('/patient?id=<int:body_id>/')
 def enter_patient_file(body_id):
     patient = checks.get_patient(body_id)
-    if patient:
-        if not checks.is_patient_self_appointment():
-            checks.quit_appointment()
-        return render_template('patient_file.html', patient=patient)
+    return render_template('patient_file.html', patient=patient)
 
 @app.route('/add/patient/', methods=['GET', 'POST'])
 @app.route('/add/patient?meeting_id=<int:meeting_id>', methods=['GET', 'POST'])
@@ -101,7 +96,6 @@ def add_patient(meeting_id=0):
     if session['role'] not in authorized_roles:
         return redirect(url_for("allpatients"))
    
-    checks.quit_patient_file()
     # Forms used for adding a new patient : 
     # two are patient's specific :
     gen_info_form = PatientGeneralInfoForm(request.form)
