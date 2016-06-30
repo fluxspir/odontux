@@ -40,6 +40,8 @@ def choose_event_location(patient_id, appointment_id):
     if not session['role'] in authorized_roles:
         return redirect(url_for('index'))
     patient = checks.get_patient(patient_id)
+    if not appointment_id: 
+        appointment_id = patient.appointments[-1].id
     appointment = checks.get_appointment(appointment_id)
     return render_template('choose_event_location.html',
                                             patient=patient,

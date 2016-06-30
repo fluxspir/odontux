@@ -285,7 +285,8 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
                                     clear_form=clear_form)
 
 @app.route('/patient/anamnesis?pid=<int:patient_id>')
-def list_anamnesis(patient_id):
+@app.route('/patient/anamnesis?pid=<int:patient_id>&aid=<int:appointment_id>')
+def list_anamnesis(patient_id, appointment_id=None):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
@@ -296,6 +297,9 @@ def list_anamnesis(patient_id):
         meta.session.query(anamnesis.Survey.id, anamnesis.Survey.name).all()
 
     patient = checks.get_patient(patient_id)
+    if not appointment_id:
+        appointment_id = patient.appointments[-1].id
+    appointment = checks.get_appointment(appointment_id)
 
     global_anamnesis = with_polymorphic(anamnesis.Anamnesis, '*')
     patient_anamnesis = (
@@ -313,6 +317,7 @@ def list_anamnesis(patient_id):
         md.MedecineDoctor.id == patient.gen_doc_id).one_or_none()
     return render_template("patient_anamnesis.html",
                             patient=patient,
+                            appointment=appointment,
                             patient_anamnesis=patient_anamnesis,
                             doctor=doctor,
                             survey_form=survey_form,
