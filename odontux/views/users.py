@@ -149,8 +149,6 @@ def portal_users():
 @app.route('/odontux_user/')
 @app.route('/user/')
 def list_users():
-    checks.quit_patient_file()
-    checks.quit_appointment()
     # when we only want user with role "request.form['role']
     if request.form and request.form['role']:
         try:
@@ -167,8 +165,6 @@ def list_users():
 
 @app.route('/dental_office/')
 def list_dental_offices():
-    checks.quit_patient_file()
-    checks.quit_appointment()
     dental_offices = meta.session.query(users.DentalOffice).all()
     return render_template('list_dental_offices.html', 
                             dental_offices=dental_offices)
@@ -176,8 +172,6 @@ def list_dental_offices():
 @app.route('/add/user/', methods=['GET', 'POST'])
 @app.route('/user/add/', methods=['GET', 'POST'])
 def add_user():
-    checks.quit_patient_file()
-    checks.quit_appointment()
     if session['role'] != constants.ROLE_ADMIN:
         return redirect(url_for("index"))
 
@@ -243,8 +237,6 @@ def add_user():
 
 @app.route('/dental_office/add/', methods=['GET', 'POST'])
 def add_dental_office():
-    checks.quit_patient_file()
-    checks.quit_appointment()
     if session['role'] != constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 
@@ -284,8 +276,6 @@ def add_dental_office():
 @app.route('/user/update_user?id=<int:body_id>&'
             'form_to_display=<form_to_display>/', methods=['GET', 'POST'])
 def update_user(body_id, form_to_display):
-    checks.quit_patient_file()
-    checks.quit_appointment()
 
     user = forms._get_body(body_id, "user")
     if not forms._check_body_perm(user, "user"):
@@ -617,8 +607,6 @@ def update_timesheet(body_id):
             '&form_to_display=<form_to_display>/', methods=['GET', 'POST'])
 def update_dental_office(body_id, form_to_display):
     """ """
-    checks.quit_patient_file()
-    checks.quit_appointment()
     if not session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 

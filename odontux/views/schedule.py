@@ -606,8 +606,6 @@ def add_patient_appointment(body_id, meeting_id=0):
         return redirect(url_for('index'))
 
     if not body_id:
-        checks.quit_patient_file()
-        checks.quit_appointment()
 
     agenda_form = AgendaForm(request.form)
     meeting = ( meta.session.query(schedule.Agenda)

@@ -21,8 +21,6 @@ from gettext import gettext as _
 
 @app.route('/')
 def index():
-    checks.quit_patient_file()
-    checks.quit_appointment()
     if 'username' in session:
         return render_template('index.html')
     return redirect(url_for('login'))
@@ -30,8 +28,6 @@ def index():
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
-    checks.quit_patient_file()
-    checks.quit_appointment()
     if request.method == 'POST':
         try:
             user = meta.session.query(users.OdontuxUser).filter\
@@ -88,9 +84,6 @@ def login():
 
 @app.route('/logout/')
 def logout():
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    #session.pop('username', None)
     session.clear()
     return redirect(url_for('index'))
 
