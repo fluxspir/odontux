@@ -75,7 +75,7 @@
         healthcare_plan_id: $('#healthcare_plan_id').val(),
         patient_id: {{ patient.id }},
       }, function(data) {
-        console.log(data.success)
+//        console.log(data.success)
         if ( data.success == true ) {
           // remove from data success information
           delete data["success"]
