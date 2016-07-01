@@ -64,7 +64,7 @@ class PatientGeneralInfoForm(Form):
     dentist_id = SelectField(_('Dentist_id'), [validators.Required(
                                 message=_("Please specify dentist_id"))],
                                 coerce=int)
-    payer = BooleanField(_('is payer'))
+    payer = BooleanField(_('is payer'), default=True)
     time_stamp = DateField(_("Time_stamp"), [validators.Optional()])
    
 class HealthCarePlanPatientForm(Form):
