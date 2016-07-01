@@ -5,12 +5,14 @@
 # licence BSD
 #
 import pdb
-from flask import session, render_template, request, redirect, url_for
+from flask import ( session, render_template, request, redirect, url_for, 
+                    abort, jsonify )
 from wtforms import (Form, 
                      IntegerField, SelectField, TextField, BooleanField, 
-                     RadioField, SelectMultipleField, DateField,
+                     RadioField, SelectMultipleField, DateField, HiddenField,
                      validators)
 import sqlalchemy
+from sqlalchemy import or_
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
 from gettext import gettext as _
@@ -30,9 +32,6 @@ def get_gen_info_field_list():
                     "job", "inactive", "time_stamp",
                     "office_id", "dentist_id",
                     "identity_number_1", "identity_number_2" ]
-
-def get_family_field_list():
-    return [ "family_id" ]
 
 class PatientGeneralInfoForm(Form):
     title = SelectField(_('title'))
@@ -57,7 +56,8 @@ class PatientGeneralInfoForm(Form):
     inactive = BooleanField(_('Inactive'))
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
-    family_id = IntegerField(_('family_id'), [validators.Optional()])
+    family_id = HiddenField(_('family_id'), [validators.Optional()])
+    family_member = TextField(_('family_member'), [validators.Optional()])
     office_id = SelectField(_('Office_id'), [validators.Required(
                                message=_("Please specify office_id"))], 
                                coerce=int)
@@ -80,6 +80,34 @@ def allpatients():
 def enter_patient_file(body_id):
     patient = checks.get_patient(body_id)
     return render_template('patient_file.html', patient=patient)
+
+@app.route('/find/family_member')
+def find_family_member():
+    name = request.args.get('name', None)
+    if name:
+#        # Won't work:part of keyword would be in firstname and other in last.
+#        name = name.split(" ")
+#        keyword = u"%"
+        keyword = u'%{}%'.format(name)
+#        for name_part in name:
+#            keyword = keyword + u'{}%'.format(name_part)
+        patients = ( meta.session.query(administration.Patient)
+                        .filter(or_(
+                            administration.Patient.firstname.ilike(keyword),
+                            administration.Patient.lastname.ilike(keyword) )
+                        ).order_by(administration.Patient.firstname,
+                                administration.Patient.lastname )
+                        .all()
+        )
+        if not patients:
+            return jsonify(success=False)
+        data = {}
+        for patient in patients:
+            data[str(patient.id)] = ( patient.firstname + " " + 
+                                                            patient.lastname,
+                                        patient.family.id )
+        return jsonify(success=True, **data)
+    return jsonify(success=False)
 
 @app.route('/add/patient/', methods=['GET', 'POST'])
 @app.route('/add/patient?meeting_id=<int:meeting_id>', methods=['GET', 'POST'])
@@ -146,11 +174,12 @@ def add_patient(meeting_id=0):
 
         # A family is define in odontux mostly by the fact that
         # they live together. 
+        family_field_list = ['family_id']
         for f in get_family_field_list():
             # If patient in a family that is already in database, just tell 
             # which family he's in.
             if getattr(gen_info_form, f).data:
-                value[f] = getattr(gen_info_form, f).data
+                value[f] = int(getattr(gen_info_form, f).data)
             else:
                 # Create new family and put the new patient in it.
                 new_family = administration.Family()

@@ -133,8 +133,4 @@ class Patient(Base):
 
 class Payer(Base):
     __tablename__ = 'payer'
-    id = Column(Integer, primary_key=True)
-    #id = Column(Integer, ForeignKey(Patient.id), primary_key=True)
-    patient_id = Column(Integer, ForeignKey(Patient.id))
-   
-
+    id = Column(Integer, ForeignKey(Patient.id), primary_key=True)
