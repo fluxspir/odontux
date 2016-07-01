@@ -55,6 +55,9 @@
               </li>
             </ul>
           </li>
+          <li>
+            <a href="{{ url_for('patient_payments', patient_id=patient.id) }}">Payments</a>
+          </li>
           {% if appointment %}
             <li>
               <a href={{ url_for("choose_drugs_to_prescribe", 
