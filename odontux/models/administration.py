@@ -60,6 +60,7 @@ class Family(Base):
     payers = relationship("Payer", secondary=family_payer_table,
                            backref="family")
 
+
 class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
@@ -87,8 +88,8 @@ class Patient(Base):
     creation_date = Column(Date, default=func.current_date())
     appointments = relationship("Appointment", backref="patient",
                         cascade="all, delete, delete-orphan")
-    payer = relationship("Payer", backref="patient",
-                        cascade="all, delete, delete-orphan")
+#    payer = relationship("Payer", backref="patient",
+#                        cascade="all, delete, delete-orphan")
     hcs = relationship("HealthCarePlan", 
                         secondary=patient_healthcare_plan_table,
                         backref="patients",
@@ -133,6 +134,7 @@ class Patient(Base):
 class Payer(Base):
     __tablename__ = 'payer'
     id = Column(Integer, primary_key=True)
+    #id = Column(Integer, ForeignKey(Patient.id), primary_key=True)
     patient_id = Column(Integer, ForeignKey(Patient.id))
-
+   
 
