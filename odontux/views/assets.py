@@ -112,7 +112,7 @@ class AssetForm(Form):
     #asset_category_id = SelectField(_('Asset Category'), coerce=int)
     acquisition_date = DateField(_('Acquisition Date'), format='%Y-%m-%d')
     acquisition_price = DecimalField(_('Acquisition Price'))
-    new = BooleanField(_('Asset new'))
+    new = BooleanField(_('Asset new'), default=True)
     user_id = SelectField(_("Dentist owner"), coerce=int, 
                                                 default=last_user_asset())
     office_id = SelectField(_("Office_where it is"), coerce=int,
