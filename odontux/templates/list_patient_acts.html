@@ -12,8 +12,8 @@
     {% endfor %}
     {{ act_table_closing_tag() }}
   <br />
-  total price = {{ total_price }}<br />
-  total paid = {{ total_paid }}<br />
-  due = {{ due }}
+  total price = {{ patient.global_price() }}<br />
+  total paid = {{ patient.already_paid() }}<br />
+  due = {{ patient.due() }}
   {% endblock %}
 {% endblock %}
