@@ -79,23 +79,10 @@ def list_acts(patient_id):
         .filter(compta.Payment.patient_id == patient_id)
         .all()
     )
-    total_price = total_paid = 0
-    for appointment in patient.appointments:
-        for gesture in appointment.administrative_gestures:
-            total_price += gesture.price
-    
-    for payment in payments:
-        total_paid += payment.amount
-
-    due = total_price - total_paid
-
     return render_template("list_patient_acts.html",
                             patient=patient,
                             acts=acts,
-                            payments=payments,
-                            total_price=total_price,
-                            total_paid=total_paid,
-                            due=due)
+                            payments=payments)
 
 @app.route("/patient/update_act?id=<int:patient_id>&act=<int:act_id>")
 def update_patient_act(patient_id, act_id):
