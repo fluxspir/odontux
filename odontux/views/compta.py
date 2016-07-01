@@ -28,6 +28,40 @@ class PaymentTypeForm(Form):
     add = SubmitField(_('Add'))
     update = SubmitField(_('Update'))
 
+class PatientPaymentForm(Form):
+    payer_id = HiddenField(_('payer_id'))
+    patient_id = HiddenField(_('patient_id'))
+    mean_id = SelectField(_("Payment's mean"), coerce=int)
+    amount = DecimalField(_('Amount'), [validators.Required()])
+    comments = TextAreaField(_('Comments'))
+
+@app.route('/make/payment&pid=<int:patient_id>')
+def make_payment(patient_id):
+    
+    patient = checks.get_patient(patient_id)
+    payment_form = PatientPaymentForm(request.form)
+    payment_form.mean_id.choices = [ ( mean.id, mean.name ) for mean in
+                                meta.session.query(compta.PaymentType).all() ]
+    
+    if request.method == 'POST' and payment_form.validate():
+        pass
+
+    if request.method == 'GET':
+        pass
+        
+    return render_template('make_payment', patient=patient)
+
+@app.route('/patient/payments/&pid=<int:patient_id>')
+def patient_payments(patient_id):
+    
+    patient = checks.get_patient(patient_id)
+    payments = ( meta.session.query(compta.Payment)
+                    .filter(compta.Payment.patient_id == patient_id)
+                    .all()
+    )
+    return render_template('patient_payments.html', patient=patient,
+                                                    payments=payments)
+
 @app.route('/show_payments_type&ptid=<int:payments_type_id>')
 def show_payments_type(payments_type_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
@@ -84,4 +118,5 @@ def portal_comptability():
         return abort(403)
 
     return render_template('portal_comptability.html')
+
 

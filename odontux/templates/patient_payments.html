@@ -1,0 +1,14 @@
+{% extends 'summary_patient.html' %}
+{% block main %}
+<div id="list_payments">
+<a href="{{ url_for('make_payment',
+                        patient_id=patient.id) }}">
+  Make a payment</a><br />
+</div>
+<br />
+Bills:<br />
+{% for payment in payments %}
+  {{ payment.mean.name }} {{ payment.amount }} {{ payment.cashin_date }}<br />
+{% endfor %}
+<br />
+{% endblock %}

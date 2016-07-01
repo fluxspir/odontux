@@ -7,8 +7,7 @@
 
 from meta import Base
 from tables import payment_gesture_table
-import act, administration
-import datetime
+import act, administration, documents
 
 from sqlalchemy import (Table, Column, Integer, String, Boolean, Numeric, Date)
 from sqlalchemy import ForeignKey
@@ -47,15 +46,19 @@ class Payment(Base):
     """
     __tablename__ = 'payment'
     id = Column(Integer, primary_key=True)
-    payer_id = Column(Integer, ForeignKey(administration.Patient.id), 
+    payer_id = Column(Integer, ForeignKey(administration.Payer.id), 
                                                                 nullable=False)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id),
                                                                 nullable=False)
     mean_id = Column(Integer, ForeignKey(PaymentType.id), nullable=False)
+    receipt_id = Column(Integer, ForeignKey(documents.Files.id), nullable=False)
     amount = Column(Numeric, nullable=False)
     comments = Column(String, default="")
     cashin_date = Column(Date, default=func.current_date())
-    gestures = relationship("AppointmentGestureReference",
-                          secondary=payment_gesture_table,
-                          backref="payments")
-
+    mean = relationship('PaymentType', backref='payments')
+    receipt = relationship('documents.Files', backref='payment')
+    patient = relationship('administration.Patient', backref='payments')
+#    gestures = relationship("AppointmentGestureReference",
+#                          secondary=payment_gesture_table,
+#                          backref="payments")
+#
