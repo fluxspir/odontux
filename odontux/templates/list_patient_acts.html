@@ -11,6 +11,9 @@
       {{ act_table_rows(session, gesture, appointment, act_info, specialty) }}
     {% endfor %}
     {{ act_table_closing_tag() }}
-
+  <br />
+  total price = {{ total_price }}<br />
+  total paid = {{ total_paid }}<br />
+  due = {{ due }}
   {% endblock %}
 {% endblock %}

@@ -8,7 +8,7 @@
 from flask import session, redirect, url_for, render_template, request, abort
 
 from odontux import constants, checks
-from odontux.models import meta, administration, schedule, act, teeth
+from odontux.models import meta, administration, schedule, act, teeth, compta
 from odontux.odonweb import app
 from odontux.views.administration import enter_patient_file
 from odontux.views.log import index
@@ -75,9 +75,27 @@ def list_acts(patient_id):
     acts = checks.get_patient_acts(patient.id, None,
             [ act.AppointmentGestureReference.appointment_id, ]
             )
+    payments = ( meta.session.query(compta.Payment)
+        .filter(compta.Payment.patient_id == patient_id)
+        .all()
+    )
+    total_price = total_paid = 0
+    for appointment in patient.appointments:
+        for gesture in appointment.administrative_gestures:
+            total_price += gesture.price
+    
+    for payment in payments:
+        total_paid += payment.amount
+
+    due = total_price - total_paid
+
     return render_template("list_patient_acts.html",
                             patient=patient,
-                            acts=acts)
+                            acts=acts,
+                            payments=payments,
+                            total_price=total_price,
+                            total_paid=total_paid,
+                            due=due)
 
 @app.route("/patient/update_act?id=<int:patient_id>&act=<int:act_id>")
 def update_patient_act(patient_id, act_id):
