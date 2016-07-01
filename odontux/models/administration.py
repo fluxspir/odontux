@@ -96,6 +96,7 @@ class Patient(Base):
     healthcare_plans_id = association_proxy('hcs', 'id')
     healthcare_plans = association_proxy('hcs', 'name')
     
+#    payments = relationship('compta.Payment')
     teeth = relationship("Tooth")
     teeth_codenames = association_proxy('teeth', 'codename')
 
@@ -113,6 +114,21 @@ class Patient(Base):
         else:
             return False
 
+    def global_price(self):
+        total_price = 0
+        for appointment in self.appointments:
+            for gesture in appointment.administrative_gestures:
+                total_price += gesture.price
+        return total_price
+
+    def already_paid(self):
+        total_paid = 0
+        for payment in self.payments:
+            total_paid += payment.amount
+        return total_paid
+
+    def due(self):
+        return self.global_price() - self.already_paid()
 
 class Payer(Base):
     __tablename__ = 'payer'
