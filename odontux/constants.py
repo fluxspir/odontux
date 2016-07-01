@@ -659,6 +659,7 @@ FILE_CESSATION = 8
 FILE_INVOICE = 20
 FILE_QUOTE = 21
 FILE_BILL = 22
+FILE_QUITTANCE = 23
 
 FILES = {
     FILE_RADIO: _('Radio'),
@@ -670,5 +671,6 @@ FILES = {
     FILE_INVOICE: _('Invoice'),
     FILE_QUOTE: _('Quote'),
     FILE_BILL: _('Bill'),
+    FILE_RECEIPT: _('Receipt'),
 }
 
