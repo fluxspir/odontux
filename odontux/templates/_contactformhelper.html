@@ -2,7 +2,8 @@
 {% from "_formhelpers.html" import render_simple_field, render_simple_hidden_field %}
 {% from "_formhelpers.html" import render_table_field %}
 {% from "_formhelpers.html" import render_table_hidden_field %}
-{% from "_formhelpers.html" import render_field_js_onblur %}
+{% from "_formhelpers.html" import render_field_js_onblur,
+                                    render_table_field_js_onblur %}
 
 
 
@@ -74,6 +75,7 @@
 {% endmacro %}
 
 {% macro update_address_form(address_form, body, url_update) %}
+<script type=text/javascript src="/static/js/brasil_address.js"></script>
   <div id="address">
     <table>
       <tr>
@@ -96,9 +98,9 @@
           {{ render_table_field(address_form.street_number, value=body.address.street_number) }}
           {{ render_table_field(address_form.building, value=body.address.building) }}
           {{ render_table_field(address_form.complement, value=body.address.complement) }}
-          {{ render_table_field(address_form.street, value=body.address.district) }}
+          {{ render_table_field(address_form.district, value=body.address.district) }}
           {{ render_table_field(address_form.city, value=body.address.city) }}
-          {{ render_table_field(address_form.zip_code, value=body.address.zip_code) }}
+          {{ render_table_field_js_onblur(address_form.zip_code, value=body.address.zip_code) }}
           {{ render_table_field(address_form.state, value=body.address.state) }}
           {{ render_table_field(address_form.country, value=body.address.country) }}
           <td><input type=submit value="Update" /></td>

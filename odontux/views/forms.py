@@ -5,6 +5,8 @@
 # Licence BSD
 #
 
+import pdb
+
 from gettext import gettext as _
 from wtforms import widgets, Field
 from wtforms import (Form, IntegerField, TextField, PasswordField,
@@ -17,6 +19,7 @@ from odontux import constants
 from odontux import gnucash_handler
 from odontux.models import (meta,
                             administration,
+                            contact,
                             md,
                             users,
                             assets
@@ -104,23 +107,26 @@ class AddressForm(Form):
                                  validators.Length(max=100, message=_("""Number
                                  and street must be less than 100 characters 
                                  please"""))])
-    street_number = TextField(_('street number'))
-    complement = TextField(_('complement'), [validators.Optional()])
-    building = TextField(_('building'), validators=[validators.Optional(), 
-                                     validators.Length(max=50)])
+    street_number = TextField(_('number'), render_kw={'size':'4'})
+    complement = TextField(_('complement'), [validators.Optional()], 
+                                                        render_kw={'size': 8})
+    building = TextField(_('building'), validators=[validators.Optional()], 
+                                     render_kw={'size': 8})
     district = TextField(_('district'))
     city = TextField(_('city'), validators=[validators.Optional(),
                              validators.Length(max=25,
                              message=_("City's name"))], 
                              filters=[title_field])
-    zip_code = TextField(_('zip_code'), 
+    zip_code = TextField(_('zip_code'), render_kw={'size': 8}, 
                                     description='get_content_br(this.value);')
     state = TextField(_('state'), validators=[validators.Optional(), 
                                   validators.Length(max=15)], 
-                                 filters=[title_field])
+                                 filters=[title_field],
+                                 render_kw={'size': 4})
     country = TextField(_('country'), validators=[validators.Optional(),
                                    validators.Length(max=15)],
-                                   filters=[title_field])
+                                   filters=[title_field],
+                                   render_kw={'size': 8})
 
 class MailForm(Form):
     email = TextField(_('email'), validators=[validators.Optional(),
@@ -192,19 +198,24 @@ def update_body_address(body_id, body_type):
         return False
     form = AddressForm(request.form)
     if request.method == 'POST' and form.validate():
-        for f in address_fields:
-            if body_type == "patient":
+        if body.address:
+            for f in address_fields:
                 setattr(body.address, f, 
                         getattr(form, f).data)
                 meta.session.commit()
                 # update address in gnucash for patient.
-                comptability = gnucash_handler.GnuCashCustomer(body.id,
-                                                 body.dentist_id)
-                customer = comptability.update_customer()
-            else:
-                setattr(body.address, f, 
-                        getattr(form, f).data)
-                meta.session.commit()
+        else:
+            address_args = {f: getattr(form, f).data 
+                            for f in address_fields }
+            new_address = contact.Address(**address_args)
+            meta.session.add(new_address)
+            meta.session.commit()
+            body.address_id = new_address.id
+            meta.session.commit()
+        if body_type == "patient":
+            comptability = gnucash_handler.GnuCashCustomer(body.id,
+                                            body.dentist_id)
+            customer = comptability.update_customer()
         return True
         
 #def add_body_address(body_id, body_type):

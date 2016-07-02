@@ -16,7 +16,7 @@
 </nav>
 <div id="update_provider">
   <div id="gen_info">
-    <form method="post" action={{ url_for('update_provider', body_id=provider.id, form_to_display="general_form" ) }}>
+    <form method="post" action={{ url_for('update_provider', provider_id=provider.id, form_to_display="gen_info" ) }}>
       <dl>
       {{ render_field(general_form.name, autofocus="autofocus") }}
         {{ render_field(general_form.active) }}
