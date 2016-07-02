@@ -37,6 +37,13 @@ def get_odontux_folder():
         os.makedirs(odontux_folder)
     return odontux_folder
 
+def get_odontux_currency():
+    parser = ConfigParser.ConfigParser()
+    home = os.path.expanduser("~")
+    parser.read(os.path.join(home, '.odontuxrc'))
+    currency = parser.get('environment', 'currency')
+    return currency
+
 def get_odontux_document_folder():
     parser = ConfigParser.ConfigParser()
     home = os.path.expanduser("~")
@@ -56,28 +63,6 @@ def get_dental_office_logo():
     odontux_logo = parser.get("environment", "odontux_logo")
     return os.path.join(odontux_folder, odontux_logo)
 
-def in_patient_file():
-    try:
-        if session['patient_id']:
-            return True
-    except KeyError:
-        return False
-    return False
-
-def quit_patient_file():
-    try:
-        if session['patient_id']:
-            session.pop('patient_id', None)
-    except KeyError:
-        pass
-
-def quit_appointment():
-    try:
-        if session['appointment_id']:
-            session.pop('appointment_id', None)
-    except KeyError:
-        pass
-
 def get_patient(patient_id):
     try:
         patient = meta.session.query(administration.Patient)\
@@ -87,73 +72,13 @@ def get_patient(patient_id):
     except sqlalchemy.orm.exc.NoResultFound:
         return False
 
-def get_appointment(appointment_id=None):
-    if not appointment_id and not 'appointment_id' in session:
-        return None
-    if not appointment_id:
-        appointment_id = session['appointment_id']
+def get_appointment(appointment_id):
     appointment = (
         meta.session.query(schedule.Appointment)
             .filter(schedule.Appointment.id == appointment_id
             ).one_or_none()
         )
-    
-    # case we got here with session['appointment_id'] empty : 
-    session['appointment_id'] = appointment.id
     return appointment
-
-def enter_patient_last_appointment(patient_id):
-    appointment = ( 
-        meta.session.query(schedule.Appointment)
-            .join(schedule.Agenda)
-            .order_by(schedule.Agenda.starttime.desc())
-            .first()
-    )
-    if not appointment:
-        return redirect(url_for('add_patient_appointment',
-                                        patient_id=session['patient_id']))
-    session['appointment_id'] = appointment.id
-    return appointment
-
-def is_patient_self_appointment():
-    """ 
-    Test if the patient is the one who has the appointment.
-    Returns True if there isn't any problem.
-    False otherwise.
-
-    This function should be use very frequently ; and anytime it would
-    returns False, all odontux odonweb... might stop really quickly, because
-    everything could get very nasty quickly...
-    """
-    # At first, look if we're in a patient file :
-    try:
-        patient_id = session['patient_id']
-    except:
-        print(_("Must be in patient file ; please feel in the session "
-                "variable"))
-        return False
-
-    # Then, verify we're in an appointment, too :
-    try:
-        appointment_id = session['appointment_id']
-    except:
-        print(_("Must be in an appointment for that kind of action"))
-        return False
-
-    # Verify now if in the database, this patient is connected to this 
-    # appointment
-    try:
-        meta.session.query(schedule.Appointment)\
-            .filter(schedule.Appointment.patient_id == patient_id)\
-            .filter(schedule.Appointment.id == appointment_id)\
-            .one()
-        return True
-    except sqlalchemy.exc.DataError:
-        print(_(""))
-        return False
-    except sqlalchemy.orm.exc.NoResultFound:
-        print(_("Patient wasn't this appointment owner ; error !"))
-        return False
 
 def get_patient_acts(patient_id, appointment_id=None, ordering=[]):
     """ The purpose of this function is to filter, then order and finally 

@@ -40,13 +40,17 @@
         {% if session.role == session.ROLE_DENTIST %}
           <td>{{ gesture.invoice_id }}</td>
           <td>Modify</td>
-          <td><a href="{{url_for('remove_administrativ_gesture', 
-                                              patient_id=session.patient_id, 
-                                              appointment_id=appointment.id, 
-                                              gesture_id=gesture.id, 
-                                              code=gesture.gesture.code) }}"
+          <td>
+            {% if gesture.paid == False or gesture.price == 0 %}
+                <a href="{{url_for('remove_administrativ_gesture', 
+                                            patient_id=appointment.patient_id, 
+                                            appointment_id=appointment.id, 
+                                            gesture_id=gesture.id, 
+                                            code=gesture.gesture.code) }}"
                 onclick="return confirm('Are you sure ?')">
-              Delete</a></td>
+              Delete</a>
+            {% endif %}
+          </td>
         {% endif %}
       </tr>
 {% endmacro %}

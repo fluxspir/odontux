@@ -56,7 +56,7 @@
   </div>
 
   {{ update_phone_form(phone_form, user, "update_user_phone", "delete_user_phone", "add_user_phone") }}
-  {{ update_address_form(address_form, user, user.addresses, "update_user_address", "delete_user_address", "add_user_address") }}
+  {{ update_address_form(address_form, user, "update_user_address") }}
   {{ update_mail_form(mail_form, user, "update_user_mail", "delete_user_mail", "add_user_mail") }}
 
   <div id="password_container">

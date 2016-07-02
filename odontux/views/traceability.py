@@ -104,8 +104,6 @@ def add_sterilization_cycle_type():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     ste_cycle_type_form = SterilizationCycleTypeForm(request.form)
     
     if request.method == "POST" and ste_cycle_type_form.validate():
@@ -128,8 +126,6 @@ def update_sterilization_cycle_type(ste_cycle_type_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     ste_cycle_type = meta.session.query(traceability.SterilizationCycleType
                             ).filter(traceability.SterilizationCycleType.id == 
                                                     ste_cycle_type_id).one()
@@ -153,8 +149,6 @@ def list_sterilization_cycle_type():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     
     ste_cycle_types = meta.session.query(traceability.SterilizationCycleType
                                                                         ).all()
@@ -168,8 +162,6 @@ def add_sterilization_complement():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     ste_complement_form = SterilizationComplementForm(request.form)
     
     if request.method == "POST" and ste_complement_form.validate():
@@ -192,8 +184,6 @@ def update_sterilization_complement(ste_complement_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     ste_complement = meta.session.query(traceability.SterilizationComplement
                         ).filter(traceability.SterilizationComplement.id == 
                                                    ste_complement_id).one()
@@ -216,8 +206,6 @@ def list_sterilization_complement():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     
     ste_complements = meta.session.query(traceability.SterilizationComplement
                                                                         ).all()
@@ -232,8 +220,6 @@ def add_sterilization_cycle_mode():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
 
     ste_cycle_mode_form = SterilizationCycleModeForm(request.form)
 
@@ -259,8 +245,6 @@ def update_sterilization_cycle_mode(ste_cycle_mode_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     ste_cycle_mode = meta.session.query(traceability.SterilizationCycleMode
                         ).filter(traceability.SterilizationCycleMode.id == 
                                                    ste_cycle_mode_id).one()
@@ -289,9 +273,6 @@ def list_sterilization_cycle_mode():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     ste_cycle_modes = meta.session.query(traceability.SterilizationCycleMode
                                                                         ).all()
     return render_template('list_sterilization_cycle_mode.html',
@@ -341,9 +322,6 @@ def get_assets_list_for_sterilization_cycle():
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-
-    checks.quit_patient_file()
-    checks.quit_appointment()
 
     assets_list = {
         "assets": [],
@@ -619,9 +597,6 @@ def remove_asset_from_sterilization():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     form = AssetSterilizedForm(request.form)
     if form.validate():
         if form.item_type.data == "kit":
@@ -658,9 +633,6 @@ def create_sterilization_list():
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-
-    checks.quit_patient_file()
-    checks.quit_appointment()
 
     if not 'assets_to_sterilize' in session:
         return redirect(url_for('add_sterilization_cycle'))
@@ -791,9 +763,6 @@ def add_sterilization_cycle():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     ste_cycle_form = SterilizationCycleForm(request.form)
     if not 'assets_to_sterilize' in session:
         session['assets_to_sterilize'] = []
@@ -888,9 +857,6 @@ def list_sterilization_cycle():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     ste_cycles = (
         meta.session.query(traceability.SterilizationCycle)
         .order_by(traceability.SterilizationCycle.cycle_date.desc())
@@ -908,9 +874,6 @@ def view_sterilization_cycle(ste_cycle_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
- 
     ste_cycle = (
         meta.session.query(traceability.SterilizationCycle)
             .filter(traceability.SterilizationCycle.id == ste_cycle_id)
@@ -956,9 +919,6 @@ def update_sticker_position(ste_cycle_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     sticker_position = ( meta.session.query(users.Settings)
             .filter(users.Settings.key == "sticker_position")
             .one() )
@@ -1105,9 +1065,6 @@ def print_sterilization_stickers(ste_cycle_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
- 
     assets = (
         meta.session.query(traceability.AssetSterilized)
             .filter(traceability.AssetSterilized.sterilization_cycle_id.in_(

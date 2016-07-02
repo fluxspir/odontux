@@ -11,8 +11,7 @@ from administration import (
                  enter_patient_file,
                  add_patient,
                  update_patient,
-                 update_patient_address, add_patient_address, 
-                 delete_patient_address,
+                 update_patient_address,
                  update_patient_phone, add_patient_phone, delete_patient_phone,
                  update_patient_mail, add_patient_mail, delete_patient_mail,
                  )
@@ -23,7 +22,7 @@ from md import (
                 list_md,
                 add_md,
                 update_md,
-                update_md_address, add_md_address, delete_md_address,
+                update_md_address,
                 update_md_phone, add_md_phone, delete_md_phone,
                 update_md_mail, add_md_mail, delete_md_mail,
                 )
@@ -31,7 +30,7 @@ from users import (
                 list_users,
                 add_user,
                 update_user,
-                update_user_address, add_user_address, delete_user_address,
+                update_user_address,
                 update_user_phone, add_user_phone, delete_user_phone,
                 update_user_mail, add_user_mail, delete_user_mail,
                 )
@@ -54,9 +53,6 @@ from schedule import (
                     agenda,
                     display_day,
                     add_appointment,
-                    )
-from patient import (
-                    enter_patient_appointment,
                     )
 from teeth import (
                     list_teeth
@@ -82,3 +78,7 @@ from event import (
 from certificates import (
                 portal_certificate
 )
+from statements import ( list_statement, find_gesture )
+from compta import portal_comptability
+from patient import patient_appointment
+from documents import display_file

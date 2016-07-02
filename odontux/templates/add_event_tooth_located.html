@@ -1,10 +1,3 @@
-
-<!--
-<script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-<script type="text/javascript">
-  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
--->
 {% extends 'summary_patient.html' %}
 
 {% block main %}
@@ -12,8 +5,8 @@
 
 <h3>Add an event on a tooth (or set of teeth).</h3>
 <form method="post" action={{ url_for('add_event_tooth_located',
-                              patient_id=session.patient_id,
-                              appointment_id=session.appointment_id) }}>
+                              patient_id=patient.id,
+                              appointment_id=appointment.id) }}>
 
   <div id="anat_loc">
     {{ render_field_js_onchange(event_form.anatomic_location) }}

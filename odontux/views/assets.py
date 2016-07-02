@@ -19,7 +19,7 @@ from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
                     validators)
 
 from odontux import constants, checks
-from odontux.models import meta, assets, administration, users, act, schedule
+from odontux.models import meta, assets, users, act, schedule, contact
 from odontux.odonweb import app
 from odontux.views import forms
 from odontux.views.log import index
@@ -112,7 +112,7 @@ class AssetForm(Form):
     #asset_category_id = SelectField(_('Asset Category'), coerce=int)
     acquisition_date = DateField(_('Acquisition Date'), format='%Y-%m-%d')
     acquisition_price = DecimalField(_('Acquisition Price'))
-    new = BooleanField(_('Asset new'))
+    new = BooleanField(_('Asset new'), default=True)
     user_id = SelectField(_("Dentist owner"), coerce=int, 
                                                 default=last_user_asset())
     office_id = SelectField(_("Office_where it is"), coerce=int,
@@ -300,8 +300,6 @@ def add_provider():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    checks.quit_patient_file()
-    checks.quit_appointment()
     general_form = AssetProviderForm(request.form)
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
@@ -317,7 +315,9 @@ def add_provider():
         provider = checks.is_body_already_in_database(general_form, 
                                                         "provider")
         if provider:
-            return redirect(url_for('update_provider'))
+            return redirect(url_for('update_provider', 
+                                            provider_id=provider.id,
+                                            form_to_display='gen_info_form'))
         values = {f: getattr(general_form, f).data
                     for f in get_asset_provider_field_list()}
         new_provider = assets.AssetProvider(**values)
@@ -327,20 +327,24 @@ def add_provider():
         address_args = {f: getattr(address_form, f).data
                     for f in forms.address_fields}
         if any(address_args.values()):
-            new_provider.addresses.append(
-                                        administration.Address(**address_args))
+            new_address = contact.Address(**address_args)
+            meta.session.add(new_address)
+            meta.session.commit()
+            new_provider.address_id = new_address.id
+#            new_provider.addresses.append(
+#                                        administration.Address(**address_args))
             meta.session.commit()
 
         phone_args = {g: getattr(phone_form, f).data
                     for f,g in forms.phone_fields}
         if any(phone_args.values()):
-            new_provider.phones.append(administration.Phone(**phone_args))
+            new_provider.phones.append(contact.Phone(**phone_args))
             meta.session.commit()
 
         mail_args = {f: getattr(mail_form, f).data 
                             for f in forms.mail_fields}
         if any(mail_args.values()):
-            new_provider.mails.append(administration.Mail(**mail_args))
+            new_provider.mails.append(contact.Mail(**mail_args))
             meta.session.commit()
 
         return redirect(url_for('list_providers'))
@@ -353,19 +357,13 @@ def add_provider():
 
 @app.route('/list_providers/')
 def list_providers():
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     providers = meta.session.query(assets.AssetProvider).all()
     return render_template('list_providers.html', providers=providers)
 
-@app.route('/update/provider?id=<int:body_id>&'
-            'form_to_display=<form_to_display>/', methods=['GET', 'POST'])
-def update_provider(body_id, form_to_display):
-    checks.quit_patient_file()
-    checks.quit_appointment()
-
-    provider = forms._get_body(body_id, "provider")
+@app.route('/update/provider?pid=<int:provider_id>'
+            '&form_to_display=<form_to_display>/', methods=['GET', 'POST'])
+def update_provider(provider_id, form_to_display):
+    provider = forms._get_body(provider_id, "provider")
     if not forms._check_body_perm(provider, "provider"):
         return redirect(url_for('list_providers'))
 
@@ -374,14 +372,14 @@ def update_provider(body_id, form_to_display):
 
     general_form = AssetProviderForm(request.form)
     provider = meta.session.query(assets.AssetProvider).filter(
-                            assets.AssetProvider.id == body_id).one()
+                            assets.AssetProvider.id == provider_id).one()
     
     if request.method == "POST" and general_form.validate():
         for f in [ "name", "active" ]:
             setattr(provider, f, getattr(general_form, f).data)
         meta.session.commit()
-        return redirect(url_for('update_provider', body_id=provider.id,
-                                    form_to_display="general_form"))
+        return redirect(url_for('update_provider', provider_id=provider_id,
+                                    form_to_display="gen_info"))
             
 
     for f in [ "name", "active" ]:
@@ -393,7 +391,7 @@ def update_provider(body_id, form_to_display):
 
     return render_template('update_provider.html', 
                             provider=provider,
-                            form_to_display=general_form,
+                            form_to_display=form_to_display,
                             general_form=general_form,
                             address_form=address_form,
                             phone_form=phone_form,
@@ -405,31 +403,31 @@ def update_provider(body_id, form_to_display):
 def update_provider_address(body_id, form_to_display):
     if forms.update_body_address(body_id, "provider"):
         return redirect(url_for("update_provider", 
-                                 body_id=body_id,
+                                 provider_id=body_id,
                                  form_to_display="address"))
     return redirect(url_for('list_providers'))
  
-@app.route('/provider/add_provider_address?id=<int:body_id>'
-           '&form_to_display=<form_to_display>/', methods=['POST'])
-def add_provider_address(body_id, form_to_display):
-    if forms.add_body_address(body_id, "provider"):
-        return redirect(url_for("update_provider", body_id=body_id, 
-                                 form_to_display="address"))
-    return redirect(url_for('list_providers'))
-
-@app.route('/provider/delete_provider_address?id=<int:body_id>'
-           '&form_to_display=<form_to_display>/', methods=['POST'])
-def delete_provider_address(body_id, form_to_display):
-    if forms.delete_body_address(body_id, "provider"):
-        return redirect(url_for("update_provider", body_id=body_id,
-                                 form_to_display="address"))
-    return redirect(url_for('list_providers'))
- 
+#@app.route('/provider/add_provider_address?id=<int:body_id>'
+#           '&form_to_display=<form_to_display>/', methods=['POST'])
+#def add_provider_address(body_id, form_to_display):
+#    if forms.add_body_address(body_id, "provider"):
+#        return redirect(url_for("update_provider", provider_id=body_id, 
+#                                 form_to_display="address"))
+#    return redirect(url_for('list_providers'))
+#
+#@app.route('/provider/delete_provider_address?id=<int:body_id>'
+#           '&form_to_display=<form_to_display>/', methods=['POST'])
+#def delete_provider_address(body_id, form_to_display):
+#    if forms.delete_body_address(body_id, "provider"):
+#        return redirect(url_for("update_provider", provider_id=body_id,
+#                                 form_to_display="address"))
+#    return redirect(url_for('list_providers'))
+# 
 @app.route('/provider/update_provider_phone?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_provider_phone(body_id, form_to_display):
     if forms.update_body_phone(body_id, "provider"):
-        return redirect(url_for("update_provider", body_id=body_id,
+        return redirect(url_for("update_provider", provider_id=body_id,
                                  form_to_display="phone"))
     return redirect(url_for('list_providers'))
  
@@ -437,7 +435,7 @@ def update_provider_phone(body_id, form_to_display):
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def add_provider_phone(body_id, form_to_display):
     if forms.add_body_phone(body_id, "provider"):
-        return redirect(url_for("update_provider", body_id=body_id,
+        return redirect(url_for("update_provider", provider_id=body_id,
                                  form_to_display="phone"))
     return redirect(url_for('list_providers'))
 
@@ -445,7 +443,7 @@ def add_provider_phone(body_id, form_to_display):
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def delete_provider_phone(body_id, form_to_display):
     if forms.delete_body_phone(body_id, "provider"):
-        return redirect(url_for("update_provider", body_id=body_id,
+        return redirect(url_for("update_provider", provider_id=body_id,
                                  form_to_display="phone"))
     return redirect(url_form('list_providers'))
 
@@ -453,7 +451,7 @@ def delete_provider_phone(body_id, form_to_display):
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_provider_mail(body_id, form_to_display):
     if forms.update_body_mail(body_id, "provider"):
-        return redirect(url_for("update_provider", body_id=body_id,
+        return redirect(url_for("update_provider", provider_id=body_id,
                                  form_to_display="mail"))
     return redirect(url_for('list_providers'))
 
@@ -461,7 +459,7 @@ def update_provider_mail(body_id, form_to_display):
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def add_provider_mail(body_id, form_to_display):
     if forms.add_body_mail(body_id, "provider"):
-        return redirect(url_for("update_provider", body_id=body_id,
+        return redirect(url_for("update_provider", provider_id=body_id,
                                  form_to_display="mail"))
     return redirect(url_for('list_providers'))
 
@@ -469,22 +467,16 @@ def add_provider_mail(body_id, form_to_display):
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def delete_provider_mail(body_id, form_to_display):
     if forms.delete_body_mail(body_id, "provider"):
-        return redirect(url_for("update_provider", body_id=body_id,
+        return redirect(url_for("update_provider", provider_id=body_id,
                                  form_to_display="mail"))
     return redirect(url_for('list_providers'))
 
 @app.route('/my_assets/')
 def my_assets():
-    checks.quit_patient_file()
-    checks.quit_appointment()
-
     return render_template('my_assets.html')
 
 @app.route('/list_assets?asset_type=<asset_type>/')
 def list_assets(asset_type="all"):
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    
     if asset_type == "device":
         query = meta.session.query(assets.Device)
     elif asset_type == "material":
@@ -1336,8 +1328,6 @@ def list_kit_type():
 def list_kits(kit_types=0):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
-    checks.quit_patient_file()
-    checks.quit_appointment()
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
@@ -1367,8 +1357,6 @@ def list_kits(kit_types=0):
 def view_kit(kit_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
                         constants.ROLE_ASSISTANT ]
-    checks.quit_patient_file()
-    checks.quit_appointment()
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 

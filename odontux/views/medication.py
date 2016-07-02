@@ -131,22 +131,13 @@ def list_drugs():
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     drugs = meta.session.query(medication.DrugPrescribed).all()
-    if 'patient_id' in session:
-        patient = checks.get_patient(session['patient_id'])
-    else:
-        patient = None
-    return render_template('list_drugs.html', drugs=drugs, patient=patient)
+    return render_template('list_drugs.html', drugs=drugs)
 
 @app.route('/drugs/update/', methods=['GET', 'POST'])
 def update_drug():
     # Only a dentist should be allowed to update drugs.
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('list_drugs'))
-
-    if 'patient_id' in session:
-        patient = checks.get_patient(session['patient_id'])
-    else:
-        patient = None
 
     drug_fields = _get_drug_prescribed_fields()
     drug_form = DrugForm(request.form)
@@ -160,12 +151,11 @@ def update_drug():
         for f in drug_fields:
             setattr(drug, f, getattr(drug_form, f).data)
         meta.session.commit()
-        return redirect(url_for('update_drug', patient=patient))
+        return redirect(url_for('update_drug'))
 
     drugs = meta.session.query(medication.DrugPrescribed).all()
 
     return render_template('update_drugs.html',
-                            patient=patient,
                             drugs=drugs,
                             drug_form=drug_form
                            )
@@ -175,28 +165,18 @@ def delete_drug():
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('list_drugs'))
 
-    if session['patient_id']:
-        patient = checks.get_patient(session['patient_id'])
-    else:
-        patient = ""
-
     drug_form = DrugForm(request.form)
     drug = meta.session.query(medication.DrugPrescribed)\
         .filter(medication.DrugPrescribed.id == drug_form.drug_id.data)\
         .one()
     meta.session.delete(drug)
     meta.session.commit()
-    return redirect(url_for('update_drug', patient=patient))
+    return redirect(url_for('update_drug'))
 
 @app.route('/drugs/add/', methods=['POST'])
 def add_drug():
     if session['role'] != constants.ROLE_DENTIST:
         return redirect(url_for('list_drugs'))
-
-    if 'patient_id' in session:
-        patient = checks.get_patient(session['patient_id'])
-    else:
-        patient = None
 
     drug_fields = _get_drug_prescribed_fields()
     drug_form = DrugForm(request.form)
@@ -209,7 +189,7 @@ def add_drug():
     new_drug = medication.DrugPrescribed(**args)
     meta.session.add(new_drug)
     meta.session.commit()
-    return redirect(url_for('update_drug', patient=patient))
+    return redirect(url_for('update_drug'))
 
 @app.route('/add/drug_to_prescription?pid=<int:patient_id>'
             '&aid=<int:appointment_id>'

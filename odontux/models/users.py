@@ -6,10 +6,11 @@
 #
 
 from meta import Base
+import contact
 import sqlalchemy
 import datetime
 
-from tables import (odontux_user_address_table, odontux_user_mail_table,
+from tables import (odontux_user_mail_table,
                     odontux_user_phone_table, dental_office_address_table,
                     dental_office_mail_table, dental_office_phone_table)
 
@@ -61,8 +62,8 @@ class OdontuxUser(Base):
     qualifications = Column(String, default="")
     registration = Column(String, default="")
     correspondence_name = Column(String, default="")
-    addresses = relationship("Address", secondary=odontux_user_address_table,
-                           backref="odontux_user")
+    address_id = Column(Integer, ForeignKey(contact.Address.id))
+    address = relationship("Address", backref="odontux_user")
     sex = Column(String, default="f")
     dob = Column(Date, default=datetime.date(1970, 1, 1))
     active = Column(Boolean, default=True)

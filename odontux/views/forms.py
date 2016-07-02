@@ -5,10 +5,12 @@
 # Licence BSD
 #
 
+import pdb
+
 from gettext import gettext as _
 from wtforms import widgets, Field
 from wtforms import (Form, IntegerField, TextField, PasswordField,
-                    SelectField, BooleanField, TextAreaField,
+                    SelectField, BooleanField, TextAreaField, HiddenField,
                     validators)
 
 from flask import session, request
@@ -17,6 +19,7 @@ from odontux import constants
 from odontux import gnucash_handler
 from odontux.models import (meta,
                             administration,
+                            contact,
                             md,
                             users,
                             assets
@@ -99,28 +102,31 @@ class PhoneForm(Form):
     phonenum = TextField(_('phonenum'), [validators.Optional()])
 
 class AddressForm(Form):
-    address_id = TextField('address_id')
+    address_id = HiddenField('address_id')
     street = TextField(_('street'), validators=[validators.Optional(),
                                  validators.Length(max=100, message=_("""Number
                                  and street must be less than 100 characters 
                                  please"""))])
-    street_number = TextField(_('street number'))
-    complement = TextField(_('complement'), [validators.Optional()])
-    building = TextField(_('building'), validators=[validators.Optional(), 
-                                     validators.Length(max=50)])
+    street_number = TextField(_('number'), render_kw={'size':'4'})
+    complement = TextField(_('complement'), [validators.Optional()], 
+                                                        render_kw={'size': 8})
+    building = TextField(_('building'), validators=[validators.Optional()], 
+                                     render_kw={'size': 8})
     district = TextField(_('district'))
     city = TextField(_('city'), validators=[validators.Optional(),
                              validators.Length(max=25,
                              message=_("City's name"))], 
                              filters=[title_field])
-    zip_code = TextField(_('zip_code'), 
+    zip_code = TextField(_('zip_code'), render_kw={'size': 8}, 
                                     description='get_content_br(this.value);')
     state = TextField(_('state'), validators=[validators.Optional(), 
                                   validators.Length(max=15)], 
-                                 filters=[title_field])
+                                 filters=[title_field],
+                                 render_kw={'size': 4})
     country = TextField(_('country'), validators=[validators.Optional(),
                                    validators.Length(max=15)],
-                                   filters=[title_field])
+                                   filters=[title_field],
+                                   render_kw={'size': 8})
 
 class MailForm(Form):
     email = TextField(_('email'), validators=[validators.Optional(),
@@ -191,55 +197,59 @@ def update_body_address(body_id, body_type):
     if not _check_body_perm(body, body_type):
         return False
     form = AddressForm(request.form)
-    address_index = int(request.form["address_index"])
     if request.method == 'POST' and form.validate():
-        for f in address_fields:
-            if body_type == "patient":
-                setattr(body.family.addresses[address_index], f, 
+        if body.address:
+            for f in address_fields:
+                setattr(body.address, f, 
                         getattr(form, f).data)
                 meta.session.commit()
                 # update address in gnucash for patient.
-                comptability = gnucash_handler.GnuCashCustomer(body.id,
-                                                 body.dentist_id)
-                customer = comptability.update_customer()
-            else:
-                setattr(body.addresses[address_index], f, 
-                        getattr(form, f).data)
-                meta.session.commit()
+        else:
+            address_args = {f: getattr(form, f).data 
+                            for f in address_fields }
+            new_address = contact.Address(**address_args)
+            meta.session.add(new_address)
+            meta.session.commit()
+            body.address_id = new_address.id
+            meta.session.commit()
+        if body_type == "patient":
+            comptability = gnucash_handler.GnuCashCustomer(body.id,
+                                            body.dentist_id)
+            customer = comptability.update_customer()
         return True
         
-def add_body_address(body_id, body_type):
-    body = _get_body(body_id, body_type)
-    if not _check_body_perm(body, body_type):
-        return False
-    form = AddressForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in address_fields}
-        if body_type == "patient":
-            body.family.addresses.append(administration.Address(**args))
-            meta.session.commit()
-            # in gnucash
-            comptability = gnucash_handler.GnuCashCustomer(body.id,
-                                                          body.dentist_id)
-            customer = comptability.update_customer()
-        else:
-            body.addresses.append(administration.Address(**args))
-            meta.session.commit()
-        return True
-
-def delete_body_address(body_id, body_type):
-    body = _get_body(body_id, body_type)
-    if not _check_body_perm(body, body_type):
-        return False
-    form = AddressForm(request.form)
-    address_id = int(request.form['address_id'])
-    if request.method == 'POST' and form.validate():
-        address = meta.session.query(administration.Address)\
-                .filter(administration.Address.id == address_id).one()
-        meta.session.delete(address)
-        meta.session.commit()
-        return True
-
+#def add_body_address(body_id, body_type):
+#    body = _get_body(body_id, body_type)
+#    if not _check_body_perm(body, body_type):
+#        return False
+#    form = AddressForm(request.form)
+#    if request.method == 'POST' and form.validate():
+#        args = {f: getattr(form, f).data for f in address_fields}
+#        if body_type == "patient":
+#            body.family.addresses.append(contact.Address(**args))
+#            meta.session.commit()
+#            # in gnucash
+#            comptability = gnucash_handler.GnuCashCustomer(body.id,
+#                                                          body.dentist_id)
+#            customer = comptability.update_customer()
+#        else:
+#            body.addresses.append(contact.Address(**args))
+#            meta.session.commit()
+#        return True
+#
+#def delete_body_address(body_id, body_type):
+#    body = _get_body(body_id, body_type)
+#    if not _check_body_perm(body, body_type):
+#        return False
+#    form = AddressForm(request.form)
+#    address_id = int(request.form['address_id'])
+#    if request.method == 'POST' and form.validate():
+#        address = meta.session.query(contact.Address)\
+#                .filter(contact.Address.id == address_id).one()
+#        meta.session.delete(address)
+#        meta.session.commit()
+#        return True
+#
 def update_body_phone(body_id, body_type):
     body = _get_body(body_id, body_type)
     if not _check_body_perm(body, body_type):
@@ -260,7 +270,7 @@ def add_body_phone(body_id, body_type):
     form = PhoneForm(request.form)
     if request.method == 'POST' and form.validate():
         args = { g: getattr(form, f).data for f, g in phone_fields }
-        body.phones.append(administration.Phone(**args))
+        body.phones.append(contact.Phone(**args))
         meta.session.commit()
         return True
 
@@ -282,8 +292,8 @@ def delete_body_phone(body_id, body_type):
 #                        administration.Phone.id == phone_id)
 #                    )
 #                ).one()
-            phone = meta.session.query(administration.Phone)\
-                    .filter(administration.Phone.id == phone_id).one()
+            phone = meta.session.query(contact.Phone)\
+                    .filter(contact.Phone.id == phone_id).one()
             meta.session.delete(phone)
             meta.session.commit()
             return True
@@ -309,7 +319,7 @@ def add_body_mail(body_id, body_type):
     form = MailForm(request.form)
     if request.method == 'POST' and form.validate():
         args = {f: getattr(form, f).data for f in mail_fields }
-        body.mails.append(administration.Mail(**(args)))
+        body.mails.append(contact.Mail(**(args)))
         meta.session.commit()
         return True
 
@@ -320,8 +330,8 @@ def delete_body_mail(body_id, body_type):
     form = MailForm(request.form)
     mail_id = int(request.form['mail_id'])
     if request.method == 'POST' and form.validate():
-        mail = meta.session.query(administration.Mail)\
-                .filter(administration.Mail.id == mail_id).one()
+        mail = meta.session.query(contact.Mail)\
+                .filter(contact.Mail.id == mail_id).one()
         meta.session.delete(mail)
         meta.session.commit()
         return True

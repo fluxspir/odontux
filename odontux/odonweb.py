@@ -31,6 +31,7 @@ app.config.from_object(__name__)
 app.config['SESSION_COOKIE_HTTPONLY'] = False
 app.config['ODONTUX_FOLDER'] = checks.get_odontux_folder()
 app.config['DOCUMENT_FOLDER'] = checks.get_odontux_document_folder()
+app.config['CURRENCY'] = checks.get_odontux_currency()
 
 bp = Blueprint('frontend', __name__, url_prefix='/<lang_code>')
 

@@ -1,8 +1,9 @@
 {% from "_formhelpers.html" import render_field %}
-{% from "_formhelpers.html" import render_simple_field %}
+{% from "_formhelpers.html" import render_simple_field, render_simple_hidden_field %}
 {% from "_formhelpers.html" import render_table_field %}
 {% from "_formhelpers.html" import render_table_hidden_field %}
-{% from "_formhelpers.html" import render_field_js_onblur %}
+{% from "_formhelpers.html" import render_field_js_onblur,
+                                    render_table_field_js_onblur %}
 
 
 
@@ -14,60 +15,7 @@
 {% endmacro %}
 
 {% macro add_address_form_fields(address_form) %}
-  <script type="text/javascript">
-    function clear_address_form() {
-      document.getElementById('street').value=("");
-      document.getElementById('district').value("");
-      document.getElementById('city').value("");
-      document.getElementById('state').value("");
-      document.getElementById('country').value("");
-    }
-    function my_callback_br(content) {
-      if (!("erro" in content)) {
-        document.getElementById('street').value=(content.logradouro);
-        document.getElementById('district').value=(content.bairro);
-        document.getElementById('city').value=(content.localidade);
-        document.getElementById('state').value=(content.uf);
-        document.getElementById('country').value=('br');
-      }
-      else {
-        clear_address_form();
-        alert("CEP não encontrado")
-      }
-    }
-    
-    function get_content_br(valor) {
-
-      var cep = valor.replace(/\D/g, '');
-
-      if (cep != "") {
-
-        var validacep = /^[0-9]{8}$/;
-        
-        if (validacep.test(cep)) {
-          document.getElementById('street').value="...";
-
-          //Cria um elemento javascript.
-          var script = document.createElement('script');
-
-          //Sincroniza com o callback.
-          script.src = 'http://viacep.com.br/ws/'+ cep + '/json/?callback=my_callback_br';
-
-          //Insere script no documento e carrega o conteúdo.
-          document.body.appendChild(script);
-
-        } else {
-          // invalid cep
-          clear_address_form();
-          alert("Formato de CEP inválido")
-        }
-
-      } else {
-        // CEP sem valor
-        clear_address_form();
-      }
-    }
-  </script>
+<script type=text/javascript src="/static/js/brasil_address.js"></script>
   {{ render_simple_field(address_form.street) }}
   {{ render_simple_field(address_form.street_number) }}
   {{ render_simple_field(address_form.building) }}
@@ -126,12 +74,14 @@
   </div>
 {% endmacro %}
 
-{% macro update_address_form(address_form, body, body_addresses, url_update, url_delete, url_add) %}
+{% macro update_address_form(address_form, body, url_update) %}
+<script type=text/javascript src="/static/js/brasil_address.js"></script>
   <div id="address">
     <table>
       <tr>
         <th class="hidden">id</th>
         <th>street</th>
+        <th>street_number</th>
         <th>building</th>
         <th>complement</th>
         <th>district</th>
@@ -141,40 +91,19 @@
         <th>country</th>
         <th></th>
       </tr>
-        {% for address in body_addresses %}
       <tr>
         <form method="post" action={{ url_for(url_update, body_id=body.id, form_to_display='address') }}>
-          <td class="hidden"><input type="text" name="address_index" value="{{ loop.index0 }}" /></td>
-          {{ render_table_field(address_form.street, value=address.street) }}
-          {{ render_table_field(address_form.street_number, value=address.street_number) }}
-          {{ render_table_field(address_form.building, value=address.building) }}
-          {{ render_table_field(address_form.complement, value=address.complement) }}
-          {{ render_table_field(address_form.street, value=address.district) }}
-          {{ render_table_field(address_form.city, value=address.city) }}
-          {{ render_table_field(address_form.zip_code, value=address.zip_code) }}
-          {{ render_table_field(address_form.state, value=address.state) }}
-          {{ render_table_field(address_form.country, value=address.country) }}
+          {{ render_simple_hidden_field(address_form.address_id, value=body.address.address_id) }}
+          {{ render_table_field(address_form.street, value=body.address.street) }}
+          {{ render_table_field(address_form.street_number, value=body.address.street_number) }}
+          {{ render_table_field(address_form.building, value=body.address.building) }}
+          {{ render_table_field(address_form.complement, value=body.address.complement) }}
+          {{ render_table_field(address_form.district, value=body.address.district) }}
+          {{ render_table_field(address_form.city, value=body.address.city) }}
+          {{ render_table_field_js_onblur(address_form.zip_code, value=body.address.zip_code) }}
+          {{ render_table_field(address_form.state, value=body.address.state) }}
+          {{ render_table_field(address_form.country, value=body.address.country) }}
           <td><input type=submit value="Update" /></td>
-        </form>
-        <form class="hidden" method="post" action={{ url_for(url_delete, body_id=body.id, form_to_display='address') }}>
-          <input type="hidden" name="address_id" value="{{address.id}}" />
-          <td><input type="submit" value="Delete" /></td>
-        </form>
-      </tr>
-      {% endfor %}
-      <tr>
-        <form method=post action={{ url_for(url_add, body_id=body.id, form_to_display='address') }}>
-          <td class="hidden"></td>
-          {{ render_table_field(address_form.street) }}
-          {{ render_table_field(address_form.street_number) }}
-          {{ render_table_field(address_form.building) }}
-          {{ render_table_field(address_form.complement) }}
-          {{ render_table_field(address_form.district) }}
-          {{ render_table_field(address_form.city) }}
-          {{ render_table_field(address_form.zip_code) }}
-          {{ render_table_field(address_form.state) }}
-          {{ render_table_field(address_form.country) }}
-          <td><input type=submit value="Add new address" /></td>
         </form>
       </tr>
     </table>

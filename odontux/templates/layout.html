@@ -17,6 +17,7 @@
       	<link rel="stylesheet" type="text/css" href="/static/footer.css">
       	<link rel="stylesheet" type="text/css" href="/static/table.css">
 	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="stylesheet" type="text/css" src='/static/js/jquery-ui.css'>
       {% block css %} 
       {% endblock %}
       {% block css_sum %}
@@ -67,6 +68,7 @@
         <a href="{{ url_for('traceability_portal') }}">Traceability</a>
         <a href="{{ url_for('portal_anamnesis') }}">Survey</a>
         <a href="{{ url_for('list_drugs') }}">Drugs</a>
+        <a href="{{ url_for('portal_comptability') }}">Compta</a>
         <div id="search">
         {% block search %}
           <form action="/search/" method="post" autocomplete="on">

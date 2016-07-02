@@ -1,0 +1,17 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+{% endblock %}
+{% block main %}
+<h3>{{ payment_type.name }}</h3>
+{% from "_formhelpers.html" import render_field %}
+<form method="post" action="{{ url_for('show_payments_type', 
+                        payments_type_id=payment_type.id) }}">
+    {{ render_field(payment_type_form.name) }}
+    {{ render_field(payment_type_form.alias) }}
+    <br />
+    {{ payment_type_form.update }}
+</form>
+<br />
+<br />
+<a href="{{ url_for('payments_type') }}">Return to payments' types</a>
+{% endblock %}

@@ -8,13 +8,13 @@
 import pdb
 from meta import Base
 import meta
-from tables import (asset_provider_address_table, asset_provider_phone_table, 
+from tables import (asset_provider_phone_table, 
                     asset_provider_mail_table, kit_asset_table,
                     kitstructure_assetcategory_table,
                     kitstructure_superassetcategory_table,
                     superassetcategory_assetcategory_table,
                     superasset_asset_table)
-import users, act, schedule 
+import users, act, schedule, contact
 import sqlalchemy
 import datetime
 try:
@@ -58,8 +58,8 @@ class AssetProvider(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     active = Column(Boolean, default=True)
-    addresses = relationship("Address", secondary=asset_provider_address_table,
-                            backref="provider")
+    address_id = Column(Integer, ForeignKey(contact.Address.id))
+    address = relationship("Address", backref="provider")
     phones = relationship("Phone", secondary=asset_provider_phone_table,
                             backref="provider")
     mails = relationship("Mail", secondary=asset_provider_mail_table,

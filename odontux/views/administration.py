@@ -5,12 +5,14 @@
 # licence BSD
 #
 import pdb
-from flask import session, render_template, request, redirect, url_for
+from flask import ( session, render_template, request, redirect, url_for, 
+                    abort, jsonify )
 from wtforms import (Form, 
                      IntegerField, SelectField, TextField, BooleanField, 
-                     RadioField, SelectMultipleField, DateField,
+                     RadioField, SelectMultipleField, DateField, HiddenField,
                      validators)
 import sqlalchemy
+from sqlalchemy import or_
 from odontux.secret import SECRET_KEY
 from odontux.odonweb import app
 from gettext import gettext as _
@@ -20,7 +22,7 @@ from odontux import gnucash_handler
 from odontux.views import forms
 from odontux.views.log import index
 from odontux.models import ( meta, administration, users, act, headneck, 
-                            endobuccal )
+                            endobuccal, contact )
 
 
 # Fields too use in treatment of forms
@@ -30,9 +32,6 @@ def get_gen_info_field_list():
                     "job", "inactive", "time_stamp",
                     "office_id", "dentist_id",
                     "identity_number_1", "identity_number_2" ]
-
-def get_family_field_list():
-    return [ "family_id" ]
 
 class PatientGeneralInfoForm(Form):
     title = SelectField(_('title'))
@@ -54,17 +53,17 @@ class PatientGeneralInfoForm(Form):
     sex = RadioField(_('Sex'), choices=[("m", _("Male")), ("f", _("Female"))])
     dob = DateField(_('Date of Birth'), [validators.Optional()])
     job = TextField(_('Job'))
-    inactive = BooleanField(_('Inactive'))
+    inactive = BooleanField(_('Inactive'), default=False)
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
-    family_id = IntegerField(_('family_id'), [validators.Optional()])
+#    family_id = HiddenField(_('family_id'), [validators.Optional()])
+#    family_member = TextField(_('family_member'), [validators.Optional()])
     office_id = SelectField(_('Office_id'), [validators.Required(
                                message=_("Please specify office_id"))], 
                                coerce=int)
     dentist_id = SelectField(_('Dentist_id'), [validators.Required(
                                 message=_("Please specify dentist_id"))],
                                 coerce=int)
-    payer = BooleanField(_('is payer'))
     time_stamp = DateField(_("Time_stamp"), [validators.Optional()])
    
 class HealthCarePlanPatientForm(Form):
@@ -72,24 +71,43 @@ class HealthCarePlanPatientForm(Form):
 
 @app.route('/patients/')
 def allpatients():
-    checks.quit_patient_file()
-    checks.quit_appointment()
-    patients = ( meta.session.query(administration.Patient)
-               .order_by(administration.Patient.firstname,
-                        administration.Patient.lastname)
-                .all()
-    )
+    patients = meta.session.query(administration.Patient)\
+               .order_by(administration.Patient.lastname).all()
     return render_template('list_patients.html', patients=patients)
 
 @app.route('/patient?id=<int:body_id>/')
 def enter_patient_file(body_id):
     patient = checks.get_patient(body_id)
-    if patient:
-        session['patient_id'] = patient.id
-        if not checks.is_patient_self_appointment():
-            checks.quit_appointment()
-        return render_template('patient_file.html', patient=patient)
+    return render_template('patient_file.html', patient=patient)
 
+#@app.route('/find/family_member')
+#def find_family_member():
+#    name = request.args.get('name', None)
+#    if name:
+##        # Won't work:part of keyword would be in firstname and other in last.
+##        name = name.split(" ")
+##        keyword = u"%"
+#        keyword = u'%{}%'.format(name)
+##        for name_part in name:
+##            keyword = keyword + u'{}%'.format(name_part)
+#        patients = ( meta.session.query(administration.Patient)
+#                        .filter(or_(
+#                            administration.Patient.firstname.ilike(keyword),
+#                            administration.Patient.lastname.ilike(keyword) )
+#                        ).order_by(administration.Patient.firstname,
+#                                administration.Patient.lastname )
+#                        .all()
+#        )
+#        if not patients:
+#            return jsonify(success=False)
+#        data = {}
+#        for patient in patients:
+#            data[str(patient.id)] = ( patient.firstname + " " + 
+#                                                            patient.lastname,
+#                                        patient.family.id )
+#        return jsonify(success=True, **data)
+#    return jsonify(success=False)
+#
 @app.route('/add/patient/', methods=['GET', 'POST'])
 @app.route('/add/patient?meeting_id=<int:meeting_id>', methods=['GET', 'POST'])
 def add_patient(meeting_id=0):
@@ -105,7 +123,6 @@ def add_patient(meeting_id=0):
     if session['role'] not in authorized_roles:
         return redirect(url_for("allpatients"))
    
-    checks.quit_patient_file()
     # Forms used for adding a new patient : 
     # two are patient's specific :
     gen_info_form = PatientGeneralInfoForm(request.form)
@@ -114,9 +131,14 @@ def add_patient(meeting_id=0):
                 for office in meta.session.query(users.DentalOffice).all() ]
     gen_info_form.dentist_id.choices = [ (dentist.id, dentist.firstname + " " 
                                                             + dentist.lastname)
-                for dentist in meta.session.query(users.OdontuxUser).filter(
-                users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
-                users.OdontuxUser.lastname).all() ]
+                for dentist in meta.session.query(users.OdontuxUser)
+                .filter(users.OdontuxUser.role == constants.ROLE_DENTIST,
+                        users.OdontuxUser.active.is_(True))
+                .order_by(users.OdontuxUser.lastname)
+                .all() 
+    ]
+    if len(gen_info_form.dentist_id.choices) > 1:
+        gen_info_form.dentist_id.choices.insert( 0, (0, "") )
 
     hcp_patient_form = HealthCarePlanPatientForm(request.form)
     hcp_patient_form.healthcare_plans_id.choices = [ (hc.id, hc.name) 
@@ -154,53 +176,55 @@ def add_patient(meeting_id=0):
             new_patient.hcs.append(hcp)
         meta.session.commit()
 
-        # A family is define in odontux mostly by the fact that
-        # they live together. 
-        for f in get_family_field_list():
-            # If patient in a family that is already in database, just tell 
-            # which family he's in.
-            if getattr(gen_info_form, f).data:
-                value[f] = getattr(gen_info_form, f).data
-            else:
-                # Create new family and put the new patient in it.
-                new_family = administration.Family()
-                meta.session.add(new_family)
-                meta.session.commit()
-                new_patient.family_id = new_family.id
-                meta.session.commit()
+#        # A family is define in odontux mostly by the fact that
+#        # they live together. 
+#        family_field_list = ['family_id']
+#        for f in family_field_list:
+#            # If patient in a family that is already in database, just tell 
+#            # which family he's in.
+#            if getattr(gen_info_form, f).data:
+#                value[f] = int(getattr(gen_info_form, f).data)
+#            else:
+#                # Create new family and put the new patient in it.
+#                new_family = administration.Family()
+#                meta.session.add(new_family)
+#                meta.session.commit()
+#                new_patient.family_id = new_family.id
+#                meta.session.commit()
                 # Give the patient, member of family an address 
-                address_args = {f: getattr(address_form, f).data 
+        address_args = {f: getattr(address_form, f).data 
                                 for f in forms.address_fields}
-
-                if any(address_args.values()):
-                    new_patient.family.addresses.append(
-                                        administration.Address(**address_args))
-        meta.session.commit()
-
-        # Now, we'll see if patient will pay for himself and for his family ;
-        # if not, it must be someone from his family who'll pay.
-        if gen_info_form.payer.data:
-            # Mark the patient as a payer
-            new_payer = administration.Payer(**{"patient_id": new_patient.id})
-            meta.session.add(new_payer)
+        if any(address_args.values()):
+            new_address = contact.Address(**address_args)
+            meta.session.add(new_address)
             meta.session.commit()
-            # precise that in his family, he pays.
-            new_patient.family.payers.append(new_payer)
+            new_patient.address_id = new_address.id
             meta.session.commit()
 
+#        # Now, we'll see if patient will pay for himself and for his family ;
+#        # if not, it must be someone from his family who'll pay.
+#        if gen_info_form.payer.data:
+#            # Mark the patient as a payer
+#            new_payer = administration.Payer(**{'id': new_patient.id})
+#            meta.session.add(new_payer)
+#            meta.session.commit()
+#            # precise that in his family, he pays.
+#            new_patient.family.payers.append(new_payer)
+#            meta.session.commit()
+#            
         # Phone number, in order to contact him.
         
         phone_args = {g: getattr(phone_form, f).data
                       for f,g in forms.phone_fields}
 
         if any(phone_args.values()):
-            new_patient.phones.append(administration.Phone(**phone_args))
+            new_patient.phones.append(contact.Phone(**phone_args))
             meta.session.commit()
 
         # Mail
         mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
         if any(mail_args.values()):
-            new_patient.mails.append(administration.Mail(**mail_args))
+            new_patient.mails.append(contact.Mail(**mail_args))
             meta.session.commit()
 
 #        ##################################
@@ -276,7 +300,6 @@ def delete_patient(body_id):
 def update_patient(body_id, form_to_display):
     """ """
     patient = forms._get_body(body_id, "patient")
-    session['patient_id'] = patient.id
     if not forms._check_body_perm(patient, "patient"):
         return redirect(url_for('list_patients', body_id=body_id))
 
@@ -295,7 +318,16 @@ def update_patient(body_id, form_to_display):
     if request.method == 'POST' and gen_info_form.validate():
         for f in get_gen_info_field_list():
             setattr(patient, f, getattr(gen_info_form, f).data)
+
+#        if not gen_info_form.family_id.data or not gen_info_form.family_member.data:
+#            new_family = administration.Family()
+#            meta.session.add(new_family)
+#            meta.session.commit()
+#            patient.family_id = new_family.id
+#        else:
+#            patient.family_id = gen_info_form.family_id.data
         meta.session.commit()
+
         # We should update in gnucash too the patient
         comptability = gnucash_handler.GnuCashCustomer(patient.id,  
                                                        patient.dentist_id) 
@@ -309,12 +341,12 @@ def update_patient(body_id, form_to_display):
     for f in get_gen_info_field_list():
         getattr(gen_info_form, f).data = getattr(patient, f)
 
-    # payer
-    for payer in patient.family.payers:
-        if patient.id == payer.id:
-            gen_info_form.payer.data = True
-    gen_info_form.family_id.data = patient.family.id
-    
+#    # payer
+#    for payer in patient.family.payers:
+#        if patient.id == payer.id:
+#            gen_info_form.payer.data = True
+#    gen_info_form.family_id.data = patient.family_id
+#    
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
@@ -429,22 +461,22 @@ def update_patient_address(body_id, form_to_display):
                                 form_to_display="address"))
     return redirect(url_for('list_patients'))
         
-@app.route('/patient/add_patient_address?id=<int:body_id>'
-           '&form_to_display=<form_to_display>/', methods=['POST'])
-def add_patient_address(body_id, form_to_display):
-    if forms.add_body_address(body_id, "patient"):
-        return redirect(url_for("update_patient", body_id=body_id,
-                                form_to_display="address"))
-    return redirect(url_for('list_patients'))
-
-@app.route('/patient/delete_patient_address?id=<int:body_id>'
-           '&form_to_display=<form_to_display>/', methods=['POST'])
-def delete_patient_address(body_id, form_to_display):
-    if forms.delete_body_address(body_id, "patient"):
-        return redirect(url_for("update_patient", body_id=body_id,
-                                form_to_display="address"))
-    return redirect(url_form('list_patients'))
-
+#@app.route('/patient/add_patient_address?id=<int:body_id>'
+#           '&form_to_display=<form_to_display>/', methods=['POST'])
+#def add_patient_address(body_id, form_to_display):
+#    if forms.add_body_address(body_id, "patient"):
+#        return redirect(url_for("update_patient", body_id=body_id,
+#                                form_to_display="address"))
+#    return redirect(url_for('list_patients'))
+#
+#@app.route('/patient/delete_patient_address?id=<int:body_id>'
+#           '&form_to_display=<form_to_display>/', methods=['POST'])
+#def delete_patient_address(body_id, form_to_display):
+#    if forms.delete_body_address(body_id, "patient"):
+#        return redirect(url_for("update_patient", body_id=body_id,
+#                                form_to_display="address"))
+#    return redirect(url_form('list_patients'))
+#
 @app.route('/patient/update_patient_phone?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_patient_phone(body_id, form_to_display):

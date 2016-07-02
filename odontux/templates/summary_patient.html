@@ -8,47 +8,61 @@
 
 {% block mainsummary %}
   {% block patient_navigation %}
-    {% if session.patient_id %}
+    {% if patient %}
         <ul id="patient_navigation">
           <li>
-            <a href="{{ url_for("list_teeth", patient_id=session.patient_id) }}">Mouth</a>
+            {% if appointment %}
+              <a href="{{ url_for("list_teeth", patient_id=patient.id, appointment_id=appointment.id) }}">
+            {% else %}
+              <a href="{{ url_for("list_teeth", patient_id=patient.id) }}">
+            {% endif %}
+                        Mouth</a>
           </li>
           <li>
             {% if appointment %}
-              <a href="{{ url_for("choose_event_location", patient_id=session.patient_id, appointment_id=appointment.id) }}">Event</a>
+              <a href="{{ url_for("choose_event_location", patient_id=patient.id, appointment_id=appointment.id) }}">Event</a>
             {% else %}
-              <a href="{{ url_for("choose_event_location", patient_id=session.patient_id, appointment_id=0) }}">Event</a>
+              <a href="{{ url_for("choose_event_location", patient_id=patient.id, appointment_id=0) }}">Event</a>
             {% endif %}
           </li>
           <li>
-            <a href={{ url_for("list_appointments") }}>Appointments</a>
+            <a href={{ url_for("list_appointments", patient_id=patient.id) }}>Appointments</a>
           </li>
           <li>
-            {% if session.appointment_id %}
-            <a href="{{ url_for("list_acts") }}" onmouseover="mopen('act_open')" onmouseout="mclosetime()">Acts</a>
+            {% if appointment %}
+            <a href="{{ url_for("list_acts", patient_id=patient.id) }}" onmouseover="mopen('act_open')" onmouseout="mclosetime()">Acts</a>
               <ul class="options_nav">
                 <li>
                   <div id="act_open" class="options_nav" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-                    <a href={{ url_for("add_administrativ_gesture", patient_id=session.patient_id, appointment_id=session.appointment_id) }}>Add</a>
+                    <a href={{ url_for("add_administrativ_gesture", patient_id=patient.id, appointment_id=appointment.id) }}>Add</a>
                   </div>
                 </li>
               </ul>
             {% else %}
-              <a href="{{ url_for("list_acts") }}">Acts</a>
+              <a href="{{ url_for("list_acts", patient_id=patient.id) }}">Acts</a>
             {% endif %}
           </li>
           <li>
-            <a href="{{ url_for("update_patient", body_id=session.patient_id, form_to_display="gen_info") }}">Administrativ</a>
+            <a href="{{ url_for("update_patient", body_id=patient.id, form_to_display="gen_info") }}">Administrativ</a>
           </li>
           <li>
-            <a href={{ url_for("list_anamnesis", patient_id=session.patient_id) }} onmouseover="mopen('anamnesis_open')" onmouseout="mclosetime()">Anamnesis</a>
+            <a href={{ url_for("list_anamnesis", patient_id=patient.id) }} onmouseover="mopen('anamnesis_open')" onmouseout="mclosetime()">Anamnesis</a>
             <ul class="options_nav">
               <li>
                 <div id="anamnesis_open" class="options_nav" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-                  <a href={{ url_for("update_anamnesis", patient_id=session.patient_id) }}>Modify</a>
+                  <a href={{ url_for("update_anamnesis", patient_id=patient.id) }}>Modify</a>
                 </div>
               </li>
             </ul>
+          </li>
+          <li>
+            {% if appointment %}
+              <a href="{{ url_for('patient_payments', patient_id=patient.id,
+                                            appointment_id=appointment.id) }}">
+            {% else %}
+              <a href="{{ url_for('patient_payments', patient_id=patient.id) }}">
+            {% endif %}
+            Payments</a>
           </li>
           {% if appointment %}
             <li>
@@ -61,6 +75,11 @@
               <a href="{{ url_for('portal_certificate', patient_id=patient.id,
                                               appointment_id=appointment.id) }}">
                     Cerfificate</a>
+            </li>
+            <li>
+              <a href="{{ url_for('list_statement', patient_id=patient.id,
+                                              appointment_id=appointment.id) }}">
+                    Statement</a>
             </li>
           {% endif %}
           <li>

@@ -1,0 +1,29 @@
+{% extends 'header.html' %}
+{% block main %}
+<h3>Majorations</h3>
+  <a href="{{ url_for('add_majoration') }}">
+    Add a majoration type
+  </a>
+  <br />
+  <table border=1>
+    <tr>
+      <th>id</th>
+      <th>Reason</th>
+      <th>Percentage</th>
+      {% if session['role'] == session.ROLE_DENTIST %}<th></th>{% endif %}
+    </tr>
+    {% for majoration in majorations %}
+      <tr>
+        <td>{{ majoration.id }}</td>
+        <td>{{ majoration.reason }}</td>
+        <td>{{ majoration.percentage }}</td>
+        {% if session['role'] == session.ROLE_DENTIST %}
+          <td>
+            <a href="{{ url_for('update_majoration', majoration_id=majoration.id) }}">Update</a>
+          </td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </table>
+
+{% endblock %}

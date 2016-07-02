@@ -40,9 +40,9 @@ def choose_event_location(patient_id, appointment_id):
     if not session['role'] in authorized_roles:
         return redirect(url_for('index'))
     patient = checks.get_patient(patient_id)
+    if not appointment_id: 
+        appointment_id = patient.appointments[-1].id
     appointment = checks.get_appointment(appointment_id)
-    if not appointment:
-        appointment = checks.enter_patient_last_appointment(patient_id)
     return render_template('choose_event_location.html',
                                             patient=patient,
                                             appointment=appointment)
@@ -87,8 +87,8 @@ def add_endo_buccal_event(patient_id, appointment_id):
             return redirect(url_for('index'))
 
         values = {
-            'patient_id': session['patient_id'],
-            'appointment_id': session['appointment_id'],
+            'patient_id': patient_id,
+            'appointment_id': appointment_id,
             'name': endo_buccal_event_form.name.data,
             'comments': endo_buccal_event_form.comments.data,
 #            'docs': endo_buccal_event_form.docs.data,
@@ -101,8 +101,8 @@ def add_endo_buccal_event(patient_id, appointment_id):
         meta.session.commit()
 
         return redirect(url_for('choose_event_location',
-                                patient_id=session['patient_id'],
-                                appointment_id=session['appointment_id']))
+                                patient_id=patient_id,
+                                appointment_id=appointment_id))
 
     return render_template('add_endobuccal_event.html',
                             select_location_form=select_location_form,

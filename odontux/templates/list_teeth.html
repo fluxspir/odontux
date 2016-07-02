@@ -11,8 +11,9 @@
       {% else %}
         <li style="color:blue;">
       {% endif %}
-      <a href="{{ url_for('show_tooth', patient_id=patient.id,
-                        tooth_codename=codename) }}">{{ codename }}</a> 
+      <a href="{{ url_for('show_tooth', patient_id=patient.id, 
+                        appointment_id=appointment.id, tooth_codename=codename) }}">
+        {{ codename }}</a> 
           : {{ state }}
       </li>
     {% endfor %}

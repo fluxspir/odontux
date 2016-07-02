@@ -425,8 +425,7 @@ def add_administrativ_gesture(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_ASSISTANT,
                         constants.ROLE_NURSE ]
     if session['role'] not in authorized_roles:
-        return redirect(url_for('index'))
-
+        return abort(403)
     # Prepare the formulary dealing with the act of adding an administrativ
     # gesture
     patient = checks.get_patient(patient_id)
@@ -438,8 +437,9 @@ def add_administrativ_gesture(patient_id, appointment_id):
                     (hcs.id, hcs.name) for hcs in patient.hcs ]
     # Create a list of all existing gestures.
     appointment_gesture_form.gesture_id.choices = [
-                                (gesture.id, gesture.name) for gesture in 
-                                        meta.session.query(act.Gesture).all() ]
+        (gesture.id, gesture.name) for gesture in 
+                                    meta.session.query(act.Gesture).all() ]
+    appointment_gesture_form.gesture_id.choices.insert( 0, (0, ""))
     appointment_gesture_form.majoration.choices =\
                                             get_majoration_choices()
 
@@ -449,17 +449,11 @@ def add_administrativ_gesture(patient_id, appointment_id):
         if appointment_gesture_form.code.data:
             gesture = (
                 meta.session.query(act.Gesture)
-                    .filter(act.Gesture.code ==\
-                                            appointment_gesture_form.code.data)
-                    .one_or_none()
+                    .filter(or_(
+                    act.Gesture.code == appointment_gesture_form.code.data,
+                    act.Gesture.id == appointment_gesture_form.gesture_id.data)
+                    ).one_or_none()
             )
-        else:
-            gesture = ( 
-                meta.session.query(act.Gesture)
-                    .filter(act.Gesture.id ==\
-                                    appointment_gesture_form.gesture_id.data)
-                    .one()
-        )
         if not gesture:
             # TODO : redirect error + message
             return redirect(url_for('index'))
@@ -487,6 +481,8 @@ def add_administrativ_gesture(patient_id, appointment_id):
                                 appointment_gesture_form.anatomic_location.data
 
         values['price'] = appointment_gesture_form.price.data
+        if not appointment_gesture_form.price.data:
+            values['paid'] = True
 
         new_gesture = act.AppointmentGestureReference(**values)
         meta.session.add(new_gesture)
@@ -527,12 +523,7 @@ def remove_administrativ_gesture(patient_id, appointment_id, gesture_id, code):
 
     invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
                                              appointment.dentist_id)
-    
     remove_from_gnucash = invoice.remove_act(gesture.gesture.code, gesture_id)
-    if remove_from_gnucash:
-        pass
-        # was first made to be sure that all fit together with gnucash.
-        # For the moment, we don't care.
 
     meta.session.delete(gesture)
     meta.session.commit()

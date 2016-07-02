@@ -14,6 +14,9 @@ home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
 LOCALE = parser.get("environment", "locale").title()
 
+QUOTE_VALIDITY = 3   # in months
+
+
 T11_NAME = _("11") # _("Incisivo central superior right permanent")
 T12_NAME = _("12") # _("Incisivo laterial superior right permanent")
 T13_NAME = _("13") # _("Canina superior right permanent")
@@ -670,21 +673,28 @@ UNITIES = {
 
 FILE_RADIO = 1
 FILE_PHOTO = 2
+
 FILE_PRESCRIPTION = 3
+
 FILE_ATTESTATION = 4
-FILE_QUOTATION = 5
-FILE_BILL = 6
 FILE_PRESENCE = 7
 FILE_CESSATION = 8
+
+FILE_INVOICE = 20
+FILE_QUOTE = 21
+FILE_BILL = 22
+FILE_RECEIPT = 23
 
 FILES = {
     FILE_RADIO: _('Radio'),
     FILE_PHOTO: _('Photo'),
     FILE_PRESCRIPTION: _('Prescription'),
     FILE_ATTESTATION: _('Attestation'),
-    FILE_QUOTATION: _('Quotation'),
-    FILE_BILL: _('Bill'),
     FILE_PRESENCE: _('Presence'),
     FILE_CESSATION: _('Cessation'),
+    FILE_INVOICE: _('Invoice'),
+    FILE_QUOTE: _('Quote'),
+    FILE_BILL: _('Bill'),
+    FILE_RECEIPT: _('Receipt'),
 }
 

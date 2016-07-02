@@ -5,59 +5,84 @@
 # Licence BSD
 #
 
+import pdb
 from meta import Base
-import administration, acts, documents
+import administration, act, documents, users, schedule
 
 import sqlalchemy
-from sqlalchemy import Table, Column, Integer, String, Numeric, Boolean
+from sqlalchemy import ( Table, Column, Integer, String, Numeric, Boolean, 
+                        DateTime, Date, Interval )
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 
+try:
+    from odontux import constants
+except ImportError:
+    import constants
+
 
 class Invoice(Base):
+    __tablename__ = 'invoice'
     id = Column(Integer, primary_key=True)
     patient_id = Column(Integer, ForeignKey(administration.Patient.id), 
                                                                 nullable=False)
     dentist_id = Column(Integer, ForeignKey(users.OdontuxUser.id), 
                                                                 nullable=False)
-    file_id = Column(Integer, ForeignKey(documents.Files.id), nullable=False)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
+    file_id = Column(Integer, ForeignKey(documents.Files.id))
     timestamp = Column(DateTime, default=func.now(), nullable=False)
-    type = Column(String, nullable=False)
+    type = Column(Integer, nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'invoice',
+        'polymorphic_identity': constants.FILE_INVOICE,
         'polymorphic_on': type
     }
 
-class Quotation(Invoice):
-    id = Column(Integer, ForeignKey(Invoice.id), nullable=False)
+class Quote(Invoice):
+    __tablename__ = 'quote'
+    id = Column(Integer, ForeignKey(Invoice.id), primary_key=True)
     validity = Column(Date)                         # Or make a Inverval value?
+    treatment_duration = Column(Interval)
     is_accepted = Column(Boolean, default=False)
+    
+    def total_price(self):
+        price = 0
+        for gesture in self.gestures:
+            price += gesture.price
+        return price
 
     __mapper_args__ = {
-        'polymorphic_identity': 'quotation',
+        'polymorphic_identity': constants.FILE_QUOTE,
     }
 
 class Bill(Invoice):
-    id = Column(Integer, ForeignKey(Invoice.id), nullable=False)
+    __tablename__ = 'bill'
+    id = Column(Integer, ForeignKey(Invoice.id), primary_key=True)
     date = Column(Date, default=func.current_date(), nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'bill',
+        'polymorphic_identity': constants.FILE_BILL,
     }
 
-class QuotationGestureReference(Base):
+class QuoteGestureReference(Base):
+    __tablename__ = 'quote_gesture_reference'
     id = Column(Integer, primary_key=True)
-    quotation_id = Column(Integer, ForeignKey(Quotation.id), nullable=False)
-    gesture_id = Column(Integer, ForeignKey(acts.Gesture.id), nullable=False)
+    quote_id = Column(Integer, ForeignKey(Quote.id), nullable=False)
+    cotation_id = Column(Integer, ForeignKey(act.Cotation.id), nullable=False)
+    gesture_id = Column(Integer, ForeignKey(act.Gesture.id), nullable=False)
     anatomic_location = Column(Integer, nullable=False)
     price = Column(Numeric, nullable=False)
-    gesture = relationship('acts.Gesture')
+    appointment_number = Column(Integer, default=0)
+    quote = relationship('Quote', backref='gestures')
+    gesture = relationship('act.Gesture')
 
 class BillAppointmentGestureReference(Base):
+    __tablename__ = 'bill_appointment_gesture_reference'
     id = Column(Integer, primary_key=True)
     bill_id = Column(Integer, ForeignKey(Bill.id), nullable=False)
-    appointment_gesture_id = Column(Integer, nullable=False,
-                            ForeignKey(acts.AppointmentGestureReference.id))
-    gesture = relationship('acts.AppointmentGestureReference')
+    appointment_gesture_id = Column(Integer,
+                            ForeignKey(act.AppointmentGestureReference.id),
+                            nullable=False)
+    appointment_gesture = relationship('act.AppointmentGestureReference')

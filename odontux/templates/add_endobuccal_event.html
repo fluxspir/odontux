@@ -3,8 +3,8 @@
 Adding new endo buccal event
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="{{ url_for('add_endo_buccal_event',
-                                    patient_id=session.patient_id,
-                                    appointment_id=session.appointment_id
+                                    patient_id=patient.id,
+                                    appointment_id=appointment.id
                                     ) }}">
   <dl>
     {{ render_field(select_location_form.location) }}

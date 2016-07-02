@@ -529,11 +529,9 @@ def update_appointment(body_id, appointment_id):
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 
-    session['patient_id'] = body_id
-    session['appointment_id'] = appointment_id
-    patient = checks.get_patient(session['patient_id'])
+    patient = checks.get_patient(body_id)
     appointment = meta.session.query(schedule.Appointment)\
-            .filter(schedule.Appointment.id == session['appointment_id'])\
+            .filter(schedule.Appointment.id == appointment_id)\
             .one()
 
     agenda_form = AgendaForm(request.form)
@@ -552,9 +550,10 @@ def update_appointment(body_id, appointment_id):
     if (request.method == 'POST' and agenda_form.validate()
         and appointment_form.validate() ):
         # get the agenda entry:
-        agenda = meta.session.query(schedule.Agenda)\
-            .filter(schedule.Agenda.appointment_id == 
-                                session['appointment_id']).one()
+        agenda = ( meta.session.query(schedule.Agenda)
+            .filter(schedule.Agenda.appointment_id == appointment_id)
+            .one()
+        )
         # verify the day_time infos
         (starttime, endtime) = agenda_handler(agenda_form.day.data,
                        agenda_form.starthour.data, agenda_form.startmin.data, 
@@ -567,7 +566,8 @@ def update_appointment(body_id, appointment_id):
         for f,g in (("starttime", starttime), ("endtime", endtime)):
             setattr(agenda, f, g)
         meta.session.commit()
-        return redirect(url_for('enter_patient_appointment'))
+        return redirect(url_for('patient_appointment', 
+                                                appointment_id=appointment_id))
     
     (day, starthour, startmin, durationhour, durationmin, endhour, endmin) = \
             reverse_agenda_handler(appointment.agenda.starttime, 
@@ -604,10 +604,6 @@ def add_patient_appointment(body_id, meeting_id=0):
                 constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-
-    if not body_id:
-        checks.quit_patient_file()
-        checks.quit_appointment()
 
     agenda_form = AgendaForm(request.form)
     meeting = ( meta.session.query(schedule.Agenda)
@@ -664,8 +660,7 @@ def add_patient_appointment(body_id, meeting_id=0):
             if appointment_in_agenda:
                 appointment_in_agenda.appointment_id = new_appointment.id
                 meta.session.commit()
-                session['appointment_id'] = new_appointment.id
-                return redirect(url_for('patient_appointment',
+                return redirect(url_for('patient_appointment', 
                                             appointment_id=new_appointment.id))
 
         args = {}
@@ -679,9 +674,8 @@ def add_patient_appointment(body_id, meeting_id=0):
         meta.session.add(new_schedule)
         meta.session.commit()
 
-        session['appointment_id'] = new_appointment.id
         return redirect(url_for('patient_appointment',
-                                            appointment_id=new_appointment.id))
+                                appointment_id=new_appointment.id))
 
     if not agenda_form.day.data:
         agenda_form.day.data = datetime.date.today()

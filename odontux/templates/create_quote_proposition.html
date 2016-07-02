@@ -1,0 +1,111 @@
+<!--
+<script type="text/javascript"src="http://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script> -->
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/jquery-ui.js"></script>
+<script type="text/javascript">
+  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
+{% extends "summary_patient.html" %}
+{% block main %}
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_field_line %}
+<h3>Create quote:</h3><br />
+<div id="quote_propositions" style="float:left;width:55%">
+{% if quotes_id %}
+  <form method="post" action="{{ url_for('create_quote_proposition',
+                                        patient_id=patient.id,
+                                        appointment_id=appointment.id,
+                                        quotes_id=quotes_id) }}">
+
+{% else %}
+  <form method="post" action="{{ url_for('create_quote_proposition',
+                                        patient_id=patient.id,
+                                        appointment_id=appointment.id) }}">
+{% endif %}
+
+    {{ quote_form.add_proposition }} {{ quote_form.preview }} 
+    {{ quote_form.save_print }}<br /><br />
+    {{ quote_form.treatment_duration }}
+    {{ quote_form.duration_unity }}<br />
+    {{ quote_form.healthcare_plan_id }}
+    {{ quote_form.proposition }}
+    {{ quote_form.remove_last }}<br />
+    {{ render_simple_field_line(quote_form.validity) }}
+</form>
+
+{% if quotes %}
+  <ol>
+  {% for quote in quotes %}
+    <li>Proposition :
+    <ul>
+    {% for gesture in quote.gestures %}
+      <li>{{ gesture.anatomic_location }} {{ gesture.gesture.name }} {{ gesture.price }}</li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('remove_quote_proposition', patient_id=patient.id, 
+                                                        appointment_id=appointment.id,
+                                                        quotes_id=quotes_id,
+                                                        quote_to_remove=quote.id) }}">
+    Remove this proposition</a>
+  {% endfor %}
+  </ol>
+{% endif %}
+</div>
+{% if pdf_out %}
+  <div id="pdf_out" style="align:right">
+    <embed src="data:application/pdf;base64,{{ pdf_out }}" type="application/pdf" width='43%' height='100%'>
+  </div>
+{% endif %}
+
+<script type='text/javascript'>
+//  document.getElementById("quote-0-project-0-gesture_code").onkeyup = function() {GetGestureCode(this.value)};
+  $(function() {
+    $('#proposition-0-cotation_id').val(null)
+    $('#proposition-0-anatomic_location').val(null)
+    $('#proposition-0-gesture_code').val(null);
+    $('#proposition-0-gesture_name').val(null);
+    $('#proposition-0-price').val(0);
+    // When enter a new letter in the code
+    $('#proposition-0-gesture_name').keyup(function() {
+      // call the method "find_gesture" in views.statement
+      $.getJSON($SCRIPT_ROOT + '/find_gesture/', {
+        // define variables to pass to the "find_gesture" method
+        
+        gesture: $('input[id="proposition-0-gesture_name"]').val(),
+        healthcare_plan_id: $('#healthcare_plan_id').val(),
+        patient_id: {{ patient.id }},
+      }, function(data) {
+//        console.log(data.success)
+        if ( data.success == true ) {
+          // remove from data success information
+          delete data["success"]
+//          console.log(data)
+          var choices = []
+          for ( gest in data ) {
+//            console.log(gest)
+            gest_option = { label: data[gest][0], code: data[gest][1], name: data[gest][0], price: data[gest][2], cotation: gest } 
+            choices.push(gest_option);
+            //choices.push(data[gest][0])
+          }
+//          console.log(choices)
+          $('#proposition-0-gesture_name').autocomplete({
+            source : choices,
+            select : function(event, ui){
+              $('#proposition-0-cotation_id').val(ui.item.cotation)
+              $('#proposition-0-gesture_code').val(ui.item.code);
+              $('#proposition-0-gesture_name').val(ui.item.name);
+              $('#proposition-0-price').val(ui.item.price);
+            }
+          });
+        } else {
+          $('#proposition-0-cotation_id').val(null)
+          $('#proposition-0-gesture_code').val(null);
+          $('#proposition-0-price').val(0);
+          return false;
+        }
+      });
+      return false;
+    });
+  });
+</script>
+{% endblock %}

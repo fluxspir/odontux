@@ -17,7 +17,8 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from users import ( OdontuxUser, DentalOffice, Settings, 
                 TimeSheet, DentistTimeSheet, AssistantTimeSheet )
 from md import MedecineDoctor
-from administration import (Address, Mail, Phone, Payer, Family, Patient)
+from administration import Patient
+from contact import ( Address, Mail, Phone )
 from anamnesis import (Anamnesis, MedicalHistory, Addiction, Treatment, 
                         PastSurgery, Allergy )
 from anamnesis import Survey, Question
@@ -40,6 +41,8 @@ from assets import (AssetProvider, AssetCategory, MaterialCategory,
 from traceability import (SterilizationCycleType, SterilizationCycleMode,
                             SterilizationCycle, AssetSterilized, 
                             MaterioVigilance)
+from statements import ( Invoice, Quote, Bill, QuoteGestureReference,
+                            BillAppointmentGestureReference )
 from certificates import Certificate
 
 def init():

@@ -23,6 +23,10 @@ color:red;
 font-size:2em;
 }
 
+.ui-menu-item {
+background-color:white;
+}
+
 #list_acttype a:link { color: blue ; text-decoration : underline}
 #list_acttype a:visited { color: blue ; text-decoration : underline}
 #list_acttype a:hover { color: blue ; text-decoration : underline}

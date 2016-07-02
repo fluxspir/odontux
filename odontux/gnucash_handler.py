@@ -7,6 +7,7 @@
 
 import pdb
 
+import time
 
 from models import meta, administration, users, compta, schedule
 import constants
@@ -61,12 +62,12 @@ class GnuCash():
         self.parser = ConfigParser.ConfigParser()
         home = os.path.expanduser("~")
         self.parser.read(os.path.join(home, ".odontuxrc"))
-        profissionnalaccounting_url = ( meta.session.query(users.OdontuxUser)
+        self.dentist = ( meta.session.query(users.OdontuxUser)
             .filter(users.OdontuxUser.id == dentist_id)
-            .one().gnucash_url
-            .encode("utf_8") 
+            .one()
         )
-        if profissionnalaccounting_url.split(".")[-1] == "xml":
+        profissionnalaccounting_url = self.dentist.gnucash_url.encode("utf_8")
+        if profissionnalaccounting_url[-3:] == "xml":
             self.gnucashtype = "xml"
         elif "postgresql" in profissionnalaccounting_url.split("://"):
             self.gnucashtype = "postgresql"
@@ -88,7 +89,6 @@ class GnuCash():
         # Set up the Book for accounting
         self.gcsession = GCSession(profissionnalaccounting_url, True)
         self.book = self.gcsession.get_book()
-
         # Set up the root on accounting book
         self.root = self.book.get_root_account()
         # Assets
@@ -162,7 +162,9 @@ class GnuCashCustomer(GnuCash):
                + self.patient.firstname
         new_customer = Customer(self.book, self.gcpatient_id, self.currency, 
                                 name.encode("utf_8"))
+        new_customer.CommitEdit()
         if self.gnucashtype == "xml":
+            time.sleep(1)
             self.gcsession.save()
         return new_customer, name
 
@@ -171,8 +173,11 @@ class GnuCashCustomer(GnuCash):
         name = self.patient.title + " " + self.patient.lastname + " " \
                + self.patient.firstname
         customer = self.book.CustomerLookupByID(self.gcpatient_id)
+        customer.BeginEdit()
         customer.SetName(name.encode("utf_8"))
+        customer.CommitEdit()
         if self.gnucashtype == "xml":
+            time.sleep(1)
             self.gcsession.save()
         return customer, name
 
@@ -184,66 +189,69 @@ class GnuCashCustomer(GnuCash):
         in the family, and the " Family patient.lastname " if there
         is several patients / payers in this family
         """
-        # Get the payers' names
-        payername = ""
-        payerlist = []
-        for payer in self.patient.family.payers:
-            # The patient is noted as a payer
-            if payer.patient_id == self.patient_id:
-                # The patient pays for himself
-                payername = patientname
-                break
-            else:
-                payerlist.append(payer.patient_id)
-
-        if not payername:
-            # Case the patient ain't recorded as a payer
-            if not payerlist:
-                # Curious case where nobody recorded as a payer for this family
-                # The patient will finally be the payer for gnucash.Customer
-                payername = patientname
-            else:
-                for patient_id in payerlist:
-                    payer = meta.session.query(administration.Patient)\
-                            .filter(administration.Patient.id == patient_id)
-                    payer = payer.one()
-                    payer = payer.title + " " + payer.lastname + " " +\
-                            payer.firstname
-                    payername.join(", ", payer)
-
+#        # Get the payers' names
+#        payername = ""
+#        payerlist = []
+#        for payer in self.patient.family.payers:
+#            # The patient is noted as a payer
+#            if payer.id == self.patient_id:
+#                # The patient pays for himself
+#                payername = patientname
+#                break
+#            else:
+#                payerlist.append(payer.patient_id)
+#
+#        if not payername:
+#            # Case the patient ain't recorded as a payer
+#            if not payerlist:
+#                # Curious case where nobody recorded as a payer for this family
+#                # The patient will finally be the payer for gnucash.Customer
+#                payername = patientname
+#            else:
+#                for patient_id in payerlist:
+#                    payer = meta.session.query(administration.Patient)\
+#                            .filter(administration.Patient.id == patient_id)
+#                    payer = payer.one()
+#                    payer = payer.title + " " + payer.lastname + " " +\
+#                            payer.firstname
+#                    payername.join(", ", payer)
+#
         address = customer.GetAddr()
-        address.SetName(payername.encode("utf_8"))
-        if self.patient.family.addresses:
-            if self.patient.family.addresses[-1].street:
-                address.SetAddr1(self.patient.family.addresses[-1]
-                    .street.encode("utf_8") + ", " +
-                    self.patient.family.addresses[-1]
-                    .street_number.encode("utf_8")
+        #address.SetName("{} {} {}".format(self.patient.title, self.patient.lastname, 
+        #                                                    self.patient.firstname)
+        #)
+        #address.SetName(self.patient.title + " " + self.patient.lastname + " "\
+        #                + self.patient.firstname)
+        address.SetName(patientname.encode("utf-8"))
+        if self.patient.address:
+            if self.patient.address.street:
+                address.SetAddr1(self.patient.address.street.encode("utf-8") +
+                    ", " +self.patient.address.street_number.encode("utf-8")
                 )
-            if self.patient.family.addresses[-1].building:
-                address.SetAddr2(self.patient.family.addresses[-1]
-                                .building.encode("utf_8"))
+            if self.patient.address.building:
+                address.SetAddr2(self.patient.address.building.encode("utf_8")
+            )
             district = ""
             zip_code = ""
             city = ""
-            if self.patient.family.addresses[-1].district:
-                district = self.patient.family.addresses[-1]\
-                            .district.encode("utf_8")
-            if self.patient.family.addresses[-1].zip_code:
-                zip_code = self.patient.family.addresses[-1]\
-                            .zip_code.encode("utf_8")
-            if self.patient.family.addresses[-1].city:
-                city = self.patient.family.addresses[-1].city.encode("utf_8")
-            address.SetAddr3(district + "\n" + zip_code  + " " + city)
+            if self.patient.address.district:
+                district = self.patient.address.district.encode("utf_8")
+            if self.patient.address.zip_code:
+                zip_code = self.patient.address.zip_code.encode("utf_8")
+            if self.patient.address.city:
+                city = self.patient.address.city.encode("utf_8")
+            address.SetAddr3(district + " " + zip_code  + " " + city)
             state = ""
             country = ""
-            if self.patient.family.addresses[-1].state:
-                state = self.patient.family.addresses[-1].state.encode("utf_8")
-            if self.patient.family.addresses[-1].country:
-                country = self.patient.family.addresses[-1].country.encode("utf_8")
+            if self.patient.address.state:
+                state = self.patient.address.state.encode("utf_8")
+            if self.patient.address.country:
+                country = self.patient.address.country.encode("utf_8")
             address.SetAddr4(state + " " + country)
-            #if self.gnucashtype == "xml":
-            #    self.gcsession.save()
+            address.CommitEdit()
+            if self.gnucashtype == "xml":
+                time.sleep(1)
+                self.gcsession.save()
 
     def add_customer(self):
         try:
@@ -300,11 +308,12 @@ class GnuCashInvoice(GnuCash):
         self.owner = self.book.CustomerLookupByID(self.gcpatient_id)
         # invoice_id is build as
         # Date + appointment_id
-        self.date = (
+        self.datetime = (
             meta.session.query(schedule.Appointment)
                 .filter(schedule.Appointment.id ==appointment_id)
-                .one().agenda.endtime.date()
+                .one().agenda.endtime
             )
+        self.date = self.datetime.date()
 
         if not invoice_id:
             self.invoice_id = "inv_" + self.date.isoformat() + "_" +\
@@ -331,15 +340,17 @@ class GnuCashInvoice(GnuCash):
             invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
             invoice_entry = Entry(self.book, invoice)
             invoice_entry.BeginEdit()
+            invoice_entry.SetDateEntered(self.datetime)
             invoice_entry.SetDescription(description.encode("utf_8"))
             invoice_entry.SetQuantity( GncNumeric(1) )
             invoice_entry.SetInvAccount(self.dentalincomes)
             invoice_entry.SetInvPrice(invoice_value)
             invoice_entry.CommitEdit()
             invoice.CommitEdit()
-            invoice.PostToAccount(self.receivables, self.date, self.date,
+            invoice.PostToAccount(self.receivables, self.datetime, self.date,
                                     description.encode("utf_8"), True, False)
-            self.gcsession.save()
+            if self.gnucashtype == 'xml':
+                self.gcsession.save()
             self.gcsession.end()
             return self.invoice_id
             
@@ -363,7 +374,7 @@ class GnuCashInvoice(GnuCash):
                     if number_of_entries > 1 :
                         invoice.Unpost(True)
                         invoice.BeginEdit()
-                        gnc_core_c.gncEntryBeginEdit(entry)
+                        entry.BeginEdit()
 #                        gnc_core_c.gncInvoiceRemoveEntry(invoice, entry)
                         invoice.RemoveEntry(entry)
                         invoice.CommitEdit()
@@ -371,13 +382,15 @@ class GnuCashInvoice(GnuCash):
                                             self.date, 
                                             description.encode("utf_8"),
                                             True, False)
-                        self.gcsession.save()
+                        if self.gnucashtype == 'xml':
+                            self.gcsession.save()
                         self.gcsession.end()
                         return True
                     if number_of_entries == 1:
                         invoice.Unpost(True)
                         invoice.Destroy()
-                        self.gcsession.save()
+                        if self.gnucashtype == 'xml':
+                            self.gcsession.save()
                         self.gcsession.end()
                         return True
             return False

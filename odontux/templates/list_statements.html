@@ -1,0 +1,22 @@
+{% extends 'summary_patient.html' %}
+{% block main %}
+<div id="list_statements"><a href="{{ url_for('create_quote_proposition',
+                        patient_id=patient.id,
+                        appointment_id=appointment.id) }}">
+  Create quote</a><br />
+<a href="{{ url_for('add_bill',
+                        patient_id=patient.id,
+                        appointment_id=appointment.id) }}">
+  Add Bill</a><br />
+</div>
+<br />
+Quotes:<br />
+{% for quote in quotes %}
+  <a href=#>{{ quote.appointment.agenda.starttime }}</a><br />
+{% endfor %}
+<br />
+Bills:<br />
+{% for bill in bills %}
+  <a href=#>{{ bill.appointment.agenda.starttime }}</a><br />
+{% endfor %}
+{% endblock %}
