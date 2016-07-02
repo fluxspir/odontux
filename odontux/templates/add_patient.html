@@ -1,9 +1,3 @@
-<script type=text/javascript src="/static/js/jquery.min.js"></script>
-<script type=text/javascript src="/static/js/jquery-ui.js"></script>
-<script type="text/javascript">
-  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
-
 {% extends 'summary_patient.html' %}
 {% block main %}
 {% from "_formhelpers.html" import render_field %}
@@ -18,8 +12,6 @@
     {{ render_simple_field(gen_info_form.title, autofocus="autofocus") }}
     {{ render_simple_field(gen_info_form.firstname) }}
     {{ render_simple_field(gen_info_form.lastname) }}
-    {{ render_simple_hidden_field(gen_info_form.family_id) }}
-    {{ render_simple_field(gen_info_form.family_member) }}
     {{ render_simple_field(gen_info_form.identity_number_1) }}
     {{ render_simple_field(gen_info_form.identity_number_2) }}
     {{ render_simple_field(gen_info_form.sex) }}
@@ -29,7 +21,6 @@
     {{ render_simple_field(gen_info_form.preferred_name) }}
     {{ render_simple_field(gen_info_form.correspondence_name) }}
     {{ render_simple_field(gen_info_form.inactive, default=False) }}
-    {{ render_simple_field(gen_info_form.payer) }}
     {{ render_simple_field(hcp_patient_form.healthcare_plans_id) }}
     {{ render_simple_field(gen_info_form.office_id) }}
     {{ render_simple_field(gen_info_form.dentist_id) }}
@@ -40,49 +31,6 @@
   <p><input type="submit" value="Add new patient">
 </form>
 
-<script type=text/javascript>
-  $(function () {
-    $('#family_member').keyup(function(e) {
-      var charTyped = String.fromCharCode(e.which);
-        if (/[a-z\d]/i.test(charTyped)) {
-        $.getJSON($SCRIPT_ROOT + "{{ url_for('find_family_member') }}", {
-          name: $('input[id="family_member"]').val(),
-        },
-        function(data) {
-//          console.log(data.success)
-          if ( data.success == true ) {
-            delete data['success']
-            var choices = []
-            for ( patient in data ) {
-            patient_option = { label: data[patient][0], value: data[patient][0], family_id: data[patient][1] }
-            choices.push(patient_option);
-            }
-            $('#family_member').autocomplete({
-              source: choices,
-              select: function(event, ui){
-                $('#family_member').val(ui.item.value);
-                $('#family_id').val(ui.item.family_id);
-//                $('#street').hide();
-//                $('#street_number').hide();
-//                $('#building').hide();
-//                $('#complement').hide();
-//                $('#district').hide();
-              }
-            });
-          } else {
-            $('#family_member').val(null);
-            $('#family_id').val(null);
-            return false;
-          }
-        });
-        return false
-      }
-    });
-  });
-
-  function FindFamilyId() {}
-
-</script>
 {% endblock %}
 
 <!---->
