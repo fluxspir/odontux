@@ -9,6 +9,8 @@
 <form method="post" action="{{ url_for('add_patient', 
                                         meeting_id=meeting_id) }}">
   <dl>
+    {{ render_simple_field(gen_info_form.office_id) }}
+    {{ render_simple_field(gen_info_form.dentist_id) }}<br />
     {{ render_simple_field(gen_info_form.title, autofocus="autofocus") }}
     {{ render_simple_field(gen_info_form.firstname) }}
     {{ render_simple_field(gen_info_form.lastname) }}
@@ -20,10 +22,8 @@
     {{ render_simple_field(gen_info_form.qualifications) }}
     {{ render_simple_field(gen_info_form.preferred_name) }}
     {{ render_simple_field(gen_info_form.correspondence_name) }}
-    {{ render_simple_field(gen_info_form.inactive, default=False) }}
+    {{ render_simple_field(gen_info_form.inactive) }}
     {{ render_simple_field(hcp_patient_form.healthcare_plans_id) }}
-    {{ render_simple_field(gen_info_form.office_id) }}
-    {{ render_simple_field(gen_info_form.dentist_id) }}
     {{ add_address_form_fields(address_form) }}
     {{ add_phone_form_fields(phone_form) }}
     {{ add_mail_form_fields(mail_form) }}
