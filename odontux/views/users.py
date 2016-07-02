@@ -52,7 +52,7 @@ class OdontuxUserGeneralInfoAdminForm(Form):
                                     validators.Length(min=1, max=20)],
                                      filters=[forms.lower_field])
     role = SelectField(_('role'), coerce=int)
-    active = BooleanField(_('active'))
+    active = BooleanField(_('active'), default=True)
     comments = TextAreaField(_('comments'))
     modified_by = IntegerField(_('modified_by'), [validators.Optional()])
     creation_date = DateField(_("creation_date"))

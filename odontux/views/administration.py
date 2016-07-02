@@ -53,7 +53,7 @@ class PatientGeneralInfoForm(Form):
     sex = RadioField(_('Sex'), choices=[("m", _("Male")), ("f", _("Female"))])
     dob = DateField(_('Date of Birth'), [validators.Optional()])
     job = TextField(_('Job'))
-    inactive = BooleanField(_('Inactive'))
+    inactive = BooleanField(_('Inactive'), default=False)
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
 #    family_id = HiddenField(_('family_id'), [validators.Optional()])
@@ -131,9 +131,14 @@ def add_patient(meeting_id=0):
                 for office in meta.session.query(users.DentalOffice).all() ]
     gen_info_form.dentist_id.choices = [ (dentist.id, dentist.firstname + " " 
                                                             + dentist.lastname)
-                for dentist in meta.session.query(users.OdontuxUser).filter(
-                users.OdontuxUser.role == constants.ROLE_DENTIST).order_by(
-                users.OdontuxUser.lastname).all() ]
+                for dentist in meta.session.query(users.OdontuxUser)
+                .filter(users.OdontuxUser.role == constants.ROLE_DENTIST,
+                        users.OdontuxUser.active.is_(True))
+                .order_by(users.OdontuxUser.lastname)
+                .all() 
+    ]
+    if len(gen_info_form.dentist_id.choices) > 1:
+        gen_info_form.dentist_id.choices.insert( 0, (0, "") )
 
     hcp_patient_form = HealthCarePlanPatientForm(request.form)
     hcp_patient_form.healthcare_plans_id.choices = [ (hc.id, hc.name) 
