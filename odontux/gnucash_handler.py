@@ -164,9 +164,8 @@ class GnuCashCustomer(GnuCash):
                                 name.encode("utf_8"))
         new_customer.CommitEdit()
         if self.gnucashtype == "xml":
+            time.sleep(1)
             self.gcsession.save()
-            while self.gcsession.save_in_progress():
-                continue
         return new_customer, name
 
     def _update_name(self):
@@ -178,9 +177,8 @@ class GnuCashCustomer(GnuCash):
         customer.SetName(name.encode("utf_8"))
         customer.CommitEdit()
         if self.gnucashtype == "xml":
-            self.gcsession.safe_save()
-            while self.gcsession.save_in_progress():
-                continue
+            time.sleep(1)
+            self.gcsession.save()
         return customer, name
 
     def _set_address(self, customer, patientname):
@@ -219,15 +217,18 @@ class GnuCashCustomer(GnuCash):
 #                    payername.join(", ", payer)
 #
         address = customer.GetAddr()
-        address.SetName(u"{} {} {}".format(self.patient.title, self.patient.lastname, 
-                                                            self.patient.firstname)
-        )
+        #address.SetName("{} {} {}".format(self.patient.title, self.patient.lastname, 
+        #                                                    self.patient.firstname)
+        #)
+        #address.SetName(self.patient.title + " " + self.patient.lastname + " "\
+        #                + self.patient.firstname)
+        address.SetName(patientname.encode("utf-8"))
         if self.patient.address:
             if self.patient.address.street:
-                address.SetAddr1(u"{}, {}".format(self.patient.address.street,
-                                        self.patient.address.street_number)
+                address.SetAddr1(self.patient.address.street.encode("utf-8") +
+                    ", " +self.patient.address.street_number.encode("utf-8")
                 )
-            if self.patientaddress.building:
+            if self.patient.address.building:
                 address.SetAddr2(self.patient.address.building.encode("utf_8")
             )
             district = ""
@@ -249,9 +250,8 @@ class GnuCashCustomer(GnuCash):
             address.SetAddr4(state + " " + country)
             address.CommitEdit()
             if self.gnucashtype == "xml":
-                self.gcsession.safe_save()
-                while self.gcsession.save_in_progress:
-                    continue
+                time.sleep(1)
+                self.gcsession.save()
 
     def add_customer(self):
         try:
