@@ -89,7 +89,6 @@ class GnuCash():
         # Set up the Book for accounting
         self.gcsession = GCSession(profissionnalaccounting_url, True)
         self.book = self.gcsession.get_book()
-
         # Set up the root on accounting book
         self.root = self.book.get_root_account()
         # Assets
@@ -163,8 +162,11 @@ class GnuCashCustomer(GnuCash):
                + self.patient.firstname
         new_customer = Customer(self.book, self.gcpatient_id, self.currency, 
                                 name.encode("utf_8"))
+        new_customer.CommitEdit()
         if self.gnucashtype == "xml":
-            self.gcsession.save()
+            self.gcsession.safe_save()
+            while self.gcsession.save_in_progress():
+                continue
         return new_customer, name
 
     def _update_name(self):
@@ -172,9 +174,13 @@ class GnuCashCustomer(GnuCash):
         name = self.patient.title + " " + self.patient.lastname + " " \
                + self.patient.firstname
         customer = self.book.CustomerLookupByID(self.gcpatient_id)
+        customer.BeginEdit()
         customer.SetName(name.encode("utf_8"))
+        customer.CommitEdit()
         if self.gnucashtype == "xml":
-            self.gcsession.save()
+            self.gcsession.safe_save()
+            while self.gcsession.save_in_progress():
+                continue
         return customer, name
 
     def _set_address(self, customer, patientname):
@@ -185,68 +191,67 @@ class GnuCashCustomer(GnuCash):
         in the family, and the " Family patient.lastname " if there
         is several patients / payers in this family
         """
-        # Get the payers' names
-        payername = ""
-        payerlist = []
-        for payer in self.patient.family.payers:
-            # The patient is noted as a payer
-            if payer.patient_id == self.patient_id:
-                # The patient pays for himself
-                payername = patientname
-                break
-            else:
-                payerlist.append(payer.patient_id)
-
-        if not payername:
-            # Case the patient ain't recorded as a payer
-            if not payerlist:
-                # Curious case where nobody recorded as a payer for this family
-                # The patient will finally be the payer for gnucash.Customer
-                payername = patientname
-            else:
-                for patient_id in payerlist:
-                    payer = meta.session.query(administration.Patient)\
-                            .filter(administration.Patient.id == patient_id)
-                    payer = payer.one()
-                    payer = payer.title + " " + payer.lastname + " " +\
-                            payer.firstname
-                    payername.join(", ", payer)
-
+#        # Get the payers' names
+#        payername = ""
+#        payerlist = []
+#        for payer in self.patient.family.payers:
+#            # The patient is noted as a payer
+#            if payer.id == self.patient_id:
+#                # The patient pays for himself
+#                payername = patientname
+#                break
+#            else:
+#                payerlist.append(payer.patient_id)
+#
+#        if not payername:
+#            # Case the patient ain't recorded as a payer
+#            if not payerlist:
+#                # Curious case where nobody recorded as a payer for this family
+#                # The patient will finally be the payer for gnucash.Customer
+#                payername = patientname
+#            else:
+#                for patient_id in payerlist:
+#                    payer = meta.session.query(administration.Patient)\
+#                            .filter(administration.Patient.id == patient_id)
+#                    payer = payer.one()
+#                    payer = payer.title + " " + payer.lastname + " " +\
+#                            payer.firstname
+#                    payername.join(", ", payer)
+#
         address = customer.GetAddr()
-        address.SetName(payername.encode("utf_8"))
-        if self.patient.family.addresses:
-            if self.patient.family.addresses[-1].street:
-                address.SetAddr1(self.patient.family.addresses[-1]
-                    .street.encode("utf_8") + ", " +
-                    self.patient.family.addresses[-1]
-                    .street_number.encode("utf_8")
+        address.SetName(u"{} {} {}".format(patient.title, patient.lastname, 
+                                                            patient.firstname)
+        )
+        if self.patient.address:
+            if self.patient.address.street:
+                address.SetAddr1(u"{}, {}".format(self.patient.address.street,
+                                        self.patient.address.street_number)
                 )
             if self.patient.family.addresses[-1].building:
-                address.SetAddr2(self.patient.family.addresses[-1]
-                                .building.encode("utf_8"))
+                address.SetAddr2(self.patient.address..building.encode("utf_8")
+            )
             district = ""
             zip_code = ""
             city = ""
-            if self.patient.family.addresses[-1].district:
-                district = self.patient.family.addresses[-1]\
-                            .district.encode("utf_8")
-            if self.patient.family.addresses[-1].zip_code:
-                zip_code = self.patient.family.addresses[-1]\
-                            .zip_code.encode("utf_8")
-            if self.patient.family.addresses[-1].city:
-                city = self.patient.family.addresses[-1].city.encode("utf_8")
+            if self.patient.address.district:
+                district = self.patient.address.district.encode("utf_8")
+            if self.patient.address.zip_code:
+                zip_code = self.patient.address.zip_code.encode("utf_8")
+            if self.patient.address.city:
+                city = self.patient.address.city.encode("utf_8")
             address.SetAddr3(district + " " + zip_code  + " " + city)
             state = ""
             country = ""
-            if self.patient.family.addresses[-1].state:
-                state = self.patient.family.addresses[-1].state.encode("utf_8")
-            if self.patient.family.addresses[-1].country:
-                country = self.patient.family.addresses[-1].country.encode("utf_8")
+            if self.patient.address.state:
+                state = self.patient.address.state.encode("utf_8")
+            if self.patient.address.country:
+                country = self.patient.address.country.encode("utf_8")
             address.SetAddr4(state + " " + country)
             address.CommitEdit()
             if self.gnucashtype == "xml":
-                time.sleep(1) # obrigatory to avoid a FILE IOERROR
-                self.gcsession.save()
+                self.gcsession.safe_save()
+                while self.gcsession.save_in_progress:
+                    continue
 
     def add_customer(self):
         try:

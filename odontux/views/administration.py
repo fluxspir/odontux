@@ -56,15 +56,14 @@ class PatientGeneralInfoForm(Form):
     inactive = BooleanField(_('Inactive'))
     qualifications = TextField(_('qualifications'), 
                                 filters=[forms.title_field])
-    family_id = HiddenField(_('family_id'), [validators.Optional()])
-    family_member = TextField(_('family_member'), [validators.Optional()])
+#    family_id = HiddenField(_('family_id'), [validators.Optional()])
+#    family_member = TextField(_('family_member'), [validators.Optional()])
     office_id = SelectField(_('Office_id'), [validators.Required(
                                message=_("Please specify office_id"))], 
                                coerce=int)
     dentist_id = SelectField(_('Dentist_id'), [validators.Required(
                                 message=_("Please specify dentist_id"))],
                                 coerce=int)
-    payer = BooleanField(_('is payer'), default=True)
     time_stamp = DateField(_("Time_stamp"), [validators.Optional()])
    
 class HealthCarePlanPatientForm(Form):
@@ -81,34 +80,34 @@ def enter_patient_file(body_id):
     patient = checks.get_patient(body_id)
     return render_template('patient_file.html', patient=patient)
 
-@app.route('/find/family_member')
-def find_family_member():
-    name = request.args.get('name', None)
-    if name:
-#        # Won't work:part of keyword would be in firstname and other in last.
-#        name = name.split(" ")
-#        keyword = u"%"
-        keyword = u'%{}%'.format(name)
-#        for name_part in name:
-#            keyword = keyword + u'{}%'.format(name_part)
-        patients = ( meta.session.query(administration.Patient)
-                        .filter(or_(
-                            administration.Patient.firstname.ilike(keyword),
-                            administration.Patient.lastname.ilike(keyword) )
-                        ).order_by(administration.Patient.firstname,
-                                administration.Patient.lastname )
-                        .all()
-        )
-        if not patients:
-            return jsonify(success=False)
-        data = {}
-        for patient in patients:
-            data[str(patient.id)] = ( patient.firstname + " " + 
-                                                            patient.lastname,
-                                        patient.family.id )
-        return jsonify(success=True, **data)
-    return jsonify(success=False)
-
+#@app.route('/find/family_member')
+#def find_family_member():
+#    name = request.args.get('name', None)
+#    if name:
+##        # Won't work:part of keyword would be in firstname and other in last.
+##        name = name.split(" ")
+##        keyword = u"%"
+#        keyword = u'%{}%'.format(name)
+##        for name_part in name:
+##            keyword = keyword + u'{}%'.format(name_part)
+#        patients = ( meta.session.query(administration.Patient)
+#                        .filter(or_(
+#                            administration.Patient.firstname.ilike(keyword),
+#                            administration.Patient.lastname.ilike(keyword) )
+#                        ).order_by(administration.Patient.firstname,
+#                                administration.Patient.lastname )
+#                        .all()
+#        )
+#        if not patients:
+#            return jsonify(success=False)
+#        data = {}
+#        for patient in patients:
+#            data[str(patient.id)] = ( patient.firstname + " " + 
+#                                                            patient.lastname,
+#                                        patient.family.id )
+#        return jsonify(success=True, **data)
+#    return jsonify(success=False)
+#
 @app.route('/add/patient/', methods=['GET', 'POST'])
 @app.route('/add/patient?meeting_id=<int:meeting_id>', methods=['GET', 'POST'])
 def add_patient(meeting_id=0):
@@ -172,41 +171,42 @@ def add_patient(meeting_id=0):
             new_patient.hcs.append(hcp)
         meta.session.commit()
 
-        # A family is define in odontux mostly by the fact that
-        # they live together. 
-        family_field_list = ['family_id']
-        for f in get_family_field_list():
-            # If patient in a family that is already in database, just tell 
-            # which family he's in.
-            if getattr(gen_info_form, f).data:
-                value[f] = int(getattr(gen_info_form, f).data)
-            else:
-                # Create new family and put the new patient in it.
-                new_family = administration.Family()
-                meta.session.add(new_family)
-                meta.session.commit()
-                new_patient.family_id = new_family.id
-                meta.session.commit()
+#        # A family is define in odontux mostly by the fact that
+#        # they live together. 
+#        family_field_list = ['family_id']
+#        for f in family_field_list:
+#            # If patient in a family that is already in database, just tell 
+#            # which family he's in.
+#            if getattr(gen_info_form, f).data:
+#                value[f] = int(getattr(gen_info_form, f).data)
+#            else:
+#                # Create new family and put the new patient in it.
+#                new_family = administration.Family()
+#                meta.session.add(new_family)
+#                meta.session.commit()
+#                new_patient.family_id = new_family.id
+#                meta.session.commit()
                 # Give the patient, member of family an address 
-                address_args = {f: getattr(address_form, f).data 
+        address_args = {f: getattr(address_form, f).data 
                                 for f in forms.address_fields}
 
-                if any(address_args.values()):
-                    new_patient.family.addresses.append(
-                                        administration.Address(**address_args))
-        meta.session.commit()
-
-        # Now, we'll see if patient will pay for himself and for his family ;
-        # if not, it must be someone from his family who'll pay.
-        if gen_info_form.payer.data:
-            # Mark the patient as a payer
-            new_payer = administration.Payer(**{"patient_id": new_patient.id})
-            meta.session.add(new_payer)
+        if any(address_args.values()):
+            new_address = admnistration.Address(**address_args)
+            meta.session.add(new_address)
             meta.session.commit()
-            # precise that in his family, he pays.
-            new_patient.family.payers.append(new_payer)
-            meta.session.commit()
+            new_patient.address_id = new_address.id
 
+#        # Now, we'll see if patient will pay for himself and for his family ;
+#        # if not, it must be someone from his family who'll pay.
+#        if gen_info_form.payer.data:
+#            # Mark the patient as a payer
+#            new_payer = administration.Payer(**{'id': new_patient.id})
+#            meta.session.add(new_payer)
+#            meta.session.commit()
+#            # precise that in his family, he pays.
+#            new_patient.family.payers.append(new_payer)
+#            meta.session.commit()
+#            
         # Phone number, in order to contact him.
         
         phone_args = {g: getattr(phone_form, f).data
@@ -313,7 +313,16 @@ def update_patient(body_id, form_to_display):
     if request.method == 'POST' and gen_info_form.validate():
         for f in get_gen_info_field_list():
             setattr(patient, f, getattr(gen_info_form, f).data)
+
+#        if not gen_info_form.family_id.data or not gen_info_form.family_member.data:
+#            new_family = administration.Family()
+#            meta.session.add(new_family)
+#            meta.session.commit()
+#            patient.family_id = new_family.id
+#        else:
+#            patient.family_id = gen_info_form.family_id.data
         meta.session.commit()
+
         # We should update in gnucash too the patient
         comptability = gnucash_handler.GnuCashCustomer(patient.id,  
                                                        patient.dentist_id) 
@@ -327,12 +336,12 @@ def update_patient(body_id, form_to_display):
     for f in get_gen_info_field_list():
         getattr(gen_info_form, f).data = getattr(patient, f)
 
-    # payer
-    for payer in patient.family.payers:
-        if patient.id == payer.id:
-            gen_info_form.payer.data = True
-    gen_info_form.family_id.data = patient.family.id
-    
+#    # payer
+#    for payer in patient.family.payers:
+#        if patient.id == payer.id:
+#            gen_info_form.payer.data = True
+#    gen_info_form.family_id.data = patient.family_id
+#    
     address_form = forms.AddressForm(request.form)
     phone_form = forms.PhoneForm(request.form)
     mail_form = forms.MailForm(request.form)
