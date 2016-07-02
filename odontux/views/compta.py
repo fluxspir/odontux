@@ -6,16 +6,22 @@
 #
 
 import pdb
-from flask import session, render_template, request, redirect, url_for, jsonify
+import os
+import datetime
+import md5
+from flask import ( session, render_template, request, redirect, url_for, 
+                    make_response ) 
 import sqlalchemy
 from sqlalchemy import or_
 from gettext import gettext as _
 
 from odontux.odonweb import app
 from odontux import constants, checks, gnucash_handler
-from odontux.models import ( meta, compta)
+from odontux.models import meta, compta, documents
 
 from odontux.views.log import index
+
+from odontux.pdfhandler import make_payment_receipt
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      DecimalField, HiddenField, IntegerField, validators,
@@ -29,37 +35,86 @@ class PaymentTypeForm(Form):
     update = SubmitField(_('Update'))
 
 class PatientPaymentForm(Form):
-    payer_id = HiddenField(_('payer_id'))
     patient_id = HiddenField(_('patient_id'))
     mean_id = SelectField(_("Payment's mean"), coerce=int)
     amount = DecimalField(_('Amount'), [validators.Required()])
     comments = TextAreaField(_('Comments'))
+    make_payment = SubmitField(_('Make Payment'))
 
-@app.route('/make/payment&pid=<int:patient_id>')
-def make_payment(patient_id):
-    
+@app.route('/make/payment&pid=<int:patient_id>&aid=<int:appointment_id>', 
+                                                    methods=['GET', 'POST'])
+def make_payment(patient_id, appointment_id):
     patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(appointment_id)
     payment_form = PatientPaymentForm(request.form)
     payment_form.mean_id.choices = [ ( mean.id, mean.name ) for mean in
                                 meta.session.query(compta.PaymentType).all() ]
     
     if request.method == 'POST' and payment_form.validate():
-        pass
+        mean = ( meta.session.query(compta.PaymentType)
+            .filter(compta.PaymentType.id == payment_form.mean_id.data)
+            .one()
+        )
+        pdf_out = make_payment_receipt(patient_id, appointment_id, 
+                                                    payment_form, mean.name)
+        if not pdf_out:
+            return render_template('make_payment.html', patient=patient,
+                                        appointment=appointment,
+                                        payment_form=payment_form)
+        filename = md5.new(pdf_out).hexdigest()
+        with open(os.path.join(
+                        app.config['DOCUMENT_FOLDER'], filename), 'w') as f:
+            f.write(pdf_out)
+        file_values = {
+            'md5': filename,
+            'file_type': constants.FILE_RECEIPT,
+            'mimetype': 'application/pdf'
+        }
+        new_file = ( meta.session.query(documents.Files)
+            .filter(documents.Files.md5 == filename)
+            .one_or_none()
+        )
+        if not new_file:
+            new_file = documents.Files(**file_values)
+            meta.session.add(new_file)
+            meta.session.commit()
+
+        receipt_values = {
+            'patient_id': patient_id,
+            'mean_id': payment_form.mean_id.data,
+            'receipt_id': new_file.id,
+            'amount': payment_form.amount.data,
+            'comments': payment_form.comments.data,
+            'cashin_date': datetime.date.today(),
+        }
+        new_payment = compta.Payment(**receipt_values)
+        meta.session.add(new_payment)
+        meta.session.commit()
+        return redirect(url_for('list_acts', patient_id=patient_id,
+                                            appointment_id=appointment_id))
 
     if request.method == 'GET':
-        pass
-        
-    return render_template('make_payment', patient=patient)
+        payment_form.amount.data = patient.due()
+
+    payment_form.patient_id.data = patient.id
+    return render_template('make_payment.html', patient=patient,
+                                                appointment=appointment,
+                                                payment_form=payment_form)
 
 @app.route('/patient/payments/&pid=<int:patient_id>')
-def patient_payments(patient_id):
+@app.route('/patient/payments/&pid=<int:patient_id>&aid=<int:appointment_id>')
+def patient_payments(patient_id, appointment_id=0):
     
     patient = checks.get_patient(patient_id)
+    if not appointment_id:
+        appointment_id = patient.appointments[-1].id
+    appointment = checks.get_appointment(appointment_id)
     payments = ( meta.session.query(compta.Payment)
                     .filter(compta.Payment.patient_id == patient_id)
                     .all()
     )
     return render_template('patient_payments.html', patient=patient,
+                                                    appointment=appointment,
                                                     payments=payments)
 
 @app.route('/show_payments_type&ptid=<int:payments_type_id>')

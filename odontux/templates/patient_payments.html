@@ -2,13 +2,16 @@
 {% block main %}
 <div id="list_payments">
 <a href="{{ url_for('make_payment',
-                        patient_id=patient.id) }}">
+                        patient_id=patient.id,
+                        appointment_id=appointment.id) }}">
   Make a payment</a><br />
 </div>
 <br />
-Bills:<br />
+Receipts:<br />
 {% for payment in payments %}
-  {{ payment.mean.name }} {{ payment.amount }} {{ payment.cashin_date }}<br />
+  <a href="{{ url_for('display_file', file_id=payment.receipt_id) }}">
+  {{ payment.mean.name }} {{ payment.amount }} {{ payment.cashin_date }}
+  </a><br />
 {% endfor %}
 <br />
 {% endblock %}

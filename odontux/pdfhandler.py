@@ -8,6 +8,8 @@ import pdb
 
 from odontux.models import meta, users
 
+from odontux.odonweb import app
+
 from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER, TA_RIGHT, TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import (SimpleDocTemplate, Paragraph, 
@@ -198,6 +200,39 @@ def get_document_base(patient_id, appointment_id):
     return ( output, doc, Story, styles, patient, appointment, dentist, 
             dental_office )
  
+def make_payment_receipt(patient_id, appointment_id, payment_form, mean):
+
+    output, doc, Story, styles, patient, appointment, dentist, dental_office =\
+                                get_document_base(patient_id, appointment_id)
+
+    doc.patient_info = patient
+    Story.append(Paragraph('Recibo odontológico', 
+                                                styles['my_title']))
+    Story.append(Spacer(1, 30 * mm))
+    text = ( u'Recibo neste dia {} o pagamento em {} de {} {}, CPF: {} de uma soma total de {} {} por serviços odontológicos que serão detalhados na fatura.'.format(
+                                        appointment.agenda.starttime.date(),
+                                        mean,
+                                        patient.firstname, patient.lastname,
+                                        patient.identity_number_2,
+                                        payment_form.amount.data,
+                                        app.config['CURRENCY'])
+    )
+    Story.append(Paragraph(text, styles['normal']))
+    Story.append(Spacer(1, 20 * mm))
+    Story.append(Paragraph(u'Este recibo NÃO tem valor legal. Será emitida a nota fiscal quando os serviços forem realizados.',
+                                                            styles['normal']))
+    Story.append(Spacer(1, 40 * mm))
+    Story.append(Paragraph('Dr ' + dentist.firstname + " " + dentist.lastname,
+                                            styles['signature']))
+    Story.append(Paragraph(u'Cirurgião-Dentista - ' + dentist.registration, 
+                                                        styles['signature']))
+
+    doc.build(Story, onFirstPage=generate_dental_office_informations)
+    pdf_out = output.getvalue()
+    output.close()
+    return pdf_out
+
+
 def make_cessation_certificate(patient_id, appointment_id, cessation_form):
 
     output, doc, Story, styles, patient, appointment, dentist, dental_office =\

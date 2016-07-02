@@ -37,6 +37,13 @@ def get_odontux_folder():
         os.makedirs(odontux_folder)
     return odontux_folder
 
+def get_odontux_currency():
+    parser = ConfigParser.ConfigParser()
+    home = os.path.expanduser("~")
+    parser.read(os.path.join(home, '.odontuxrc'))
+    currency = parser.get('environment', 'currency')
+    return currency
+
 def get_odontux_document_folder():
     parser = ConfigParser.ConfigParser()
     home = os.path.expanduser("~")

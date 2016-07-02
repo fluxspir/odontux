@@ -253,7 +253,7 @@ def create_quote_proposition(patient_id, appointment_id, quotes_id=''):
             response.mimetype = 'application/pdf'
             filename = md5.new(pdf_out).hexdigest()
             with open(os.path.join(
-                            app.config['DOCUMENT_FOLDER'], filename), 'w') as f:
+                        app.config['DOCUMENT_FOLDER'], filename), 'w') as f:
                 f.write(pdf_out)
 
             file_values = {

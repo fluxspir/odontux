@@ -8,7 +8,8 @@
 from flask import session, redirect, url_for, render_template, request, abort
 
 from odontux import constants, checks
-from odontux.models import meta, administration, schedule, act, teeth, compta
+from odontux.models import ( meta, administration, schedule, act, teeth, 
+                            compta, documents )
 from odontux.odonweb import app
 from odontux.views.administration import enter_patient_file
 from odontux.views.log import index
