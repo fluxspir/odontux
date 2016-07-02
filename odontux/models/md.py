@@ -8,9 +8,10 @@
 
 from meta import Base
 
-from tables import (medecine_doctor_address_table, medecine_doctor_mail_table,
+from tables import (medecine_doctor_mail_table,
                     medecine_doctor_phone_table)
 
+import contact
 import sqlalchemy
 from sqlalchemy import Table, Column, Integer, String
 from sqlalchemy import ForeignKey
@@ -22,12 +23,11 @@ class MedecineDoctor(Base):
     id = Column(Integer, primary_key=True)
     lastname = Column(String, nullable=False)
     firstname = Column(String, default="")
-    addresses = relationship("Address", secondary=
-                medecine_doctor_address_table, backref="medecine_doctor")
+    address_id = Column(Integer, ForeignKey(contact.Address.id))
+    address = relationship("Address", backref="medecine_doctor")
     phones = relationship("Phone", secondary=medecine_doctor_phone_table,
                           backref="medecine_doctor")
     mails = relationship("Mail", secondary=medecine_doctor_mail_table,
                          backref="medecine_doctor")
-    patient = relationship("Patient", backref="medecine_doctor")
-
+    patients = relationship("Patient", backref="medecine_doctor")
 

@@ -1,5 +1,12 @@
+<script type=text/javascript src="/static/js/jquery.min.js"></script>
+<script type=text/javascript src="/static/js/jquery-ui.js"></script>
+<script type="text/javascript">
+  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
+
 {% from "_formhelpers.html" import render_field %}
-{% from "_formhelpers.html" import render_simple_field %}
+{% from "_formhelpers.html" import render_simple_field, render_simple_hidden_field %}
 {% from "_formhelpers.html" import render_table_field %}
 {% from "_formhelpers.html" import render_table_hidden_field %}
 {% from "_contactformhelper.html" import update_phone_form %}
@@ -35,10 +42,8 @@
         {{ render_field(gen_info_form.preferred_name) }}
         {{ render_field(gen_info_form.correspondence_name) }}
         {{ render_field(gen_info_form.inactive) }}
-        {{ render_field(gen_info_form.family_id) }}
         {{ render_field(gen_info_form.office_id) }}
         {{ render_field(gen_info_form.dentist_id) }}
-        {{ render_field(gen_info_form.payer) }}
         <input type=submit value="Update" />
       </dl>
     </form>
@@ -85,9 +90,12 @@
   </div>
   {{ update_phone_form(phone_form, body, "update_patient_phone", "delete_patient_phone", "add_patient_phone") }}
 <!-- Add a trick for body.family_id or update_address_form -->
-  {{ update_address_form(address_form, body, body.family.addresses, "update_patient_address", "delete_patient_address", "add_patient_address") }}
+  {{ update_address_form(address_form, body, "update_patient_address") }}
   {{ update_mail_form(mail_form, body, "update_patient_mail", "delete_patient_mail", "add_patient_mail") }}
 
 </div>
 {% endif %}
+<script type=text/javascript src='/static/js/family_members.js'>
+</script>
+
 {% endblock %}

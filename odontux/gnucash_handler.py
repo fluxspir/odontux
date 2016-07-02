@@ -164,7 +164,7 @@ class GnuCashCustomer(GnuCash):
                                 name.encode("utf_8"))
         new_customer.CommitEdit()
         if self.gnucashtype == "xml":
-            self.gcsession.safe_save()
+            self.gcsession.save()
             while self.gcsession.save_in_progress():
                 continue
         return new_customer, name
@@ -219,16 +219,16 @@ class GnuCashCustomer(GnuCash):
 #                    payername.join(", ", payer)
 #
         address = customer.GetAddr()
-        address.SetName(u"{} {} {}".format(patient.title, patient.lastname, 
-                                                            patient.firstname)
+        address.SetName(u"{} {} {}".format(self.patient.title, self.patient.lastname, 
+                                                            self.patient.firstname)
         )
         if self.patient.address:
             if self.patient.address.street:
                 address.SetAddr1(u"{}, {}".format(self.patient.address.street,
                                         self.patient.address.street_number)
                 )
-            if self.patient.family.addresses[-1].building:
-                address.SetAddr2(self.patient.address..building.encode("utf_8")
+            if self.patientaddress.building:
+                address.SetAddr2(self.patient.address.building.encode("utf_8")
             )
             district = ""
             zip_code = ""

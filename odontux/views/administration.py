@@ -22,7 +22,7 @@ from odontux import gnucash_handler
 from odontux.views import forms
 from odontux.views.log import index
 from odontux.models import ( meta, administration, users, act, headneck, 
-                            endobuccal )
+                            endobuccal, contact )
 
 
 # Fields too use in treatment of forms
@@ -189,12 +189,12 @@ def add_patient(meeting_id=0):
                 # Give the patient, member of family an address 
         address_args = {f: getattr(address_form, f).data 
                                 for f in forms.address_fields}
-
         if any(address_args.values()):
-            new_address = admnistration.Address(**address_args)
+            new_address = contact.Address(**address_args)
             meta.session.add(new_address)
             meta.session.commit()
             new_patient.address_id = new_address.id
+            meta.session.commit()
 
 #        # Now, we'll see if patient will pay for himself and for his family ;
 #        # if not, it must be someone from his family who'll pay.
@@ -213,13 +213,13 @@ def add_patient(meeting_id=0):
                       for f,g in forms.phone_fields}
 
         if any(phone_args.values()):
-            new_patient.phones.append(administration.Phone(**phone_args))
+            new_patient.phones.append(contact.Phone(**phone_args))
             meta.session.commit()
 
         # Mail
         mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
         if any(mail_args.values()):
-            new_patient.mails.append(administration.Mail(**mail_args))
+            new_patient.mails.append(contact.Mail(**mail_args))
             meta.session.commit()
 
 #        ##################################
@@ -456,22 +456,22 @@ def update_patient_address(body_id, form_to_display):
                                 form_to_display="address"))
     return redirect(url_for('list_patients'))
         
-@app.route('/patient/add_patient_address?id=<int:body_id>'
-           '&form_to_display=<form_to_display>/', methods=['POST'])
-def add_patient_address(body_id, form_to_display):
-    if forms.add_body_address(body_id, "patient"):
-        return redirect(url_for("update_patient", body_id=body_id,
-                                form_to_display="address"))
-    return redirect(url_for('list_patients'))
-
-@app.route('/patient/delete_patient_address?id=<int:body_id>'
-           '&form_to_display=<form_to_display>/', methods=['POST'])
-def delete_patient_address(body_id, form_to_display):
-    if forms.delete_body_address(body_id, "patient"):
-        return redirect(url_for("update_patient", body_id=body_id,
-                                form_to_display="address"))
-    return redirect(url_form('list_patients'))
-
+#@app.route('/patient/add_patient_address?id=<int:body_id>'
+#           '&form_to_display=<form_to_display>/', methods=['POST'])
+#def add_patient_address(body_id, form_to_display):
+#    if forms.add_body_address(body_id, "patient"):
+#        return redirect(url_for("update_patient", body_id=body_id,
+#                                form_to_display="address"))
+#    return redirect(url_for('list_patients'))
+#
+#@app.route('/patient/delete_patient_address?id=<int:body_id>'
+#           '&form_to_display=<form_to_display>/', methods=['POST'])
+#def delete_patient_address(body_id, form_to_display):
+#    if forms.delete_body_address(body_id, "patient"):
+#        return redirect(url_for("update_patient", body_id=body_id,
+#                                form_to_display="address"))
+#    return redirect(url_form('list_patients'))
+#
 @app.route('/patient/update_patient_phone?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_patient_phone(body_id, form_to_display):

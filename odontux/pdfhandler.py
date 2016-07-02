@@ -142,16 +142,16 @@ def generate_dental_office_informations(canvas, doc):
                             patient.firstname + " " + patient.lastname)
         patient_info_height = _new_height(patient_info_height)
         canvas.drawString( patient_info_width, patient_info_height,
-                            patient.family.addresses[-1].street + ", " + 
-                            patient.family.addresses[-1].street_number + " ; "+
-                            patient.family.addresses[-1].complement )
+                            patient.address.street + ", " + 
+                            patient.address.street_number + " ; "+
+                            patient.address.complement )
         patient_info_height = _new_height(patient_info_height)
         canvas.drawString( patient_info_width, patient_info_height,
-                            patient.family.addresses[-1].district + " - " +
-                            patient.family.addresses[-1].zip_code)
+                            patient.address.district + " - " +
+                            patient.address.zip_code)
         patient_info_height = _new_height(patient_info_height)
         canvas.drawString( patient_info_width, patient_info_height,
-                            patient.family.addresses[-1].city )
+                            patient.address.city )
 
     canvas.restoreState()
 
@@ -422,10 +422,12 @@ def make_prescription(patient_id, appointment_id, prescription_form):
     # Patient's dentification 
     Story.append(Paragraph('Patiente: ' + patient.firstname + " "\
                                     + patient.lastname, styles['patient']))
-    Story.append(Paragraph(patient.family.addresses[-1].street + " " +\
-                patient.family.addresses[-1].complement, styles['patient']))
-    Story.append(Paragraph(patient.family.addresses[-1].city + " " +\
-                patient.family.addresses[-1].zip_code, styles['patient']))
+    Story.append(Paragraph(patient.address.street + " " +\
+                patient.address.street_number + " " +\
+                patient.address.complement, styles['patient']))
+    Story.append(Paragraph(patient.address.district + " " +\
+                patient.address.zip_code + " " +\
+                patient.address.city, styles['patient']))
     Story.append(Spacer(1, 5 * mm))
     for drug in sorted(prescription_form.drugs, key=lambda x: x.position.data):
         if not drug.position.data:

@@ -7,7 +7,7 @@
 
 from flask import render_template, request, redirect, url_for, session
 import sqlalchemy
-from odontux.models import meta, md, administration
+from odontux.models import meta, md, contact
 from odontux.odonweb import app
 from gettext import gettext as _
 
@@ -63,18 +63,21 @@ def add_md():
         address_args = {f: getattr(address_form, f).data 
                         for f in forms.address_fields}
         if any(address_args.values()):
-            new_medecine_doctor.addresses.append(administration.Address(
-                                                             **address_args))
+            new_address = contact.Address(**address_args)
+            meta.session.add(new_address)
+            meta.session.commit()
+            new_medecine_doctor.address_id = new_address.id
+#            new_medecine_doctor.addresses.append(contact.Address(
+#                                                             **address_args))
 
         phone_args = {g: getattr(phone_form, f).data 
                       for f,g in forms.phone_fields}
         if any(phone_args.values()):
-            new_medecine_doctor.phones.append(administration.Phone(
-                                                                **phone_args))
+            new_medecine_doctor.phones.append(contact.Phone(**phone_args))
 
         mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
         if any(mail_args.values()):
-            new_medecine_doctor.mails.append(administration.Mail(**mail_args))
+            new_medecine_doctor.mails.append(contact.Mail(**mail_args))
                         
         meta.session.commit()
         return redirect(url_for('list_md'))
@@ -134,20 +137,20 @@ def update_md_address(body_id, form_to_display):
 
 @app.route('/md/add_md_address?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])
-def add_md_address(body_id, form_to_display):
-    if forms.add_body_address(body_id, "md"):
-        return redirect(url_for('update_md', body_id=body_id,
-                                form_to_display="address"))
-    return redirect(url_for('list_md'))
-
-@app.route('/md/delete_md_address?id=<int:body_id>'
-           '&form_to_display=<form_to_display>/', methods=['POST'])
-def delete_md_address(body_id, form_to_display):
-    if forms.delete_body_address(body_id, "md"):
-        return redirect(url_for('update_md', body_id=body_id,
-                                form_to_display="address"))
-    return redirect(url_for('list_md'))
-
+#def add_md_address(body_id, form_to_display):
+#    if forms.add_body_address(body_id, "md"):
+#        return redirect(url_for('update_md', body_id=body_id,
+#                                form_to_display="address"))
+#    return redirect(url_for('list_md'))
+#
+#@app.route('/md/delete_md_address?id=<int:body_id>'
+#           '&form_to_display=<form_to_display>/', methods=['POST'])
+#def delete_md_address(body_id, form_to_display):
+#    if forms.delete_body_address(body_id, "md"):
+#        return redirect(url_for('update_md', body_id=body_id,
+#                                form_to_display="address"))
+#    return redirect(url_for('list_md'))
+#
 @app.route('/md/update_md_phone?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_md_phone(body_id, form_to_display):

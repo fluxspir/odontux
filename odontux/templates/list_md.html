@@ -18,8 +18,8 @@
     <td>{{ doc.id }}</td>
     <td>{{ doc.lastname }}</td>
     <td>{{ doc.firstname }}</td>
-    <td>{{ doc.addresses[-1].city }}</td>
-    <td>{{ doc.addresses[-1].zip_code }}</td>
+    <td>{{ doc.address.city }}</td>
+    <td>{{ doc.address.zip_code }}</td>
     <td>{{ doc.phones[-1] }}</td>
     <td>
       <a href={{ url_for('update_md', body_id=doc.id, form_to_display='gen_info') }}>Update</a></td>

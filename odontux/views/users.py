@@ -22,7 +22,7 @@ from wtforms import (Form, IntegerField, TextField, PasswordField,
                     DateField, DateTimeField, validators)
 
 from odontux import constants, checks
-from odontux.models import meta, users, administration
+from odontux.models import meta, users, contact
 from odontux.odonweb import app
 from odontux.views import forms
 from odontux.views.log import index
@@ -210,17 +210,21 @@ def add_user():
         address_args = {f: getattr(address_form, f).data 
                         for f in forms.address_fields}
         if any(address_args.values()):
-            new_odontuxuser.addresses.append(administration.Address(
-                                                            **address_args))
-
+            new_address = contact.Address(**address_args)
+            meta.session.add(new_address)
+            meta.session.commit()
+            new_odontuxuser.address_id = new_address.id
+#            new_odontuxuser.addresses.append(contact.Address(
+#                                                            **address_args))
+#
         phone_args = {g: getattr(phone_form, f).data 
                       for f,g in forms.phone_fields}
         if any(phone_args.values()):
-            new_odontuxuser.phones.append(administration.Phone(**phone_args))
+            new_odontuxuser.phones.append(contact.Phone(**phone_args))
 
         mail_args = {f: getattr(mail_form, f).data for f in forms.mail_fields}
         if any(mail_args.values()):
-            new_odontuxuser.mails.append(administration.Mail(**mail_args))
+            new_odontuxuser.mails.append(contact.Mail(**mail_args))
 
         meta.session.commit()
         return redirect(url_for('list_users'))
@@ -255,11 +259,11 @@ def add_dental_office():
 
         address_args = {f: getattr(address_form, f).data
                         for f in forms.address_fields}
-        new_dental_office.addresses.append(administration.Address(
+        new_dental_office.addresses.append(contact.Address(
                                                 **address_args))
         phone_args = {g: getattr(phone_form, f).data
                         for f,g in forms.phone_fields}
-        new_dental_office.phones.append(administration.Phone(
+        new_dental_office.phones.append(contact.Phone(
                                                 **phone_args))
         mail_args = {f: getattr(mail_form, f).data
                         for f in forms.mail_fields}

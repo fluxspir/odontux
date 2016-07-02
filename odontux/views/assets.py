@@ -19,7 +19,7 @@ from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
                     validators)
 
 from odontux import constants, checks
-from odontux.models import meta, assets, administration, users, act, schedule
+from odontux.models import meta, assets, users, act, schedule, contact
 from odontux.odonweb import app
 from odontux.views import forms
 from odontux.views.log import index
@@ -325,20 +325,24 @@ def add_provider():
         address_args = {f: getattr(address_form, f).data
                     for f in forms.address_fields}
         if any(address_args.values()):
-            new_provider.addresses.append(
-                                        administration.Address(**address_args))
+            new_address = contact.Address(**address_args)
+            meta.session.add(new_address)
+            meta.session.commit()
+            new_provider.address_id = new_address.id
+#            new_provider.addresses.append(
+#                                        administration.Address(**address_args))
             meta.session.commit()
 
         phone_args = {g: getattr(phone_form, f).data
                     for f,g in forms.phone_fields}
         if any(phone_args.values()):
-            new_provider.phones.append(administration.Phone(**phone_args))
+            new_provider.phones.append(contact.Phone(**phone_args))
             meta.session.commit()
 
         mail_args = {f: getattr(mail_form, f).data 
                             for f in forms.mail_fields}
         if any(mail_args.values()):
-            new_provider.mails.append(administration.Mail(**mail_args))
+            new_provider.mails.append(contact.Mail(**mail_args))
             meta.session.commit()
 
         return redirect(url_for('list_providers'))

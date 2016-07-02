@@ -17,7 +17,8 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from users import ( OdontuxUser, DentalOffice, Settings, 
                 TimeSheet, DentistTimeSheet, AssistantTimeSheet )
 from md import MedecineDoctor
-from administration import (Address, Mail, Phone, Payer, Family, Patient)
+from administration import Patient
+from contact import ( Address, Mail, Phone )
 from anamnesis import (Anamnesis, MedicalHistory, Addiction, Treatment, 
                         PastSurgery, Allergy )
 from anamnesis import Survey, Question

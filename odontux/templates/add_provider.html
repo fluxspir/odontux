@@ -4,6 +4,7 @@ Add a new assets' provider
 {% endblock %}
 {% block main %}
 {% from "_formhelpers.html" import render_field, render_hidden_field %}
+{% from "_contactformhelper.html" import add_address_form_fields %}
 <form method="post" action="/provider/add/">
   <dl>
     {{ render_hidden_field(general_form.active) }}
@@ -13,15 +14,7 @@ Add a new assets' provider
       {{ render_field(phone_form.phoneareacode) }}
       {{ render_field(phone_form.phonenum) }}
       {{ render_field(mail_form.email) }}
-      {{ render_field(address_form.street) }}
-      {{ render_field(address_form.street_number) }}
-      {{ render_field(address_form.building) }}
-      {{ render_field(address_form.complement) }}
-      {{ render_field(address_form.district) }}
-      {{ render_field(address_form.city) }}
-      {{ render_field(address_form.zip_code) }}
-      {{ render_field(address_form.state) }}
-      {{ render_field(address_form.country) }}
+      {{ add_address_form_fields(address_form) }}
   </dl>
   <p><input type="submit" value="Add">
 </form>
