@@ -57,15 +57,6 @@ def get_dental_office_logo():
     odontux_logo = parser.get("environment", "odontux_logo")
     return os.path.join(odontux_folder, odontux_logo)
 
-def get_patient(patient_id):
-    try:
-        patient = meta.session.query(administration.Patient)\
-            .filter(administration.Patient.id == patient_id)\
-            .one()
-        return patient
-    except sqlalchemy.orm.exc.NoResultFound:
-        return False
-
 def get_patient_appointment(patient_id=0, appointment_id=0):
     if appointment_id:
         appointment = (
