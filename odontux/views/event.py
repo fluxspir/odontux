@@ -33,16 +33,15 @@ class EndoBuccalEventForm(Form):
 class HardPalateEventForm(EndoBuccalEventForm):
     pass
 
-@app.route('/choose/event_location?pid=<int:patient_id>&aid=<int:appointment_id>')
+@app.route('/choose/event_location?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>')
 def choose_event_location(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
     if not session['role'] in authorized_roles:
         return redirect(url_for('index'))
-    patient = checks.get_patient(patient_id)
-    if not appointment_id: 
-        appointment_id = patient.appointments[-1].id
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     return render_template('choose_event_location.html',
                                             patient=patient,
                                             appointment=appointment)

@@ -66,7 +66,7 @@ def get_patient(patient_id):
     except sqlalchemy.orm.exc.NoResultFound:
         return False
 
-def get_appointment(patient_id=0, appointment_id=0):
+def get_patient_appointment(patient_id=0, appointment_id=0):
     if appointment_id:
         appointment = (
             meta.session.query(schedule.Appointment)
@@ -75,7 +75,7 @@ def get_appointment(patient_id=0, appointment_id=0):
         )
     else:
         if not patient_id:
-            return None
+            return None, None
         appointment = (
             meta.session.query(schedule.Appointment).join(schedule.Agenda)
                 .filter(
@@ -85,7 +85,7 @@ def get_appointment(patient_id=0, appointment_id=0):
                 .order_by(schedule.Agenda.starttime.desc())
                 .first()
         )
-    return appointment
+    return appointment.patient, appointment
 
 def get_patient_acts(patient_id, appointment_id=None, ordering=[]):
     """ The purpose of this function is to filter, then order and finally 

@@ -240,9 +240,8 @@ def choose_drugs_to_prescribe(patient_id, appointment_id, drug_list=''):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return abort(403)
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     drugs_prescribed = []
     if drug_list:
         drugs_prescribed = [ drug_id for drug_id in drug_list.split(",") ]
@@ -342,9 +341,8 @@ def choose_drugs_positions_on_prescription(patient_id, appointment_id,
             )
             drug_position[int(drug_id)] = [ int(position), drug.molecule ]
 
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     drug_position_form = DrugPositionInPrescriptionForm(request.form)
 
     if request.method == 'POST' and drug_position_form.validate():
@@ -414,13 +412,10 @@ def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
             prescription_form.drugs.append_entry(drug_prescribed_form)
         return prescription_form
 
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     prescription_form = PrescriptionForm(request.form)
-#    if ( request.method == 'POST' and prescription_form.validate()
-#        and 'update' in request.form ):
-#
+    
     if ( request.method == 'POST' and prescription_form.validate()
         and 'save_print' in request.form ):
         pdf_out = make_prescription(patient_id, appointment_id, 

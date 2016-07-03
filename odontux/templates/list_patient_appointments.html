@@ -12,7 +12,8 @@
       {% block appointment_row %}
         {% for appointment in appointments %}
           {{ appointment_table_rows(session, appointment, 
-              url_for('patient_appointment', appointment_id=appointment.id), 
+              url_for('patient_appointment', 
+                              appointment_id=appointment.id), 
               "Select") }}
         {% endfor %}
       {% endblock %}

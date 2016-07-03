@@ -115,9 +115,8 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     anamnesis_form = AnamnesisForm(request.form)
     anamnesis_form.anamnesis_type.choices = [ (id, info[0]) for id, info in
                                             constants.ANAMNESIS.items() ]
@@ -296,11 +295,8 @@ def list_anamnesis(patient_id, appointment_id=None):
     survey_form.survey_id.choices =\
         meta.session.query(anamnesis.Survey.id, anamnesis.Survey.name).all()
 
-    patient = checks.get_patient(patient_id)
-    if not appointment_id:
-        appointment_id = patient.appointments[-1].id
-    appointment = checks.get_appointment(appointment_id)
-
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     global_anamnesis = with_polymorphic(anamnesis.Anamnesis, '*')
     patient_anamnesis = (
         meta.session.query(global_anamnesis)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 # Franck Labadille
 # 2012/09/02
@@ -14,7 +15,12 @@ home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
 LOCALE = parser.get("environment", "locale").title()
 
-CURRENCY_SYMBOL = "R$"
+if LOCALE == 'Fr':
+    CURRENCY_SYMBOL = u"€"
+elif LOCALE == 'Br':
+    CURRENCY_SYMBOL = u"R$"
+else:
+    CURRENCY_SYMBOL = u"$"
 
 QUOTE_VALIDITY = 3   # in months
 

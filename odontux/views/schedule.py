@@ -529,11 +529,8 @@ def update_appointment(body_id, appointment_id):
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 
-    patient = checks.get_patient(body_id)
-    appointment = meta.session.query(schedule.Appointment)\
-            .filter(schedule.Appointment.id == appointment_id)\
-            .one()
-
+    patient, appointment = checks.get_patient_appointment(body_id, 
+                                                                appointment_id)
     agenda_form = AgendaForm(request.form)
     appointment_form = AppointmentForm(request.form)
     appointment_form.dentist_id.choices = [ (user.id, user.firstname + " " 
@@ -682,7 +679,7 @@ def add_patient_appointment(body_id, meeting_id=0):
     
     if session['role'] == constants.ROLE_DENTIST:
         appointment_form.dentist_id.data = session['user_id']
-    patient = checks.get_patient(body_id)
+    patient, appointment = checks.get_patient_appointment(patient_id=body_id)
     return render_template('add_patient_appointment.html',
                             patient=patient,
                             agenda_form=agenda_form,

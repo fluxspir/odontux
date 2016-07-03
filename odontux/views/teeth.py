@@ -218,10 +218,8 @@ def list_teeth(patient_id, appointment_id=None):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     
-    patient = checks.get_patient(patient_id)
-    if not appointment_id:
-        appointment_id = patient.appointments[-1].id
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     teeth = []
     for tooth in patient.teeth:
         teeth.append( ( tooth.id, 
@@ -239,9 +237,8 @@ def show_tooth(patient_id, appointment_id, tooth_codename):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-    
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     tooth = ( 
         meta.session.query(teeth.Tooth)
             .filter(teeth.Tooth.patient_id == patient_id,
@@ -292,9 +289,8 @@ def add_event_tooth_located(patient_id, appointment_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     tooth_form = ToothForm(request.form)
     event_form = EventForm(request.form)
     crown_event_form = CrownEventForm(request.form)

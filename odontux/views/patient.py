@@ -23,12 +23,8 @@ def patient_appointment(appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    appointment = (
-            meta.session.query(schedule.Appointment)
-                .filter(schedule.Appointment.id == appointment_id)
-                .one()
-            )
-    patient = checks.get_patient(appointment.patient_id)
+    patient, appointment = checks.get_patient_appointment(
+                                                appointment_id=appointment_id)
 
     acts = checks.get_patient_acts(patient.id, appointment.id,
                 [ act.AppointmentGestureReference.anatomic_location ]
@@ -46,17 +42,17 @@ def list_appointments(patient_id):
         return abort(403)
     
     # Get the patient in database, and the list of his appointments.
-    patient = checks.get_patient(patient_id)
-
+    patient, appointment = checks.get_patient_appointment(
+                                                        patient_id=patient_id)
     appointments = ( meta.session.query(schedule.Appointment)
                         .filter(schedule.Appointment.patient_id == patient_id)
                         .join(schedule.Agenda)
                         .order_by(schedule.Agenda.starttime.desc())
                         .all()
     )
-
     return render_template("list_patient_appointments.html",
                             patient=patient,
+                            appointment=appointment,
                             appointments=appointments)
 
 @app.route('/patient/acts?pid=<int:patient_id>')
@@ -72,9 +68,8 @@ def list_acts(patient_id, appointment_id=0):
     if session['role'] == constants.ROLE_ADMIN:
         return redirect(url_for('index'))
 
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(patient_id, appointment_id)
-
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     acts = checks.get_patient_acts(patient.id, None,
             [ act.AppointmentGestureReference.appointment_id, ]
             )

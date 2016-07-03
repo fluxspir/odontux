@@ -428,8 +428,8 @@ def add_administrativ_gesture(patient_id, appointment_id):
         return abort(403)
     # Prepare the formulary dealing with the act of adding an administrativ
     # gesture
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     appointment_gesture_form = AppointmentGestureReferenceForm(request.form)
 
     # Patient is linked to some healthcare plans. Won't be included other plans
@@ -516,8 +516,8 @@ def remove_administrativ_gesture(patient_id, appointment_id, gesture_id, code):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
     
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     gesture = meta.session.query(act.AppointmentGestureReference).filter(
             act.AppointmentGestureReference.id == gesture_id).one()
 
@@ -539,9 +539,8 @@ def sterilized_asset_used(patient_id, appointment_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     asset_sterilized_form = AssetSterilizedUsedForm(request.form)
 
     if request.method == 'POST' and asset_sterilized_form.validate():
@@ -619,9 +618,8 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
                         constants.ROLE_NURSE ]
     if session['role'] not in authorized_roles:
         return redirecs(url_for('index'))
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-    
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     assets_manufacture_sterilized = (
         meta.session.query(assets.Device)
             .filter(
@@ -645,38 +643,12 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
 @app.route('/view/material_used_in_appointment?pid=<int:patient_id>'
             '&aid=<int:appointment_id>')
 def view_material_used_in_appointment(patient_id, appointment_id):
-#    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
-#                        constants.ROLE_ASSISTANT ]
-#    if session['role'] not in authorized_roles:
-#        return redirect(url_for('index'))
-#    patient = checks.get_patient(patient_id)
-#    appointment = checks.get_appointment(appointment_id)
-#    
-#    material_used = (
-#        meta.session.query(assets.Material)
-#        .filter(assets.Material.id.in_(
-#            meta.session.query(assets.Material.id)
-#            .filter(traceability.MaterioVigilance.appointments.has(
-#                schedule.Appointment.id == appointment_id
-#                    )
-#                )
-#            )
-#        ).all()
-#    )
-#    return render_template('view_material_used_in_appointment.html',
-#                            patient=patient, appointment=appointment,
-#                            material_used=material_used)
-#
-#@app.route('/update/material_used_to_appointment?pid=<int:patient_id>'
-#            '&aid=<int:appointment_id>', methods=['GET', 'POST'])
-#def update_material_used_in_appointment(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-    
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     material_form = MaterioVigilanceForm(request.form)
 
     if request.method == 'POST' and material_form.validate():

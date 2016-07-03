@@ -66,7 +66,8 @@ def find_gesture():
     gest_code = request.args.get('gesture', None)
     healthcare_plan_id = request.args.get('healthcare_plan_id', None)
     patient_id = int(request.args.get('patient_id', None))
-    patient = checks.get_patient(patient_id)
+    patient, appointment = checks.get_patient_appointment(
+                                                        patient_id=patient_id)
     if gest_code:
         gest_code = gest_code.split(" ")
         words = u"%"
@@ -124,8 +125,8 @@ def create_quote_proposition(patient_id, appointment_id, quotes_id=''):
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
         return abort(403)
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     if not quotes_id:
         quotes = ( 
             meta.session.query(statements.Quote)
@@ -313,9 +314,8 @@ def list_statement(patient_id, appointment_id):
     if session['role'] not in authorized_roles:
         return abort(403)
 
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
-    
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     quotes = ( meta.session.query(statements.Quote)
             .filter(statements.Quote.patient_id == patient_id)
             .join(schedule.Appointment, schedule.Agenda)

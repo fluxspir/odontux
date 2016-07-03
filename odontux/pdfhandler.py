@@ -159,8 +159,8 @@ def generate_dental_office_informations(canvas, doc):
     canvas.restoreState()
 
 def get_document_base(patient_id, appointment_id):
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     dental_office = (
         meta.session.query(users.DentalOffice)
            .filter(users.DentalOffice.id == 

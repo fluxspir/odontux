@@ -65,8 +65,8 @@ def portal_certificate(patient_id, appointment_id):
     if session['role'] not in authorized_roles:
         return abort(403)
 
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
     certifs = ( meta.session.query(certificates.Certificate)
                     .filter(certificates.Certificate.patient_id == patient_id)
     )
@@ -97,8 +97,8 @@ def add_presence_certificate(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return abort(403)
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     presence_form = PresenceForm(request.form)
 
     if ( request.method == 'POST' and presence_form.validate()
@@ -169,8 +169,8 @@ def add_cessation_certificate(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return abort(403)
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                            appointment_id)
     cessation_form = CessationForm(request.form)
 
     if ( request.method == 'POST' and cessation_form.validate()

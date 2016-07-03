@@ -77,8 +77,9 @@ def allpatients():
 
 @app.route('/patient?id=<int:body_id>/')
 def enter_patient_file(body_id):
-    patient = checks.get_patient(body_id)
-    return render_template('patient_file.html', patient=patient)
+    patient, appointment = checks.get_patient_appointment(patient_id=body_id)
+    return render_template('patient_file.html', patient=patient,
+                                                appointment=appointment)
 
 #@app.route('/find/family_member')
 #def find_family_member():

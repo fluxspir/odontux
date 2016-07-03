@@ -44,8 +44,8 @@ class PatientPaymentForm(Form):
 @app.route('/make/payment&pid=<int:patient_id>&aid=<int:appointment_id>', 
                                                     methods=['GET', 'POST'])
 def make_payment(patient_id, appointment_id):
-    patient = checks.get_patient(patient_id)
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     payment_form = PatientPaymentForm(request.form)
     payment_form.mean_id.choices = [ ( mean.id, mean.odontux_name ) for mean in
             meta.session.query(compta.PaymentType)
@@ -112,17 +112,17 @@ def make_payment(patient_id, appointment_id):
 @app.route('/patient/payments/&pid=<int:patient_id>&aid=<int:appointment_id>')
 def patient_payments(patient_id, appointment_id=0):
     
-    patient = checks.get_patient(patient_id)
-    if not appointment_id:
-        appointment_id = patient.appointments[-1].id
-    appointment = checks.get_appointment(appointment_id)
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
     payments = ( meta.session.query(compta.Payment)
                     .filter(compta.Payment.patient_id == patient_id)
                     .all()
     )
+    currency_symbol = constants.CURRENCY_SYMBOL
     return render_template('patient_payments.html', patient=patient,
-                                                    appointment=appointment,
-                                                    payments=payments)
+                                            appointment=appointment,
+                                            payments=payments,
+                                            currency_symbol=currency_symbol)
 
 @app.route('/show_payments_type&ptid=<int:payments_type_id>', 
                                                     methods=['GET', 'POST'])
