@@ -60,7 +60,8 @@ def list_appointments(patient_id):
                             appointments=appointments)
 
 @app.route('/patient/acts?pid=<int:patient_id>')
-def list_acts(patient_id):
+@app.route('/patient/acts?pid=<int:patient_id>&aid=<int:appointment_id>')
+def list_acts(patient_id, appointment_id=0):
     """
     Sends to template a list of tuples :
     ( gesture, tooth, act_info, act_specialty )
@@ -72,6 +73,7 @@ def list_acts(patient_id):
         return redirect(url_for('index'))
 
     patient = checks.get_patient(patient_id)
+    appointment = checks.get_appointment(patient_id, appointment_id)
 
     acts = checks.get_patient_acts(patient.id, None,
             [ act.AppointmentGestureReference.appointment_id, ]
@@ -82,6 +84,7 @@ def list_acts(patient_id):
     )
     return render_template("list_patient_acts.html",
                             patient=patient,
+                            appointment=appointment,
                             acts=acts,
                             payments=payments)
 

@@ -7,6 +7,7 @@
 
 import pdb
 import sqlalchemy
+from sqlalchemy import cast, Date
 from flask import session
 from gettext import gettext as _
 
@@ -72,11 +73,24 @@ def get_patient(patient_id):
     except sqlalchemy.orm.exc.NoResultFound:
         return False
 
-def get_appointment(appointment_id):
-    appointment = (
-        meta.session.query(schedule.Appointment)
-            .filter(schedule.Appointment.id == appointment_id
-            ).one_or_none()
+def get_appointment(patient_id=0, appointment_id=0):
+    if appointment_id:
+        appointment = (
+            meta.session.query(schedule.Appointment)
+                .filter(schedule.Appointment.id == appointment_id
+                ).one_or_none()
+        )
+    else:
+        if not patient_id:
+            return None
+        appointment = (
+            meta.session.query(schedule.Appointment).join(schedule.Agenda)
+                .filter(
+                    schedule.Appointment.patient_id == patient_id, 
+                    (cast(schedule.Agenda.starttime,Date) <= 
+                                                    datetime.date.today() ) )
+                .order_by(schedule.Agenda.starttime.desc())
+                .first()
         )
     return appointment
 
