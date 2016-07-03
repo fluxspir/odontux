@@ -48,9 +48,10 @@ def make_payment(patient_id, appointment_id):
     appointment = checks.get_appointment(appointment_id)
     payment_form = PatientPaymentForm(request.form)
     payment_form.mean_id.choices = [ ( mean.id, mean.odontux_name ) for mean in
-                                meta.session.query(compta.PaymentType)
-                                    .filter(compta.PaymentType.active.is_(True)
-                                    .all() ]
+            meta.session.query(compta.PaymentType)
+                .filter(compta.PaymentType.active.is_(True))
+                .all() 
+    ]
     
     if request.method == 'POST' and payment_form.validate():
         # get the gnucash mean_account_odontux_asset name
