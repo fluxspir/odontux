@@ -26,8 +26,9 @@ class PaymentType(Base):
     """
     __tablename__ = 'payment_type'
     id = Column(Integer, primary_key=True)
-    name = Column(String, default="")
-    alias = Column(String, default="")
+    odontux_name = Column(String, default="", nullable=False)
+    gnucash_name = Column(String, default="", nullable=False)
+    active = Column(Boolean, default=True)
 
 class Majoration(Base):
     """ """

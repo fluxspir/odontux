@@ -10,7 +10,7 @@ import os
 import datetime
 import md5
 from flask import ( session, render_template, request, redirect, url_for, 
-                    make_response ) 
+                    make_response, abort ) 
 import sqlalchemy
 from sqlalchemy import or_
 from gettext import gettext as _
@@ -29,9 +29,9 @@ from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
 
 class PaymentTypeForm(Form):
     id = HiddenField(_('id'))
-    name = TextField(_('name'), [validators.Required()])
-    alias = TextField(_('alias'))
-    add = SubmitField(_('Add'))
+    odontux_name = TextField(_('Odontux name'), [validators.Required()])
+    gnucash_name = TextField(_('Gnucash name'), [validators.Required()])
+    active = BooleanField(_('Active') )
     update = SubmitField(_('Update'))
 
 class PatientPaymentForm(Form):
@@ -47,16 +47,19 @@ def make_payment(patient_id, appointment_id):
     patient = checks.get_patient(patient_id)
     appointment = checks.get_appointment(appointment_id)
     payment_form = PatientPaymentForm(request.form)
-    payment_form.mean_id.choices = [ ( mean.id, mean.name ) for mean in
-                                meta.session.query(compta.PaymentType).all() ]
+    payment_form.mean_id.choices = [ ( mean.id, mean.odontux_name ) for mean in
+                                meta.session.query(compta.PaymentType)
+                                    .filter(compta.PaymentType.active.is_(True)
+                                    .all() ]
     
     if request.method == 'POST' and payment_form.validate():
+        # get the gnucash mean_account_odontux_asset name
         mean = ( meta.session.query(compta.PaymentType)
             .filter(compta.PaymentType.id == payment_form.mean_id.data)
             .one()
         )
         pdf_out = make_payment_receipt(patient_id, appointment_id, 
-                                                    payment_form, mean.name)
+                                            payment_form, mean.gnucash_name)
         if not pdf_out:
             return render_template('make_payment.html', patient=patient,
                                         appointment=appointment,
@@ -90,6 +93,9 @@ def make_payment(patient_id, appointment_id):
         new_payment = compta.Payment(**receipt_values)
         meta.session.add(new_payment)
         meta.session.commit()
+        
+        # Record payment in gnucash
+
         return redirect(url_for('list_acts', patient_id=patient_id,
                                             appointment_id=appointment_id))
 
@@ -117,7 +123,8 @@ def patient_payments(patient_id, appointment_id=0):
                                                     appointment=appointment,
                                                     payments=payments)
 
-@app.route('/show_payments_type&ptid=<int:payments_type_id>')
+@app.route('/show_payments_type&ptid=<int:payments_type_id>', 
+                                                    methods=['GET', 'POST'])
 def show_payments_type(payments_type_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
@@ -129,14 +136,16 @@ def show_payments_type(payments_type_id):
     payment_type_form = PaymentTypeForm(request.form)
     
     if request.method == 'POST' and payment_type_form.validate():
-        payment_type.name = payment_type_form.name.data
-        payment_type.alias = payment_type_form.alias.data
+        payment_type.odontux_name = payment_type_form.odontux_name.data
+        payment_type.gnucash_name = payment_type_form.gnucash_name.data
+        payment_type.active = payment_type_form.active.data
         meta.session.commit()
-        return redirect(url_for('show_payments_type'),
-                                            payments_type_id=payments_type_id)
+        return redirect(url_for('show_payments_type',
+                                            payments_type_id=payments_type_id))
     
-    payment_type_form.name.data = payment_type.name
-    payment_type_form.alias.data = payment_type.alias
+    payment_type_form.odontux_name.data = payment_type.odontux_name
+    payment_type_form.gnucash_name.data = payment_type.gnucash_name
+    payment_type_form.active.data = payment_type.active
     return render_template('show_payments_type.html',
                                         payment_type=payment_type,
                                         payment_type_form=payment_type_form)
@@ -148,17 +157,6 @@ def payments_type():
     if session['role'] not in authorized_roles:
         return abort(403)
     
-    payment_type_form = PaymentTypeForm(request.form)
-    if request.method == 'POST' and payment_type_form.validate():
-        values = {
-            'name': payment_type_form.name.data,
-            'alias': payment_type_form.alias.data,
-        }
-        new_payment_type = compta.PaymentType(**values)
-        meta.session.add(new_payment_type)
-        meta.session.commit()
-        return redirect(url_for('payments_type'))
-
     payments_types = meta.session.query(compta.PaymentType).all()
 
     return render_template('payments_type.html', 

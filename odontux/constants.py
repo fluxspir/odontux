@@ -14,6 +14,8 @@ home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
 LOCALE = parser.get("environment", "locale").title()
 
+CURRENCY_SYMBOL = "R$"
+
 QUOTE_VALIDITY = 3   # in months
 
 
@@ -70,15 +72,9 @@ T83_NAME = _("83") # _("Canina inferior right deciduous")
 T84_NAME = _("84") # _("First Molar inferior right deciduous")
 T85_NAME = _("85") # _("Second Molar inferior right deciduous")
 
-
-
-
-
-
 # ------------------------------------
 # Odontux user
 # ------------------------------------
-
 
 ROLE_DENTIST = 1
 ROLE_NURSE = 2
@@ -697,4 +693,19 @@ FILES = {
     FILE_BILL: _('Bill'),
     FILE_RECEIPT: _('Receipt'),
 }
+
+# ----------------------------------------------------------
+# Gnucash
+# ----------------------------------------------------------
+
+GNUCASH_CURRENCY = 'BRL'
+
+ASSETS = 'Assets'
+
+RECEIVABLES = 'Patients Invoices'
+
+DENTAL_FUND = 'Odontux Assets'
+
+INCOMES = "Incomes"
+DENTAL_INCOMES = "GestureToPay"
 

@@ -6,6 +6,9 @@
 
 import pdb
 
+import checks
+import constants
+
 from odontux.models import meta, users
 
 from odontux.odonweb import app
@@ -21,8 +24,6 @@ from reportlab.lib import colors
 
 import os
 import cStringIO
-import checks
-import constants
 import datetime
 
 L_MARG = R_MARG = 20 * mm
@@ -215,7 +216,7 @@ def make_payment_receipt(patient_id, appointment_id, payment_form, mean):
                                         patient.firstname, patient.lastname,
                                         patient.identity_number_2,
                                         payment_form.amount.data,
-                                        app.config['CURRENCY'])
+                                        constants.CURRENCY_SYMBOL)
     )
     Story.append(Paragraph(text, styles['normal']))
     Story.append(Spacer(1, 20 * mm))

@@ -6,8 +6,9 @@
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action="{{ url_for('show_payments_type', 
                         payments_type_id=payment_type.id) }}">
-    {{ render_field(payment_type_form.name) }}
-    {{ render_field(payment_type_form.alias) }}
+    {{ render_field(payment_type_form.odontux_name) }}
+    If you update gnucash name of the account, make sure to put the exact same in gnucash.
+    {{ render_field(payment_type_form.gnucash_name) }}
     <br />
     {{ payment_type_form.update }}
 </form>

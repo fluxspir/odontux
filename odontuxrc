@@ -7,15 +7,4 @@ odontux_folder = /home/odontuxuser/odontuxfolder
 odontux_logo = img/logo.png
 document_folder = doc
 
-[gnucashdb]
-currency = EUR
-assets = Assets
-receivables = Receivables Account
-dentalfund = Dental's fund
-check = Chèques
-cash = Espèces
-card = Carte Bleue
-transfer = Virement
-paypal = Paypal
-incomes = Incomes
-dentalincomes = Dentals
+

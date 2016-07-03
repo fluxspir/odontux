@@ -73,11 +73,30 @@ class GnuCash():
             self.gnucashtype = "postgresql"
         else:
             self.gnucashtype = "xml"
-        assets = self.parser.get("gnucashdb", "assets")
-        receivables = self.parser.get("gnucashdb", "receivables")
-        dentalfund = self.parser.get("gnucashdb", "dentalfund")
-        incomes = self.parser.get("gnucashdb", "incomes")
-        dentalincomes = self.parser.get("gnucashdb", "dentalincomes")
+        assets = constants.ASSETS
+        receivables = constants.RECEIVABLES
+        dentalfund = constants.DENTAL_FUND
+        
+        payments_types = meta.session.query(compta.PaymentType)
+        cash = payments_types.filter(
+                            compta.PaymentType.gnucash_name == 'Cash').one()
+        credit_receivable = payments_types.filter(
+                        compta.PaymentType.gnucash_name == 'CreditCard').one()
+        debit_receivable = payments_types.filter(
+                        compta.PaymentType.gnucash_name == 'DebitCard').one()
+        check_receivable = payments_types.filter(
+                        compta.PaymentType.gnucash_name == 'Check').one()
+        transfer_receivable = payments_types.filter(
+                        compta.PaymentType.gnucash_name == 'Transfer').one()
+        paypal = payments_types.filter(
+                        compta.PaymentType.gnucash_name == 'Paypal').one()
+        boleto = payments_types.filter(
+                        compta.PaymentType.gnucash_name == 'Boleto').one()
+        other = payments_types.filter(
+                        compta.PaymentType.gnucash_name == 'Other').one()
+
+        incomes = constants.INCOMES
+        dentalincomes = constants.DENTAL_INCOMES
 
         # Precise on which patient we'll work on
         self.patient_id = patient_id
@@ -100,13 +119,22 @@ class GnuCash():
         # the detail of dental fund is build in commands/compta.py
         # while getting the paymenttype.
         self.dentalfund = self.assets.lookup_by_name(dentalfund)
+        self.cash = self.assets.lookup_by_name(cash)
+        self.credit_receivable = self.assets.lookup_by_name(credit_receivable)
+        self.debit_receivable = self.assets.lookup_by_name(debit_receivable)
+        self.check_receivable = self.assets.lookup_by_name(check_receivable)
+        self.transfer_receivable = self.assets.lookup_by_name(
+                                                        transfer_receivable)
+        self.paypal = self.assets.lookup_by_name(paypal)
+        self.boleto = self.assets.lookup_by_name(boleto)
+        self.other = self.assets.lookup_by_name(other)
 
         # Incomes
         self.incomes = self.root.lookup_by_name(incomes)
         self.dentalincomes = self.incomes.lookup_by_name(dentalincomes)
 
         # set the currency we'll use
-        currency = self.parser.get("gnucashdb", "currency")
+        currency = constants.GNUCASH_CURRENCY
         commod_tab = self.book.get_table()
         self.currency = commod_tab.lookup("CURRENCY", currency)
 
@@ -189,39 +217,7 @@ class GnuCashCustomer(GnuCash):
         in the family, and the " Family patient.lastname " if there
         is several patients / payers in this family
         """
-#        # Get the payers' names
-#        payername = ""
-#        payerlist = []
-#        for payer in self.patient.family.payers:
-#            # The patient is noted as a payer
-#            if payer.id == self.patient_id:
-#                # The patient pays for himself
-#                payername = patientname
-#                break
-#            else:
-#                payerlist.append(payer.patient_id)
-#
-#        if not payername:
-#            # Case the patient ain't recorded as a payer
-#            if not payerlist:
-#                # Curious case where nobody recorded as a payer for this family
-#                # The patient will finally be the payer for gnucash.Customer
-#                payername = patientname
-#            else:
-#                for patient_id in payerlist:
-#                    payer = meta.session.query(administration.Patient)\
-#                            .filter(administration.Patient.id == patient_id)
-#                    payer = payer.one()
-#                    payer = payer.title + " " + payer.lastname + " " +\
-#                            payer.firstname
-#                    payername.join(", ", payer)
-#
         address = customer.GetAddr()
-        #address.SetName("{} {} {}".format(self.patient.title, self.patient.lastname, 
-        #                                                    self.patient.firstname)
-        #)
-        #address.SetName(self.patient.title + " " + self.patient.lastname + " "\
-        #                + self.patient.firstname)
         address.SetName(patientname.encode("utf-8"))
         if self.patient.address:
             if self.patient.address.street:
@@ -375,7 +371,6 @@ class GnuCashInvoice(GnuCash):
                         invoice.Unpost(True)
                         invoice.BeginEdit()
                         entry.BeginEdit()
-#                        gnc_core_c.gncInvoiceRemoveEntry(invoice, entry)
                         invoice.RemoveEntry(entry)
                         invoice.CommitEdit()
                         invoice.PostToAccount(self.receivables, self.date, 
