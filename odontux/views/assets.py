@@ -166,7 +166,7 @@ class AssetKitStructureForm(Form):
                         validators.Length(max=30, 
                         message=_('Max : 30 characters'))],
                         filters=[forms.title_field])
-    active = BooleanField(_('active'))
+    active = BooleanField(_('active'), default=True)
 
 class AssetKitForm(Form):
     id = HiddenField(_('id'))
