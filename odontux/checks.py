@@ -64,18 +64,28 @@ def get_patient_appointment(patient_id=0, appointment_id=0):
                 .filter(schedule.Appointment.id == appointment_id
                 ).one_or_none()
         )
+        return appointment.patient, appointment
+
     else:
         if not patient_id:
             return None, None
-        appointment = (
-            meta.session.query(schedule.Appointment).join(schedule.Agenda)
-                .filter(
-                    schedule.Appointment.patient_id == patient_id, 
+            
+    appointment = ( 
+        meta.session.query(schedule.Appointment).join(schedule.Agenda)
+            .filter(schedule.Appointment.patient_id == patient_id, 
                     (cast(schedule.Agenda.starttime,Date) <= 
-                                                    datetime.date.today() ) )
-                .order_by(schedule.Agenda.starttime.desc())
-                .first()
+                                                    datetime.date.today() 
+                    ) 
+            ).order_by(schedule.Agenda.starttime.desc())
+            .first()
+    )
+    if not appointment:
+        patient = ( meta.session.query(administration.Patient)
+                .filter(administration.Patient.id == patient_id)
+                .one()
         )
+        return patient, None
+
     return appointment.patient, appointment
 
 def get_patient_acts(patient_id, appointment_id=None, ordering=[]):
