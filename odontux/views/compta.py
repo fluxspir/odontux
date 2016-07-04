@@ -59,6 +59,11 @@ def make_payment(patient_id, appointment_id):
             .filter(compta.PaymentType.id == payment_form.mean_id.data)
             .one()
         )
+        # create gnucash instance in advance for not having problem after 
+        # payment registered in odontux
+        gcpayment = gnucash_handler.GnuCashPayment(patient_id, 
+                                                            patient.dentist_id)
+
         pdf_out = make_payment_receipt(patient_id, appointment_id, 
                                             payment_form, mean.gnucash_name)
         if not pdf_out:
@@ -95,7 +100,9 @@ def make_payment(patient_id, appointment_id):
         meta.session.add(new_payment)
         meta.session.commit()
         
-        # Record payment in gnucash
+        # Record payment in gnucash and create bill:
+        gcpayment.add_payment(new_payment.mean_id, new_payment.amount,
+                                                    new_payment.cashin_date)
 
         return redirect(url_for('list_acts', patient_id=patient_id,
                                             appointment_id=appointment_id))
@@ -161,7 +168,6 @@ def payments_type():
     payments_types = meta.session.query(compta.PaymentType).all()
 
     return render_template('payments_type.html', 
-                                        payment_type_form=payment_type_form,
                                         payments_types=payments_types)
 
 @app.route('/portal_comptability')

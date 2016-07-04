@@ -76,25 +76,26 @@ class GnuCash():
         assets = constants.ASSETS
         receivables = constants.RECEIVABLES
         dentalfund = constants.DENTAL_FUND
-        
-        payments_types = meta.session.query(compta.PaymentType)
-        cash = payments_types.filter(
-                            compta.PaymentType.gnucash_name == 'Cash').one()
-        credit_receivable = payments_types.filter(
-                        compta.PaymentType.gnucash_name == 'CreditCard').one()
-        debit_receivable = payments_types.filter(
-                        compta.PaymentType.gnucash_name == 'DebitCard').one()
-        check_receivable = payments_types.filter(
-                        compta.PaymentType.gnucash_name == 'Check').one()
-        transfer_receivable = payments_types.filter(
-                        compta.PaymentType.gnucash_name == 'Transfer').one()
-        paypal = payments_types.filter(
-                        compta.PaymentType.gnucash_name == 'Paypal').one()
-        boleto = payments_types.filter(
-                        compta.PaymentType.gnucash_name == 'Boleto').one()
-        other = payments_types.filter(
-                        compta.PaymentType.gnucash_name == 'Other').one()
 
+# Not needed for ApplyPaiement lookup automagically         
+#        payments_types = meta.session.query(compta.PaymentType)
+#        cash = payments_types.filter(
+#                        compta.PaymentType.gnucash_name == 'Cash').one()
+#        credit_receiv = payments_types.filter(
+#                        compta.PaymentType.gnucash_name == 'CreditCard').one()
+#        debit_receiv = payments_types.filter(
+#                        compta.PaymentType.gnucash_name == 'DebitCard').one()
+#        check_receiv = payments_types.filter(
+#                        compta.PaymentType.gnucash_name == 'Check').one()
+#        transfer_receiv = payments_types.filter(
+#                        compta.PaymentType.gnucash_name == 'Transfer').one()
+#        paypal = payments_types.filter(
+#                        compta.PaymentType.gnucash_name == 'Paypal').one()
+#        boleto = payments_types.filter(
+#                        compta.PaymentType.gnucash_name == 'Boleto').one()
+#        other = payments_types.filter(
+#                        compta.PaymentType.gnucash_name == 'Other').one()
+#
         incomes = constants.INCOMES
         dentalincomes = constants.DENTAL_INCOMES
 
@@ -119,15 +120,15 @@ class GnuCash():
         # the detail of dental fund is build in commands/compta.py
         # while getting the paymenttype.
         self.dentalfund = self.assets.lookup_by_name(dentalfund)
-        self.cash = self.assets.lookup_by_name(cash)
-        self.credit_receivable = self.assets.lookup_by_name(credit_receivable)
-        self.debit_receivable = self.assets.lookup_by_name(debit_receivable)
-        self.check_receivable = self.assets.lookup_by_name(check_receivable)
-        self.transfer_receivable = self.assets.lookup_by_name(
-                                                        transfer_receivable)
-        self.paypal = self.assets.lookup_by_name(paypal)
-        self.boleto = self.assets.lookup_by_name(boleto)
-        self.other = self.assets.lookup_by_name(other)
+# Not needed 
+#        self.cash = self.dentalfund.lookup_by_name(cash)
+#        self.credit_receiv = self.dentalfund.lookup_by_name(credit_receiv)
+#        self.debit_receiv = self.dentalfund.lookup_by_name(debit_receiv)
+#        self.check_receiv = self.dentalfund.lookup_by_name(check_receiv)
+#        self.transfer_receiv = self.dentalfund.lookup_by_name(transfer_receiv)
+#        self.paypal = self.dentalfund.lookup_by_name(paypal)
+#        self.boleto = self.dentalfund.lookup_by_name(boleto)
+#        self.other = self.dentalfund.lookup_by_name(other)
 
         # Incomes
         self.incomes = self.root.lookup_by_name(incomes)
@@ -398,33 +399,24 @@ class GnuCashInvoice(GnuCash):
 class GnuCashPayment(GnuCash):
     """ GnuCashPayment tries to 
     """
-    def _get_payer(self, gcpayer_id):
-        return self.book.CustomerLookupByID(gcpayer_id)
+    def _get_customer(self, gcpatient_id):
+        return self.book.CustomerLookupByID(gcpatient_id)
 
     def _get_paymenttype(self, mean_id):
-        mean = meta.session.query(compta.PaymentType)\
+        mean = ( meta.session.query(compta.PaymentType)
                .filter(compta.PaymentType.id == mean_id).one()
-        
-        paymenttype = self.parser.get("gnucashdb", mean.name)
-        return self.dentalfund.lookup_by_name(paymenttype)
+        )
+        return self.dentalfund.lookup_by_name(
+                                            mean.gnucash_name.encode("utf-8"))
             
     def add_payment(self, mean_id, amount, date):
         try:
-            payer = self._get_payer(self.gcpatient_id)
+            customer = self._get_customer(self.gcpatient_id)
             dest_account = self._get_paymenttype(mean_id)
             amount = self.gnc_numeric_from_decimal(amount)
 
-#            invoices_list = []
-#            for invoice_id in invoices_id:
-#                invoices_list.append(self.book.InvoiceLookupByID(invoice_id))
-                
-#            payer.ApplyPayment(invoice=None, None, account=self.receivables, 
-#                           dest_account, 
-#                            amount, exch=GncNumeric(1), date, memo="", num="",
-#                            autopay=False)
-            payer.ApplyPayment(None, None, self.receivables, dest_account, 
-                            amount, GncNumeric(1), date, "", "", False)
-            
+            customer.ApplyPayment(None, None, self.receivables, dest_account, 
+                            amount, GncNumeric(1), date, "", "", True)
             if self.gnucashtype == "xml":
                 self.gcsession.save()
             self.gcsession.end()
