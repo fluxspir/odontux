@@ -14,15 +14,14 @@
       {% endif %}
       <th>Code</th>
       <th>Price</th>
-      {% if session.role == session.ROLE_DENTIST %}
-        <th>Invoice ID</th>
-        <th></th>
-        <th></th>
-      {% endif %}
+      <th>Invoice ID</th>
+      <th>Payment</th>
+      <th>Mod</th>
+      <th>Del</th>
     </tr>
 {% endmacro %}
 
-{% macro act_table_rows(session, gesture, appointment, act_info, specialty) %}
+{% macro act_table_rows(session, gesture, appointment, act_info, specialty, patient) %}
       {% if gesture.paid == True %}
         <tr style="color:blue;">
       {% else %}
@@ -37,11 +36,19 @@
         {% endif %}
         <td>{{ gesture.gesture.code }}</td>
         <td>{{ gesture.price }}</td>
+        <td>{{ gesture.invoice_id }}</td>
+        <td>
+          {% if gesture.is_paid == False 
+            and patient.already_paid() - patient.gestures_marked_as_paid() > gesture.price %}
+          <a href="{{ url_for('apply_payment_to_gesture', patient_id=patient.id,
+                                              gesture_id = gesture.id) }}">
+            Apply payment</a>
+          {% endif %}
+        </td>
         {% if session.role == session.ROLE_DENTIST %}
-          <td>{{ gesture.invoice_id }}</td>
           <td>Modify</td>
           <td>
-            {% if gesture.paid == False or gesture.price == 0 %}
+            {% if gesture.is_paid == False or gesture.price == 0 %}
                 <a href="{{url_for('remove_administrativ_gesture', 
                                             patient_id=appointment.patient_id, 
                                             appointment_id=appointment.id, 
@@ -51,6 +58,9 @@
               Delete</a>
             {% endif %}
           </td>
+        {% else %}
+          <td></td>
+          <td></td>
         {% endif %}
       </tr>
 {% endmacro %}
