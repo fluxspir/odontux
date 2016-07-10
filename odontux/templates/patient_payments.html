@@ -6,12 +6,19 @@
     <tr>
       <th>Total Price</th>
       <th>Total Paid</th>
-      <th>Due</th>
+      <th>Balance</th>
     </tr>
     <tr>
       <td>{{ patient.global_price() }} {{ currency_symbol }}</td>
-      <td style="color:green;">{{ patient.already_paid() }} {{ currency_symbol }}</td>
-      <td style="color:red;">{{ patient.due() }} {{ currency_symbol }}</td>
+      <td style="color:blue;">{{ patient.already_paid() }} {{ currency_symbol }}</td>
+      {% if patient.balance() < 0 %}
+        <td style="color:red;">
+      {% elif patient.balance() == 0 %}
+        <td>
+      {% else %}
+        <td style="color:green;">
+      {% endif %}
+      {{ patient.balance() }} {{ currency_symbol }}</td>
     </tr>
   </table>
 <br />

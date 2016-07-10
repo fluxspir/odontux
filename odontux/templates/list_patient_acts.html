@@ -3,17 +3,35 @@
 {% extends "summary_patient.html" %}
 
 {% block main %}
+  <table>
+    <tr>
+      <th>Total Price</th>
+      <th>Acts paid</th>
+      <th>Total Payments</th>
+      <th>Balance</th>
+    </tr>
+    <tr>
+      <td>{{ patient.global_price() }} {{ currency_symbol }}</td>
+      <td>{{ patient.gestures_marked_as_paid() }}</td>
+      <td style="color:blue;">{{ patient.already_paid() }} {{ currency_symbol }}</td>
+      {% if patient.balance() < 0 %}
+        <td style="color:red;">
+      {% elif patient.balance() == 0 %}
+        <td>
+      {% else %}
+        <td style="color:green;">
+      {% endif %}
+      {{ patient.balance() }} {{ currency_symbol }}</td>
+    </tr>
+  </table>
+
   {% block list_acts %}
 
     {{ act_table_opening_tag("list of acts made to patient") }}
     {{ act_table_header(session) }}
     {% for gesture, appointment, act_info, specialty in acts %}
-      {{ act_table_rows(session, gesture, appointment, act_info, specialty) }}
+      {{ act_table_rows(session, gesture, appointment, act_info, specialty, patient) }}
     {% endfor %}
     {{ act_table_closing_tag() }}
-  <br />
-  total price = {{ patient.global_price() }}<br />
-  total paid = {{ patient.already_paid() }}<br />
-  due = {{ patient.due() }}
   {% endblock %}
 {% endblock %}

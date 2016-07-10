@@ -22,7 +22,8 @@ import datetime
 
 
 import gnucash
-from gnucash import Session as GCSession, GUID
+from gnucash import Session as GCSession
+from gnucash import Account
 from gnucash import GncNumeric
 from gnucash import gnucash_core_c as gnc_core_c
 from gnucash.gnucash_business import Customer, Address, Invoice, Entry
@@ -73,29 +74,11 @@ class GnuCash():
             self.gnucashtype = "postgresql"
         else:
             self.gnucashtype = "xml"
+
         assets = constants.ASSETS
         receivables = constants.RECEIVABLES
         dentalfund = constants.DENTAL_FUND
 
-# Not needed for ApplyPaiement lookup automagically         
-#        payments_types = meta.session.query(compta.PaymentType)
-#        cash = payments_types.filter(
-#                        compta.PaymentType.gnucash_name == 'Cash').one()
-#        credit_receiv = payments_types.filter(
-#                        compta.PaymentType.gnucash_name == 'CreditCard').one()
-#        debit_receiv = payments_types.filter(
-#                        compta.PaymentType.gnucash_name == 'DebitCard').one()
-#        check_receiv = payments_types.filter(
-#                        compta.PaymentType.gnucash_name == 'Check').one()
-#        transfer_receiv = payments_types.filter(
-#                        compta.PaymentType.gnucash_name == 'Transfer').one()
-#        paypal = payments_types.filter(
-#                        compta.PaymentType.gnucash_name == 'Paypal').one()
-#        boleto = payments_types.filter(
-#                        compta.PaymentType.gnucash_name == 'Boleto').one()
-#        other = payments_types.filter(
-#                        compta.PaymentType.gnucash_name == 'Other').one()
-#
         incomes = constants.INCOMES
         dentalincomes = constants.DENTAL_INCOMES
 
@@ -109,35 +92,35 @@ class GnuCash():
         # Set up the Book for accounting
         self.gcsession = GCSession(profissionnalaccounting_url, True)
         self.book = self.gcsession.get_book()
+
+        # set the currency we'll use
+        currency = constants.GNUCASH_CURRENCY
+        commod_tab = self.book.get_table()
+        self.currency = commod_tab.lookup("CURRENCY", currency)
+
         # Set up the root on accounting book
         self.root = self.book.get_root_account()
         # Assets
         self.assets = self.root.lookup_by_name(assets)
         # What the patient owes to dental office
         self.receivables = self.assets.lookup_by_name(receivables)
+        if not self.receivables.lookup_by_name(self.gcpatient_id):
+            self.patient_receivables = Account(self.book)
+            self.receivables.append_child(self.patient_receivables)
+            self.patient_receivables.SetName(self.gcpatient_id)
+            self.patient_receivables.SetType(gnc_core_c.ACCT_TYPE_RECEIVABLE)
+            self.patient_receivables.SetCommodity(self.currency)
+        else:
+            self.patient_receivables = self.receivables.lookup_by_name(
+                                                            self.gcpatient_id)
         # What the patient paid to dental office, but not usable
         # because it needs to pass by the bank.
         # the detail of dental fund is build in commands/compta.py
         # while getting the paymenttype.
         self.dentalfund = self.assets.lookup_by_name(dentalfund)
-# Not needed 
-#        self.cash = self.dentalfund.lookup_by_name(cash)
-#        self.credit_receiv = self.dentalfund.lookup_by_name(credit_receiv)
-#        self.debit_receiv = self.dentalfund.lookup_by_name(debit_receiv)
-#        self.check_receiv = self.dentalfund.lookup_by_name(check_receiv)
-#        self.transfer_receiv = self.dentalfund.lookup_by_name(transfer_receiv)
-#        self.paypal = self.dentalfund.lookup_by_name(paypal)
-#        self.boleto = self.dentalfund.lookup_by_name(boleto)
-#        self.other = self.dentalfund.lookup_by_name(other)
-
         # Incomes
         self.incomes = self.root.lookup_by_name(incomes)
         self.dentalincomes = self.incomes.lookup_by_name(dentalincomes)
-
-        # set the currency we'll use
-        currency = constants.GNUCASH_CURRENCY
-        commod_tab = self.book.get_table()
-        self.currency = commod_tab.lookup("CURRENCY", currency)
 
     def gnc_numeric_from_decimal(self, decimal_value):
         sign, digits, exponent = decimal_value.as_tuple()
@@ -180,6 +163,9 @@ class GnuCashCustomer(GnuCash):
     a new Customer in gnucash, as each dentist possesses his own 
     gnucash_session.
     """
+
+    def __init__(self):
+        pass
 
     def _test_id_already_in_database(self):
         return self.book.CustomerLookupByID(self.gcpatient_id)
@@ -285,19 +271,21 @@ class GnuCashInvoice(GnuCash):
     An individual invoice will contain every act made on a unique patient
     during an unique appointment.
     """
-    def __init__(self, patient_id, appointment_id, dentist_id, invoice_id=""):
+    def __init__(self, patient_id, appointment_id, dentist_id=None, 
+                                                            invoice_id=None):
         # Initialize the self.vars from Parent : GnuCash
         #   * self.gcsession
         #   * self.book
-        #   * self.root, self.assets, self.receivables, self.incomes, 
+        #   * self.root, self.assets, self.patient_receivables, self.incomes, 
         #   self.dentalincomes
         #   * self.gcpatient and self.patient
         #   * self.currency
         patient = meta.session.query(administration.Patient).filter(
-                                administration.Patient.id == patient_id).one()
-        # If it's a dentist who is entering an act in database, we assume he
-        # did the gesture. Otherwise, if nurse, secretary (...) enters the act
-        # in database, we assume the patient's official dentist made it.
+                            administration.Patient.id == patient_id).one()
+        # If it's a dentist who is entering an act in database, we assume
+        # he did the gesture. Otherwise, if nurse, secretary (...) enters 
+        # the act in database, we assume the patient's official dentist 
+        # made it.
         if not dentist_id:
             dentist_id = patient.dentist_id
         GnuCash.__init__(self, patient.id, dentist_id)
@@ -307,22 +295,21 @@ class GnuCashInvoice(GnuCash):
         # Date + appointment_id
         self.datetime = (
             meta.session.query(schedule.Appointment)
-                .filter(schedule.Appointment.id ==appointment_id)
+                .filter(schedule.Appointment.id == appointment_id)
                 .one().agenda.endtime
             )
         self.date = self.datetime.date()
-
-        if not invoice_id:
+        if invoice_id:
+            self.invoice_id = invoice_id
+        else:
             self.invoice_id = "inv_" + self.date.isoformat() + "_" +\
                                                             str(appointment_id)
-        else:
-            self.invoice_id = invoice_id
 
     def _create_invoice_instance(self):
         return Invoice(self.book, self.invoice_id, self.currency, 
                        self.owner, self.date)
         
-    def add_act(self, code, price, act_id):
+    def add_act(self, price, act_id):
         # Get an instance for the invoice
         try:
             if self.book.InvoiceLookupByID(self.invoice_id):
@@ -333,7 +320,7 @@ class GnuCashInvoice(GnuCash):
                 invoice = self._create_invoice_instance()
                 invoice.BeginEdit()
 
-            description = str(act_id) + "_" + code
+            description = str(act_id)
             invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
             invoice_entry = Entry(self.book, invoice)
             invoice_entry.BeginEdit()
@@ -344,8 +331,8 @@ class GnuCashInvoice(GnuCash):
             invoice_entry.SetInvPrice(invoice_value)
             invoice_entry.CommitEdit()
             invoice.CommitEdit()
-            invoice.PostToAccount(self.receivables, self.datetime, self.date,
-                                    description.encode("utf_8"), True, False)
+            invoice.PostToAccount(self.patient_receivables, self.datetime, 
+                        self.date, description.encode("utf_8"), True, False)
             if self.gnucashtype == 'xml':
                 self.gcsession.save()
             self.gcsession.end()
@@ -356,14 +343,14 @@ class GnuCashInvoice(GnuCash):
             raise
             return False
 
-    def remove_act(self, code, act_id):
+    def remove_act(self, act_id):
         try:
             if self.book.InvoiceLookupByID(self.invoice_id):
                 invoice = self.book.InvoiceLookupByID(self.invoice_id)
             else:
                 raise Exception(_("invoice_id doesn't fit"))
 
-            description = str(act_id) + "_" + code
+            description = str(act_id)
             number_of_entries = len(invoice.GetEntries())
             
             for entry in invoice.GetEntries():
@@ -374,8 +361,8 @@ class GnuCashInvoice(GnuCash):
                         entry.BeginEdit()
                         invoice.RemoveEntry(entry)
                         invoice.CommitEdit()
-                        invoice.PostToAccount(self.receivables, self.date, 
-                                            self.date, 
+                        invoice.PostToAccount(self.patient_receivables, 
+                                            self.date, self.date, 
                                             description.encode("utf_8"),
                                             True, False)
                         if self.gnucashtype == 'xml':
@@ -391,6 +378,27 @@ class GnuCashInvoice(GnuCash):
                         return True
             return False
 
+        except:
+            self.gcsession.end()
+            raise
+            return False
+
+
+    def apply_payment(self, amount=0):
+        try:
+            if self.book.InvoiceLookupByID(self.invoice_id):
+                invoice = self.book.InvoiceLookupByID(self.invoice_id)
+            else:
+                raise Exception(_("invoice_id doesn't fit"))
+            
+            amount = self.gnc_numeric_from_decimal(Decimal(amount))
+            invoice.ApplyPayment(None, self.dentalfund, amount, GncNumeric(1),
+                                                            self.date, "", "" )
+#            invoice.SetActive(False)
+            if self.gnucashtype == "xml":
+                self.gcsession.save()
+            self.gcsession.end()
+            return True
         except:
             self.gcsession.end()
             raise
@@ -415,8 +423,8 @@ class GnuCashPayment(GnuCash):
             dest_account = self._get_paymenttype(mean_id)
             amount = self.gnc_numeric_from_decimal(amount)
 
-            customer.ApplyPayment(None, None, self.receivables, dest_account, 
-                            amount, GncNumeric(1), date, "", "", True)
+            customer.ApplyPayment(None, None, self.patient_receivables, 
+                    dest_account, amount, GncNumeric(1), date, "", "", True)
             if self.gnucashtype == "xml":
                 self.gcsession.save()
             self.gcsession.end()

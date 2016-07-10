@@ -144,17 +144,18 @@ def generate_dental_office_informations(canvas, doc):
         canvas.drawString( patient_info_width, patient_info_height,
                             patient.firstname + " " + patient.lastname)
         patient_info_height = _new_height(patient_info_height)
-        canvas.drawString( patient_info_width, patient_info_height,
-                            patient.address.street + ", " + 
-                            patient.address.street_number + " ; "+
-                            patient.address.complement )
-        patient_info_height = _new_height(patient_info_height)
-        canvas.drawString( patient_info_width, patient_info_height,
-                            patient.address.district + " - " +
-                            patient.address.zip_code)
-        patient_info_height = _new_height(patient_info_height)
-        canvas.drawString( patient_info_width, patient_info_height,
-                            patient.address.city )
+        if patient.address_id:
+            canvas.drawString( patient_info_width, patient_info_height,
+                                patient.address.street + ", " + 
+                                patient.address.street_number + " ; "+
+                                patient.address.complement )
+            patient_info_height = _new_height(patient_info_height)
+            canvas.drawString( patient_info_width, patient_info_height,
+                                patient.address.district + " - " +
+                                patient.address.zip_code)
+            patient_info_height = _new_height(patient_info_height)
+            canvas.drawString( patient_info_width, patient_info_height,
+                                patient.address.city )
 
     canvas.restoreState()
 
@@ -201,7 +202,7 @@ def get_document_base(patient_id, appointment_id):
     return ( output, doc, Story, styles, patient, appointment, dentist, 
             dental_office )
  
-def make_payment_receipt(patient_id, appointment_id, payment_form, mean):
+def make_payment_receipt(patient_id, appointment_id, payment_form, mean): 
 
     output, doc, Story, styles, patient, appointment, dentist, dental_office =\
                                 get_document_base(patient_id, appointment_id)
@@ -212,7 +213,7 @@ def make_payment_receipt(patient_id, appointment_id, payment_form, mean):
     Story.append(Spacer(1, 30 * mm))
     text = ( u'Recibo neste dia {} o pagamento em {} de {} {}, CPF: {} de uma soma total de {} {} por serviços odontológicos que serão detalhados na fatura.'.format(
                                         appointment.agenda.starttime.date(),
-                                        mean,
+                                        mean.odontux_name,
                                         patient.firstname, patient.lastname,
                                         patient.identity_number_2,
                                         payment_form.amount.data,

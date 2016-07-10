@@ -490,8 +490,7 @@ def add_administrativ_gesture(patient_id, appointment_id):
 
         invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
                                                         appointment.dentist_id)
-        invoice_id = invoice.add_act(gesture.code, values['price'],
-                                                                new_gesture.id)
+        invoice_id = invoice.add_act(values['price'], new_gesture.id)
 
         new_gesture.invoice_id = invoice_id
         meta.session.commit()
@@ -522,8 +521,8 @@ def remove_administrativ_gesture(patient_id, appointment_id, gesture_id, code):
             act.AppointmentGestureReference.id == gesture_id).one()
 
     invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
-                                             appointment.dentist_id)
-    remove_from_gnucash = invoice.remove_act(gesture.gesture.code, gesture_id)
+                                                     appointment.dentist_id)
+    remove_from_gnucash = invoice.remove_act(gesture_id)
 
     meta.session.delete(gesture)
     meta.session.commit()

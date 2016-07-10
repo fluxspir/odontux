@@ -62,5 +62,5 @@ class AppointmentGestureReference(Base):
     healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id))
     price = Column(Numeric, nullable=False)
     invoice_id = Column(String, default="")
-    paid = Column(Boolean, default=False)
+    is_paid = Column(Boolean, default=False)
     gesture = relationship('Gesture')

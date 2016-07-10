@@ -17,7 +17,7 @@ from gettext import gettext as _
 
 from odontux.odonweb import app
 from odontux import constants, checks, gnucash_handler
-from odontux.models import meta, compta, documents
+from odontux.models import meta, compta, documents, act
 
 from odontux.views.log import index
 
@@ -40,6 +40,42 @@ class PatientPaymentForm(Form):
     amount = DecimalField(_('Amount'), [validators.Required()])
     comments = TextAreaField(_('Comments'))
     make_payment = SubmitField(_('Make Payment'))
+
+@app.route('/apply_payment_to_gesture?pid=<int:patient_id>'
+                                            '&gid=<int:gesture_id>')
+def apply_payment_to_gesture(patient_id, gesture_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+    appointment_gesture = ( 
+        meta.session.query(act.AppointmentGestureReference)
+            .filter(act.AppointmentGestureReference.id == gesture_id)
+            .one()
+    )
+    patient, appointment = checks.get_patient_appointment(
+                                                        patient_id=patient_id)
+    if patient.balance() < 0:
+        return redirect(url_for('list_acts', patient_id=patient_id))
+    if ( appointment_gesture.price <= 
+                patient.already_paid() - patient.gestures_marked_as_paid() ):
+        appointment_gesture.is_paid = True
+        meta.session.commit()
+
+        gestures_in_invoice = (
+            meta.session.query(act.AppointmentGestureReference)
+                .filter(act.AppointmentGestureReference.invoice_id == 
+                                                appointment_gesture.invoice_id)
+                .all()
+        )
+
+        if all([ gesture.is_paid for gesture in gestures_in_invoice ]):
+            invoice = gnucash_handler.GnuCashInvoice(patient.id,
+                        appointment_gesture.appointment_id, None, 
+                        invoice_id = appointment_gesture.invoice_id)
+            apply_payment_to_invoice = invoice.apply_payment()
+
+    return redirect(url_for('list_acts', patient_id=patient_id))
 
 @app.route('/make/payment&pid=<int:patient_id>&aid=<int:appointment_id>', 
                                                     methods=['GET', 'POST'])
@@ -65,7 +101,7 @@ def make_payment(patient_id, appointment_id):
                                                             patient.dentist_id)
 
         pdf_out = make_payment_receipt(patient_id, appointment_id, 
-                                            payment_form, mean.gnucash_name)
+                                                            payment_form, mean)
         if not pdf_out:
             return render_template('make_payment.html', patient=patient,
                                         appointment=appointment,
@@ -108,7 +144,10 @@ def make_payment(patient_id, appointment_id):
                                             appointment_id=appointment_id))
 
     if request.method == 'GET':
-        payment_form.amount.data = patient.due()
+        if patient.balance() < 0:
+            payment_form.amount.data = abs(patient.balance())
+        else:
+            payment_form.amount.data = 0
 
     payment_form.patient_id.data = patient.id
     return render_template('make_payment.html', patient=patient,

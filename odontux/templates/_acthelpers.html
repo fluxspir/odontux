@@ -39,7 +39,7 @@
         <td>{{ gesture.invoice_id }}</td>
         <td>
           {% if gesture.is_paid == False 
-            and patient.already_paid() - patient.gestures_marked_as_paid() > gesture.price %}
+            and patient.already_paid() - patient.gestures_marked_as_paid() >= gesture.price %}
           <a href="{{ url_for('apply_payment_to_gesture', patient_id=patient.id,
                                               gesture_id = gesture.id) }}">
             Apply payment</a>

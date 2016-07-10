@@ -18,52 +18,9 @@ from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 
-
-#class Address(Base):
-#    __tablename__ = 'address'
-#    id = Column(Integer, primary_key=True)
-#    street = Column(String, default="", nullable=False)
-#    street_number = Column(String, default="", nullable=False)
-#    building = Column(String, default="", nullable=False)
-#    complement = Column(String, default="", nullable=False)
-#    district = Column(String, default="", nullable=False)
-#    city = Column(String, default="", nullable=False)
-#    zip_code = Column(String, default="", nullable=False)
-#    state = Column(String, default="", nullable=False)
-#    country = Column(String, default="", nullable=False)
-#    update_date = Column(Date, default=func.current_date())
-#
-#
-#class Mail(Base):
-#    __tablename__ = 'mail'
-#    id = Column(Integer, primary_key=True)
-#    email = Column(String, default="")
-#    update_date = Column(Date, default=func.current_date())
-#
-#
-#class Phone(Base):
-#    __tablename__ = 'phone'
-#    id = Column(Integer, primary_key=True)
-#    name = Column(String, default="")
-#    indicatif = Column(String, default="")
-#    area_code = Column(String, default="")
-#    number = Column(String, default="")
-#    update_date = Column(Date, default=func.current_date())
-#
-#class Family(Base):
-#    __tablename__ = 'family'
-#    id = Column(Integer, primary_key=True)
-#    members = relationship("Patient", backref="family")
-#    addresses = relationship("Address", secondary=family_address_table,
-#                             backref="family")
-#    payers = relationship("Payer", secondary=family_payer_table,
-#                           backref="family")
-#
-
 class Patient(Base):
     __tablename__ = 'patient'
     id = Column(Integer, primary_key=True)
-#    family_id = Column(Integer, ForeignKey(Family.id))
     identity_number_1 = Column(String)
     identity_number_2 = Column(String)
     title = Column(String, default="Mr")
@@ -73,7 +30,7 @@ class Patient(Base):
     preferred_name = Column(String, default="")
     correspondence_name = Column(String, default="")
     sex = Column(String, default="f")
-    dob = Column(Date, default="19700101")                  # date of birth
+    dob = Column(Date, default=datetime.date(1970, 1, 1))  #date of birth
     job = Column(String, default="")
     address_id = Column(Integer, ForeignKey(contact.Address.id))
     address = relationship('Address', backref='patient')
@@ -89,16 +46,12 @@ class Patient(Base):
     creation_date = Column(Date, default=func.current_date())
     appointments = relationship("Appointment", backref="patient",
                         cascade="all, delete, delete-orphan")
-#    payer = relationship("Payer", backref="patient",
-#                        cascade="all, delete, delete-orphan")
     hcs = relationship("HealthCarePlan", 
                         secondary=patient_healthcare_plan_table,
                         backref="patients",
                         cascade="all, delete")
     healthcare_plans_id = association_proxy('hcs', 'id')
     healthcare_plans = association_proxy('hcs', 'name')
-    
-#    payments = relationship('compta.Payment')
     teeth = relationship("Tooth")
     teeth_codenames = association_proxy('teeth', 'codename')
 
@@ -129,9 +82,13 @@ class Patient(Base):
             total_paid += payment.amount
         return total_paid
 
-    def due(self):
-        return self.global_price() - self.already_paid()
+    def gestures_marked_as_paid(self):
+        gestures_paid = 0
+        for appointment in self.appointments:
+            for gesture in appointment.administrative_gestures:
+                if gesture.is_paid:
+                    gestures_paid += gesture.price
+        return gestures_paid
 
-#class Payer(Base):
-#    __tablename__ = 'payer'
-#    id = Column(Integer, ForeignKey(Patient.id), primary_key=True)
+    def balance(self):
+        return self.already_paid() - self.global_price()
