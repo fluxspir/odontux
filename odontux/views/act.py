@@ -484,15 +484,16 @@ def add_administrativ_gesture(patient_id, appointment_id):
         if not appointment_gesture_form.price.data:
             values['paid'] = True
 
-        new_gesture = act.AppointmentGestureReference(**values)
-        meta.session.add(new_gesture)
+        new_technical_gesture = act.AppointmentGestureReference(**values)
+        meta.session.add(new_technical_gesture)
         meta.session.commit()
 
         invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
                                                         appointment.dentist_id)
-        invoice_id = invoice.add_act(values['price'], new_gesture.id)
+        invoice_id = invoice.add_act(gesture.name, values['price'], 
+                                                        new_technical_gesture.id)
 
-        new_gesture.invoice_id = invoice_id
+        new_technical_gesture.invoice_id = invoice_id
         meta.session.commit()
 
         return redirect(url_for("add_administrativ_gesture", 

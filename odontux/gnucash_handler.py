@@ -8,7 +8,7 @@
 import pdb
 
 import time
-
+import json
 from models import meta, administration, users, compta, schedule
 import constants
 
@@ -309,7 +309,7 @@ class GnuCashInvoice(GnuCash):
         return Invoice(self.book, self.invoice_id, self.currency, 
                        self.owner, self.date)
         
-    def add_act(self, price, act_id):
+    def add_act(self, name, price, gesture_id):
         # Get an instance for the invoice
         try:
             if self.book.InvoiceLookupByID(self.invoice_id):
@@ -319,20 +319,21 @@ class GnuCashInvoice(GnuCash):
             else:
                 invoice = self._create_invoice_instance()
                 invoice.BeginEdit()
-
-            description = str(act_id)
+            
+            datas = { 'gesture_id': gesture_id }
             invoice_value = self.gnc_numeric_from_decimal(Decimal(price))
             invoice_entry = Entry(self.book, invoice)
             invoice_entry.BeginEdit()
             invoice_entry.SetDateEntered(self.datetime)
-            invoice_entry.SetDescription(description.encode("utf_8"))
+            invoice_entry.SetDescription(name.encode("utf_8"))
+            invoice_entry.SetNotes(json.dumps(datas))
             invoice_entry.SetQuantity( GncNumeric(1) )
             invoice_entry.SetInvAccount(self.dentalincomes)
             invoice_entry.SetInvPrice(invoice_value)
             invoice_entry.CommitEdit()
             invoice.CommitEdit()
             invoice.PostToAccount(self.patient_receivables, self.datetime, 
-                        self.date, description.encode("utf_8"), True, False)
+                        self.date, name.encode("utf_8"), True, False)
             if self.gnucashtype == 'xml':
                 self.gcsession.save()
             self.gcsession.end()
@@ -343,18 +344,18 @@ class GnuCashInvoice(GnuCash):
             raise
             return False
 
-    def remove_act(self, act_id):
+    def remove_act(self, gesture_id):
         try:
             if self.book.InvoiceLookupByID(self.invoice_id):
                 invoice = self.book.InvoiceLookupByID(self.invoice_id)
             else:
                 raise Exception(_("invoice_id doesn't fit"))
 
-            description = str(act_id)
             number_of_entries = len(invoice.GetEntries())
             
             for entry in invoice.GetEntries():
-                if entry.GetDescription() == description:
+                if int(json.loads(entry.GetNotes())['gesture_id']) ==\
+                                                                    gesture_id:
                     if number_of_entries > 1 :
                         invoice.Unpost(True)
                         invoice.BeginEdit()
@@ -369,7 +370,7 @@ class GnuCashInvoice(GnuCash):
                             self.gcsession.save()
                         self.gcsession.end()
                         return True
-                    if number_of_entries == 1:
+                    else:
                         invoice.Unpost(True)
                         invoice.Destroy()
                         if self.gnucashtype == 'xml':
