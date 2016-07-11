@@ -208,8 +208,7 @@ def make_payment_receipt(patient_id, appointment_id, payment_form, mean):
                                 get_document_base(patient_id, appointment_id)
 
     doc.patient_info = patient
-    Story.append(Paragraph('Recibo odontológico', 
-                                                styles['my_title']))
+    Story.append(Paragraph(u'Recibo odontológico', styles['my_title']))
     Story.append(Spacer(1, 30 * mm))
     text = ( u'Recibo neste dia {} o pagamento em {} de {} {}, CPF: {} de uma soma total de {} {} por serviços odontológicos que serão detalhados na fatura.'.format(
                                         appointment.agenda.starttime.date(),
@@ -234,6 +233,14 @@ def make_payment_receipt(patient_id, appointment_id, payment_form, mean):
     output.close()
     return pdf_out
 
+def make_invoice_payment_bill(patient_id, appointment_id, gestures):
+    output, doc, Story, styles, patient, appointment, dentist, dental_office =\
+                                get_document_base(patient_id, appointment_id)
+
+    doc.patient_info = patient
+    Story.append(Paragraph(u'Fatura detalhada', styles['my_title']))
+    Story.append(Spacer(1, 30 * mm))
+    
 
 def make_cessation_certificate(patient_id, appointment_id, cessation_form):
 

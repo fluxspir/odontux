@@ -21,7 +21,7 @@ from odontux.models import meta, compta, documents, act
 
 from odontux.views.log import index
 
-from odontux.pdfhandler import make_payment_receipt
+from odontux.pdfhandler import make_payment_receipt, make_invoice_payment_bill
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      DecimalField, HiddenField, IntegerField, validators,
@@ -40,6 +40,22 @@ class PatientPaymentForm(Form):
     amount = DecimalField(_('Amount'), [validators.Required()])
     comments = TextAreaField(_('Comments'))
     make_payment = SubmitField(_('Make Payment'))
+
+class BillForm(Form):
+    gesture_description = TextAreaField(_('Gesture description'), 
+                                            [validators.Required()])
+
+@app.route('/write_bill?pid=<int:patient_id>&aid=<int:appointment_id>'
+            'iid=<invoice_id>', methods=['GET', 'POST'])
+def write_bill(patient_id, appointment_id, invoice_id):
+
+    gestures_in_invoice = ( meta.session.query(act.AppointmentGestureReference)
+            .filter(act.AppointmentGestureReference.invoice_id == invoice_id)
+            .all()
+    )
+    pdf_out = make_invoice_payment_bill(patient_id, 
+                                        appointment_gesture.appointment_id,
+                                        gestures_in_invoice)
 
 @app.route('/apply_payment_to_gesture?pid=<int:patient_id>'
                                             '&gid=<int:gesture_id>')
@@ -74,6 +90,13 @@ def apply_payment_to_gesture(patient_id, gesture_id):
                         appointment_gesture.appointment_id, None, 
                         invoice_id = appointment_gesture.invoice_id)
             apply_payment_to_invoice = invoice.apply_payment()
+
+            # create a bill for user:
+            return redirect(url_for('write_bill', patient_id=patient_id,
+                            appointment_id=appointment_gesture.appointment_id,
+                            invoice_id=appointment_gesture.invoice_id))
+            #####
+
 
     return redirect(url_for('list_acts', patient_id=patient_id))
 
