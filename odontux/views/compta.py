@@ -18,7 +18,7 @@ from gettext import gettext as _
 
 from odontux.odonweb import app
 from odontux import constants, checks, gnucash_handler
-from odontux.models import meta, compta, documents, act
+from odontux.models import meta, compta, documents, act, statements
 
 from odontux.views.log import index
 
@@ -172,10 +172,15 @@ def patient_payments(patient_id, appointment_id=0):
                     .filter(compta.Payment.patient_id == patient_id)
                     .all()
     )
+    bills = ( meta.session.query(statements.Bill)
+                    .filter(statements.Bill.patient_id == patient_id)
+                    .all()
+    )
     currency_symbol = constants.CURRENCY_SYMBOL
     return render_template('patient_payments.html', patient=patient,
                                             appointment=appointment,
                                             payments=payments,
+                                            bills=bills,
                                             currency_symbol=currency_symbol)
 
 @app.route('/show_payments_type&ptid=<int:payments_type_id>', 

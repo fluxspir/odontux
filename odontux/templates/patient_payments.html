@@ -35,4 +35,10 @@ Receipts:<br />
   </a><br />
 {% endfor %}
 <br />
+Bills:<br />
+{% for bill in bills %}
+  <a href="{{ url_for('view_bill', bill_file_id=bill.file_id) }}">
+    {{ bill.appointment.agenda.starttime }}
+  </a><br />
+{% endfor %}
 {% endblock %}
