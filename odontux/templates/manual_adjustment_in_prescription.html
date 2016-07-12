@@ -15,7 +15,7 @@
     </div>
     {{ render_simple_hidden_field(drug_form.drug_id) }}
     {{ render_sfl_wol(drug_form.position) }}
-    {{ drug_form.molecule }}
+    {{ drug_form.molecule.data }}
     {{ render_sfl_wol(drug_form.packaging) }}
     {{ render_sfl_wol(drug_form.posologia) }}
     days: {{ render_sfl_wol(drug_form.dayssupply) }}

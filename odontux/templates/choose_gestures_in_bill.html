@@ -1,0 +1,32 @@
+{% extends 'summary_patient.html' %}
+
+{% block main %}
+Gestures in bill:</br />
+  {% for gesture in gestures_in_bill %}
+    {{ gesture.appointment.agenda.starttime }} --
+    {{ gesture.anatomic_location }} - {{ gesture.gesture.name }} : 
+      {{ gesture.price }} {{ constants.CURRENCY_SYMBOL }} ||
+    <a href="{{ url_for('remove_gesture_from_bill', patient_id=patient.id,
+                      appointment_id=appointment.id, 
+                      gesture_id_to_remove=gesture.id,
+                      gestures_id_in_bill=gestures_id_in_bill) }}">
+        Remove</a><br />
+  {% endfor %}<br />
+  Gestures that could be added:<br />
+  {% for gesture in gestures_not_in_bill %}
+    {{ gesture.appointment.agenda.starttime }} --
+    {{ gesture.anatomic_location }} - {{ gesture.gesture.name }} : 
+      {{ gesture.price }} {{ constants.CURRENCY_SYMBOL }} ||
+      <a href="{{ url_for('add_gesture_to_bill', patient_id=patient.id,
+                      appointment_id=appointment.id, 
+                      gesture_id_to_add=gesture.id,
+                      gestures_id_in_bill=gestures_id_in_bill) }}">
+        Add</a><br />
+  {% endfor %}
+  <br /><br />
+  <a href="{{ url_for('make_bill', patient_id=patient.id,
+                              appointment_id=appointment.id,
+                              gestures_id_in_bill=gestures_id_in_bill) }}">
+          Make bill
+  </a>
+{% endblock %}

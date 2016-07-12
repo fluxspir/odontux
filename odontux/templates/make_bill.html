@@ -1,0 +1,32 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_field_line %}
+<h3>Create Bill</h3><br />
+<div id="bill_fine_tune" style="float:left;width:55%;height:100vh">
+
+  <form method='post' action="{{ url_for('make_bill',
+                                    patient_id=patient.id,
+                                    appointment_id=appointment.id,
+                                    gestures_id_in_bill=gestures_id_in_bill) }}">
+
+    {{ bill_form.update }}
+    {{ bill_form.preview }} {{ bill_form.save_print }}<br />
+    {% for gesture_form in bill_form.gestures %}
+      {% if gesture_form.gesture_id.data %}
+        {{ gesture_form.gesture_id }}
+        {{ gesture_form.date.data }} {{ gesture_form.date }} -- 
+        {{ gesture_form.anatomic_location.data }} {{ gesture_form.anatomic_location }}
+        {{ gesture_form.gesture_name }} : 
+        {{ gesture_form.price.data }} {{ constants.CURRENCY_SYMBOL }}
+        {{ gesture_form.price }}
+      {% endif %}
+    {% endfor %}
+  </form>
+</div>
+{% if pdf_out %}
+  <div id="pdf_out" style="float:right;width:43%;height:100vh">
+    <embed src="data:application/pdf;base64,{{ pdf_out }}" type="application/pdf" width='95%' height='100%'>
+  </div>
+{% endif %}
+
+{% endblock %}

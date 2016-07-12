@@ -14,7 +14,7 @@ from flask import ( session, render_template, request, redirect, url_for,
                     abort, make_response, jsonify)
 
 from wtforms import (Form, TextField, TextAreaField, DecimalField, 
-                    IntegerField,HiddenField, DateField, SubmitField, 
+                    IntegerField, HiddenField, DateField, SubmitField, 
                     FieldList, FormField, SelectField,
                     validators )
 #from forms import TimeField
@@ -28,7 +28,7 @@ from odontux.odonweb import app
 from gettext import gettext as _
 
 from odontux import constants, checks
-from odontux.pdfhandler import make_quote
+from odontux.pdfhandler import make_quote, make_invoice_payment_bill
 
 #from odontux.pdfhandler import ( )
 
@@ -60,6 +60,207 @@ class QuotePropositionForm(Form):
     preview = SubmitField(_('Preview'))
     save_print = SubmitField(_('Save and Print'))
 
+class GestureForm(Form):
+    gesture_id = HiddenField(_('gesture_id'))
+    date = HiddenField(_('date'))
+    gesture_name = TextAreaField(_('Gesture description'), 
+                                            render_kw={'row':2,'cols':60})
+    anatomic_location = HiddenField(_('anat_loc'))
+    price = HiddenField(_('price'))
+
+class BillForm(Form):
+    gestures = FieldList(FormField(GestureForm), min_entries=1)
+    update = SubmitField(_('Update'))
+    preview = SubmitField(_('Preview'))
+    save_print = SubmitField(_('Save and Print'))
+
+@app.route('/choose/gestures_in_bill?pid=<int:patient_id>'
+                                                '&aid=<int:appointment_id>')
+@app.route('/choose/gestures_in_bill?pid=<int:patient_id>'
+                        '&aid=<int:appointment_id>&gids=<gestures_id_in_bill>')
+def choose_gestures_in_bill(patient_id, appointment_id, 
+                                                    gestures_id_in_bill=""):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
+    patient_appointments_id = [ a.id for a in patient.appointments ]
+    # get id list of gestures that could be in bill
+    gestures_panel = (
+        meta.session.query(act.AppointmentGestureReference)
+            .join(schedule.Appointment, schedule.Agenda)
+            .filter(
+                act.AppointmentGestureReference.appointment_id.in_(
+                                                    patient_appointments_id),
+                act.AppointmentGestureReference.is_paid.is_(True),
+                ~act.AppointmentGestureReference.id.in_(
+                    meta.session.query(
+            statements.BillAppointmentGestureReference.appointment_gesture_id)
+                ),
+                schedule.Agenda.starttime <= appointment.agenda.starttime
+            )
+            .order_by(schedule.Agenda.starttime)
+            .all()
+    )
+    gestures_id_panel = [ gesture.id for gesture in gestures_panel ]
+
+    # get id list of gestures that are to be in bill
+    if not gestures_id_in_bill:
+        gestures_id_in_bill = [ gesture.id for gesture in gestures_panel ]
+    else:
+        gestures_id_in_bill = [ int(i) for i in gestures_id.split(",") ]
+
+    gestures_in_bill = (
+        meta.session.query(act.AppointmentGestureReference)
+            .filter(
+                act.AppointmentGestureReference.id.in_(gestures_id_in_bill))
+            .join(schedule.Appointment, schedule.Agenda)
+            .order_by(schedule.Agenda.starttime)
+            .all()
+    )
+
+    # get id list of gestures that won't be in bill
+    gestures_not_in_bill = (
+        meta.session.query(act.AppointmentGestureReference)
+            .filter(
+                act.AppointmentGestureReference.id.in_(gestures_id_panel),
+                ~act.AppointmentGestureReference.id.in_(gestures_id_in_bill)
+            )
+            .all()
+    )
+    
+    gestures_id_in_bill = ",".join( [ str(gest.id) 
+                                            for gest in gestures_in_bill ] )
+    return render_template('choose_gestures_in_bill.html',
+                                    patient=patient,
+                                    appointment=appointment,
+                                    constants=constants,
+                                    gestures_in_bill=gestures_in_bill,
+                                    gestures_not_in_bill=gestures_not_in_bill,
+                                    gestures_id_in_bill=gestures_id_in_bill)
+
+@app.route('/add/gesture_to_bill?pid=<int:patient_id>&aid=<int:appointment_id>'
+            '&gid=<gesture_id_to_add>&gib=<gestures_id_in_bill>')
+def add_gesture_to_bill(patient_id, appointment_id, gesture_id_to_add,
+                                                        gestures_id_in_bill):
+
+    gestures_id_in_bill = gestures_id_in_bill + "," + gesture_id_to_add
+    return redirect(url_for('choose_gestures_in_bill', patient_id=patient_id,
+                                    appointment_id=appointment_id,
+                                    gestures_id_in_bill=gestures_id_in_bill))
+
+@app.route('/remove/gesture_from_bill?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>&gid=<gesture_id_to_remove>'
+            '&gib=<gestures_id_in_bill>')
+def remove_gesture_from_bill(patient_id, appointment_id, gesture_id_to_remove,
+                                                        gestures_id_in_bill):
+    gestures_id_in_bill = gestures_id_in_bill.split(",")
+    gestures_id_in_bill.remove(gesture_id_to_remove)
+    gestures_id_in_bill = ",".join( [ gid for gid in gestures_id_in_bill ] )
+    if not gestures_id_in_bill:
+        return redirect(url_for('choose_gestures_in_bill', 
+                                                        patient_id=patient_id,
+                                                appointment_id=appointment_id))
+        
+    return redirect(url_for('choose_gestures_in_bill', patient_id=patient_id,
+                                    appointment_id=appointment_id,
+                                    gestures_id_in_bill=gestures_id_in_bill))
+
+@app.route('/make_bill?pid=<int:patient_id>&aid=<int:appointment_id>'
+                        '&gib=<gestures_id_in_bill>', methods=['GET', 'POST'])
+def make_bill(patient_id, appointment_id, gestures_id_in_bill):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+    patient, appointment = checks.get_patient_appointment(patient_id, 
+                                                                appointment_id)
+    gestures_in_bill = ( 
+        meta.session.query(act.AppointmentGestureReference)
+        .filter(act.AppointmentGestureReference.id.in_( 
+                [ int(gid) for gid in gestures_id_in_bill.split(",") ] ) )
+        .all()
+    )
+    bill_form = BillForm(request.form)
+
+    if request.method == 'GET':
+        for gesture in gestures_in_bill:
+            gesture_form = GestureForm(request.form)
+            gesture_form.gesture_id = gesture.id
+            gesture_form.gesture_name = gesture.gesture.name
+            gesture_form.date =\
+                        gesture.appointment.agenda.starttime.date().isoformat()
+            gesture_form.anatomic_location = gesture.anatomic_location
+            gesture_form.price = gesture.price
+            bill_form.gestures.append_entry(gesture_form)
+
+    pdf_out = make_invoice_payment_bill(patient_id, 
+                                        gestures_in_bill[-1].appointment_id,
+                                        bill_form)
+ 
+    if request.method == 'POST' and bill_form.validate():
+        if 'update' in request.form:
+            return render_template('make_bill.html', patient=patient,
+                                    appointment=appointment,
+                                    constants=constants,
+                                    bill_form=bill_form,
+                                    gestures_id_in_bill=gestures_id_in_bill,
+                                    pdf_out=b64encode(pdf_out))
+        elif 'preview' in request.form:
+            response = make_response(pdf_out)
+            response.mimetype = 'application/pdf'
+            return response
+
+        elif 'save_print' in request.form:
+            response = make_response(pdf_out)
+            response.mimetype = 'application/pdf'
+            filename = md5.new(pdf_out).hexdigest()
+
+            with open(os.path.join(
+                        app.config['DOCUMENT_FOLDER'], filename), 'w') as f:
+                f.write(pdf_out)
+
+            file_values = {
+                'md5': filename,
+                'file_type': constants.FILE_BILL,
+                'mimetype': 'application/pdf',
+            }
+            new_file = documents.Files(**file_values)
+            meta.session.add(new_file)
+            meta.session.commit()
+
+            bill_values = {
+                'patient_id': patient_id,
+                'appointment_id': gestures_in_bill[-1].appointment_id,
+                'dentist_id': appointment.dentist_id,
+                'type': constants.FILE_BILL,
+                'file_id': new_file.id,
+            }
+            new_bill = statements.Bill(**bill_values)
+            meta.session.add(new_bill)
+            meta.session.commit()
+
+            for gesture in bill_form.gestures:
+                values = {
+                    'bill_id': new_bill.id,
+                    'appointment_gesture_id': int(gesture.gesture_id.data),
+                }
+                new_gesture =\
+                    statements.BillAppointmentGestureReference(**values)
+                meta.session.add(new_gesture)
+                meta.session.commit()
+
+            return response
+
+    return render_template('make_bill.html', patient=patient,
+                                    appointment=appointment,
+                                    constants=constants,
+                                    bill_form=bill_form,
+                                    gestures_id_in_bill=gestures_id_in_bill)
+#                                            pdf_out=b64encode(pdf_out))
 
 @app.route('/find_gesture/')
 def find_gesture():

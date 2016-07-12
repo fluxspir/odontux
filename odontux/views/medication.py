@@ -41,16 +41,16 @@ class DrugForm(Form):
     alias = TextField(_('alias'), render_kw={'size':'8'})
     molecule = TextField(_('molecule'), [validators.Required(_("Specify drug "
                                         "name please"))])
-    packaging = TextAreaField(_('packaging'), 
+    packaging = TextField(_('packaging'), 
                             [validators.Required(_("Please tell "
                                         "how the drug in packaged"))])
-    posologia = TextAreaField(_('posologia'), 
+    posologia = TextField(_('posologia'), 
                             [validators.Required(_("Please tell "
                             "the posologia the patient might take"))])
     dayssupply = TextField(_('daysupply'), [validators.Required(_("Please tell"
                             " for how long the patient need to be under "
                             "medication"))], render_kw={'size':'4'})
-    comments = TextAreaField(_('comments'))
+    comments = TextField(_('comments'))
     special = BooleanField(_('special'))
 
 class DrugPrescribedForm(Form):
@@ -142,7 +142,7 @@ def update_drug():
     drug_fields = _get_drug_prescribed_fields()
     drug_form = DrugForm(request.form)
     drug_form.family_id.choices = [ (family.id, family.name) for family in
-                        meta.session.query(medication.Family).all() ]
+                        meta.session.query(medication.DrugFamily).all() ]
     if request.method == 'POST' and drug_form.validate():
         # Get the drug to update
         drug = meta.session.query(medication.DrugPrescribed)\
@@ -181,7 +181,7 @@ def add_drug():
     drug_fields = _get_drug_prescribed_fields()
     drug_form = DrugForm(request.form)
     drug_form.family_id.choices = [ (family.id, family.name) for family in
-                        meta.session.query(medication.Family).all() ]
+                        meta.session.query(medication.DrugFamily).all() ]
     if (not request.method == 'POST' 
         or not drug_form.validate()):
         return redirect(url_for('update_form'))
@@ -393,13 +393,13 @@ def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
         return abort(403)
     def _populate_prescription_form(drug_list):
         prescription_form = PrescriptionForm(request.form)
-        drug_prescribed = {}
+        #drug_prescribed = {}
         for drug_pos in drug_list.split(','):
             drug_prescribed_form = DrugPrescribedForm(request.form)
             drug_id, position = drug_pos.split('-')
             drug = ( meta.session.query(medication.DrugPrescribed)
-                .filter(medication.DrugPrescribed.id == drug_id).one() )
-            drug_prescribed[drug_id] = ( position, drug )
+                .filter(medication.DrugPrescribed.id == int(drug_id)).one() )
+            #drug_prescribed[drug_id] = ( position, drug )
             drug_prescribed_form.drug_id = drug_id
             drug_prescribed_form.position = position
             drug_prescribed_form.molecule = drug.molecule

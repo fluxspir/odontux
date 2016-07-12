@@ -22,9 +22,11 @@ from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 from reportlab.lib import colors
 
+from gettext import gettext as _
 import os
 import cStringIO
 import datetime
+from decimal import Decimal
 
 L_MARG = R_MARG = 20 * mm
 T_MARG = 20 * mm
@@ -274,15 +276,15 @@ def make_invoice_payment_bill(patient_id, appointment_id, bill_form):
     Story.append(Spacer(1, -10 * mm))
     Story.append(Paragraph(u'Fatura detalhada', styles['my_title']))
     Story.append(Spacer(1, 10 * mm))
-    data_width = 20 * mm
+    date_width = 20 * mm
     location_width = 20 * mm
     price_width = 35 * mm
     technical_gesture_width = WIDTH_PAPER - L_MARG - R_MARG -\
-                        data_width - location_width - price_width
+                        date_width - location_width - price_width
     t = Table( [ 
                 [ _(u'Data'), _(u'Loc.'), _('Gesto técnico'), _('Preço') ]
             ],
-            colWidths=( data_width, location_width, 
+            colWidths=( date_width, location_width, 
                         technical_gesture_width, price_width)
     )
     t.setStyle(TableStyle( [
@@ -295,7 +297,60 @@ def make_invoice_payment_bill(patient_id, appointment_id, bill_form):
                     ('LINEBELOW', (0,0), (-1,0), 1, colors.black),
                     ] )
     )
-    gestures_bill = []
+    Story.append(t)
+    
+    gestures_list = []
+    total_price = 0
+    for gesture in sorted(bill_form.gestures, key=lambda x: x.date.data):
+        gestures_list.append( (
+                date_to_readable(gesture.date.data),
+                gesture.anatomic_location.data,
+                gesture.gesture_name.data,
+                constants.CURRENCY_SYMBOL + " " +str(gesture.price.data) )
+                )
+        total_price += Decimal(gesture.price.data)
+
+    t = Table( gestures_list, colWidths = (date_width,
+            location_width, technical_gesture_width, price_width)
+    )
+    t.setStyle(TableStyle( [
+                        ('FONTSIZE', (0,0), (-1,-1), 11),
+                        ('FONTNAME', (0,0), (-1,-1), 'Times-Roman' ),
+                        ('ALIGN', (0,0), (-2,-1), 'LEFT'),
+                        ('ALIGN', (-1,0), (-1,-1), 'CENTER'),
+                        ('ALIGN', (-1,0), (-1,-1), 'RIGHT'),
+                        ('LINEBELOW', (0,-1), (-1, -1), 1, colors.black),
+                        ] )
+    )
+    Story.append(t)
+    Story.append(Spacer(1, 1 * mm))
+    t = Table( [ [ u"Total", 
+                    constants.CURRENCY_SYMBOL + " " + str(total_price) ] ],
+                    colWidths = ( WIDTH_PAPER - L_MARG - R_MARG - price_width,
+                                    price_width )
+    )
+    t.setStyle(TableStyle( [
+                             ('FONTSIZE', (0,0), (-1,-1), 11),
+                            ('FONTNAME', (0,0), (-1,-1), 'Times-Bold' ),
+                            ('ALIGN', (0,0), (0,0), 'LEFT'),
+                            ('ALIGN', (-1,0), (-1,-1), 'RIGHT'),
+                            ('LINEABOVE', (0,-1), (-1, -1), 1, colors.black),
+                            ('LINEBELOW', (0,-1), (-1, -1), 2, colors.black),
+                            ] )
+    )
+    Story.append(t)
+
+    Story.append(Spacer(1, 30 * mm))
+    Story.append(Paragraph('Dr ' + dentist.firstname + " " + dentist.lastname,
+                                            styles['signature']))
+    Story.append(Paragraph(u'Cirurgião-Dentista - ' + dentist.registration, 
+                                                        styles['signature']))
+
+
+    doc.build(Story, onFirstPage=generate_dental_office_informations)
+    pdf_out = output.getvalue()
+    output.close()
+    return pdf_out
 
 def make_quote(patient_id, appointment_id, quotes):
 
