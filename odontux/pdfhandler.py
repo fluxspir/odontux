@@ -37,6 +37,9 @@ hori_stop = WIDTH_PAPER - R_MARG
 vert_start = T_MARG
 vert_stop = HEIGHT_PAPER - B_MARG
 
+def date_to_readable(date=datetime.date.today().isoformat()):
+    date = date.split("-")
+    return date[2] + "/" + date[1] + "/" + date[0]
 
 def generate_doc_template(output):
     doc = SimpleDocTemplate(output, pagesize=A4, rightMargin=R_MARG,
@@ -127,7 +130,8 @@ def generate_dental_office_informations(canvas, doc):
             font = 'Times-Roman'
             fontsize = 11
             city = doc.dental_info['dental_office'].addresses[-1].city
-            day = doc.dental_info['appointment'].agenda.endtime.date().isoformat()
+            day = date_to_readable(doc.dental_info['appointment'].agenda.\
+                                                    endtime.date().isoformat())
             text = city + ", o " + day
             add_line(font, fontsize, text, align='right')
         
@@ -233,15 +237,6 @@ def make_payment_receipt(patient_id, appointment_id, payment_form, mean):
     output.close()
     return pdf_out
 
-def make_invoice_payment_bill(patient_id, appointment_id, gestures):
-    output, doc, Story, styles, patient, appointment, dentist, dental_office =\
-                                get_document_base(patient_id, appointment_id)
-
-    doc.patient_info = patient
-    Story.append(Paragraph(u'Fatura detalhada', styles['my_title']))
-    Story.append(Spacer(1, 30 * mm))
-    
-
 def make_cessation_certificate(patient_id, appointment_id, cessation_form):
 
     output, doc, Story, styles, patient, appointment, dentist, dental_office =\
@@ -253,7 +248,8 @@ def make_cessation_certificate(patient_id, appointment_id, cessation_form):
     text = ( cessation_form.first_part.data + patient.firstname + " " +
         patient.lastname + cessation_form.second_part.data + 
         cessation_form.identity_number.data + cessation_form.third_part.data +
-        cessation_form.day.data.isoformat() + cessation_form.fourth_part.data +
+        date_to_readable(cessation_form.day.data.isoformat())
+        + cessation_form.fourth_part.data +
         str(cessation_form.days_number.data) + u" dias.") 
 
     Story.append(Paragraph(text, styles['normal']))
@@ -269,6 +265,37 @@ def make_cessation_certificate(patient_id, appointment_id, cessation_form):
     pdf_out = output.getvalue()
     output.close()
     return pdf_out
+
+def make_invoice_payment_bill(patient_id, appointment_id, bill_form):
+    output, doc, Story, styles, patient, appointment, dentist, dental_office =\
+                                get_document_base(patient_id, appointment_id)
+
+    doc.patient_info = patient
+    Story.append(Spacer(1, -10 * mm))
+    Story.append(Paragraph(u'Fatura detalhada', styles['my_title']))
+    Story.append(Spacer(1, 10 * mm))
+    data_width = 20 * mm
+    location_width = 20 * mm
+    price_width = 35 * mm
+    technical_gesture_width = WIDTH_PAPER - L_MARG - R_MARG -\
+                        data_width - location_width - price_width
+    t = Table( [ 
+                [ _(u'Data'), _(u'Loc.'), _('Gesto técnico'), _('Preço') ]
+            ],
+            colWidths=( data_width, location_width, 
+                        technical_gesture_width, price_width)
+    )
+    t.setStyle(TableStyle( [
+                    ('FONTSIZE', (0,0), (-1,-1), 11),
+                    ('FONTNAME', (0,0), (-1,0), 'Times-Bold' ),
+                    ('ALIGN', (0,0), (1, 0), 'LEFT'),
+                    ('ALIGN', (2,0), (2, 0), 'CENTER'),
+                    ('ALIGN', (-1,0), (-1,0), 'RIGHT'),
+                    ('LINEABOVE', (0,0), (-1,0), 2, colors.black),
+                    ('LINEBELOW', (0,0), (-1,0), 1, colors.black),
+                    ] )
+    )
+    gestures_bill = []
 
 def make_quote(patient_id, appointment_id, quotes):
 
@@ -386,7 +413,8 @@ def make_quote(patient_id, appointment_id, quotes):
             )
         Story.append(Spacer(1, 10 * mm))
     Story.append(Paragraph(u'Orçamento aplicável até dia ' + 
-                        str(quote.validity.isoformat()), styles['normal'])
+                        date_to_readable(str(quote.validity.isoformat())),
+                                                            styles['normal'])
     )
     t = Table( [
             [ '', '', ],
@@ -423,7 +451,7 @@ def make_presence_certificate(patient_id, appointment_id, presence_form):
     text = ( presence_form.first_part.data + patient.firstname + " " +
         patient.lastname + presence_form.second_part.data + 
         presence_form.identity_number.data + presence_form.third_part.data +
-        presence_form.day.data.isoformat() + " das " + 
+        date_to_readable(presence_form.day.data.isoformat()) + " das " + 
         presence_form.starttime.data + u" às " + presence_form.endtime.data + 
         "." )
 
@@ -497,7 +525,8 @@ def make_prescription(patient_id, appointment_id, prescription_form):
     prescriptor = 'Dr ' + dentist.firstname + " " + dentist.lastname + " - " +\
                                                         dentist.registration
     Story.append(Paragraph(prescriptor, styles['prescriptor']))
-    Story.append(Paragraph(appointment.agenda.endtime.date().isoformat(), 
+    Story.append(Paragraph(
+            date_to_readable(appointment.agenda.endtime.date().isoformat()),
                                                         styles['prescriptor']))
 
     if any( [drug.special.data for drug in prescription_form.drugs ]):
