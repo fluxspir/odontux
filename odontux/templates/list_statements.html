@@ -12,11 +12,13 @@
 <br />
 Quotes:<br />
 {% for quote in quotes %}
-  <a href=#>{{ quote.appointment.agenda.starttime }}</a><br />
+  <a href="{{ url_for('view_quote', quote_file_id=quote.file_id) }}">
+      {{ quote.appointment.agenda.starttime }}</a><br />
 {% endfor %}
 <br />
 Bills:<br />
 {% for bill in bills %}
-  <a href=#>{{ bill.appointment.agenda.starttime }}</a><br />
+  <a href="{{ url_for('view_bill', bill_file_id=bill.file_id) }}">
+      {{ bill.appointment.agenda.starttime }}</a><br />
 {% endfor %}
 {% endblock %}

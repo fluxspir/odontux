@@ -11,7 +11,7 @@ import os
 import md5
 from base64 import b64encode
 from flask import ( session, render_template, request, redirect, url_for, 
-                    abort, make_response, jsonify)
+                    abort, make_response, jsonify, send_from_directory)
 
 from wtforms import (Form, TextField, TextAreaField, DecimalField, 
                     IntegerField, HiddenField, DateField, SubmitField, 
@@ -536,7 +536,33 @@ def list_statement(patient_id, appointment_id):
                                         quotes=quotes,
                                         bills=bills)
 
-@app.route('/add_bill?pid=<int:patient_id>&aid=<int:appointment_id>')
-def add_bill(patient_id, appointment_id):
-    pass
-
+@app.route('/view/bill&bid=<int:bill_file_id>')
+def view_bill(bill_file_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+    
+    bill_file = ( meta.session.query(documents.Files)
+                    .filter(documents.Files.id == bill_file_id)
+                    .one()
+    )
+    return send_from_directory(app.config['DOCUMENT_FOLDER'],
+                                    bill_file.md5,
+                                    mimetype=bill_file.mimetype)
+ 
+@app.route('/view/quote&qid=<int:quote_file_id>')
+def view_quote(quote_file_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+    
+    quote_file = ( meta.session.query(documents.Files)
+                    .filter(documents.Files.id == quote_file_id)
+                    .one()
+    )
+    return send_from_directory(app.config['DOCUMENT_FOLDER'],
+                                    quote_file.md5,
+                                    mimetype=quote_file.mimetype)
+   
