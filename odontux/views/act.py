@@ -65,12 +65,12 @@ class AssetSterilizedUsedForm(Form):
                                             [validators.Required()] )
 
 class MaterioVigilanceForm(Form):
-    def max_quantity(material_id):
-        max_quantity = ( meta.session.query(assets.Material)
-            .filter(assets.Material.id == material_id)
-            .one()[0]
-        )
-        return max_quantity
+#    def max_quantity(material_id):
+#        max_quantity = ( meta.session.query(assets.Material)
+#            .filter(assets.Material.id == material_id)
+#            .one()[0]
+#        )
+#        return max_quantity
     material_id = HiddenField(_('Material id'))
     old_quantity_used = HiddenField(_('Old Quantity Used'))
     new_quantity_used = DecimalField(_('Quantity used'), 
@@ -824,6 +824,7 @@ def view_material_used_in_appointment(patient_id, appointment_id):
                                                 materio_vigilance.quantity_used
         materio_vigilance_form.new_quantity_used =\
                                                 materio_vigilance.quantity_used
+        pdb.set_trace()
         materio_vigilance_form.material_data = (
             str(material.id) + " " + material.asset_category.brand + " " +
             material.asset_category.commercial_name + " " +
