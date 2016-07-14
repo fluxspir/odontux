@@ -118,6 +118,6 @@ class MaterioVigilance(Base):
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
                                                             primary_key=True)
     quantity_used = Column(Numeric)
-    material = relationship('assets.Material')
+    material = relationship('assets.Material', backref='materio_vigilance')
     appointment = relationship('schedule.Appointment')
 

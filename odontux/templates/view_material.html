@@ -9,7 +9,7 @@
 </a>
 
 <br />
-    {{ asset.id }} ({{ asset.asset_category.id}} --   {{ asset.asset_category.brand }}  -- {{ asset.asset_category.commercial_name }} <br />
+    {{ asset.id }} ({{ asset.asset_category.id}}) --   {{ asset.asset_category.brand }}  -- {{ asset.asset_category.commercial_name }} <br />
   Category description : {{ asset.asset_category.description }} <br />
   Material description : {{ asset.description }} <br />
   Asset provider : {{ asset.provider.name }} <br />
@@ -18,7 +18,8 @@
   Owner : {{ asset.user.username }} <br />
   Office : {{ asset.office.office_name }} <br />
   Start of use : {{ asset.start_of_use }} <br />
-  Actual Quantity : {{ asset.actual_quantity }} <br />
+  Actual Quantity : {{ asset.actual_quantity }} 
+                    {{ constants.UNITIES[asset.asset_category.unity][1] }}<br />
   Expiration Date : {{ asset.expiration_date }} <br />
   Batch Number : {{ asset.batch_number }} <br />
   Expiration alert : {{ asset.expiration_alert }} <br />

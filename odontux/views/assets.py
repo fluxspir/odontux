@@ -931,7 +931,8 @@ def view_device(asset_id):
 def view_material(asset_id):
     asset = meta.session.query(assets.Asset).filter(
                                 assets.Asset.id == asset_id).one()
-    return render_template('view_material.html', asset=asset)
+    return render_template('view_material.html', asset=asset,
+                                                constants=constants)
 
 @app.route('/view/superasset&id=<int:asset_id>')
 def view_superasset(asset_id):

@@ -524,7 +524,8 @@ def get_assets_list_for_sterilization_cycle():
             .filter(
                 ~assets.Asset.id.in_(
                     meta.session.query(traceability.AssetSterilized.asset_id)
-                    .filter(traceability.AssetSterilized.asset_id.isnot(None),
+                    .filter(
+                        traceability.AssetSterilized.asset_id.isnot(None),
                         traceability.AssetSterilized.appointment_id.is_(None),
                         traceability.AssetSterilized.expiration_date > 
                                                         datetime.date.today(),

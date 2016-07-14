@@ -663,10 +663,10 @@ UNITY_VOLUME = 1
 UNITY_WEIGHT = 2
 UNITY_LENGTH = 3
 UNITIES = {
-            UNITY_PIECE: ( _("pieces/items"), 'UNITY_PIECE' ), 
-            UNITY_VOLUME: ( _("volume in mL"), 'UNITY_VOLUME' ), 
-            UNITY_WEIGHT: ( _("weight in gr"), 'UNITY_WEIGHT' ), 
-            UNITY_LENGTH: ( _('length in m'), 'UNITY_LENGTH' ),
+            UNITY_PIECE: ( _("pieces/items"), _(""), 'UNITY_PIECE' ), 
+            UNITY_VOLUME: ( _("volume in mL"), _("mL"), 'UNITY_VOLUME' ), 
+            UNITY_WEIGHT: ( _("weight in gr"), _("gr"), 'UNITY_WEIGHT' ), 
+            UNITY_LENGTH: ( _('length in m'), _("m"), 'UNITY_LENGTH' ),
         }
 
 # --------------------------------------------------
