@@ -53,6 +53,14 @@
         {% endif %}
 
         <br />
+        <form method='post' action="{{ url_for('add_file_to_tooth_event',
+                                          patient_id=patient.id,
+                                          appointment_id=event.appointment.id,
+                                          event_id=event.id) }}">
+          {{ document_form.document }}
+          {{ document_form.document_type }}
+          {{ document_form.add_file }}
+        </form>
         --------------
         <br />
       {% endfor %}

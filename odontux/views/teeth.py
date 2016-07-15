@@ -6,6 +6,10 @@
 #
 
 import pdb
+
+import md5
+import magic
+
 from wtforms import ( Form,
                     TextField, TextAreaField, HiddenField, SelectMultipleField,
                     BooleanField, RadioField, IntegerField, SelectField, 
@@ -13,7 +17,7 @@ from wtforms import ( Form,
                     )
 import sqlalchemy
 from sqlalchemy.orm import with_polymorphic
-from flask import session, render_template, redirect, url_for, request
+from flask import session, render_template, redirect, url_for, request, abort
 
 from gettext import gettext as _
 
@@ -164,7 +168,6 @@ class EventForm(Form):
     description = TextField(_("Description"))
     comment = TextAreaField(_("General comments of this event"))
     color = forms.ColorField(_("color"))
-    documents = FieldList(FormField(DocumentForm), min_entries=1)
     anatomic_location = SelectField(_("Location"), coerce=int,
                         description='ChangementToothAnatomicLocation()')
 
@@ -279,22 +282,68 @@ def show_tooth(patient_id, appointment_id, tooth_codename):
             )
             .all()
         )
+    document_form = DocumentForm(request.form)
     return render_template('show_tooth.html', patient=patient,
                                               appointment=appointment,
                                               tooth=tooth,
                                               gum=gum,
                                               constants=constants,
-                                              events=events)
+                                              events=events,
+                                              document_form=document_form)
 
+@app.route('/add/file_to_tooth_event?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>&eid=<int:event_id>', methods=['POST'])
+def add_file_to_tooth_event(patient_id, appointment_id, event_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
+    event = ( meta.session.query(teeth.Event)
+                .filter(teeth.Event.id == event_id)
+                .one()
+    )
+    document_form = DocumentForm(request.form)
+    if document_form.validate():
+        document_data = request.files[document_form.document.name].read()
+        filename = md5.new(document_data).hexdigest()
+        m = magic.open(magic.MAGIC_MIME)
+        m.load()
+        mimetype = m.file(document_data)
+        with open(os.path.join(
+                        app.config['DOCUMENT_FOLDER'], filename), 'w') as f:
+            f.write(document_data)
+        file_values = {
+            'md5': filename,
+            'file_type': file_type,
+            'mimetype': mimetype,
+            'timestamp': appointment.agenda.endtime
+        }
+        new_file = documents.Files(**file_values)
+        meta.session.add(new_file)
+        meta.session.commit()
+
+        event.files.append(new_file)
+        meta.session.commit()
+
+
+    return redirect(url_for('show_tooth', patient_id=patient_id,
+                                        appointment_id=appointment_id,
+                                        tooth_codename=event.tooth.codename))
+#    return render_template('add_file_to_tooth_event.html', patient=patient,
+#                                            appointment=appointment,
+#                                            event=event,
+#                                            document_form=document_form)
+#
 @app.route('/add/event_tooth_located?pid=<int:patient_id>'
                         '&aid=<int:appointment_id>', methods=['GET','POST'])
-#@app.route('/add/event_tooth_located?pid=<int:patient_id>'
-#            '&aid=<int:appointment_id>&fid=<files_id>', methods=['GET','POST'])
 def add_event_tooth_located(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
-        return redirect(url_for('index'))
+        return abort(403)
 
     patient, appointment = checks.get_patient_appointment(patient_id,
                                                                 appointment_id)
@@ -350,24 +399,7 @@ def add_event_tooth_located(patient_id, appointment_id):
             'state': tooth_form.choose_tooth_state.data,
         }
 
-        if 'documents-0-add_file' in request.form:
-            # 
-            #event_form.documents.append_entry(request.files[event_form.documents[0].name].read())
-            doc_form = DocumentForm(request.form)
-            doc_form.document = request.files[event_form.documents[0].name].read()
-            doc_form.document_type = event_form.documents[0].document_type.data
-            event_form.documents.append_entry(doc_form)
-            
-            return render_template('add_event_tooth_located.html',
-                    patient=patient, appointment=appointment,
-                    tooth_form=tooth_form,
-                    event_form=event_form,
-                    crown_event_form=crown_event_form,
-                    root_event_form=root_event_form,
-                    periodontal_event_form=periodontal_event_form,
-                    clear_form=False)
-
-        elif ( event_form.anatomic_location.data == 
+        if ( event_form.anatomic_location.data == 
                                         constants.TOOTH_EVENT_LOCATION_TOOTH ):
             
             for tooth_codename in teeth_to_add:
