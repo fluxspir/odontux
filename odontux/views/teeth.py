@@ -6,10 +6,10 @@
 #
 
 import pdb
-from wtforms import ( Form, 
+from wtforms import ( Form,
                     TextField, TextAreaField, HiddenField, SelectMultipleField,
                     BooleanField, RadioField, IntegerField, SelectField, 
-                    validators
+                    FieldList, FileField, FormField, SubmitField, validators
                     )
 import sqlalchemy
 from sqlalchemy.orm import with_polymorphic
@@ -149,6 +149,14 @@ class ToothForm(Form):
                                                                 coerce=int)
     surveillance = BooleanField(_('Surveillance'))
 
+class DocumentForm(Form):
+    document = FileField(_('Document'))
+    document_type = SelectField(_('Type'), coerce=int, 
+            choices=[ (doc[0], doc[1][0]) for doc in constants.FILES.items()
+                                            if doc[1][1] 
+                                            and 'tooth' in doc[1][1] ] )
+    add_file = SubmitField(_('Add document'))
+
 class EventForm(Form):
     event_id = HiddenField(_("ID"))
     teeth = TextField(_("Teeth"))
@@ -156,9 +164,7 @@ class EventForm(Form):
     description = TextField(_("Description"))
     comment = TextAreaField(_("General comments of this event"))
     color = forms.ColorField(_("color"))
-    x_ray = BooleanField(_("x_ray"))
-    pic = BooleanField(_("pic"))
-    document = BooleanField(_("document"))
+    documents = FieldList(FormField(DocumentForm), min_entries=1)
     anatomic_location = SelectField(_("Location"), coerce=int,
                         description='ChangementToothAnatomicLocation()')
 
@@ -280,9 +286,10 @@ def show_tooth(patient_id, appointment_id, tooth_codename):
                                               constants=constants,
                                               events=events)
 
-
 @app.route('/add/event_tooth_located?pid=<int:patient_id>'
-                '&aid=<int:appointment_id>', methods=['GET','POST'])
+                        '&aid=<int:appointment_id>', methods=['GET','POST'])
+#@app.route('/add/event_tooth_located?pid=<int:patient_id>'
+#            '&aid=<int:appointment_id>&fid=<files_id>', methods=['GET','POST'])
 def add_event_tooth_located(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
@@ -339,14 +346,27 @@ def add_event_tooth_located(patient_id, appointment_id):
             'description': event_form.description.data,
             'comment': event_form.comment.data,
             'color': event_form.color.data,
-            'x_ray': event_form.x_ray.data,
-            'pic': event_form.pic.data,
-            'document': event_form.document.data,
             'location': event_form.anatomic_location.data,
             'state': tooth_form.choose_tooth_state.data,
         }
 
-        if ( event_form.anatomic_location.data == 
+        if 'documents-0-add_file' in request.form:
+            #event_form.documents.append_entry(request.files[event_form.documents[0].name].read())
+            doc_form = DocumentForm(request.form)
+            doc_form.document = request.files[event_form.documents[0].name].read()
+            doc_form.document_type = event_form.documents[0].document_type.data
+            event_form.documents.append_entry(doc_form)
+            
+            return render_template('add_event_tooth_located.html',
+                    patient=patient, appointment=appointment,
+                    tooth_form=tooth_form,
+                    event_form=event_form,
+                    crown_event_form=crown_event_form,
+                    root_event_form=root_event_form,
+                    periodontal_event_form=periodontal_event_form,
+                    clear_form=False)
+
+        elif ( event_form.anatomic_location.data == 
                                         constants.TOOTH_EVENT_LOCATION_TOOTH ):
             
             for tooth_codename in teeth_to_add:
@@ -428,7 +448,6 @@ def add_event_tooth_located(patient_id, appointment_id):
         clear_form = False
     else:
         clear_form = True
-
     return render_template('add_event_tooth_located.html',
                     patient=patient, appointment=appointment,
                     tooth_form=tooth_form,
