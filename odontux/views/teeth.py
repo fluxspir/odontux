@@ -351,6 +351,7 @@ def add_event_tooth_located(patient_id, appointment_id):
         }
 
         if 'documents-0-add_file' in request.form:
+            # 
             #event_form.documents.append_entry(request.files[event_form.documents[0].name].read())
             doc_form = DocumentForm(request.form)
             doc_form.document = request.files[event_form.documents[0].name].read()
