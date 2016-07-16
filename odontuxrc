@@ -6,5 +6,5 @@ locale = br
 odontux_folder = /home/odontuxuser/odontuxfolder
 odontux_logo = img/logo.png
 document_folder = doc
-
+thumbnail_folder = thumbnail
 
