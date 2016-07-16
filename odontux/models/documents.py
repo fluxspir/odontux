@@ -22,3 +22,9 @@ class Files(Base):
     mimetype = Column(String, nullable=False)
     timestamp = Column(DateTime, default=func.now())
 
+#class Thumbnail(Files):
+#    __tablename__ = 'thumbnail'
+#    id = Column(Integer, ForeignKey(Files.id), primary_key=True)
+#    original_file_id = Column(Integer, ForeignKey(Files.id), nullable=False)
+#    width = Column(Numeric)
+#    height = Column(Numeric)
