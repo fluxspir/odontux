@@ -53,7 +53,8 @@
         {% endif %}
 
         <br />
-        <form method='post' action="{{ url_for('add_file_to_tooth_event',
+        <form method='post' enctype="multipart/form-data" 
+                            action="{{ url_for('add_file_to_tooth_event',
                                           patient_id=patient.id,
                                           appointment_id=event.appointment.id,
                                           event_id=event.id) }}">
