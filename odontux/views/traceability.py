@@ -584,11 +584,19 @@ def get_assets_list_for_sterilization_cycle():
             )
 
     for kit in query_kits.all():
-        assets_list['kits'].append(kit)
+#        assets_list['kits'].append(kit)
+        assets_list['kits'].append( (kit.id, kit.asset_kit_structure.name ) )
     for asset in query_assets.all():
-        assets_list['assets'].append(asset)
+#        assets_list['assets'].append(asset)
+        assets_list['assets'].append( (asset.id,
+                                asset.asset_category.brand + " " +
+                                asset.asset_category.commercial_name + " " +
+                                asset.asset_category.description + " " +
+                                str(asset.description) ) )
     for superasset in query_superassets.all():
-        assets_list['superassets'].append(superasset)
+#        assets_list['superassets'].append(superasset)
+        assets_list['superassets'].append( ( superasset.id,
+                                        superasset.superasset_category.name ) )
     return assets_list
 
 @app.route('/remove/asset_from_sterilization', methods=["POST"])
@@ -627,6 +635,26 @@ def update_number_uncategorized():
                                         int(uncategorized_form.validity.data) )
 
     return redirect(url_for('create_sterilization_list'))
+
+@app.route('/add_to_ste?itype=<itype>&iid=<int:item_id>')
+def add_to_ste(itype, iid):
+    pass
+
+@app.route('/choose_items_to_sterilize&k=<kit_list>&s=<superasset_list>'
+                                                            '&a=<asset_list>')
+def choose_items_to_sterilize(kit_list, superasset_list, asset_list):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return redirect(url_for('index'))
+
+    assets_list = get_assets_list_for_sterilization_cycle()
+    assets_list['kit_ste'] = ()
+    assets_list['asset_ste'] = ()
+    assets_list['superasset_ste'] = ()
+    #my_assets = jsonify(success=True, **assets_list)
+    return render_template('choose_items_to_sterilize.html', 
+                                                    assets_list=assets_list)
 
 @app.route('/create/sterilization_list', methods=["GET", "POST"])
 def create_sterilization_list():

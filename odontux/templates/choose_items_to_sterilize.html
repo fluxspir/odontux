@@ -1,0 +1,91 @@
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+{% extends "header.html" %}
+{% block main %}
+<h3>Choose items to sterilize</h3>
+{#<script>
+//  var my_assets = {{ assets_list|tojson }};
+</script>
+#}
+<div id="asset_choice" style='float:left;width:50%;'>
+  <script>
+    var my_assets = {{ assets_list|tojson }}
+    console.log(my_assets)
+    {#
+    document.write('Kits: <br />')
+    for (kit in my_assets.kits) {
+      console.log(my_assets.kits[kit])
+      document.write(
+        my_assets.kits[kit][0] + ' ' + my_assets.kits[kit][1] + 
+        '<br />'
+      );
+      console.log(bla)
+    }
+    #}
+  </script>
+{#  {% for kit in assets_list['kits'] %}
+    {{ kit[0] }} -- {{ kit[1] }}<br />
+  {% endfor %}<br />
+  Superassets: <br />
+  {% for superasset in assets_list['superassets'] %}
+    {{ superasset[0] }} -- {{ superasset[1] }}<br />
+  {% endfor %}<br />
+  Assets: <br />
+  {% for asset in assets_list['assets'] %}
+    {{ asset[0] }} -- {{ asset[1] }}<br />
+  {% endfor %}<br />
+</div>
+<div id="assets_for_ste">
+  Kits: <br />
+  {% for kit in assets_list['kit_ste'] %}
+    {{ kit[0] }} -- {{ kit[1] }}<br />
+  {% endfor %}<br />
+  Superassets: <br />
+  {% for superasset in assets_list['superasset_ste'] %}
+    {{ superasset[0] }} -- {{ superasset[1] }}<br />
+  {% endfor %}<br />
+  Assets: <br />
+  {% for asset in assets_list['asset_ste'] %}
+    {{ asset[0] }} -- {{ asset[1] }}<br />
+  {% endfor %}<br />
+</div>
+<div id="asset_choice" style='float:left;width:50%;'>
+  Kits: <br />
+  {% for kit in assets_list['kits'] %}
+    {{ kit[0] }} -- {{ kit[1] }}<br />
+  {% endfor %}<br />
+  Superassets: <br />
+  {% for superasset in assets_list['superassets'] %}
+    {{ superasset[0] }} -- {{ superasset[1] }}<br />
+  {% endfor %}<br />
+  Assets: <br />
+  {% for asset in assets_list['assets'] %}
+    {{ asset[0] }} -- {{ asset[1] }}<br />
+  {% endfor %}<br />
+</div>
+<div id="assets_for_ste">
+  Kits: <br />
+  {% for kit in assets_list['kit_ste'] %}
+    {{ kit[0] }} -- {{ kit[1] }}<br />
+  {% endfor %}<br />
+  Superassets: <br />
+  {% for superasset in assets_list['superasset_ste'] %}
+    {{ superasset[0] }} -- {{ superasset[1] }}<br />
+  {% endfor %}<br />
+  Assets: <br />
+  {% for asset in assets_list['asset_ste'] %}
+    {{ asset[0] }} -- {{ asset[1] }}<br />
+  {% endfor %}<br />
+</div>
+#}
+{#
+<script type="text/javascript">
+  var assets_list = {{ assets_list.data|tojson }}
+  for (bla in assets_list) {
+    console.log(bla)
+  }
+</script>
+#}
+{% endblock %}

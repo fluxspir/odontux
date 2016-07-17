@@ -69,6 +69,10 @@
         <a href="{{ url_for('portal_anamnesis') }}">Survey</a>
         <a href="{{ url_for('list_drugs') }}">Drugs</a>
         <a href="{{ url_for('portal_comptability') }}">Compta</a>
+        <a href="{{ url_for('choose_items_to_sterilize', kit_list='0', 
+                                                        superasset_list='0', 
+                                                        asset_list='0') }}">
+                                                                  Items ste</a>
         <div id="search">
         {% block search %}
           <form action="/search/" method="post" autocomplete="on">
