@@ -56,7 +56,7 @@ def get_thumbnail_folder():
     odontux_folder = get_odontux_folder()
     thumbnail_folder_name = parser.get("environment", "thumbnail_folder")
     thumbnail_folder = os.path.join(odontux_folder, thumbnail_folder_name)
-    if not os.path.exists(thumbnail_folder)
+    if not os.path.exists(thumbnail_folder):
         os.makedirs(thumbnail_folder)
     return thumbnail_folder
 
