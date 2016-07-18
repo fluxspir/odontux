@@ -14,6 +14,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import relationship
 import datetime
 
+
 class Files(Base):
     __tablename__ = 'files'
     id = Column(Integer, primary_key=True)
@@ -21,10 +22,14 @@ class Files(Base):
     file_type = Column(Integer, nullable=False)
     mimetype = Column(String, nullable=False)
     timestamp = Column(DateTime, default=func.now())
+    thumbnails = relationship('Thumbnail')
 
-#class Thumbnail(Files):
-#    __tablename__ = 'thumbnail'
-#    id = Column(Integer, ForeignKey(Files.id), primary_key=True)
-#    original_file_id = Column(Integer, ForeignKey(Files.id), nullable=False)
-#    width = Column(Numeric)
-#    height = Column(Numeric)
+class Thumbnail(Base):
+    __tablename__ = 'thumbnail'
+    id = Column(Integer, primary_key=True)
+    md5 = Column(String(32), unique=True, nullable=False)
+    size = Column(String)
+    mimetype = Column(String, nullable=False)
+    timestamp = Column(DateTime, default=func.now())
+    file_id = Column(Integer, ForeignKey(Files.id))
+

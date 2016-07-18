@@ -53,6 +53,7 @@
         {% endif %}
 
         <br />
+        <div id="event_{{ event.id }}">
         <form method='post' enctype="multipart/form-data" 
                             action="{{ url_for('add_file_to_tooth_event',
                                           patient_id=patient.id,
@@ -62,6 +63,10 @@
           {{ document_form.document_type }}
           {{ document_form.add_file }}
         </form>
+        </div>
+        {% for file in event.files %}
+          <a href={{ url_for('display_file', file_id=file.id ) }}>Display</a>
+        {% endfor %}
         --------------
         <br />
       {% endfor %}

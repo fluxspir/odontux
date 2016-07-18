@@ -7,10 +7,6 @@
 
 import pdb
 
-import os
-import md5
-import magic
-
 from wtforms import ( Form,
                     TextField, TextAreaField, HiddenField, SelectMultipleField,
                     BooleanField, RadioField, IntegerField, SelectField, 
@@ -27,6 +23,8 @@ from odontux.odonweb import app
 from odontux.views import forms
 from odontux.models import meta, teeth, schedule, headneck, documents
 from odontux.views.log import index
+from documents import insert_document_in_db
+
 
 def get_teeth_list(teeth=""):
     """
@@ -310,31 +308,8 @@ def add_file_to_tooth_event(patient_id, appointment_id, event_id):
     if document_form.validate():
         document_data = request.files[document_form.document.name].read()
         if document_data:
-            filename = md5.new(document_data).hexdigest()
-            file_exists = ( meta.session.query(documents.Files)
-                                .filter(documents.Files.md5 == filename)
-                                .one_or_none()
-            )
-            if not file_exists:
-                with open(os.path.join(
-                                app.config['DOCUMENT_FOLDER'], filename), 'w') as f:
-                    f.write(document_data)
-                m = magic.open(magic.MAGIC_MIME)
-                m.load()
-                mimetype = m.file(os.path.join(
-                                    app.config['DOCUMENT_FOLDER'], filename))
-                file_values = {
-                    'md5': filename,
-                    'file_type': document_form.document_type.data,
-                    'mimetype': mimetype,
-                    'timestamp': appointment.agenda.endtime
-                }
-                new_file = documents.Files(**file_values)
-                meta.session.add(new_file)
-                meta.session.commit()
-            else:
-                new_file = file_exists
-
+            new_file = insert_document_in_db(document_data, 
+                                document_form.document_type.data, appointment)
             if new_file not in event.files:
                 event.files.append(new_file)
                 meta.session.commit()
