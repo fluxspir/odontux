@@ -103,3 +103,18 @@ def display_file(file_id):
     response.mimetype = my_file.mimetype
     return response
 
+@app.route('/display_thumbnail&tid=<int:thumbnail_id>')
+def display_thumbnail(thumbnail_id):
+    my_thumbnail = ( meta.session.query(documents.Thumbnail)
+                    .filter(documents.Thumbnail.id == thumbnail_id)
+                    .one_or_none()
+    )
+    with open(os.path.join(
+                        app.config['THUMBNAIL_FOLDER'], my_thumbnail.md5), 
+                                                                    'r') as f:
+        file_out = f.read()
+
+    response = make_response(file_out)
+    response.mimetype = my_thumbnail.mimetype
+    return response
+

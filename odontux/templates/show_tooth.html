@@ -53,6 +53,19 @@
         {% endif %}
 
         <br />
+        {% for file in event.files %}
+          {% if file.thumbnails %}
+            {% for thumbnail in file.thumbnails %}
+              <a href={{ url_for('display_file', file_id=file.id ) }}>
+                <img src={{ url_for('display_thumbnail', thumbnail_id=thumbnail.id ) }} />
+              </a>
+            {% endfor %}
+          {% else %}
+            <a href={{ url_for('display_file', file_id=file.id ) }}>Display</a>
+          {% endif %}
+        {% endfor %}
+        <br />
+
         <div id="event_{{ event.id }}">
         <form method='post' enctype="multipart/form-data" 
                             action="{{ url_for('add_file_to_tooth_event',
@@ -64,9 +77,6 @@
           {{ document_form.add_file }}
         </form>
         </div>
-        {% for file in event.files %}
-          <a href={{ url_for('display_file', file_id=file.id ) }}>Display</a>
-        {% endfor %}
         --------------
         <br />
       {% endfor %}
