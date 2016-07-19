@@ -164,6 +164,9 @@ class GnuCashCustomer(GnuCash):
     gnucash_session.
     """
 
+    # If to put a def __init__(), see in GnuCashInvoice how to load Gnucash() 
+    # for not having a problem !!!
+    #
     def _test_id_already_in_database(self):
         return self.book.CustomerLookupByID(self.gcpatient_id)
 
