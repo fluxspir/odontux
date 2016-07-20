@@ -673,7 +673,6 @@ UNITIES = {
 # Files
 # --------------------------------------------------
 
-FILE_RADIO = 1
 FILE_PHOTO = 2
 
 FILE_PRESCRIPTION = 3
@@ -687,17 +686,30 @@ FILE_QUOTE = 21
 FILE_BILL = 22
 FILE_RECEIPT = 23
 
+FILE_X_RAY_PERIAPICAL = 30
+FILE_X_RAY_BITEWING = 31
+FILE_X_RAY_OCCLUSAL = 32
+FILE_X_RAY_PANORAMIC = 33
+FILE_X_RAY_TELERADIO_FACE = 34
+FILE_X_RAY_TELERADIO_PROFIL = 35
+
 FILES = {
-    FILE_RADIO: _('Radio'),
-    FILE_PHOTO: _('Photo'),
-    FILE_PRESCRIPTION: _('Prescription'),
-    FILE_ATTESTATION: _('Attestation'),
-    FILE_PRESENCE: _('Presence'),
-    FILE_CESSATION: _('Cessation'),
-    FILE_INVOICE: _('Invoice'),
-    FILE_QUOTE: _('Quote'),
-    FILE_BILL: _('Bill'),
-    FILE_RECEIPT: _('Receipt'),
+    FILE_PHOTO: ( _('Photo'), [ 'tooth' ] ),
+    FILE_PRESCRIPTION: ( _('Prescription'), None ),
+    FILE_ATTESTATION: ( _('Attestation'), None ),
+    FILE_PRESENCE: ( _('Presence'), None ),
+    FILE_CESSATION: ( _('Cessation'), None ),
+    FILE_INVOICE: ( _('Invoice'), None ),
+    FILE_QUOTE: ( _('Quote'), None ),
+    FILE_BILL: ( _('Bill'), None ),
+    FILE_RECEIPT: ( _('Receipt'), None ),
+    FILE_X_RAY_PERIAPICAL: ( _('X_ray periapical'), [ 'tooth' ] ),
+    FILE_X_RAY_BITEWING: ( _('X_ray bitewing'), [ 'tooth' ] ),
+    FILE_X_RAY_OCCLUSAL: ( _('X_ray occlusal'), [ 'tooth' ] ),
+    FILE_X_RAY_PANORAMIC: ( _('X_ray panoramic'), [ 'tooth', 'face' ] ),
+    FILE_X_RAY_TELERADIO_FACE: ( _('X_ray teleradiography face'), [ 'face' ] ),
+    FILE_X_RAY_TELERADIO_PROFIL: ( _('X_ray teleradiography profil'), 
+                                                                [ 'face' ] ),
 }
 
 # ----------------------------------------------------------

@@ -24,7 +24,7 @@ from anamnesis import (Anamnesis, MedicalHistory, Addiction, Treatment,
 from anamnesis import Survey, Question
 from headneck import HeadEvent, NeckEvent
 from medication import DrugPrescribed, Prescription, PrescribedDrugReference
-from documents import Files 
+from documents import Files, Thumbnail
 from schedule import Agenda, Appointment, AppointmentMemo
 from endobuccal import (MouthEvent, SuperiorLipEvent, InferiorLipEvent, 
                         LeftCheekEvent, RightCheekEvent,HardPalateEvent, 

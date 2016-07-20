@@ -5,6 +5,7 @@
 # licence BSD
 #
 from meta import Base
+from tables import teeth_event_file_table
 import users, headneck, schedule, administration
 import sqlalchemy
 try:
@@ -77,6 +78,7 @@ class Event(Base):
     description = Column(String)
     comment = Column(String, default="")
     color = Column(String, default="")
+    files = relationship("Files", secondary=teeth_event_file_table)
     location = Column(Integer, nullable=False)
     tooth = relationship('Tooth', backref="events")
     appointment = relationship('Appointment')
