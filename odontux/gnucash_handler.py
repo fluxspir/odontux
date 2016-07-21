@@ -364,7 +364,7 @@ class GnuCashInvoice(GnuCash):
                         invoice.CommitEdit()
                         invoice.PostToAccount(self.patient_receivables, 
                                             self.date, self.date, 
-                                            description.encode("utf_8"),
+                                            "".encode("utf_8"),
                                             True, False)
                         if self.gnucashtype == 'xml':
                             self.gcsession.save()
