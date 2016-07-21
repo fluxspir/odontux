@@ -13,7 +13,7 @@ from flask import ( session, render_template, request, redirect, url_for,
                     abort, make_response )
 
 from wtforms import (Form, TextField, TextAreaField, DecimalField,
-                     HiddenField, DateField, SubmitField,
+                     HiddenField, DateField, SubmitField, SelectField,
                     validators )
 from forms import TimeField
 #from sqlalchemy.orm import with_polymorphic
@@ -27,13 +27,17 @@ from gettext import gettext as _
 from odontux import constants, checks
 
 from odontux.pdfhandler import ( make_presence_certificate, 
-                                    make_cessation_certificate
+                                    make_cessation_certificate,
+                                    make_requisition_certificate
                             )
 
 CERTIFICATE_FIRST_PART = u"Atesto, com o fim específico de dispensa de atividades trabalhistas (ou escolares, ou judiciárias), que "
 CERTIFICATE_SECOND_PART = u", portador(a) do CPF "
 CERTIFICATE_THIRD_PART = u" esteve sob meus cuidados profissionais no dia "
 CESSATION_FOURTH_PART = u" devendo permanecer em repouso por "
+
+REQUISITION_FIRST_PART = u"Favor realizar uma radiografia panorâmica no patiente "
+REQUISITION_SECOND_PART = u" en visto da elaboração dum plano de tratamento."
 
 class CertificateForm(Form):
     certificate_id = HiddenField(_('presence_id'))
@@ -56,6 +60,17 @@ class CessationForm(CertificateForm):
     fourth_part = TextAreaField(_('fourth part'), [validators.Required()])
     days_number = DecimalField(_('Number of days of cessation'), 
                         [validators.Required()], render_kw={'size': 4})
+
+class RequisitionForm(Form):
+    requisition_type = SelectField(_('Type'), coerce=int,
+                        choices=[ ( req[0], req[1] ) for req in 
+                                            constants.REQUISITIONS.items() ] )
+    first_part = TextAreaField(_('Text'), [validators.Required()], 
+                                            render_kw={'cols': 50, 'rows':2} )
+    second_part = TextAreaField(_('Text'), [validators.Required()], 
+                                            render_kw={'cols': 50, 'rows':2} )
+    preview = SubmitField(_('Preview'))
+    save_print = SubmitField(_('Save and Print'))
 
 @app.route('/portal/certificate?pid=<int:patient_id>'
             '&aid=<int:appointment_id>')
@@ -84,12 +99,48 @@ def portal_certificate(patient_id, appointment_id):
                 .order_by(schedule.Agenda.starttime.desc())
                 .all()
     )
-
+    requisitions = ( certifs.join(certificates.Requisition)
+                .filter(certificates.Certificate.certif_type ==\
+                                                    constants.FILE_REQUISITION)
+                .join(schedule.Appointment, schedule.Agenda)
+                .order_by(schedule.Agenda.starttime.desc())
+                .all()
+    )
     return render_template('list_certificates.html',
                                 patient=patient,
                                 appointment=appointment,
                                 presences=presences,
-                                cessations=cessations)
+                                cessations=cessations,
+                                requisitions=requisitions)
+
+@app.route('/add/requisition_certificate?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>', methods=[ 'GET', 'POST'] )
+def add_requisition_certificate(patient_id, appointment_id):
+    authorized_roles = [constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
+    requisition_form = RequisitionForm(request.form)
+    if ( request.method == 'POST' and requisition_form.validate()
+        and 'save_print' in request.form ):
+        pass
+    elif ( request.method == 'POST' and requisition_form.validate()
+        and 'preview' in request.form ):
+        pdf_out = make_requisition_certificate(patient_id, appointment_id,
+                                                        requisition_form)
+        response = make_response(pdf_out)
+        response.mimetype = 'application/pdf'
+        return response
+
+
+    if request.method == 'GET':
+        requisition_form.first_part.data = REQUISITION_FIRST_PART
+        requisition_form.second_part.data = REQUISITION_SECOND_PART
+    return render_template('add_requisition_certificate.html',
+                                            patient=patient,
+                                            appointment=appointment,
+                                            requisition_form=requisition_form)
 
 @app.route('/add/presence_certificate?pid=<int:patient_id>'
             '&aid=<int:appointment_id>', methods=['GET', 'POST'])

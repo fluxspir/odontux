@@ -43,6 +43,20 @@ def date_to_readable(date=datetime.date.today().isoformat()):
     date = date.split("-")
     return date[2] + "/" + date[1] + "/" + date[0]
 
+def format_zip_code(zip_code):
+    if ( constants.LOCALE == 'br' and zip_code.isdigit() and 
+                                                        len(zip_code) == 8 ):
+        return zip_code[:5] + "-" + zip_code[5:]
+    else:
+        return zip_code
+
+def format_identity_2(id_2):
+    if ( constants.LOCALE == 'br' and id_2.isdigit() and
+                                                        len(id_2) == 11 ):
+        return id_2[:3] + "." + id_2[3:6] + "." + id_2[6:9] + "-" + id_2[9:]
+    else:
+        return id_2
+
 def generate_doc_template(output):
     doc = SimpleDocTemplate(output, pagesize=A4, rightMargin=R_MARG,
                     leftMargin=L_MARG, topMargin=T_MARG, bottomMargin=B_MARG)
@@ -99,7 +113,9 @@ def generate_dental_office_informations(canvas, doc):
     street_address = doc.dental_info['dental_office'].addresses[-1].street\
             + " " + doc.dental_info['dental_office'].addresses[-1].complement
     city_address = doc.dental_info['dental_office'].addresses[-1].city\
-            + " - " + doc.dental_info['dental_office'].addresses[-1].zip_code
+            + " - " +\
+            format_zip_code(
+                    doc.dental_info['dental_office'].addresses[-1].zip_code)
     if doc.dental_info['dentist'].mails:
         email = doc.dental_info['dentist'].mails[-1].email
     elif doc.dental_info['dental_office'].mails:
@@ -158,7 +174,7 @@ def generate_dental_office_informations(canvas, doc):
             patient_info_height = _new_height(patient_info_height)
             canvas.drawString( patient_info_width, patient_info_height,
                                 patient.address.district + " - " +
-                                patient.address.zip_code)
+                                format_zip_code(patient.address.zip_code))
             patient_info_height = _new_height(patient_info_height)
             canvas.drawString( patient_info_width, patient_info_height,
                                 patient.address.city )
@@ -220,7 +236,7 @@ def make_payment_receipt(patient_id, appointment_id, payment_form, mean):
                                         appointment.agenda.starttime.date(),
                                         mean.odontux_name,
                                         patient.firstname, patient.lastname,
-                                        patient.identity_number_2,
+                                format_identity_2(patient.identity_number_2),
                                         payment_form.amount.data,
                                         constants.CURRENCY_SYMBOL)
     )
@@ -249,7 +265,8 @@ def make_cessation_certificate(patient_id, appointment_id, cessation_form):
     Story.append(Spacer(1, 30 * mm))
     text = ( cessation_form.first_part.data + patient.firstname + " " +
         patient.lastname + cessation_form.second_part.data + 
-        cessation_form.identity_number.data + cessation_form.third_part.data +
+        format_identity_2(cessation_form.identity_number.data) +
+        cessation_form.third_part.data +
         date_to_readable(cessation_form.day.data.isoformat())
         + cessation_form.fourth_part.data +
         str(cessation_form.days_number.data) + u" dias.") 
@@ -475,7 +492,9 @@ def make_quote(patient_id, appointment_id, quotes):
             [ '', '', ],
             [ patient.firstname + " " + patient.lastname, 
             u"Dr " + dentist.firstname + " " + dentist.lastname ],
-            [ u"CPF: " + patient.identity_number_2, dentist.registration ],
+            [ u"CPF: " + 
+            format_identity_2(patient.identity_number_2), dentist.registration 
+            ],
         ], 
         colWidths=( ( WIDTH_PAPER - L_MARG - R_MARG ) / 2 ),
         rowHeights=( 30 * mm, 5 * mm, 5 * mm )
@@ -505,7 +524,8 @@ def make_presence_certificate(patient_id, appointment_id, presence_form):
     Story.append(Spacer(1, 30 * mm))
     text = ( presence_form.first_part.data + patient.firstname + " " +
         patient.lastname + presence_form.second_part.data + 
-        presence_form.identity_number.data + presence_form.third_part.data +
+        format_identity_2(presence_form.identity_number.data) + 
+        presence_form.third_part.data +
         date_to_readable(presence_form.day.data.isoformat()) + " das " + 
         presence_form.starttime.data + u" às " + presence_form.endtime.data + 
         "." )
@@ -523,6 +543,49 @@ def make_presence_certificate(patient_id, appointment_id, presence_form):
     pdf_out = output.getvalue()
     output.close()
     return pdf_out
+
+def make_requisition_certificate(patient_id, appointment_id, requisition_form):
+
+    output, doc, Story, styles, patient, appointment, dentist, dental_office =\
+                                get_document_base(patient_id, appointment_id)
+
+    doc.patient_info = patient
+    if requisition_form.requisition_type.data == constants.REQUISITION_X_RAY:
+        Story.append(Paragraph('Requisição radiográfica',
+                                                styles['my_title']))
+    elif requisition_form.requisition_type.data ==\
+                                                constants.REQUISITION_BIOLOGIC:
+        Story.append(Paragraph('Requisição exame biológico',
+                                                styles['my_title']))
+    Story.append(Spacer(1, 30 * mm))
+#    text = ( presence_form.first_part.data + patient.firstname + " " +
+#        patient.lastname + presence_form.second_part.data + 
+#        presence_form.identity_number.data + presence_form.third_part.data +
+#        date_to_readable(presence_form.day.data.isoformat()) + " das " + 
+#        presence_form.starttime.data + u" às " + presence_form.endtime.data + 
+#        "." )
+#
+    Story.append(Paragraph('Prezado colega,', styles['normal']))
+    Story.append(Spacer(1, 10 * mm))
+    text = ( requisition_form.first_part.data + patient.firstname + " " +
+            patient.lastname + " portador do CPF: " +
+            format_identity_2(patient.identity_number_2) +
+            requisition_form.second_part.data )
+    Story.append(Paragraph(text, styles['normal']))
+    Story.append(Spacer(1, 20 * mm))
+    Story.append(Paragraph('Atenciosamente,', styles['normal']))
+    Story.append(Spacer(1, 40 * mm))
+    Story.append(Paragraph('Dr ' + dentist.firstname + " " + dentist.lastname,
+                                            styles['signature']))
+    Story.append(Paragraph(u'Cirurgião-Dentista - ' + dentist.registration, 
+                                                        styles['signature']))
+
+    doc.build(Story, onFirstPage=generate_dental_office_informations)
+    pdf_out = output.getvalue()
+    output.close()
+    return pdf_out
+
+
 
 def make_prescription(patient_id, appointment_id, prescription_form):
 
@@ -553,7 +616,7 @@ def make_prescription(patient_id, appointment_id, prescription_form):
                 patient.address.street_number + " " +\
                 patient.address.complement, styles['patient']))
     Story.append(Paragraph(patient.address.district + " " +\
-                patient.address.zip_code + " " +\
+                format_zip_code(patient.address.zip_code) + " " +\
                 patient.address.city, styles['patient']))
     Story.append(Spacer(1, 5 * mm))
     for drug in sorted(prescription_form.drugs, key=lambda x: x.position.data):

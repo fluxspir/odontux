@@ -1,0 +1,18 @@
+{% extends "summary_patient.html" %}
+{% block main %}
+{% from "_formhelpers.html" import render_sfl_wol, render_simple_hidden_field %}
+<h3>Create requisition certificate:</h3><br />
+
+<form method="post" action="{{ url_for('add_requisition_certificate',
+                                        patient_id=patient.id,
+                                        appointment_id=appointment.id) }}">
+ 
+ {{ render_sfl_wol(requisition_form.requisition_type) }}
+ {{ render_sfl_wol(requisition_form.first_part) }}
+ {{ patient.firstname }} {{ patient.lastname }}
+ {{ render_sfl_wol(requisition_form.second_part) }}<br />
+ <br /><br />
+    {{ requisition_form.save_print }}
+    {{ requisition_form.preview }}
+</form>
+{% endblock %}

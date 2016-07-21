@@ -29,6 +29,13 @@ from odontux.models import (
                             assets
                            )
 
+def get_locale():
+    parser = ConfigParser.ConfigParser()
+    home = os.path.expanduser("~")
+    parser.read(os.path.join(home, ".odontuxrc"))
+    locale = parser.get("environment", "locale")
+    return locale.lower()
+
 def get_odontux_folder():
     parser = ConfigParser.ConfigParser()
     home = os.path.expanduser("~")

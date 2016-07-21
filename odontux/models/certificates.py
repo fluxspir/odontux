@@ -37,6 +37,23 @@ class Certificate(Base):
         'polymorphic_on': certif_type,
     }
 
+class Requisition(Certificate):
+    __tablename__ = 'requisition'
+    id = Column(Integer, ForeignKey(Certificate.id), primary_key=True)
+    requisition_type = Column(Integer, nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': constants.FILE_REQUISITION
+    }
+
+class Presence(Certificate):
+    __tablename__ = 'presence'
+    id = Column(Integer, ForeignKey(Certificate.id), primary_key=True)
+    
+    __mapper_args__ = {
+        'polymorphic_identity': constants.FILE_PRESENCE
+    }
+
 class Cessation(Certificate):
     __tablename__ = 'cessation'
     id = Column(Integer, ForeignKey(Certificate.id), primary_key=True)

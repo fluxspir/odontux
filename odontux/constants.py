@@ -6,18 +6,18 @@
 # Licence BSD
 
 from gettext import gettext as _
-import ConfigParser
 import os
 import datetime
+import ConfigParser
 
 parser = ConfigParser.ConfigParser()
 home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
-LOCALE = parser.get("environment", "locale").title()
+LOCALE = parser.get("environment", "locale").lower()
 
-if LOCALE == 'Fr':
+if LOCALE == 'fr':
     CURRENCY_SYMBOL = u"€"
-elif LOCALE == 'Br':
+elif LOCALE == 'br':
     CURRENCY_SYMBOL = u"R$"
 else:
     CURRENCY_SYMBOL = u"$"
@@ -677,9 +677,16 @@ FILE_PHOTO = 2
 
 FILE_PRESCRIPTION = 3
 
-FILE_ATTESTATION = 4
 FILE_PRESENCE = 7
 FILE_CESSATION = 8
+FILE_REQUISITION = 9
+REQUISITION_X_RAY = 90
+REQUISITION_BIOLOGIC = 95 
+
+REQUISITIONS = {
+    REQUISITION_X_RAY: _('X ray'),
+    REQUISITION_BIOLOGIC: _('Biologic'),
+}
 
 FILE_INVOICE = 20
 FILE_QUOTE = 21
@@ -696,9 +703,9 @@ FILE_X_RAY_TELERADIO_PROFIL = 35
 FILES = {
     FILE_PHOTO: ( _('Photo'), [ 'tooth' ] ),
     FILE_PRESCRIPTION: ( _('Prescription'), None ),
-    FILE_ATTESTATION: ( _('Attestation'), None ),
-    FILE_PRESENCE: ( _('Presence'), None ),
-    FILE_CESSATION: ( _('Cessation'), None ),
+    FILE_PRESENCE: ( _('Presence'), [ 'certificate'] ),
+    FILE_CESSATION: ( _('Cessation'), [ 'certificate' ] ),
+    FILE_REQUISITION: (_('Requisition'), [ 'certificate' ] ),
     FILE_INVOICE: ( _('Invoice'), None ),
     FILE_QUOTE: ( _('Quote'), None ),
     FILE_BILL: ( _('Bill'), None ),
