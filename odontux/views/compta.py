@@ -77,7 +77,7 @@ def apply_payment_to_gesture(patient_id, gesture_id):
             apply_payment_to_invoice = invoice.apply_payment()
 
             # create a bill for user:
-            return redirect(url_for('write_bill', patient_id=patient_id,
+            return redirect(url_for('make_bill', patient_id=patient_id,
                             appointment_id=appointment_gesture.appointment_id,
                             invoice_id=appointment_gesture.invoice_id))
             #####
