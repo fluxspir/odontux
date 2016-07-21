@@ -71,8 +71,13 @@ class HealthCarePlanPatientForm(Form):
 
 @app.route('/patients/')
 def allpatients():
-    patients = meta.session.query(administration.Patient)\
-               .order_by(administration.Patient.lastname).all()
+    patients = ( meta.session.query(administration.Patient)
+                    .filter(administration.Patient.inactive.is_(False))
+                    .order_by(
+                        administration.Patient.firstname,
+                        administration.Patient.lastname)
+                    .all()
+    )
     return render_template('list_patients.html', patients=patients)
 
 @app.route('/patient?id=<int:body_id>/')
