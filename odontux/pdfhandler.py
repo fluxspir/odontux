@@ -319,6 +319,8 @@ def make_invoice_payment_bill(patient_id, appointment_id, bill_form):
     gestures_list = []
     total_price = 0
     for gesture in sorted(bill_form.gestures, key=lambda x: x.date.data):
+        if not gesture.gesture_name.data:
+            continue
         gestures_list.append( (
                 date_to_readable(gesture.date.data),
                 gesture.anatomic_location.data,
