@@ -85,7 +85,6 @@ def insert_document_in_db(document_data, file_type, appointment):
         new_file = file_exists
 
     thumbnail = create_thumbnail_img(new_file.id)
-    pdb.set_trace()
     
     return new_file
 

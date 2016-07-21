@@ -111,7 +111,7 @@ def choose_gestures_in_bill(patient_id, appointment_id,
     if not gestures_id_in_bill:
         gestures_id_in_bill = [ gesture.id for gesture in gestures_panel ]
     else:
-        gestures_id_in_bill = [ int(i) for i in gestures_id.split(",") ]
+        gestures_id_in_bill = [ int(i) for i in gestures_id_in_bill.split(",") ]
 
     gestures_in_bill = (
         meta.session.query(act.AppointmentGestureReference)

@@ -84,7 +84,11 @@ def apply_payment_to_gesture(patient_id, gesture_id):
                 else:
                     gestures_id_in_bill = gestures_id_in_bill + "," +\
                                                                 str(gesture.id)
-            return redirect(url_for('make_bill', patient_id=patient_id,
+#            return redirect(url_for('make_bill', patient_id=patient_id,
+#                            appointment_id=appointment_gesture.appointment_id,
+#                            gestures_id_in_bill=gestures_id_in_bill))
+            return redirect(url_for('choose_gestures_in_bill', 
+                            patient_id=patient_id,
                             appointment_id=appointment_gesture.appointment_id,
                             gestures_id_in_bill=gestures_id_in_bill))
             #####
