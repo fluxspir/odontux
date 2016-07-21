@@ -498,7 +498,7 @@ def add_administrativ_gesture(patient_id, appointment_id):
 
         values['price'] = appointment_gesture_form.price.data
         if not appointment_gesture_form.price.data:
-            values['paid'] = True
+            values['is_paid'] = True
 
         new_technical_gesture = act.AppointmentGestureReference(**values)
         meta.session.add(new_technical_gesture)
