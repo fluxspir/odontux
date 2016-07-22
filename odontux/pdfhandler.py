@@ -324,7 +324,7 @@ def make_invoice_payment_bill(patient_id, appointment_id, bill_form):
         gestures_list.append( (
                 date_to_readable(gesture.date.data),
                 gesture.anatomic_location.data,
-                gesture.gesture_name.data,
+                Paragraph(gesture.gesture_name.data, styles['normal']),
                 constants.CURRENCY_SYMBOL + " " +str(gesture.price.data) )
                 )
         total_price += Decimal(gesture.price.data)
@@ -338,6 +338,7 @@ def make_invoice_payment_bill(patient_id, appointment_id, bill_form):
                         ('ALIGN', (0,0), (-2,-1), 'LEFT'),
                         ('ALIGN', (-1,0), (-1,-1), 'CENTER'),
                         ('ALIGN', (-1,0), (-1,-1), 'RIGHT'),
+                        ('VALIGN', (0,0), (-1, -1), 'MIDDLE'),
                         ('LINEBELOW', (0,-1), (-1, -1), 1, colors.black),
                         ] )
     )
