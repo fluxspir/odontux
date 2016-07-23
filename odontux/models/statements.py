@@ -21,6 +21,16 @@ try:
 except ImportError:
     import constants
 
+if constants.LOCALE == 'br':
+    class NotaFiscalBr(Base):
+        __tablename__ = 'nota_fiscal_br'
+        id = Column(Integer, primary_key=True)
+        patient_id = Column(Integer, ForeignKey(administration.Patient.id),
+                                                                nullable=False)
+        document_id = Column(Integer, ForeignKey(documents.Files.id), 
+                                                                nullable=False)
+        timestamp = Column(DateTime, default=func.now(), nullable=False)
+        document = relationship('documents.Files')
 
 class Invoice(Base):
     __tablename__ = 'invoice'

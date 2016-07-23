@@ -9,13 +9,15 @@ import pdb
 import datetime
 import os
 import md5
+import magic
+
 from base64 import b64encode
 from flask import ( session, render_template, request, redirect, url_for, 
                     abort, make_response, jsonify, send_from_directory)
 
 from wtforms import (Form, TextField, TextAreaField, DecimalField, 
                     IntegerField, HiddenField, DateField, SubmitField, 
-                    FieldList, FormField, SelectField,
+                    FieldList, FormField, SelectField, FileField,
                     validators )
 #from forms import TimeField
 from sqlalchemy import or_
@@ -28,6 +30,7 @@ from odontux.odonweb import app
 from gettext import gettext as _
 
 from odontux import constants, checks
+from documents import insert_document_in_db
 from odontux.pdfhandler import make_quote, make_invoice_payment_bill
 
 #from odontux.pdfhandler import ( )
@@ -73,6 +76,14 @@ class BillForm(Form):
     update = SubmitField(_('Update'))
     preview = SubmitField(_('Preview'))
     save_print = SubmitField(_('Save and Print'))
+
+if constants.LOCALE == 'br':
+    class NotaFiscalForm(Form):
+        document = FileField(_('Document'))
+        document_type = SelectField(_('Type'), coerce=int,
+            choices=[ ( nfe[0], nfe[1] ) for nfe in 
+                        constants.NOTAS_FISCAIS.items() ] )
+        add_file = SubmitField(_('Add document'))
 
 @app.route('/choose/gestures_in_bill?pid=<int:patient_id>'
                                                 '&aid=<int:appointment_id>')
@@ -529,12 +540,21 @@ def list_statement(patient_id, appointment_id):
             .order_by(schedule.Agenda.starttime.desc())
             .all()
     )
-
+    if constants.LOCALE == 'br':
+        nfes = (meta.session.query(statements.NotaFiscalBr)
+            .filter(statements.NotaFiscalBr.patient_id == patient_id)
+            .order_by(statements.NotaFiscalBr.timestamp.desc())
+            .all()
+        )
+    else:
+        nfes = []
     return render_template('list_statements.html', patient=patient,
                                         appointment=appointment,
                                         quotes_id='',
                                         quotes=quotes,
-                                        bills=bills)
+                                        bills=bills,
+                                        nfes=nfes,
+                                        constants=constants)
 
 @app.route('/view/bill&bid=<int:bill_file_id>')
 def view_bill(bill_file_id):
@@ -565,4 +585,52 @@ def view_quote(quote_file_id):
     return send_from_directory(app.config['DOCUMENT_FOLDER'],
                                     quote_file.md5,
                                     mimetype=quote_file.mimetype)
-   
+
+if constants.LOCALE == 'br':
+    @app.route('/view/nota_fiscal&nfeid=<int:nfe_file_id>')
+    def view_nota_fiscal(nfe_file_id):
+        authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                            constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+        if session['role'] not in authorized_roles:
+            return abort(403)
+        
+        nfe_file = ( meta.session.query(documents.Files)
+                        .filter(documents.Files.id == nfe_file_id)
+                        .one()
+        )
+        return send_from_directory(app.config['DOCUMENT_FOLDER'],
+                                        nfe_file.md5,
+                                        mimetype=nfe_file.mimetype)
+
+
+    @app.route('/add/nota_fiscal?pid=<int:patient_id>', 
+                                                    methods=['GET', 'POST'])
+    @app.route('/add/nota_fiscal?pid=<int:patient_id>'
+                '&aid=<int:appointment_id>', methods=['GET', 'POST'])
+    def add_nota_fiscal(patient_id, appointment_id=0):
+        authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+        if session['role'] not in authorized_roles:
+            return abort(403)
+        patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
+        
+        document_form = NotaFiscalForm(request.form)
+        if request.method == 'POST' and document_form.validate():
+            document_data = request.files[document_form.document.name].read()
+            if document_data:
+                new_file = insert_document_in_db(document_data,
+                                document_form.document_type.data, appointment)
+                
+                values = {
+                    'patient_id': patient_id,
+                    'document_id': new_file.id,
+                }
+                new_nota_fiscal = statements.NotaFiscalBr(**values)
+                meta.session.add(new_nota_fiscal)
+                meta.session.commit()
+
+        return render_template('add_nota_fiscal.html', patient=patient,
+                                            appointment=appointment,
+                                            document_form=document_form)
+        

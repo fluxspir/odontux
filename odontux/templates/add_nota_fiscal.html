@@ -1,0 +1,12 @@
+{% extends 'summary_patient.html' %}
+
+{% block main %}
+<h3>Add nota Fiscal</h3>
+    <form method='post' enctype="multipart/form-data" 
+          action="{{ url_for('add_nota_fiscal', patient_id=patient.id,
+                                  appointment_id=appointment.id,) }}">
+      {{ document_form.document }}
+      {{ document_form.document_type }}
+      {{ document_form.add_file }}
+    </form>
+{% endblock %}
