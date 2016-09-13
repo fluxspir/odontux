@@ -556,7 +556,7 @@ def list_statement(patient_id, appointment_id):
                                         nfes=nfes,
                                         constants=constants)
 
-@app.route('/view/bill&bid=<int:bill_file_id>')
+@app.route('/view/bill?bid=<int:bill_file_id>')
 def view_bill(bill_file_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
@@ -571,7 +571,7 @@ def view_bill(bill_file_id):
                                     bill_file.md5,
                                     mimetype=bill_file.mimetype)
  
-@app.route('/view/quote&qid=<int:quote_file_id>')
+@app.route('/view/quote?qid=<int:quote_file_id>')
 def view_quote(quote_file_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]

@@ -18,14 +18,18 @@
 <br />
 Quotes:<br />
 {% for quote in quotes %}
-  <a href="{{ url_for('view_quote', quote_file_id=quote.file_id) }}">
+  {% if quote.file_id %}
+    <a href="{{ url_for('view_quote', quote_file_id=quote.file_id) }}">
       {{ quote.appointment.agenda.starttime }}</a><br />
+  {% endif %}
 {% endfor %}
 <br />
 Bills:<br />
 {% for bill in bills %}
-  <a href="{{ url_for('view_bill', bill_file_id=bill.file_id) }}">
+  {% if bill.file_id %}
+    <a href="{{ url_for('view_bill', bill_file_id=bill.file_id) }}">
       {{ bill.appointment.agenda.starttime }}</a><br />
+  {% endif %}
 {% endfor %}
 <br />
 {% if constants.LOCALE == 'br' %}
