@@ -56,6 +56,8 @@ def create_thumbnail_img(file_id, size=(128, 128)):
                 new_thumbnail = documents.Thumbnail(**thumbnail_values)
                 meta.session.add(new_thumbnail)
                 meta.session.commit()
+            else:
+                new_thumbnail = file_exists
     return new_thumbnail
 
 def insert_document_in_db(document_data, file_type, appointment):
