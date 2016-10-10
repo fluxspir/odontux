@@ -219,19 +219,26 @@ def generate_patient_survey_info(canvas, doc):
 
     canvas.saveState()
     
+    patient_phone = ""
+    patient_address_1 = ""
+    patient_address_2 = ""
+    patient_mail = ""
     patient_name = doc.patient_info['patient'].firstname + " " +\
                     doc.patient_info['patient'].lastname
     patient_id_num = "CPF: " + doc.patient_info['patient'].identity_number_2
-    patient_address_1 =  doc.patient_info['patient'].address.street +\
+    if doc.patient_info['patient'].address:
+        patient_address_1 =  doc.patient_info['patient'].address.street +\
                     ", " + doc.patient_info['patient'].address.street_number +\
                     " ; " + doc.patient_info['patient'].address.complement
-    patient_address_2 =  doc.patient_info['patient'].address.district +\
+        patient_address_2 =  doc.patient_info['patient'].address.district +\
                     " " + doc.patient_info['patient'].address.zip_code +\
                     " - " + doc.patient_info['patient'].address.city
-    patient_phone = doc.patient_info['patient'].phones[-1].indicatif +\
+    if doc.patient_info['patient'].phones:
+        patient_phone = doc.patient_info['patient'].phones[-1].indicatif +\
                     " " + doc.patient_info['patient'].phones[-1].area_code +\
                     " " + doc.patient_info['patient'].phones[-1].number
-    patient_mail = doc.patient_info['patient'].mails[-1].email
+    if doc.patient_info['patient'].mails:
+        patient_mail = doc.patient_info['patient'].mails[-1].email
                         
     patient_info = [
         ( patient_name, None ),
