@@ -29,6 +29,13 @@ from odontux.models import (
                             assets
                            )
 
+def get_locale():
+    parser = ConfigParser.ConfigParser()
+    home = os.path.expanduser("~")
+    parser.read(os.path.join(home, ".odontuxrc"))
+    locale = parser.get("environment", "locale")
+    return locale.lower()
+
 def get_odontux_folder():
     parser = ConfigParser.ConfigParser()
     home = os.path.expanduser("~")
@@ -48,6 +55,17 @@ def get_odontux_document_folder():
     if not os.path.exists(document_folder):
         os.makedirs(document_folder)
     return document_folder
+
+def get_thumbnail_folder():
+    parser = ConfigParser.ConfigParser()
+    home = os.path.expanduser("~")
+    parser.read(os.path.join(home, ".odontuxrc"))
+    odontux_folder = get_odontux_folder()
+    thumbnail_folder_name = parser.get("environment", "thumbnail_folder")
+    thumbnail_folder = os.path.join(odontux_folder, thumbnail_folder_name)
+    if not os.path.exists(thumbnail_folder):
+        os.makedirs(thumbnail_folder)
+    return thumbnail_folder
 
 def get_dental_office_logo():
     parser = ConfigParser.ConfigParser()

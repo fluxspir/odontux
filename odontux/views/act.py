@@ -26,9 +26,6 @@ from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
 from odontux.views.forms import ColorField
 from decimal import Decimal
 
-def get_code_list():
-    return [ gesture.code for gesture in meta.session.query(act.Gesture).all() ]
-
 class SpecialtyForm(Form):
     name = TextField('name', [validators.Required(), 
                      validators.Length(min=1, max=20, 
@@ -50,7 +47,12 @@ class AppointmentGestureReferenceForm(Form):
     gesture_id = SelectField(_('Choose gesture in list'), coerce=int,
                                         description='UpdateCodePrice()')
     code = TextField(_('Code'), validators=[validators.Optional(),
-                validators.AnyOf(get_code_list())])
+                validators.AnyOf( 
+                [ gesture.code for gesture in 
+                    meta.session.query(act.Gesture).all() ] 
+                )
+                ]
+    )
     price = DecimalField(_('Price'), [validators.Optional()])
     majoration = SelectField(_('Majoration'), coerce=int)
 
@@ -496,7 +498,7 @@ def add_administrativ_gesture(patient_id, appointment_id):
 
         values['price'] = appointment_gesture_form.price.data
         if not appointment_gesture_form.price.data:
-            values['paid'] = True
+            values['is_paid'] = True
 
         new_technical_gesture = act.AppointmentGestureReference(**values)
         meta.session.add(new_technical_gesture)
@@ -824,7 +826,6 @@ def view_material_used_in_appointment(patient_id, appointment_id):
                                                 materio_vigilance.quantity_used
         materio_vigilance_form.new_quantity_used =\
                                                 materio_vigilance.quantity_used
-        pdb.set_trace()
         materio_vigilance_form.material_data = (
             str(material.id) + " " + material.asset_category.brand + " " +
             material.asset_category.commercial_name + " " +

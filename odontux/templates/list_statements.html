@@ -8,17 +8,37 @@
                         patient_id=patient.id,
                         appointment_id=appointment.id) }}">
   Add Bill</a><br />
+{% if constants.LOCALE == 'br' %}
+  <a href="{{ url_for('add_nota_fiscal',
+                        patient_id=patient.id,
+                        appointment_id=appointment.id) }}">
+      Add Nota Fiscal</a><br />
+{% endif %}
 </div>
 <br />
 Quotes:<br />
 {% for quote in quotes %}
-  <a href="{{ url_for('view_quote', quote_file_id=quote.file_id) }}">
+  {% if quote.file_id %}
+    <a href="{{ url_for('view_quote', quote_file_id=quote.file_id) }}">
       {{ quote.appointment.agenda.starttime }}</a><br />
+  {% endif %}
 {% endfor %}
 <br />
 Bills:<br />
 {% for bill in bills %}
-  <a href="{{ url_for('view_bill', bill_file_id=bill.file_id) }}">
+  {% if bill.file_id %}
+    <a href="{{ url_for('view_bill', bill_file_id=bill.file_id) }}">
       {{ bill.appointment.agenda.starttime }}</a><br />
+  {% endif %}
 {% endfor %}
+<br />
+{% if constants.LOCALE == 'br' %}
+  Notas Fiscais:<br />
+  {% for nfe in nfes %}
+    <a href="{{ url_for('view_nota_fiscal', nfe_file_id=nfe.document_id) }}">
+      {{ constants.NOTAS_FISCAIS[nfe.document.file_type] }} - 
+      {{ nfe.timestamp }}
+    </a><br />
+  {% endfor %}
+{% endif %}
 {% endblock %}

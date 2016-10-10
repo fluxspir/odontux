@@ -75,11 +75,22 @@ def apply_payment_to_gesture(patient_id, gesture_id):
                         appointment_gesture.appointment_id, None, 
                         invoice_id = appointment_gesture.invoice_id)
             apply_payment_to_invoice = invoice.apply_payment()
-
+            
+            gestures_id_in_bill = ''
             # create a bill for user:
-            return redirect(url_for('write_bill', patient_id=patient_id,
+            for index, gesture in enumerate(gestures_in_invoice):
+                if index == 0:
+                    gestures_id_in_bill = str(gesture.id)
+                else:
+                    gestures_id_in_bill = gestures_id_in_bill + "," +\
+                                                                str(gesture.id)
+#            return redirect(url_for('make_bill', patient_id=patient_id,
+#                            appointment_id=appointment_gesture.appointment_id,
+#                            gestures_id_in_bill=gestures_id_in_bill))
+            return redirect(url_for('choose_gestures_in_bill', 
+                            patient_id=patient_id,
                             appointment_id=appointment_gesture.appointment_id,
-                            invoice_id=appointment_gesture.invoice_id))
+                            gestures_id_in_bill=gestures_id_in_bill))
             #####
 
 

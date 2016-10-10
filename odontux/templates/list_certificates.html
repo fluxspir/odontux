@@ -9,15 +9,24 @@
                         patient_id=patient.id,
                         appointment_id=appointment.id) }}">
   Add Cessation certificate</a><br />
+<a href="{{ url_for('add_requisition_certificate',
+                        patient_id=patient.id,
+                        appointment_id=appointment.id) }}">
+  Add Requisition certificate</a><br />
 </div>
 <br />
 Presence certificates:<br />
 {% for presence in presences %}
-  <a href=#>{{ presence.appointment.agenda.starttime }}</a><br />
+  <a href={{ url_for('display_file', file_id=presence.id ) }}>
+                    {{ presence.appointment.agenda.starttime }}</a><br />
 {% endfor %}
 <br />
 Cessation certificates:<br />
 {% for cessation in cessations %}
-  <a href=#>{{ cessation.appointment.agenda.starttime }}</a><br />
+  <a href={{ url_for('display_file', file_id=cessation.id ) }}>{{ cessation.appointment.agenda.starttime }}</a><br />
+{% endfor %}
+Requisition certificates:<br />
+{% for requisition in requisitions %}
+  <a href={{ url_for('display_file', file_id=requisition.id ) }}>{{ requisition.appointment.agenda.starttime }}</a><br />
 {% endfor %}
 {% endblock %}

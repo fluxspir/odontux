@@ -164,9 +164,9 @@ class GnuCashCustomer(GnuCash):
     gnucash_session.
     """
 
-    def __init__(self):
-        pass
-
+    # If to put a def __init__(), see in GnuCashInvoice how to load Gnucash() 
+    # for not having a problem !!!
+    #
     def _test_id_already_in_database(self):
         return self.book.CustomerLookupByID(self.gcpatient_id)
 
@@ -364,7 +364,7 @@ class GnuCashInvoice(GnuCash):
                         invoice.CommitEdit()
                         invoice.PostToAccount(self.patient_receivables, 
                                             self.date, self.date, 
-                                            description.encode("utf_8"),
+                                            "".encode("utf_8"),
                                             True, False)
                         if self.gnucashtype == 'xml':
                             self.gcsession.save()

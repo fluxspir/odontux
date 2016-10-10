@@ -6,22 +6,25 @@
 #
 
 import pdb
-from wtforms import ( Form, 
+
+from wtforms import ( Form,
                     TextField, TextAreaField, HiddenField, SelectMultipleField,
                     BooleanField, RadioField, IntegerField, SelectField, 
-                    validators
+                    FieldList, FileField, FormField, SubmitField, validators
                     )
 import sqlalchemy
 from sqlalchemy.orm import with_polymorphic
-from flask import session, render_template, redirect, url_for, request
+from flask import session, render_template, redirect, url_for, request, abort
 
 from gettext import gettext as _
 
 from odontux import constants, checks
 from odontux.odonweb import app
 from odontux.views import forms
-from odontux.models import meta, teeth, schedule, headneck
+from odontux.models import meta, teeth, schedule, headneck, documents
 from odontux.views.log import index
+from documents import insert_document_in_db
+
 
 def get_teeth_list(teeth=""):
     """
@@ -149,6 +152,14 @@ class ToothForm(Form):
                                                                 coerce=int)
     surveillance = BooleanField(_('Surveillance'))
 
+class DocumentForm(Form):
+    document = FileField(_('Document'))
+    document_type = SelectField(_('Type'), coerce=int, 
+            choices=[ (doc[0], doc[1][0]) for doc in constants.FILES.items()
+                                            if doc[1][1] 
+                                            and 'tooth' in doc[1][1] ] )
+    add_file = SubmitField(_('Add document'))
+
 class EventForm(Form):
     event_id = HiddenField(_("ID"))
     teeth = TextField(_("Teeth"))
@@ -156,9 +167,6 @@ class EventForm(Form):
     description = TextField(_("Description"))
     comment = TextAreaField(_("General comments of this event"))
     color = forms.ColorField(_("color"))
-    x_ray = BooleanField(_("x_ray"))
-    pic = BooleanField(_("pic"))
-    document = BooleanField(_("document"))
     anatomic_location = SelectField(_("Location"), coerce=int,
                         description='ChangementToothAnatomicLocation()')
 
@@ -273,21 +281,54 @@ def show_tooth(patient_id, appointment_id, tooth_codename):
             )
             .all()
         )
+    document_form = DocumentForm(request.form)
     return render_template('show_tooth.html', patient=patient,
                                               appointment=appointment,
                                               tooth=tooth,
                                               gum=gum,
                                               constants=constants,
-                                              events=events)
+                                              events=events,
+                                              document_form=document_form)
 
+@app.route('/add/file_to_tooth_event?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>&eid=<int:event_id>', methods=['POST'])
+def add_file_to_tooth_event(patient_id, appointment_id, event_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
 
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
+    event = ( meta.session.query(teeth.Event)
+                .filter(teeth.Event.id == event_id)
+                .one()
+    )
+    document_form = DocumentForm(request.form)
+    if document_form.validate():
+        document_data = request.files[document_form.document.name].read()
+        if document_data:
+            new_file = insert_document_in_db(document_data, 
+                                document_form.document_type.data, appointment)
+            if new_file not in event.files:
+                event.files.append(new_file)
+                meta.session.commit()
+
+    return redirect(url_for('show_tooth', patient_id=patient_id,
+                                        appointment_id=appointment_id,
+                                        tooth_codename=event.tooth.codename))
+#    return render_template('add_file_to_tooth_event.html', patient=patient,
+#                                            appointment=appointment,
+#                                            event=event,
+#                                            document_form=document_form)
+#
 @app.route('/add/event_tooth_located?pid=<int:patient_id>'
-                '&aid=<int:appointment_id>', methods=['GET','POST'])
+                        '&aid=<int:appointment_id>', methods=['GET','POST'])
 def add_event_tooth_located(patient_id, appointment_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
                         constants.ROLE_ASSISTANT ]
     if session['role'] not in authorized_roles:
-        return redirect(url_for('index'))
+        return abort(403)
 
     patient, appointment = checks.get_patient_appointment(patient_id,
                                                                 appointment_id)
@@ -339,9 +380,6 @@ def add_event_tooth_located(patient_id, appointment_id):
             'description': event_form.description.data,
             'comment': event_form.comment.data,
             'color': event_form.color.data,
-            'x_ray': event_form.x_ray.data,
-            'pic': event_form.pic.data,
-            'document': event_form.document.data,
             'location': event_form.anatomic_location.data,
             'state': tooth_form.choose_tooth_state.data,
         }
@@ -428,7 +466,6 @@ def add_event_tooth_located(patient_id, appointment_id):
         clear_form = False
     else:
         clear_form = True
-
     return render_template('add_event_tooth_located.html',
                     patient=patient, appointment=appointment,
                     tooth_form=tooth_form,

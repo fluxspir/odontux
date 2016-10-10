@@ -6,18 +6,18 @@
 # Licence BSD
 
 from gettext import gettext as _
-import ConfigParser
 import os
 import datetime
+import ConfigParser
 
 parser = ConfigParser.ConfigParser()
 home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
-LOCALE = parser.get("environment", "locale").title()
+LOCALE = parser.get("environment", "locale").lower()
 
-if LOCALE == 'Fr':
+if LOCALE == 'fr':
     CURRENCY_SYMBOL = u"€"
-elif LOCALE == 'Br':
+elif LOCALE == 'br':
     CURRENCY_SYMBOL = u"R$"
 else:
     CURRENCY_SYMBOL = u"$"
@@ -673,31 +673,58 @@ UNITIES = {
 # Files
 # --------------------------------------------------
 
-FILE_RADIO = 1
 FILE_PHOTO = 2
 
 FILE_PRESCRIPTION = 3
 
-FILE_ATTESTATION = 4
 FILE_PRESENCE = 7
 FILE_CESSATION = 8
+FILE_REQUISITION = 9
+REQUISITION_X_RAY = 90
+REQUISITION_BIOLOGIC = 95 
+
+REQUISITIONS = {
+    REQUISITION_X_RAY: _('X ray'),
+    REQUISITION_BIOLOGIC: _('Biologic'),
+}
 
 FILE_INVOICE = 20
 FILE_QUOTE = 21
 FILE_BILL = 22
 FILE_RECEIPT = 23
+if LOCALE == 'br':
+    FILE_NOTA_FISCAL_PDF = 24
+    FILE_NOTA_FISCAL_XML = 25
+
+    NOTAS_FISCAIS = {
+        FILE_NOTA_FISCAL_PDF: "Pdf",
+        FILE_NOTA_FISCAL_XML: "XML",
+    }
+
+FILE_X_RAY_PERIAPICAL = 30
+FILE_X_RAY_BITEWING = 31
+FILE_X_RAY_OCCLUSAL = 32
+FILE_X_RAY_PANORAMIC = 33
+FILE_X_RAY_TELERADIO_FACE = 34
+FILE_X_RAY_TELERADIO_PROFIL = 35
 
 FILES = {
-    FILE_RADIO: _('Radio'),
-    FILE_PHOTO: _('Photo'),
-    FILE_PRESCRIPTION: _('Prescription'),
-    FILE_ATTESTATION: _('Attestation'),
-    FILE_PRESENCE: _('Presence'),
-    FILE_CESSATION: _('Cessation'),
-    FILE_INVOICE: _('Invoice'),
-    FILE_QUOTE: _('Quote'),
-    FILE_BILL: _('Bill'),
-    FILE_RECEIPT: _('Receipt'),
+    FILE_PHOTO: ( _('Photo'), [ 'tooth' ] ),
+    FILE_PRESCRIPTION: ( _('Prescription'), None ),
+    FILE_PRESENCE: ( _('Presence'), [ 'certificate'] ),
+    FILE_CESSATION: ( _('Cessation'), [ 'certificate' ] ),
+    FILE_REQUISITION: (_('Requisition'), [ 'certificate' ] ),
+    FILE_INVOICE: ( _('Invoice'), None ),
+    FILE_QUOTE: ( _('Quote'), None ),
+    FILE_BILL: ( _('Bill'), None ),
+    FILE_RECEIPT: ( _('Receipt'), None ),
+    FILE_X_RAY_PERIAPICAL: ( _('X_ray periapical'), [ 'tooth' ] ),
+    FILE_X_RAY_BITEWING: ( _('X_ray bitewing'), [ 'tooth' ] ),
+    FILE_X_RAY_OCCLUSAL: ( _('X_ray occlusal'), [ 'tooth' ] ),
+    FILE_X_RAY_PANORAMIC: ( _('X_ray panoramic'), [ 'tooth', 'face' ] ),
+    FILE_X_RAY_TELERADIO_FACE: ( _('X_ray teleradiography face'), [ 'face' ] ),
+    FILE_X_RAY_TELERADIO_PROFIL: ( _('X_ray teleradiography profil'), 
+                                                                [ 'face' ] ),
 }
 
 # ----------------------------------------------------------

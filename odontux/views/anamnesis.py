@@ -7,7 +7,8 @@
 
 import pdb
 import datetime
-from flask import session, render_template, request, redirect, url_for, jsonify
+from flask import ( session, render_template, request, redirect, url_for, 
+                    abort, jsonify, make_response )
 from wtforms import (Form, SelectField, TextField, BooleanField, TextAreaField,
                      IntegerField, HiddenField, DateField, DecimalField, 
                     validators )
@@ -20,6 +21,7 @@ from odontux.views import forms
 from gettext import gettext as _
 
 from odontux import constants, checks
+from odontux.pdfhandler import make_base_survey, make_patient_survey_info
 
 class SurveyForm(Form):
     id = HiddenField(_('id'))
@@ -565,6 +567,11 @@ def update_question(question_id):
                                                 question_form=question_form)
 
 
+@app.route('/delete/question?qid=<int:question_id>')
+def delete_question(question_id):
+    # penser à voir si question dans surveys, et si sur de la virer
+    pass
+
 @app.route('/delete/survey?sid=<int:survey_id>')
 def delete_survey(survey_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
@@ -578,4 +585,19 @@ def delete_survey(survey_id):
     meta.session.delete(survey)
     meta.session.commit()
     return redirect(url_for('list_survey'))
+
+@app.route('/print/base_survey?sid=<int:survey_id>')
+def print_base_survey(survey_id):
+    pdf_out = make_base_survey(survey_id)
+    response = make_response(pdf_out)
+    response.mimetype = 'application/pdf'
+    return response
+
+@app.route('/print/patient_data_anamnesis?pid=<int:patient_id>'
+            '&aid=<int:appointment_id>')
+def print_patient_data_on_anamnesis(patient_id, appointment_id):
+    pdf_out = make_patient_survey_info(patient_id, appointment_id)
+    response = make_response(pdf_out)
+    response.mimetype = 'application/pdf'
+    return response
 

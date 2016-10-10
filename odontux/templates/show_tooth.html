@@ -53,6 +53,30 @@
         {% endif %}
 
         <br />
+        {% for file in event.files %}
+          {% if file.thumbnails %}
+            {% for thumbnail in file.thumbnails %}
+              <a href={{ url_for('display_file', file_id=file.id ) }}>
+                <img src={{ url_for('display_thumbnail', thumbnail_id=thumbnail.id ) }} />
+              </a>
+            {% endfor %}
+          {% else %}
+            <a href={{ url_for('display_file', file_id=file.id ) }}>Display</a>
+          {% endif %}
+        {% endfor %}
+        <br />
+
+        <div id="event_{{ event.id }}">
+        <form method='post' enctype="multipart/form-data" 
+                            action="{{ url_for('add_file_to_tooth_event',
+                                          patient_id=patient.id,
+                                          appointment_id=event.appointment.id,
+                                          event_id=event.id) }}">
+          {{ document_form.document }}
+          {{ document_form.document_type }}
+          {{ document_form.add_file }}
+        </form>
+        </div>
         --------------
         <br />
       {% endfor %}

@@ -10,6 +10,11 @@ import sqlalchemy
 import ConfigParser
 import os
 
+try:
+    import constants
+except ImportError:
+    from odontux import constants
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from zope.sqlalchemy import ZopeTransactionExtension
@@ -24,7 +29,7 @@ from anamnesis import (Anamnesis, MedicalHistory, Addiction, Treatment,
 from anamnesis import Survey, Question
 from headneck import HeadEvent, NeckEvent
 from medication import DrugPrescribed, Prescription, PrescribedDrugReference
-from documents import Files 
+from documents import Files, Thumbnail
 from schedule import Agenda, Appointment, AppointmentMemo
 from endobuccal import (MouthEvent, SuperiorLipEvent, InferiorLipEvent, 
                         LeftCheekEvent, RightCheekEvent,HardPalateEvent, 
@@ -44,6 +49,9 @@ from traceability import (SterilizationCycleType, SterilizationCycleMode,
 from statements import ( Invoice, Quote, Bill, QuoteGestureReference,
                             BillAppointmentGestureReference )
 from certificates import Certificate
+
+if constants.LOCALE == 'br':
+    from statements import NotaFiscalBr
 
 def init():
     parser = ConfigParser.ConfigParser()
