@@ -37,6 +37,7 @@ class Gesture(Base):
     color = Column(String, default="#000000")
     cotations = relationship('Cotation')
     healthcare_plans = association_proxy('cotations', 'healthcare_plan')
+#    material_categories = 
     
 class Cotation(Base):
     __tablename__ = "cotation"
@@ -48,6 +49,7 @@ class Cotation(Base):
     active = Column(Boolean, default=True)
     gesture = relationship("Gesture")
     healthcare_plan = relationship('HealthCarePlan', backref="cotations")
+#    material_categories = associationprox('Gesture.material_categories')
 
 class AppointmentGestureReference(Base):
     """ 
