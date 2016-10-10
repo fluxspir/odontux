@@ -9,7 +9,7 @@ import pdb
 import checks
 import constants
 
-from odontux.models import meta, users
+from odontux.models import meta, users, anamnesis
 
 from odontux.odonweb import app
 
@@ -142,7 +142,8 @@ def generate_dental_office_informations(canvas, doc):
         else:
             font = 'Times-Roman'
         fontsize = 11
-        add_line(font, fontsize, text, doc.last_height)
+        #add_line(font, fontsize, text, doc.last_height)
+        add_line(font, fontsize, text, align='left')
 
         if idx == 0:
             font = 'Times-Roman'
@@ -180,6 +181,192 @@ def generate_dental_office_informations(canvas, doc):
                                 patient.address.city )
 
     canvas.restoreState()
+
+def generate_base_survey_info(canvas, doc):
+    canvas.saveState()
+    logo_url = get_logo()
+    if logo_url:
+        logo = ImageReader(logo_url)
+        width_logo = 45 * mm
+        height_logo = 45 * mm
+        canvas.drawImage(logo,
+                        R_MARG/2, 
+                        HEIGHT_PAPER - T_MARG/2 - height_logo, 
+                        width_logo, height_logo
+                        )
+    canvas.restoreState()
+
+def generate_patient_survey_info(canvas, doc):
+    def add_line(font, fontsize, text, align='', varalign=0):
+        canvas.setFont(font, fontsize)
+        if align == 'centred' or align == 'center':
+            canvas.drawCentredString( WIDTH_PAPER / 2 + varalign,
+                                (HEIGHT_PAPER - T_MARG - doc.last_height),
+                                text
+                            )
+        elif align == 'right':
+            canvas.drawRightString( WIDTH_PAPER - R_MARG + varalign,
+                            (HEIGHT_PAPER - T_MARG - doc.last_height),
+                            text
+                            )
+        else:
+            canvas.drawString( L_MARG + varalign, 
+                        (HEIGHT_PAPER - T_MARG - doc.last_height),
+                        text
+                        )
+        return True
+
+
+    canvas.saveState()
+    
+    patient_name = doc.patient_info['patient'].firstname + " " +\
+                    doc.patient_info['patient'].lastname
+    patient_id_num = "CPF: " + doc.patient_info['patient'].identity_number_2
+    patient_address_1 =  doc.patient_info['patient'].address.street +\
+                    ", " + doc.patient_info['patient'].address.street_number +\
+                    " ; " + doc.patient_info['patient'].address.complement
+    patient_address_2 =  doc.patient_info['patient'].address.district +\
+                    " " + doc.patient_info['patient'].address.zip_code +\
+                    " - " + doc.patient_info['patient'].address.city
+    patient_phone = doc.patient_info['patient'].phones[-1].indicatif +\
+                    " " + doc.patient_info['patient'].phones[-1].area_code +\
+                    " " + doc.patient_info['patient'].phones[-1].number
+    patient_mail = doc.patient_info['patient'].mails[-1].email
+                        
+    patient_info = [
+        ( patient_name, None ),
+        ( patient_id_num, None ),
+        ( patient_address_1, None ),
+        ( patient_address_2, None ),
+        ( patient_phone, None ),
+        ( patient_mail, None ),
+    ]
+
+    font = 'Times-Roman'
+    fontsize = 11
+    for idx, text in enumerate(patient_info, start=0):
+        # bold for Patient Name
+        if not idx:
+            font = 'Times-Bold'
+        else:
+            font = 'Times-Roman'
+        if text[0]: 
+            # varalign à cause logo
+            varalign = 35 * mm
+            add_line(font, fontsize, text[0], 'left', varalign)
+        if text[1]:
+            add_line(font, fontsize, text[1], 'right')
+
+        doc.last_height = doc.last_height + 5 *mm
+
+    doc.last_height = HEIGHT_PAPER - B_MARG - 20 * mm
+    city = doc.patient_info['dental_office'].addresses[-1].city
+    day = date_to_readable(doc.patient_info['appointment'].agenda.\
+                                            endtime.date().isoformat())
+    text = city + ", o " + day
+    add_line( 'Times-Bold', 11, text, align='center')
+
+    doc.last_height = doc.last_height + 5 *mm
+    dentist_name = 'Dr ' + doc.patient_info['dentist'].firstname +\
+                    " " + doc.patient_info['dentist'].lastname
+    align_patient = - WIDTH_PAPER/4
+    align_dentist = WIDTH_PAPER/4
+    add_line( 'Times-Bold', 12, patient_name, 'center', align_patient )
+    add_line( 'Times-Bold', 12, dentist_name, 'center', align_dentist )
+
+    doc.last_height = doc.last_height + 5 * mm
+    add_line( 'Times-Roman', 10, patient_id_num, 'center', align_patient )
+    add_line( 'Times-Roman', 10, doc.patient_info['dentist'].registration,
+                                                    'center', align_dentist)
+#
+
+    canvas.restoreState()
+
+def make_patient_survey_info(patient_id, appointment_id):
+
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                            appointment_id)
+    dental_office = ( meta.session.query(users.DentalOffice)
+                        .filter(users.DentalOffice.id ==
+                                    appointment.dental_unit.dental_office_id)
+                        .one()
+    )
+    dentist = ( meta.session.query(users.OdontuxUser)
+                .filter(users.OdontuxUser.id == appointment.dentist_id)
+                .one()
+    )
+
+    Story = []
+    output = cStringIO.StringIO()
+    doc = generate_doc_template(output)
+    doc.patient_info = { 'dentist': dentist,
+                        'patient': patient,
+                        'appointment': appointment,
+                        'dental_office': dental_office,
+    }
+    doc.last_height = 0
+    Story.append(Spacer(1, 0 * mm))
+    doc.build(Story, onFirstPage=generate_patient_survey_info)
+    pdf_out = output.getvalue()
+    output.close()
+    return pdf_out
+
+def make_base_survey(survey_id):
+    survey = ( meta.session.query(anamnesis.Survey)
+                .filter(anamnesis.Survey.id == survey_id)
+                .one()
+    )
+
+    Story = []
+    output = cStringIO.StringIO()
+    doc = generate_doc_template(output)
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='normal', fontName='Times-Roman',
+                            fontSize=11, alignment=TA_LEFT))
+    styles.add(ParagraphStyle(name='my_title', fontName='Times-Bold',
+                            fontSize=16, alignment=TA_CENTER))
+
+    Story.append(Spacer(1, 40 * mm))
+    Story.append(Paragraph(_('Anamnesis'), styles['my_title']))
+    Story.append(Spacer(1, 10 * mm))
+
+    questions_list = []
+    for question in sorted(survey.quests, 
+                                    key=lambda question: question.position):
+
+        questions_list.append( (
+            str(question.position),
+            Paragraph(question.question.question, styles['normal']),
+            _('S') + "  " + _('N'),
+            ""
+            )
+        )
+
+    position_width = 5 * mm
+    choices_width = 10 * mm
+    question_width = 70 * mm
+    comments_width = WIDTH_PAPER - L_MARG -R_MARG - choices_width -\
+                                                question_width - position_width
+    t = Table( questions_list, colWidths = ( position_width, question_width, 
+                                            choices_width, comments_width )
+    )
+
+    t.setStyle(TableStyle( [
+                    ('FONTSIZE', (0,0), (-1,-1), 11),
+                    ('FONTNAME', (0,0), (-1,-1), 'Times-Roman'),
+                    ('FONTNAME', (2,0), (2,-1), 'Times-Bold'),
+                    ('ALIGN', (1,0), (1, -1), 'LEFT'),
+                    ('ALIGN', (1,0), (1, -1), 'LEFT'),
+                    ('VALIGN', (0,0), (0, -1), 'MIDDLE'),
+                    ('VALIGN', (2,0), (2, -1), 'MIDDLE'),
+                    ])
+    )
+    Story.append(t)
+
+    doc.build(Story, onFirstPage=generate_base_survey_info)
+    pdf_out = output.getvalue()
+    output.close()
+    return pdf_out
 
 def get_document_base(patient_id, appointment_id):
     patient, appointment = checks.get_patient_appointment(patient_id, 
@@ -615,7 +802,7 @@ def make_prescription(patient_id, appointment_id, prescription_form):
     # Patient's dentification 
     Story.append(Paragraph('Patiente: ' + patient.firstname + " "\
                                     + patient.lastname, styles['patient']))
-    Story.append(Paragraph(patient.address.street + " " +\
+    Story.append(Paragraph(patient.address.street + ", " +\
                 patient.address.street_number + " " +\
                 patient.address.complement, styles['patient']))
     Story.append(Paragraph(patient.address.district + " " +\

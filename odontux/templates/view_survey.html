@@ -2,7 +2,10 @@
 {% block main %}
 <br />
 {% from "_formhelpers.html" import render_simple_field_line, render_simple_hidden_field %}
-{{ survey.name }}<br /><br />
+<h2>{{ survey.name }}</h2>
+<a href="{{ url_for('print_base_survey', survey_id=survey.id)}}">Print survey</a>
+<br />
+<br />
 Questions in survey :<br />
 {% for question in question_form_list %}
   <a href="{{ url_for('remove_question_from_survey', survey_id=survey.id,
