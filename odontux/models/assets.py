@@ -296,3 +296,16 @@ class AssetKit(Base):
     end_of_use = Column(Date, default=None)
     end_use_reason = Column(Integer, default=0)
     sterilization = relationship('AssetSterilized')
+
+
+class MaterialCategoryClinicGestureReference(Base):
+    """
+    """
+    __tablename__ = 'material_category_clinic_gesture_reference'
+    id = Column(Integer, primary_key=True)
+    material_category_id = Column(Integer, ForeignKey(MaterialCategory.id), 
+                                                                nullable=False)
+    clinic_gesture_id = Column(Integer, ForeignKey(act.ClinicGesture.id), 
+                                                                nullable=False)
+    material_category = relationship('MaterialCategory')
+    mean_quantity = Column(Numeric, default=None)

@@ -6,14 +6,16 @@
 #
 
 from meta import Base
-from tables import payment_gesture_table 
+from tables import material_category_gesture_table
 import schedule, headneck, teeth
 import sqlalchemy
-from sqlalchemy import Table, Column, Integer, String, Numeric, Boolean
+from sqlalchemy import ( Table, Column, Integer, String, Numeric, Boolean, 
+                            Interval)
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
 
+import datetime
 
 class Specialty(Base):
     __tablename__ = 'specialty'
@@ -27,6 +29,11 @@ class HealthCarePlan(Base):
     name = Column(String, nullable=False, unique=True)
 
 class Gesture(Base):
+    """ a Gesture is the common name of the global act
+        that can be one or more ClinicAct
+        A gesture as a set of materials that may be used in
+        ones of the clinic acts that compose the gesture 
+    """
     __tablename__ = 'gesture'
     id = Column(Integer, primary_key=True)
     specialty_id = Column(Integer, ForeignKey(Specialty.id), default=None)
@@ -37,8 +44,31 @@ class Gesture(Base):
     color = Column(String, default="#000000")
     cotations = relationship('Cotation')
     healthcare_plans = association_proxy('cotations', 'healthcare_plan')
+    materials = relationship('MaterialCategory', 
+                            secondary=material_category_gesture_table)
+   
+class ClinicGesture(Base):
+    """ a ClinicGesture is define by its material used, is mean time, 
+        and, as a consequence, its cost."""
+    __tablename__ = 'clinic_gesture'
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
+    description = Column(String)
+    duration = Column(Interval, default=datetime.timedelta(seconds= 5 * 60))
+    materials = relationship('MaterialCategoryClinicGestureReference',
+                    cascade="all, delete, delete-orphan", backref="gesture")
+    #materials = association_proxy('mat_categories', 'material_category')
     
+    def mean_cost(self):
+        """
+            Cost = duration * dental_unit_hour_cost + 
+                    clinic_gestures_materials_unity_cost * quantity
+        """
+        pass
+
 class Cotation(Base):
+    """
+    """
     __tablename__ = "cotation"
     id = Column(Integer, primary_key=True)
     gesture_id = Column(Integer, ForeignKey(Gesture.id), nullable=False)
@@ -48,6 +78,20 @@ class Cotation(Base):
     active = Column(Boolean, default=True)
     gesture = relationship("Gesture")
     healthcare_plan = relationship('HealthCarePlan', backref="cotations")
+    clinic_gestures = relationship('ClinicGestureCotationReference', 
+                                cascade="all, delete, delete-orphan",
+                                backref="cotations")
+    gests = association_proxy('clinic_gestures', 'clinic_gesture')
+
+class ClinicGestureCotationReference(Base):
+    __tablename__ = "clinic_gesture_cotation_reference"
+    id = Column(Integer, primary_key=True)
+    clinic_gesture_id = Column(Integer, ForeignKey(ClinicGesture.id), 
+                                                            nullable=False)
+    cotation_id = Column(Integer, ForeignKey(Cotation.id), nullable=False)
+    clinic_gesture = relationship('ClinicGesture') 
+    appointment_number = Column(Integer, default=0)
+    appointment_sequence = Column(Integer, default=0)
 
 class AppointmentGestureReference(Base):
     """ 

@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-from tables import payment_gesture_table
+#from tables import payment_gesture_table
 import act, administration, documents
 
 from sqlalchemy import (Table, Column, Integer, String, Boolean, Numeric, Date)

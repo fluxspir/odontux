@@ -6,7 +6,8 @@
 #
 
 import pdb
-from flask import session, render_template, request, redirect, url_for, jsonify
+from flask import ( session, render_template, request, redirect, url_for, 
+                    jsonify, abort )
 import sqlalchemy
 from sqlalchemy import or_, and_, desc
 from gettext import gettext as _
@@ -25,12 +26,27 @@ from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      FieldList, FormField, SubmitField)
 from odontux.views.forms import ColorField
 from decimal import Decimal
+import datetime
 
 class SpecialtyForm(Form):
     name = TextField('name', [validators.Required(), 
                      validators.Length(min=1, max=20, 
                      message=_("Must be less than 20 characters"))])
     color = ColorField('color')
+
+class ClinicGestureForm(Form):
+    name = TextField(_('Name'), [validators.Required()])
+    description = TextAreaField(_('Description'))
+    duration = IntegerField(_('Duration in minutes'), 
+                                                [validators.Optional()] )
+class MaterialCategoryClinicGestureForm(Form):
+    mean_quantity = DecimalField(_('Quantity used'), [validators.Required()])
+    submit = SubmitField('Update')
+
+class ClinicGestureCotationReferenceForm(Form):
+    appointment_number = IntegerField(_('Appointment_number'))
+    appointment_sequence = IntegerField(_('Appointment_sequence'))
+    submit = SubmitField(_('Update'))
 
 class GestureForm(Form):
     specialty_id = SelectField('specialty', coerce=int)
@@ -166,10 +182,11 @@ def add_specialty():
 @app.route('/act/update_specialty/id=<int:specialty_id>/', 
             methods=['GET', 'POST'])
 def update_specialty(specialty_id):
-    try:
-        specialty = meta.session.query(act.Specialty).filter\
-              (act.Specialty.id == specialty_id).one()
-    except sqlalchemy.orm.exc.NoResultFound:
+    specialty = ( meta.session.query(act.Specialty)
+                    .filter(act.Specialty.id == specialty_id)
+                    .one_or_none()
+    )
+    if not specialty:
         return redirect(url_for('list_specialty'))
 
     form = SpecialtyForm(request.form)
@@ -293,6 +310,13 @@ def update_gesture(gesture_id):
     # d'on ne sait quand...
     # (update 160504 : toujours pas d'idée)
     
+    other_materials = ( meta.session.query(assets.MaterialCategory)
+                            .filter(~assets.MaterialCategory.id.in_(
+                                [ mat.id for mat in gesture.materials ]
+                                )
+                            )
+                            .all()
+    )
     if request.method == 'POST' and gesture_form.validate():
         for f in get_gesture_field_list():
             setattr(gesture, f, getattr(gesture_form, f).data)
@@ -308,9 +332,205 @@ def update_gesture(gesture_id):
     return render_template('/update_gesture.html', 
                             gesture_form=gesture_form, 
                             specialty_form=specialty_form,
-                            gesture=gesture
+                            gesture=gesture,
+                            other_materials=other_materials
                             )
 
+@app.route('/add/clinic_gesture?crel=<int:cotation_id>', 
+                                                    methods=['GET', 'POST'])
+def add_clinic_gesture(cotation_id):
+    form = ClinicGestureForm(request.form)
+    if request.method == 'POST' and form.validate():
+        new_clinic_gesture = ( meta.session.query(act.ClinicGesture)
+                            .filter(act.ClinicGesture.name == form.name.data)
+                            .one_or_none()
+        )
+        if not new_clinic_gesture:
+            args = {
+                'name': form.name.data,
+                'description': form.description.data,
+                'duration': datetime.timedelta(seconds=form.duration.data * 60)
+            }
+            new_clinic_gesture = act.ClinicGesture(**args)
+            meta.session.add(new_clinic_gesture)
+            meta.session.commit()
+        return redirect(url_for('update_clinic_gesture', 
+                                    clinic_gesture_id=new_clinic_gesture.id,
+                                    cotation_id=cotation_id,
+                                    form=form))
+    return render_template('add_clinic_gesture.html', cotation_id=cotation_id, 
+                                                        form=form)
+
+@app.route('/update/clinic_gesture?cgid=<int:clinic_gesture_id>'
+            '?crel=<int:cotation_id>', methods=['GET', 'POST' ])
+def update_clinic_gesture(clinic_gesture_id, cotation_id):
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+
+    clinic_gesture = ( meta.session.query(act.ClinicGesture)
+                        .filter(act.ClinicGesture.id == clinic_gesture_id)
+                        .one()
+    )
+    cotation = ( meta.session.query(act.Cotation)
+                        .filter(act.Cotation.id == cotation_id)
+                        .one()
+    )
+
+    cg_form = ClinicGestureForm(request.form)
+
+    other_materials = ( meta.session.query(assets.MaterialCategory)
+        .filter(
+                ~assets.MaterialCategory.id.in_(
+            [ mat.material_category.id for mat in clinic_gesture.materials ]
+                ),
+                assets.MaterialCategory.id.in_(
+                [ mat.id for mat in cotation.gesture.materials ]
+                )
+        )
+        .all()
+    )
+
+    if request.method == 'POST' and cg_form.validate():
+        # Verify if name update won't create IntegrityError (constraint unique)
+        other_cg_same_new_name = ( meta.session.query(act.ClinicGesture)
+                    .filter(act.ClinicGesture.id != clinic_gesture_id,
+                            act.ClinicGesture.name == cg_form.name.data
+                    )
+                    .one_or_none()
+        )
+        # won't try to update with name already in db to avoid IntegrityError
+        if not other_cg_same_new_name:
+            for f in ('name', 'description', 'duration'):
+                if f == 'duration':
+                    setattr(clinic_gesture, f, 
+                        datetime.timedelta(seconds=getattr(cg_form, f).data * 60))
+                    
+                else:
+                    setattr(clinic_gesture, f, getattr(cg_form, f).data)
+            meta.session.commit()
+        return redirect(url_for('update_clinic_gesture', 
+                                    clinic_gesture_id=clinic_gesture.id,
+                                    cotation_id=cotation.id))
+
+    # create update_form for each quantity
+    quantity_forms = {}
+    for material in clinic_gesture.materials:
+        mat_form = MaterialCategoryClinicGestureForm(request.form)
+        mat_form.mean_quantity.data = material.mean_quantity
+        quantity_forms[material.material_category_id] = mat_form
+
+    for f in ('name', 'description', 'duration'):
+        if f == 'duration':
+            getattr(cg_form, f).data =\
+                                getattr(clinic_gesture, f).seconds % 3600 / 60
+        else:
+            getattr(cg_form, f).data = getattr(clinic_gesture, f)
+
+    return render_template('update_clinic_gesture.html', 
+                                    clinic_gesture=clinic_gesture,
+                                    cotation=cotation,
+                                    other_materials=other_materials,
+                                    quantity_forms=quantity_forms,
+                                    cg_form=cg_form,
+                                    constants=constants)
+
+@app.route('/update/mean_quantity_mat_in_gest'
+            '?mgid=<int:mat_gest_id>&cid=<int:cotation_id>', methods=['POST'])
+def update_mean_quantity_mat_in_gest(mat_gest_id, cotation_id):
+    mat_gest_ref = ( 
+        meta.session.query(assets.MaterialCategoryClinicGestureReference)
+            .filter(assets.MaterialCategoryClinicGestureReference.id == 
+                                                                mat_gest_id)
+            .one()
+    )
+    
+    form = MaterialCategoryClinicGestureForm(request.form)
+    if form.validate():
+        mat_gest_ref.mean_quantity = form.mean_quantity.data
+        meta.session.commit()
+    return redirect(url_for('update_clinic_gesture', 
+                            clinic_gesture_id=mat_gest_ref.clinic_gesture_id,
+                                                    cotation_id=cotation_id))
+
+@app.route('/add/material_category_to_clinic_gesture'
+            '?cgid=<int:clinic_gesture_id>&mcid=<int:material_category_id>'
+            '&cotid=<int:cotation_id>')
+def add_material_category_to_clinic_gesture(clinic_gesture_id, 
+                                            material_category_id, cotation_id):
+    clinic_gesture = ( meta.session.query(act.ClinicGesture)
+                        .filter(act.ClinicGesture.id == clinic_gesture_id)
+                        .one()
+    )
+    material_category = ( meta.session.query(assets.MaterialCategory)
+                    .filter(assets.MaterialCategory.id == material_category_id)
+                    .one()
+    )
+    mat_cg_reference = assets.MaterialCategoryClinicGestureReference(
+                        mean_quantity=material_category.automatic_decrease)
+    mat_cg_reference.material_category = material_category
+    clinic_gesture.materials.append(mat_cg_reference)
+    meta.session.commit()
+
+    return redirect(url_for('update_clinic_gesture', 
+                                clinic_gesture_id=clinic_gesture.id,
+                                cotation_id=cotation_id))
+
+@app.route('/remove/material_category_from_clinic_gesture'
+            '?mccgid=<int:material_category_clinic_gesture_ref_id>'
+            '&cotid=<int:cotation_id>')
+def remove_material_category_from_clinic_gesture(
+                                    material_category_clinic_gesture_ref_id,
+                                                                cotation_id):
+    mc_cg_ref = ( 
+        meta.session.query(assets.MaterialCategoryClinicGestureReference)
+        .filter(
+            assets.MaterialCategoryClinicGestureReference.id == 
+                                        material_category_clinic_gesture_ref_id
+        )
+        .one()
+    )
+    clinic_gesture_id = mc_cg_ref.clinic_gesture_id
+    meta.session.delete(mc_cg_ref)
+    meta.session.commit()
+
+    return redirect(url_for('update_clinic_gesture', 
+                                clinic_gesture_id=clinic_gesture_id,
+                                cotation_id=cotation_id))
+
+
+@app.route('/remove/material_category_from_gesture&gid=<int:gesture_id>'
+            '&mcid=<int:material_category_id>')
+def remove_material_category_from_gesture(gesture_id, material_category_id):
+    gesture = ( meta.session.query(act.Gesture)
+                    .filter(act.Gesture.id == gesture_id)
+                    .one()
+    )
+    material_category = ( meta.session.query(assets.MaterialCategory)
+                    .filter(assets.MaterialCategory.id == material_category_id)
+                    .one()
+    )
+    gesture.materials.remove(material_category)
+    meta.session.commit()
+    return redirect(url_for('update_gesture', gesture_id=gesture.id))
+
+
+@app.route('/add/material_category_to_gesture&gid=<int:gesture_id>'
+            '&mcid=<int:material_category_id>')
+def add_material_category_to_gesture(gesture_id, material_category_id):
+    gesture = ( meta.session.query(act.Gesture)
+                    .filter(act.Gesture.id == gesture_id)
+                    .one()
+    )
+    material_category = ( meta.session.query(assets.MaterialCategory)
+                    .filter(assets.MaterialCategory.id == material_category_id)
+                    .one()
+    )
+    gesture.materials.append(material_category)
+    meta.session.commit()
+    return redirect(url_for('update_gesture', gesture_id=gesture.id))
+
+@app.route('/view/gesture?id=<int:gesture_id>')
 @app.route('/view/gesture?id=<int:gesture_id>')
 def view_gesture(gesture_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
@@ -321,20 +541,6 @@ def view_gesture(gesture_id):
                     .filter(act.Gesture.id == gesture_id)
                     .one() 
             )
-
-    price_forms = []
-    for cotation in gesture.cotations:
-        if cotation.active == False:
-            continue
-        form = PriceForm(request.form)
-        form.gesture_id.data = gesture.id
-        form.healthcare_plan_id.data = cotation.healthcare_plan_id
-        
-        if cotation.price:
-            form.price.data = cotation.price
-        else:
-            form.price.data = 0
-        price_forms.append((cotation, form))
 
     healthcare_plans_not_in_gesture = (
         meta.session.query(act.HealthCarePlan)
@@ -356,7 +562,7 @@ def view_gesture(gesture_id):
         ).all()
     )
     return render_template('view_gesture.html', gesture=gesture,
-            price_forms=price_forms,
+            constants=constants,
             healthcare_plans_not_in_gesture=healthcare_plans_not_in_gesture)
 
 @app.route('/add/healthcare_plan_to_gesture?gest=<int:gesture_id>'
@@ -406,28 +612,91 @@ def remove_healthcare_plan_from_gesture(gesture_id, healthcare_plan_id):
     meta.session.commit()
     return redirect(url_for('view_gesture', gesture_id=gesture_id))
 
-@app.route('/update/cotation', methods=['POST'])
-def update_cotation():
+@app.route('/update/cotation?cid=<int:cotation_id>', methods=['GET', 'POST'])
+def update_cotation(cotation_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
-        return redirect(url_for('index'))
-    
+        return abort(403)
+
+    cotation = ( meta.session.query(act.Cotation)
+                    .filter(act.Cotation.id == cotation_id)
+                    .one()
+    )
+
     price_form = PriceForm(request.form)
 
-    if price_form.validate():
-        cotation = (
-            meta.session.query(act.Cotation)
-                .filter(act.Cotation.gesture_id== price_form.gesture_id.data,
-                        act.Cotation.healthcare_plan_id ==
-                                        price_form.healthcare_plan_id.data
-                    )
-                .one()
-            )
+    if request.method == 'POST' and price_form.validate():
         cotation.price = price_form.price.data
         meta.session.commit()
+
+    clinic_gestures = meta.session.query(act.ClinicGesture).all()
+    
+    cg_in_cotation = []
+    for cg_cot_ref in sorted(cotation.clinic_gestures,
+                        key=lambda cg_cot_ref: ( cg_cot_ref.appointment_number,
+                                            cg_cot_ref.appointment_sequence)):
+        ref_form = ClinicGestureCotationReferenceForm(request.form)
+        ref_form.appointment_number.data = cg_cot_ref.appointment_number
+        ref_form.appointment_sequence.data = cg_cot_ref.appointment_sequence
+        cg_in_cotation.append( (cg_cot_ref, ref_form ))
+
+    return render_template('update_cotation.html', cotation=cotation,
+                            cg_in_cotation=cg_in_cotation,
+                            price_form=price_form,
+                            clinic_gestures=clinic_gestures)
+
+@app.route('/add/clinic_gesture_to_cotation?cid=<int:clinic_gesture_id>'
+            '&cid=<int:cotation_id>')
+def add_clinic_gesture_to_cotation(clinic_gesture_id, cotation_id):
+    others = ( meta.session.query(act.ClinicGestureCotationReference)
+        .filter(
+        act.ClinicGestureCotationReference.clinic_gesture_id ==
+                                                        clinic_gesture_id,
+        act.ClinicGestureCotationReference.cotation_id == cotation_id
+        )
+    )
+    
+    values = {
+        'clinic_gesture_id': clinic_gesture_id,
+        'cotation_id': cotation_id,
+        'appointment_number': 1,
+        'appointment_sequence': 1,
+    }
+    new_cg_in_cot = act.ClinicGestureCotationReference(**values)
+    meta.session.add(new_cg_in_cot)
+    meta.session.commit()
+    return redirect(url_for('update_cotation', cotation_id=cotation_id))
+
+@app.route('/remove/clinic_gesture_from_cotation?cid=<int:cg_cot_ref_id>')
+def remove_clinic_gesture_from_cotation(cg_cot_ref_id):
+    query = meta.session.query(act.ClinicGestureCotationReference)
+    cg_cot_ref = ( 
+        query.filter(act.ClinicGestureCotationReference.id == cg_cot_ref_id )
+        .one()
+    )
+    cotation_id = cg_cot_ref.cotation_id
+    meta.session.delete(cg_cot_ref)
+    meta.session.commit()
+    return redirect(url_for('update_cotation', cotation_id=cotation_id))
+
+@app.route('/update/clinic_gesture_cotation_reference?rid=<int:cg_cot_ref_id>',
+                                                            methods=['POST'])
+            
+def update_clinic_gesture_cotation_reference(cg_cot_ref_id):
+    ref = ( meta.session.query(act.ClinicGestureCotationReference)
+            .filter(act.ClinicGestureCotationReference.id == cg_cot_ref_id)
+            .order_by(
+                act.ClinicGestureCotationReference.appointment_number,
+                act.ClinicGestureCotationReference.appointment_sequence )
+            .one()
+    )
+    ref_form = ClinicGestureCotationReferenceForm(request.form)
+    if ref_form.validate():
+        ref.appointment_number = ref_form.appointment_number.data
+        ref.appointment_sequence = ref_form.appointment_sequence.data
+        meta.session.commit()
+    return redirect(url_for('update_cotation', cotation_id=ref.cotation_id))
         
-    return redirect(url_for('view_gesture', 
-                            gesture_id=price_form.gesture_id.data))
 
 @app.route('/add/gesture?pid=<int:patient_id>&_id=<int:appointment_id>', 
                                                     methods=['GET', 'POST'])

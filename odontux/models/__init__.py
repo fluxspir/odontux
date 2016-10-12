@@ -37,12 +37,13 @@ from endobuccal import (MouthEvent, SuperiorLipEvent, InferiorLipEvent,
                         UvulaEvent)
 from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootCanalEvent,
                     Gum, PeriodontalEvent )
-from act import ( Specialty, HealthCarePlan, Gesture, Cotation, 
-                AppointmentGestureReference )
+from act import ( Specialty, HealthCarePlan, Gesture, ClinicGesture, Cotation,
+                ClinicGestureCotationReference, AppointmentGestureReference )
 from compta import PaymentType, Payment
 from assets import (AssetProvider, AssetCategory, MaterialCategory,
                     Asset, Device, Material, AssetKitStructure, AssetKit,
-                    SuperAssetCategory, SuperAsset)
+                    SuperAssetCategory, SuperAsset,
+                    MaterialCategoryClinicGestureReference)
 from traceability import (SterilizationCycleType, SterilizationCycleMode,
                             SterilizationCycle, AssetSterilized, 
                             MaterioVigilance)
