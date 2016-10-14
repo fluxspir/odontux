@@ -11,7 +11,7 @@ import sqlalchemy
 import datetime
 
 from tables import (odontux_user_mail_table,
-                    odontux_user_phone_table, dental_office_address_table,
+                    odontux_user_phone_table,
                     dental_office_mail_table, dental_office_phone_table)
 
 try:

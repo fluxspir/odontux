@@ -43,10 +43,10 @@ odontux_user_phone_table = Table('odontux_user_phone', Base.metadata,
 Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),
 Column('phone_id', Integer, ForeignKey('phone.id'))
 )
-dental_office_address_table = Table('dental_office_address', Base.metadata,
-Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
-Column('address_id', Integer, ForeignKey('address.id'))
-)
+#dental_office_address_table = Table('dental_office_address', Base.metadata,
+#Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
+#Column('address_id', Integer, ForeignKey('address.id'))
+#)
 dental_office_mail_table = Table('dental_office_mail', Base.metadata,
 Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
 Column('mail_id', Integer, ForeignKey('mail.id'))
