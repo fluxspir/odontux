@@ -197,18 +197,18 @@ def get_appointment_base_cost(appointment_base_duration,
 
     duration_appointment_base_cost =\
                         float(appointment_base_duration.total_seconds()) *\
-                    float( hourly_operational_cost + dentist_hour_fees ) / 3600
+                ( hourly_operational_cost + float(dentist_hour_fees) ) / 3600
 
     appointment_base_cost = duration_appointment_base_cost +\
-                                                appointment_base_material_cost
+                                        float(appointment_base_material_cost)
 
     return duration_appointment_base_cost, appointment_base_cost
 
 def get_gestures_cost(gestures_duration, gestures_material_cost, 
                                 hourly_operational_cost, dentist_hour_fees):
     duration_gestures_cost = (
-                float(gestures_duration.total_seconds()) *
-            float(hourly_operational_cost + dentist_hour_fees ) / 3600
+                gestures_duration.total_seconds() *
+            (hourly_operational_cost + float(dentist_hour_fees) ) / 3600
     )
     gestures_cost = duration_gestures_cost + float(gestures_material_cost)
 
@@ -307,7 +307,7 @@ def get_cost_informations(cg_cot_dict, cotation_id):
     
     return cost_informations
 
-@app.route('/portal/operation_cost/' methods=['GET', 'POST'])
+@app.route('/portal/operation_cost/', methods=['GET', 'POST'])
 def portal_operation_cost():
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
