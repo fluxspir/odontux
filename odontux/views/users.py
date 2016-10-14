@@ -385,6 +385,7 @@ def update_user(body_id, form_to_display):
 def update_timesheet_1(body_id):
  
     timesheet_fields = [ 'weekday', 'period', 'begin', 'end' ]
+    dentalunit_timesheet_fields = [ 'dental_unit_id' ]
     dentist_timesheet_fields = [ 'dental_unit_id' ]
     assistant_timesheet_fields = [ 'dentist_id' ]
     
@@ -395,10 +396,12 @@ def update_timesheet_1(body_id):
         )
     
     timesheet_form = OdontuxUserTimeSheetForm(request.form)
-#    if user.role == constants.ROLE_DENTIST:
+#    if user.role == constants.ROLE_DENTIST or constants.ROLE_ADMIN:
     timesheet_form.dental_unit_id.choices =\
             [ (dental_unit.id, dental_unit.name) for dental_unit in
-                meta.session.query(users.DentalUnit).all() ]
+                meta.session.query(users.DentalUnit)
+                    .filter(users.DentalUnit.active == True)
+                    .all() ]
 #    elif user.role == constants.ROLE_ASSISTANT:
     timesheet_form.dentist_id.choices =\
             [ (dentist.id, dentist.username) for dentist in
@@ -434,6 +437,14 @@ def update_timesheet_1(body_id):
                     timesheet_form.dental_unit_id.data
                 )
             )
+
+        elif user.role == constants.ROLE_ADMIN:
+            TS = (
+                TS.filter(
+                    users.DentalUnitTimeSheet.dental_unit_id ==
+                    timesheet_form.dental_unit_id.data
+                )
+            )
         elif user.role == constants.ROLE_ASSISTANT:
             TS = (
                 TS.filter(
@@ -456,19 +467,19 @@ def update_timesheet_1(body_id):
                     values[f] =\
                     getattr(timesheet_form, f).data
 
-#                        [ values[f] =
-#                            getattr(timesheet_form, f).data
-#                            for f in dentist_timesheet_fields ]
                 new_TS = users.DentistTimeSheet(**values)
+
+            elif user.role == constants.ROLE_ADMIN:
+                for f in dentalunit_timesheet_fields:
+                    values[f] =\
+                    getattr(timesheet_form, f).data
+                new_TS = users.DentalUnitTimeSheet(**values)
 
             elif user.role == constants.ROLE_ASSISTANT:
                 for f in assistant_timesheet_fields:
                     values[f] =\
                     getattr(timesheet_form, f).data
                     
-#                        [ values[f] = 
-#                            getattr(timesheet_form, f).data
-#                            for f in assistant_timesheet_fields ]
                 new_TS = users.AssistantTimeSheet(**values)
 
             else:
@@ -480,7 +491,11 @@ def update_timesheet_1(body_id):
             [ setattr(TS, f, 
                     getattr(timesheet_form, f).data)
                 for f in timesheet_fields ]
-            if user.role == constants.ROLE_DENTIST:
+            if user.role == constants.ROLE_ADMIN:
+                [ setattr(TS, f,
+                    getattr(timesheet_form, f).data)
+                    for f in dentalunit_timesheet_fields ]
+            elif user.role == constants.ROLE_DENTIST:
                 [ setattr(TS, f,
                     getattr(timesheet_form, f).data)
                     for f in dentist_timesheet_fields ]
@@ -496,8 +511,6 @@ def update_timesheet_1(body_id):
 
     return redirect(url_for('update_user', body_id=body_id,
                                         form_to_display="time_sheet"))
-
-   
 
 @app.route('/update/timesheet?body_id=<int:body_id>', methods=['POST'])
 def update_timesheet(body_id):

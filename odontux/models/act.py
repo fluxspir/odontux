@@ -7,7 +7,7 @@
 
 from meta import Base
 from tables import material_category_gesture_table
-import schedule, headneck, teeth
+import schedule, headneck, teeth, users
 import sqlalchemy
 from sqlalchemy import ( Table, Column, Integer, String, Numeric, Boolean, 
                             Interval)
@@ -57,14 +57,8 @@ class ClinicGesture(Base):
     duration = Column(Interval, default=datetime.timedelta(seconds= 5 * 60))
     materials = relationship('MaterialCategoryClinicGestureReference',
                     cascade="all, delete, delete-orphan", backref="gesture")
-    #materials = association_proxy('mat_categories', 'material_category')
-    
-    def mean_cost(self):
-        """
-            Cost = duration * dental_unit_hour_cost + 
-                    clinic_gestures_materials_unity_cost * quantity
-        """
-        pass
+    is_daily = Column(Boolean, default=False)
+    is_appointmently = Column(Boolean, default=False)
 
 class Cotation(Base):
     """
@@ -108,3 +102,12 @@ class AppointmentGestureReference(Base):
     invoice_id = Column(String, default="")
     is_paid = Column(Boolean, default=False)
     gesture = relationship('Gesture')
+
+class HealthCarePlanUserReference(Base):
+    """ """
+    __tablename__ = 'healthcare_plan_user_reference'
+    id = Column(Integer, primary_key=True)
+    healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id),
+                                                        nullable=False)
+    user_id = Column(Integer, ForeignKey(users.OdontuxUser.id), nullable=False)
+    hour_fees = Column(Numeric, nullable=False)

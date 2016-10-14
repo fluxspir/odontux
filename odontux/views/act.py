@@ -17,6 +17,7 @@ from odontux import constants, checks, gnucash_handler
 from odontux.models import ( meta, act, schedule, administration, traceability,
                             assets, teeth, compta)
 from odontux.views import cotation as views_cotation
+from odontux.views import cost
 
 from odontux.views.log import index
 #from odontux.views.patient import list_acts
@@ -628,22 +629,22 @@ def update_cotation(cotation_id):
     if request.method == 'POST' and price_form.validate():
         cotation.price = price_form.price.data
         meta.session.commit()
+    else:
+        price_form.price.data = cotation.price
 
-    clinic_gestures = meta.session.query(act.ClinicGesture).all()
+    clinic_gestures_available = meta.session.query(act.ClinicGesture).all()
     
-    cg_in_cotation = []
-    for cg_cot_ref in sorted(cotation.clinic_gestures,
-                        key=lambda cg_cot_ref: ( cg_cot_ref.appointment_number,
-                                            cg_cot_ref.appointment_sequence)):
-        ref_form = ClinicGestureCotationReferenceForm(request.form)
-        ref_form.appointment_number.data = cg_cot_ref.appointment_number
-        ref_form.appointment_sequence.data = cg_cot_ref.appointment_sequence
-        cg_in_cotation.append( (cg_cot_ref, ref_form ))
-
+    # cg_cot_dics = { appointment_number: [ [ (cg_cot_ref, form) ], duration,
+    #                                       [ cg_mat_ref ], material_cost ],
+    #               }
+    cg_cot_dict, = cost.get_cotation_dictionary(cotation_id)
+    cost_informations = cost.get_cost_informations(cg_cot_dict)
+   
     return render_template('update_cotation.html', cotation=cotation,
-                            cg_in_cotation=cg_in_cotation,
                             price_form=price_form,
-                            clinic_gestures=clinic_gestures)
+                            clinic_gestures=clinic_gestures_available,
+                            cg_cot_dict=cg_cot_dict,
+                            cost_informations=cost_informations)
 
 @app.route('/add/clinic_gesture_to_cotation?cid=<int:clinic_gesture_id>'
             '&cid=<int:cotation_id>')

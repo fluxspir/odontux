@@ -49,6 +49,7 @@ class DentalUnit(Base):
                                                                 nullable=False)
     name = Column(String)
     dental_office = relationship('DentalOffice')
+    active = Column(Boolean, default=True)
 
 class OdontuxUser(Base):
     __tablename__ = 'odontux_user'
@@ -95,6 +96,15 @@ class TimeSheet(Base):
     __mapper_args__ = {
         'polymorphic_identity': 'time_sheet',
         'polymorphic_on': user_role
+    }
+
+class DentalUnitTimeSheet(TimeSheet):
+    __tablename__ = 'dental_unit_time_sheet'
+    id = Column(Integer, ForeignKey(TimeSheet.id), primary_key=True)
+    dental_unit_id = Column(Integer, ForeignKey(DentalUnit.id), nullable=False)
+    
+    __mapper_args__ = {
+        'polymorphic_identity': constants.ROLE_ADMIN
     }
 
 class DentistTimeSheet(TimeSheet):

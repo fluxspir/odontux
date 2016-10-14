@@ -8,6 +8,7 @@
         <th>Office Name</th>
         <th>Owner Lastname</th>
         <th>Owner Firstname</th>
+        <th></th> {# update link #}
         {% if session.role == session.ROLE_ADMIN %}
           <th></th>
         {% endif %}
@@ -22,7 +23,7 @@
           {% endif %}
           <td>{{ office.owner_lastname }}</td>
           <td>{{ office.owner_firstname }}</td>
-          {% if session.role == session.ROLE_ADMIN %}
+          {% if session.role == session.ROLE_DENTIST %}
             <td>
               <a href="{{ url_for('update_dental_office', body_id=office.id, form_to_display='gen_info') }}">Modify</a>
             </td>

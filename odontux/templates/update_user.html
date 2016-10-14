@@ -87,7 +87,8 @@
                   <form method="post" action="{{ url_for('update_timesheet_1', body_id=user.id) }}">
 
                     <caption>
-                      {% if user.role == constants.ROLE_DENTIST %}
+                      {% if user.role == constants.ROLE_DENTIST or 
+                            user.role == constants.ROLE_ADMIN %}
                         {{ render_simple_field_line(timesheet_form[weekday][period].dental_unit_id) }}
                       {% elif user.role == constants.ROLE_ASSISTANT %}
                         {{ render_simple_field_line(timesheet_form[weekday][period].dentist_id) }}
