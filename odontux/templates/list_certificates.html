@@ -17,16 +17,16 @@
 <br />
 Presence certificates:<br />
 {% for presence in presences %}
-  <a href={{ url_for('display_file', file_id=presence.id ) }}>
+  <a href={{ url_for('display_file', file_id=presence.file_id ) }}>
                     {{ presence.appointment.agenda.starttime }}</a><br />
 {% endfor %}
 <br />
 Cessation certificates:<br />
 {% for cessation in cessations %}
-  <a href={{ url_for('display_file', file_id=cessation.id ) }}>{{ cessation.appointment.agenda.starttime }}</a><br />
+  <a href={{ url_for('display_file', file_id=cessation.file_id ) }}>{{ cessation.appointment.agenda.starttime }}</a><br />
 {% endfor %}
 Requisition certificates:<br />
 {% for requisition in requisitions %}
-  <a href={{ url_for('display_file', file_id=requisition.id ) }}>{{ requisition.appointment.agenda.starttime }}</a><br />
+  <a href={{ url_for('display_file', file_id=requisition.file_id ) }}>{{ requisition.appointment.agenda.starttime }}</a><br />
 {% endfor %}
 {% endblock %}

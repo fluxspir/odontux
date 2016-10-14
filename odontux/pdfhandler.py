@@ -110,12 +110,12 @@ def generate_dental_office_informations(canvas, doc):
     responsable = 'RT - CD: Dr ' + doc.dental_info['dentist'].lastname + " " +\
                                     doc.dental_info['dentist'].firstname
     registration = doc.dental_info['dentist'].registration
-    street_address = doc.dental_info['dental_office'].addresses[-1].street\
-            + " " + doc.dental_info['dental_office'].addresses[-1].complement
-    city_address = doc.dental_info['dental_office'].addresses[-1].city\
+    street_address = doc.dental_info['dental_office'].address.street\
+            + " " + doc.dental_info['dental_office'].address.complement
+    city_address = doc.dental_info['dental_office'].address.city\
             + " - " +\
             format_zip_code(
-                    doc.dental_info['dental_office'].addresses[-1].zip_code)
+                    doc.dental_info['dental_office'].address.zip_code)
     if doc.dental_info['dentist'].mails:
         email = doc.dental_info['dentist'].mails[-1].email
     elif doc.dental_info['dental_office'].mails:
@@ -148,7 +148,7 @@ def generate_dental_office_informations(canvas, doc):
         if idx == 0:
             font = 'Times-Roman'
             fontsize = 11
-            city = doc.dental_info['dental_office'].addresses[-1].city
+            city = doc.dental_info['dental_office'].address.city
             day = date_to_readable(doc.dental_info['appointment'].agenda.\
                                                     endtime.date().isoformat())
             text = city + ", o " + day
@@ -267,7 +267,7 @@ def generate_patient_survey_info(canvas, doc):
         doc.last_height = doc.last_height + 5 *mm
 
     doc.last_height = HEIGHT_PAPER - B_MARG - 20 * mm
-    city = doc.patient_info['dental_office'].addresses[-1].city
+    city = doc.patient_info['dental_office'].address.city
     day = date_to_readable(doc.patient_info['appointment'].agenda.\
                                             endtime.date().isoformat())
     text = city + ", o " + day
@@ -766,7 +766,7 @@ def make_requisition_certificate(patient_id, appointment_id, requisition_form):
     Story.append(Spacer(1, 10 * mm))
     text = ( requisition_form.first_part.data + patient.firstname + " " +
             patient.lastname + " portador do CPF: " +
-            format_identity_2(patient.identity_number_2) +
+            format_identity_2(patient.identity_number_2) + " " +
             requisition_form.second_part.data )
     Story.append(Paragraph(text, styles['normal']))
     Story.append(Spacer(1, 20 * mm))
@@ -781,8 +781,6 @@ def make_requisition_certificate(patient_id, appointment_id, requisition_form):
     pdf_out = output.getvalue()
     output.close()
     return pdf_out
-
-
 
 def make_prescription(patient_id, appointment_id, prescription_form):
 

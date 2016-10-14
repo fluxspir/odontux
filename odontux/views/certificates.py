@@ -36,8 +36,8 @@ CERTIFICATE_SECOND_PART = u", portador(a) do CPF "
 CERTIFICATE_THIRD_PART = u" esteve sob meus cuidados profissionais no dia "
 CESSATION_FOURTH_PART = u" devendo permanecer em repouso por "
 
-REQUISITION_FIRST_PART = u"Favor realizar uma radiografia panorâmica no patiente "
-REQUISITION_SECOND_PART = u" en visto da elaboração dum plano de tratamento."
+REQUISITION_FIRST_PART = u"Favor realizar uma radiografia extra-bucal panorâmica no paciente "
+REQUISITION_SECOND_PART = u" em visto da elaboração de um plano de tratamento."
 
 class CertificateForm(Form):
     certificate_id = HiddenField(_('presence_id'))
@@ -92,14 +92,14 @@ def portal_certificate(patient_id, appointment_id):
                 .order_by(schedule.Agenda.starttime.desc())
                 .all()
     )
-    cessations = ( certifs.join(certificates.Cessation)
+    cessations = ( certifs
                 .filter(certificates.Certificate.certif_type ==\
                                                     constants.FILE_CESSATION)
                 .join(schedule.Appointment, schedule.Agenda)
                 .order_by(schedule.Agenda.starttime.desc())
                 .all()
     )
-    requisitions = ( certifs.join(certificates.Requisition)
+    requisitions = ( certifs
                 .filter(certificates.Certificate.certif_type ==\
                                                     constants.FILE_REQUISITION)
                 .join(schedule.Appointment, schedule.Agenda)
@@ -122,9 +122,48 @@ def add_requisition_certificate(patient_id, appointment_id):
     patient, appointment = checks.get_patient_appointment(patient_id,
                                                                 appointment_id)
     requisition_form = RequisitionForm(request.form)
+
     if ( request.method == 'POST' and requisition_form.validate()
         and 'save_print' in request.form ):
-        pass
+        pdf_out = make_requisition_certificate(patient_id, appointment_id,
+                                                        requisition_form)
+        response = make_response(pdf_out)
+        response.mimetype = 'application/pdf'
+        filename = md5.new(pdf_out).hexdigest()
+        with open(os.path.join(
+                        app.config['DOCUMENT_FOLDER'], filename), 'w') as f:
+            f.write(pdf_out)
+
+        file_values = {
+            'md5': filename,
+            'file_type': constants.FILE_REQUISITION,
+            'mimetype': 'application/pdf',
+        }
+        file_in_db = ( meta.session.query(documents.Files)
+            .filter(documents.Files.md5 == filename)
+            .one_or_none()
+        )
+        
+        if file_in_db:
+            return response
+
+        new_file = documents.Files(**file_values)
+        meta.session.add(new_file)
+        meta.session.commit()
+
+        certificate_values = {
+            'dentist_id': appointment.dentist_id,
+            'patient_id': patient_id,
+            'appointment_id': appointment_id,
+            'file_id': new_file.id,
+            'certif_type': constants.FILE_REQUISITION,
+        }
+        new_certificate = certificates.Certificate(**certificate_values)
+        meta.session.add(new_certificate)
+        meta.session.commit()
+
+        return response
+
     elif ( request.method == 'POST' and requisition_form.validate()
         and 'preview' in request.form ):
         pdf_out = make_requisition_certificate(patient_id, appointment_id,
