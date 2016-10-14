@@ -107,8 +107,8 @@ def generate_dental_office_informations(canvas, doc):
                         )
 
     dental_office_name = doc.dental_info['dental_office'].office_name
-    responsable = 'RT - CD: Dr ' + doc.dental_info['dentist'].lastname + " " +\
-                                    doc.dental_info['dentist'].firstname
+    responsable = 'RT - CD: Dr ' + doc.dental_info['dentist'].firstname + " " +\
+                                    doc.dental_info['dentist'].lastname
     registration = doc.dental_info['dentist'].registration
     street_address = doc.dental_info['dental_office'].address.street\
             + " " + doc.dental_info['dental_office'].address.complement
