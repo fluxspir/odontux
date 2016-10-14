@@ -34,8 +34,8 @@ class DentalOffice(Base):
     owner_firstname = Column(String, default="")
     active = Column(Boolean, default=True)
     url = Column(String, default="")
-    addresses = relationship("Address", secondary=dental_office_address_table,
-                           backref="dental_office")
+    address_id = Column(Integer, ForeignKey(contact.Address.id))
+    address = relationship("Address", backref="dental_office")
     phones = relationship("Phone", secondary=dental_office_phone_table,
                           backref="dental_office")
     mails = relationship("Mail", secondary=dental_office_mail_table,
