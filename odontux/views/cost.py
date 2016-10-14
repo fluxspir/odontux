@@ -307,7 +307,7 @@ def get_cost_informations(cg_cot_dict, cotation_id):
     
     return cost_informations
 
-@app.route('/portal/operation_cost/')
+@app.route('/portal/operation_cost/' methods=['GET', 'POST'])
 def portal_operation_cost():
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
@@ -315,3 +315,19 @@ def portal_operation_cost():
 
     return render_template('operation_cost.html')
 
+#@app.route('/update/annual_cost/', methods=['GET', 'POST'])
+#def update_annual_cost():
+#    authorized_roles = [ constants.ROLE_DENTIST ]
+#    if session['role'] not in authorized_roles:
+#        return abort(403)
+#
+#    return render_template('update_annual_cost.html')
+#
+#@app.route('/update/mensal_cost/', methods=['GET', 'POST'])
+#def update_mensal_cost():
+#    authorized_roles = [ constants.ROLE_DENTIST ]
+#    if session['role'] not in authorized_roles:
+#        return abort(403)
+#
+#    return render_template('update_anual_cost.html')
+#
