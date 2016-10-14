@@ -110,4 +110,5 @@ class HealthCarePlanUserReference(Base):
     healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id),
                                                         nullable=False)
     user_id = Column(Integer, ForeignKey(users.OdontuxUser.id), nullable=False)
+    healthcare_plan = relationship('HealthCarePlan')
     hour_fees = Column(Numeric, nullable=False)

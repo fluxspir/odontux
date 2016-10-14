@@ -36,8 +36,8 @@ def get_dental_unit_week_hours():
     dental_unit_open_time = datetime.timedelta(seconds=0)
     for du in dental_units:
         timesheet = ( meta.session.query(users.DentalUnitTimeSheet)
-                        .filter(users.DentalUnitTimeSheet.dental_unit_id == du.id)
-                        .all()
+                    .filter(users.DentalUnitTimeSheet.dental_unit_id == du.id)
+                    .all()
         )
         dummydate = datetime.date(2000, 1, 1)
         for period_open in timesheet:
@@ -48,6 +48,70 @@ def get_dental_unit_week_hours():
             dental_unit_open_time = dental_unit_open_time + open_time
 
     return dental_unit_open_time
+
+def get_dentist_hour_fees(healthcare_plan_id, user_id=0):
+    if not user_id:
+        user_id = session['user_id']
+    dentist_hour_fees = ( meta.session.query(act.HealthCarePlanUserReference)
+        .filter(act.HealthCarePlanUserReference.user_id == user_id,
+                act.HealthCarePlanUserReference.healthcare_plan_id ==
+                                                            healthcare_plan_id)
+        .one_or_none()
+    )
+    if dentist_hour_fees:
+        return dentist_hour_fees.hour_fees
+    else:
+        return 0
+
+def get_material_cost(clinic_gesture):
+    cg_mat_ref_list = []
+    for cg_mat_ref in clinic_gesture.materials:
+        cg_mat_ref_list.append(cg_mat_ref)
+        material = ( meta.session.query(assets.Material)
+            .filter(
+                assets.Material.asset_category_id == 
+                                        cg_mat_ref.material_category_id,
+                assets.Material.end_of_use.is_(None),
+                assets.Material.end_use_reason == 0
+            )
+        )
+        material_in_use = (
+            material.filter(assets.Material.start_of_use.isnot(None))
+            .first()
+        )
+        if material_in_use:
+            material_used = material_in_use
+        else:
+            material_used = (
+                material.order_by(assets.Material.expiration_date)
+                .first()
+            )
+
+        if not cg_mat_ref.mean_quantity:
+            cg_mat_ref.mean_quantity = material.automatic_decrease
+
+        material_used_cost = ( cg_mat_ref.mean_quantity / 
+                material_used.asset_category.initial_quantity ) *\
+                                            material_used.acquisition_price
+
+    return cg_mat_ref_list, material_used_cost
+
+def get_appointmently_data():
+    appointmently = ( 
+        meta.session.query(act.ClinicGesture)
+            .filter(act.ClinicGesture.is_appointmently == True)
+            .all()
+    )
+    total_material_cost = 0
+    total_duration_time = datetime.timedelta(seconds=0)
+    for clinic_gesture in appointmently:
+        total_duration_time = total_duration_time + clinic_gesture.duration
+        
+        cg_mat_ref_list, material_used_cost = get_material_cost(clinic_gesture)
+        total_material_cost = total_material_cost + material_used_cost
+
+    return total_duration_time, total_material_cost
+            
 
 def get_cotation_dictionary(cotation_id):
     cotation = ( meta.session.query(act.Cotation)
@@ -79,39 +143,14 @@ def get_cotation_dictionary(cotation_id):
             dictionnary[cg_cot_ref.appointment_number][1] +\
                                             cg_cot_ref.clinic_gesture.duration
 
-        for cg_mat_ref in cg_cot_ref.clinic_gesture.materials:
-            material = ( meta.session.query(assets.Material)
-                .filter(
-                    assets.Material.asset_category_id == 
-                                            cg_mat_ref.material_category_id,
-                    assets.Material.end_of_use.is_(None),
-                    assets.Material.end_use_reason == 0
-                )
-            )
-            material_in_use = (
-                material.filter(assets.Material.start_of_use.isnot(None))
-                .first()
-            )
-            if material_in_use:
-                material_used = material_in_use
-            else:
-                material_used = (
-                    material.order_by(assets.Material.expiration_date)
-                    .first()
-                )
+        cg_mat_ref_list, material_used_cost =\
+                                get_material_cost(cg_cot_ref.clinic_gesture)
 
-            if not cg_mat_ref.mean_quantity:
-                cg_mat_ref.mean_quantity = material.automatic_decrease
-
-            material_used_cost = ( cg_mat_ref.mean_quantity / 
-                    material_used.asset_category.initial_quantity ) *\
-                                                material_used.acquisition_price
-
-            dictionnary[cg_cot_ref.appointment_number][2].append( cg_mat_ref )
-            # cost of appointment in material
-            dictionnary[cg_cot_ref.appointment_number][3] =\
-                dictionnary[cg_cot_ref.appointment_number][3] +\
-                                                            material_used_cost
+        dictionnary[cg_cot_ref.appointment_number][2] = cg_mat_ref_list
+        # cost of appointment in material
+        dictionnary[cg_cot_ref.appointment_number][3] =\
+            dictionnary[cg_cot_ref.appointment_number][3] +\
+                                                        material_used_cost
     return dictionnary
                                         
 def get_cost_informations(cg_cot_dict, cotation_id):
@@ -127,22 +166,11 @@ def get_cost_informations(cg_cot_dict, cotation_id):
         # duration specific to gesture
         duration_gesture = duration_gesture + cg_cot_dict[appointment][1]
 
-    # test session['user_id'] int ou str
-    dentist_hour_fees = ( meta.session.query(act.HealthCarePlanUserReference)
-        .filter(act.HealthCarePlanUserReference.user_id == session['user_id'],
-                act.HealthCarePlanUserReference.healthcare_plan_id ==
-                                                cotation.healthcare_plan_id)
-        .one_or_none()
-    )
-    if dentist_hour_fees:
-        dentist_hour_fees = dentist_hour_cost.hour_fees
-    else:
-        dentist_hour_fees = 0
-
     cost_informations = {
         'duration_gesture': duration_gesture,
         'gesture_material_cost': total_material_cost,
-        'dentist_hour_fees': dentist_hour_fees,
+        'dentist_hour_fees': 
+                            get_dentist_hour_fees(cotation.healthcare_plan.id),
         'dental_unit_week_hours': get_dental_unit_week_hours(),
         'appointments_material_cost': 0,
         'appointments_duration': 0,
