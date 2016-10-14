@@ -637,8 +637,8 @@ def update_cotation(cotation_id):
     # cg_cot_dics = { appointment_number: [ [ (cg_cot_ref, form) ], duration,
     #                                       [ cg_mat_ref ], material_cost ],
     #               }
-    cg_cot_dict, = cost.get_cotation_dictionary(cotation_id)
-    cost_informations = cost.get_cost_informations(cg_cot_dict)
+    cg_cot_dict = cost.get_cotation_dictionary(cotation_id)
+    cost_informations = cost.get_cost_informations(cg_cot_dict, cotation_id)
    
     return render_template('update_cotation.html', cotation=cotation,
                             price_form=price_form,

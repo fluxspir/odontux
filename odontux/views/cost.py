@@ -28,6 +28,27 @@ class ClinicGestureCotationReferenceForm(Form):
                                                     render_kw={'size':'4'})
     submit = SubmitField(_('Update'))
 
+def get_dental_unit_week_hours():
+    dental_units = ( meta.session.query(users.DentalUnit).filter(
+                                        users.DentalUnit.active == True)
+                    .all()
+    )
+    dental_unit_open_time = datetime.timedelta(seconds=0)
+    for du in dental_units:
+        timesheet = ( meta.session.query(users.DentalUnitTimeSheet)
+                        .filter(users.DentalUnitTimeSheet.dental_unit_id == du.id)
+                        .all()
+        )
+        dummydate = datetime.date(2000, 1, 1)
+        for period_open in timesheet:
+            
+            open_time =\
+                datetime.datetime.combine(dummydate, period_open.end) -\
+                datetime.datetime.combine(dummydate, period_open.begin)
+            dental_unit_open_time = dental_unit_open_time + open_time
+
+    return dental_unit_open_time
+
 def get_cotation_dictionary(cotation_id):
     cotation = ( meta.session.query(act.Cotation)
                     .filter(act.Cotation.id == cotation_id)
@@ -91,16 +112,20 @@ def get_cotation_dictionary(cotation_id):
             dictionnary[cg_cot_ref.appointment_number][3] =\
                 dictionnary[cg_cot_ref.appointment_number][3] +\
                                                             material_used_cost
+    return dictionnary
                                         
-def get_cost_informations(cg_cot_dict):
+def get_cost_informations(cg_cot_dict, cotation_id):
 
+    cotation = ( meta.session.query(act.Cotation).filter(act.Cotation.id ==
+                                                            cotation_id).one()
+    )
     total_material_cost = 0
     duration_gesture = datetime.timedelta(seconds=0)
     for appointment in cg_cot_dict:
         # cost of materials specific to gesture
         total_material_cost = total_material_cost + cg_cot_dict[appointment][3]
         # duration specific to gesture
-        total_duration = total_duration + cg_cot_dict[appointment][1]
+        duration_gesture = duration_gesture + cg_cot_dict[appointment][1]
 
     # test session['user_id'] int ou str
     dentist_hour_fees = ( meta.session.query(act.HealthCarePlanUserReference)
@@ -109,7 +134,7 @@ def get_cost_informations(cg_cot_dict):
                                                 cotation.healthcare_plan_id)
         .one_or_none()
     )
-    if dentist_hour_cost:
+    if dentist_hour_fees:
         dentist_hour_fees = dentist_hour_cost.hour_fees
     else:
         dentist_hour_fees = 0
@@ -118,11 +143,12 @@ def get_cost_informations(cg_cot_dict):
         'duration_gesture': duration_gesture,
         'gesture_material_cost': total_material_cost,
         'dentist_hour_fees': dentist_hour_fees,
+        'dental_unit_week_hours': get_dental_unit_week_hours(),
         'appointments_material_cost': 0,
         'appointments_duration': 0,
     }
- 
-    return dictionnary, cost_informations
+    
+    return cost_informations
 
 @app.route('/portal/operation_cost/')
 def portal_operation_cost():
