@@ -274,7 +274,8 @@ def add_patient(meeting_id=0):
         #Add the new patient to gnucash !
         comptability = gnucash_handler.GnuCashCustomer(new_patient.id, 
                                                  new_patient.dentist_id)
-        
+        customer = comptability.add_customer()        
+
         return redirect(url_for('add_patient_appointment', 
                                             body_id=new_patient.id,
                                             meeting_id=meeting_id))
