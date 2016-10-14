@@ -13,7 +13,7 @@ Return to gesture <a href="{{ url_for('view_gesture',
       {{ render_simple_field_line(cg_form.duration) }}<br />
       {{ render_simple_field_line(cg_form.is_daily) }}
       {{ render_simple_field_line(cg_form.is_appointmently) }}
-      {{ render_simple_field_line(cg_form.submit) }}
+      {{ render_sfl_wol(cg_form.submit) }}
 </form>
 <br />
 <br />
@@ -29,7 +29,7 @@ Materials used in <strong>{{ clinic_gesture.name }}</strong>:<br />
       {{ material_cg_ref.material_category.brand }} {{ material_cg_ref.material_category.commercial_name }}
       {{ render_sfl_wol(quantity_forms[material_cg_ref.material_category_id].mean_quantity) }} 
       {{ constants.UNITIES[material_cg_ref.material_category.unity][1] }}
-      {{ render_simple_field_line(quantity_forms[material_cg_ref.material_category_id].submit) }}
+      {{ render_sfl_wol(quantity_forms[material_cg_ref.material_category_id].submit) }}
       </form>
       <br />
 {% endfor %}

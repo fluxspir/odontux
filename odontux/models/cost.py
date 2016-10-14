@@ -25,8 +25,7 @@ class OperationCost(Base):
     active = Column(Boolean, default=True)
 
     def hourly(self):
-        return cost / periodicity.totals_seconds * 3600
-
+        return cost / periodicity.totals_seconds() * 3600
 
 #class ClinicGesturePeriodicyReference(Base):
 #    __tablename__ = 'clinic_gesture_periodicity_reference'

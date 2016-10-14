@@ -138,7 +138,7 @@ def update_healthcare_plan(healthcare_plan_id):
 
     if request.method == 'POST' and healthcare_plan_form.validate():
         if hcp_user_ref:
-            hcp_user_ref.fees = healthcare_plan_form.fees.data
+            hcp_user_ref.hour_fees = healthcare_plan_form.fees.data
         else:
             values = {
                 'hour_fees': healthcare_plan_form.fees.data,

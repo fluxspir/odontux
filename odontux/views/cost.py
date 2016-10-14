@@ -17,7 +17,7 @@ import datetime
 
 from odontux import constants, checks
 from odontux.odonweb import app
-from odontux.models import meta, users, act, assets
+from odontux.models import meta, users, act, assets, cost
 #from odontux.views.forms import TimeField
 from odontux.views.log import index
 
@@ -96,6 +96,20 @@ def get_material_cost(clinic_gesture):
 
     return cg_mat_ref_list, material_used_cost
 
+def get_daily_data():
+    daily = (
+        meta.session.query(act.ClinicGesture)
+            .filter(act.ClinicGesture.is_daily == True)
+            .all()
+    )
+    material_cost = 0
+    duration = datetime.timedelta(seconds=0)
+    for clinic_gesture in daily:
+        duration = duration + clinic_gesture.duration
+        material_cost = material_cost + get_material_cost(clinic_gesture)[1]
+
+    return duration, material_cost
+
 def get_appointmently_data():
     appointmently = ( 
         meta.session.query(act.ClinicGesture)
@@ -111,7 +125,22 @@ def get_appointmently_data():
         total_material_cost = total_material_cost + material_used_cost
 
     return total_duration_time, total_material_cost
-            
+    
+def get_hourly_operational_cost():
+    operations_cost = ( meta.session.query(cost.OperationCost)
+        .filter(cost.OperationCost.active == True)
+        .all()
+    )
+    hour_cost = 0
+    for operation in operations_cost:
+        if operation.periodicity == datetime.timedelta(days=365):
+            h_cost = ( operation.cost / 52 ) / get_dental_unit_week_hours()
+        elif operation.periodicity == datetime.timedelta(days=30):
+            h_cost = ( operation.cost / 4.5 ) / get_dental_unit_week_hours()
+
+        hour_cost = hour_cost + h_cost
+
+    return hour_cost
 
 def get_cotation_dictionary(cotation_id):
     cotation = ( meta.session.query(act.Cotation)
@@ -152,28 +181,128 @@ def get_cotation_dictionary(cotation_id):
             dictionnary[cg_cot_ref.appointment_number][3] +\
                                                         material_used_cost
     return dictionnary
-                                        
+
+def get_day_base_cost(day_base_duration, day_base_material, 
+                                hourly_operational_cost, dentist_hour_fees):
+    duration_day_base_cost = float(day_base_duration.total_seconds()) *\
+                                                hourly_operational_cost / 3600
+    day_base_cost = duration_day_base_cost + day_base_material
+
+    return duration_day_base_cost, day_base_cost
+
+def get_appointment_base_cost(appointment_base_duration, 
+                                            appointment_base_material_cost,
+                                            hourly_operational_cost,
+                                            dentist_hour_fees):
+
+    duration_appointment_base_cost =\
+                        float(appointment_base_duration.total_seconds()) *\
+                    float( hourly_operational_cost + dentist_hour_fees ) / 3600
+
+    appointment_base_cost = duration_appointment_base_cost +\
+                                                appointment_base_material_cost
+
+    return duration_appointment_base_cost, appointment_base_cost
+
+def get_gestures_cost(gestures_duration, gestures_material_cost, 
+                                hourly_operational_cost, dentist_hour_fees):
+    duration_gestures_cost = (
+                float(gestures_duration.total_seconds()) *
+            float(hourly_operational_cost + dentist_hour_fees ) / 3600
+    )
+    gestures_cost = duration_gestures_cost + float(gestures_material_cost)
+
+    return duration_gestures_cost, gestures_cost
+
 def get_cost_informations(cg_cot_dict, cotation_id):
+
+    gestures_material_cost = 0
+    gestures_duration = datetime.timedelta(seconds=0)
 
     cotation = ( meta.session.query(act.Cotation).filter(act.Cotation.id ==
                                                             cotation_id).one()
     )
-    total_material_cost = 0
-    duration_gesture = datetime.timedelta(seconds=0)
+    
+    appointment_base_material_cost, appointment_base_duration =\
+                                                    get_appointmently_data()
+
     for appointment in cg_cot_dict:
         # cost of materials specific to gesture
-        total_material_cost = total_material_cost + cg_cot_dict[appointment][3]
+        gestures_material_cost = gestures_material_cost +\
+                                                cg_cot_dict[appointment][3]
         # duration specific to gesture
-        duration_gesture = duration_gesture + cg_cot_dict[appointment][1]
+        gestures_duration = gestures_duration + cg_cot_dict[appointment][1]
+
+    day_base_duration, day_base_material_cost = get_daily_data()
+
+    appointment_base_duration, appointment_base_material_cost =\
+                                                    get_appointmently_data()
+
+    duration_total = appointment_base_duration * len(cg_cot_dict) +\
+                                                            gestures_duration
+    dentist_hour_fees = get_dentist_hour_fees(cotation.healthcare_plan.id)
+    hourly_operational_cost = get_hourly_operational_cost()
+
+    duration_day_base_cost, day_base_cost =\
+                                        get_day_base_cost(day_base_duration,
+                                                    day_base_material_cost,
+                                                    hourly_operational_cost,
+                                                    dentist_hour_fees)
+
+    duration_appointment_base_cost, appointment_base_cost =\
+                        get_appointment_base_cost(appointment_base_duration,
+                                            appointment_base_material_cost,
+                                            hourly_operational_cost,
+                                            dentist_hour_fees)
+
+    duration_gestures_cost, gestures_cost =\
+                        get_gestures_cost(gestures_duration,
+                                            gestures_material_cost,
+                                            hourly_operational_cost,
+                                            dentist_hour_fees)
+    total_duration = (
+        day_base_duration * len(cg_cot_dict) +
+        appointment_base_duration * len(cg_cot_dict) +
+        gestures_duration
+    )
+    total_duration_cost = (
+        total_duration.total_seconds() * 
+                ( hourly_operational_cost + float(dentist_hour_fees) ) / 3600
+    )
+    total_material_cost = (
+        day_base_material_cost * len(cg_cot_dict) +
+        appointment_base_material_cost * len(cg_cot_dict) +
+        gestures_material_cost
+    )
+    total_cost = (
+        day_base_cost * len(cg_cot_dict) +
+        appointment_base_cost * len(cg_cot_dict) +
+        gestures_cost
+    )
 
     cost_informations = {
-        'duration_gesture': duration_gesture,
-        'gesture_material_cost': total_material_cost,
-        'dentist_hour_fees': 
-                            get_dentist_hour_fees(cotation.healthcare_plan.id),
-        'dental_unit_week_hours': get_dental_unit_week_hours(),
-        'appointments_material_cost': 0,
-        'appointments_duration': 0,
+        'day_base_duration': day_base_duration * len(cg_cot_dict),
+        'duration_day_base_cost': duration_day_base_cost * len(cg_cot_dict),
+        'appointment_base_duration': appointment_base_duration *\
+                                                            len(cg_cot_dict),
+        'duration_appointment_base_cost': duration_appointment_base_cost *\
+                                                            len(cg_cot_dict),
+        'gestures_duration': gestures_duration,
+        'duration_gestures_cost': duration_gestures_cost,
+        'day_base_material_cost': day_base_material_cost * len(cg_cot_dict),
+        'day_base_cost': day_base_cost * len(cg_cot_dict),
+        'appointment_base_material_cost': appointment_base_material_cost *\
+                                                            len(cg_cot_dict),
+        'appointment_base_cost': appointment_base_cost * len(cg_cot_dict),
+        'gestures_material_cost': gestures_material_cost,
+        'gestures_cost': gestures_cost,
+        'dentist_hour_fees': dentist_hour_fees,
+        'hourly_operational_cost': hourly_operational_cost,
+        'dental_unit_week_hours': get_dental_unit_week_hours,
+        'total_duration': total_duration,
+        'total_duration_cost': total_duration_cost,
+        'total_material_cost': total_material_cost,
+        'total_cost': total_cost
     }
     
     return cost_informations

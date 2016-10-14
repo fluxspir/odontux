@@ -52,6 +52,8 @@ from statements import ( Invoice, Quote, Bill, QuoteGestureReference,
                             BillAppointmentGestureReference )
 from certificates import Certificate
 
+from cost import OperationCost
+
 if constants.LOCALE == 'br':
     from statements import NotaFiscalBr
 

@@ -45,7 +45,8 @@ class ClinicGestureForm(Form):
     submit = SubmitField(_('Update'))
 
 class MaterialCategoryClinicGestureForm(Form):
-    mean_quantity = DecimalField(_('Quantity used'), [validators.Required()])
+    mean_quantity = DecimalField(_('Quantity used'), [validators.Required()],
+                                                render_kw={'size': '8'})
     submit = SubmitField('Update')
 
 class ClinicGestureCotationReferenceForm(Form):
@@ -354,7 +355,9 @@ def add_clinic_gesture(cotation_id):
             args = {
                 'name': form.name.data,
                 'description': form.description.data,
-                'duration': datetime.timedelta(seconds=form.duration.data * 60)
+                'duration': datetime.timedelta(seconds=form.duration.data*60),
+                'is_daily': False,
+                'is_appointmently': False,
             }
             new_clinic_gesture = act.ClinicGesture(**args)
             meta.session.add(new_clinic_gesture)

@@ -5,6 +5,54 @@
 {% from "_formhelpers.html" import render_simple_field_line, render_sfl_wol %}
 <a href="{{ url_for('view_gesture', gesture_id=cotation.gesture.id) }}">Return to gesture {{ cotation.gesture.name }}</a>
 <h2>Update cotation {{ cotation.gesture.name }} {{ cotation.healthcare_plan.name }}</h2>
+<table>
+  <tr>
+    <th>Once a day</th>
+    <th>Once by appointment</th>
+    <th>Duration of gestures</th>
+    <th>Total duration</th>
+    <th></th>
+    <th>Day material</th>
+    <th>App. material</th>
+    <th>Gestures material</th>
+    <th>Total material</th>
+    <th></th>
+    <th>Operational cost</th>
+    <th>Dentist fees</th>
+  </tr>
+  <tr>
+    <td>{{ cost_informations['day_base_duration'] }}</td>
+    <td>{{ cost_informations['appointment_base_duration'] }}</td>
+    <td>{{ cost_informations['gestures_duration'] }}</td>
+    <td><strong>{{ cost_informations['total_duration'] }}<strong></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>{{ cost_informations['hourly_operational_cost'] }}</td>
+    <td>{{ cost_informations['dentist_hour_fees'] }}</td>
+  </tr>
+  <tr>
+    <td>{{ cost_informations['duration_day_base_cost'] }}</td>
+    <td>{{ cost_informations['duration_appointment_base_cost'] }}</td>
+    <td>{{ cost_informations['duration_gestures_cost'] }}</td>
+    <td></td>
+    <td></td>
+    <td>{{ cost_informations['day_base_material_cost'] }}</td>
+    <td>{{ cost_informations['appointment_base_material_cost'] }}</td>
+    <td>{{ cost_informations['gestures_material_cost'] }}</td>
+    <td>{{ cost_informations['total_material_cost'] }}</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+<br />
+Time Cost : {{ cost_informations['total_duration_cost'] }}, 
+Material Cost: {{cost_informations['total_material_cost'] }},
+Total Cost: {{ cost_informations['total_cost'] }}<br />
 <form method="post" 
   action="{{ url_for('update_cotation', cotation_id=cotation.id) }}">
     {{ render_sfl_wol(price_form.price) }}
