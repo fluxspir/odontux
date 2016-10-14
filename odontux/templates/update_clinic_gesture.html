@@ -10,8 +10,10 @@ Return to gesture <a href="{{ url_for('view_gesture',
                                                                         cotation_id=cotation.id) }}">
       {{ render_simple_field_line(cg_form.name) }}
       {{ render_simple_field_line(cg_form.description) }}
-      {{ render_simple_field_line(cg_form.duration) }}
-  <input type="submit" value="Update">
+      {{ render_simple_field_line(cg_form.duration) }}<br />
+      {{ render_simple_field_line(cg_form.is_daily) }}
+      {{ render_simple_field_line(cg_form.is_appointmently) }}
+      {{ render_simple_field_line(cg_form.submit) }}
 </form>
 <br />
 <br />

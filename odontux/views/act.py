@@ -38,8 +38,12 @@ class SpecialtyForm(Form):
 class ClinicGestureForm(Form):
     name = TextField(_('Name'), [validators.Required()])
     description = TextAreaField(_('Description'))
-    duration = IntegerField(_('Duration in minutes'), 
+    duration = IntegerField(_('Duration in minutes'),
                                                 [validators.Optional()] )
+    is_daily = BooleanField(_('Happens once a day'))
+    is_appointmently = BooleanField(_('Happens once an appointment'))
+    submit = SubmitField(_('Update'))
+
 class MaterialCategoryClinicGestureForm(Form):
     mean_quantity = DecimalField(_('Quantity used'), [validators.Required()])
     submit = SubmitField('Update')
@@ -402,7 +406,8 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
         )
         # won't try to update with name already in db to avoid IntegrityError
         if not other_cg_same_new_name:
-            for f in ('name', 'description', 'duration'):
+            for f in ( 'name', 'description', 'duration', 'is_daily', 
+                                                        'is_appointmently' ):
                 if f == 'duration':
                     setattr(clinic_gesture, f, 
                         datetime.timedelta(seconds=getattr(cg_form, f).data * 60))
@@ -421,7 +426,8 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
         mat_form.mean_quantity.data = material.mean_quantity
         quantity_forms[material.material_category_id] = mat_form
 
-    for f in ('name', 'description', 'duration'):
+    for f in ('name', 'description', 'duration', 'is_daily', 
+                                                    'is_appointmently' ):
         if f == 'duration':
             getattr(cg_form, f).data =\
                                 getattr(clinic_gesture, f).seconds % 3600 / 60
