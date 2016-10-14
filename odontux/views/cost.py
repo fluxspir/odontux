@@ -28,16 +28,6 @@ class ClinicGestureCotationReferenceForm(Form):
                                                     render_kw={'size':'4'})
     submit = SubmitField(_('Update'))
 
-
-#def get_material_cost(materials_used):
-#    """ materials_used = [ ( material, quantity ), ] """
-#    total_material = 0
-#    for material, quantity in materials_used:
-#        total_material = total_material +\
-#        ( quantity / material.initial_quantity ) * material.acquisition_price
-#    return total_material
-#
-
 def get_cotation_dictionary(cotation_id):
     cotation = ( meta.session.query(act.Cotation)
                     .filter(act.Cotation.id == cotation_id)
@@ -138,7 +128,7 @@ def get_cost_informations(cg_cot_dict):
 def portal_operation_cost():
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
-        return abort 403
+        return abort(403)
 
     return render_template('operation_cost.html')
 
