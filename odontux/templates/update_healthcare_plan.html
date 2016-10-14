@@ -8,7 +8,8 @@ Update the healthcare plan
                                     healthcare_plan_id=healthcare_plan.id) }}">
   <dl>
     {{ render_field(healthcare_plan_form.name) }}
+    {{ render_field(healthcare_plan_form.fees) }}
+    {{ render_field(healthcare_plan_form.submit) }}
   </dl>
-  <p><input type="submit" value="Update"></p>
 </form>
 {% endblock %}

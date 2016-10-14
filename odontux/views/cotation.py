@@ -6,10 +6,10 @@
 #
 
 import pdb
-from flask import session, render_template, request, redirect, url_for
+from flask import session, render_template, request, redirect, url_for, abort
 from gettext import gettext as _
 from wtforms import ( Form, TextField, HiddenField, SelectField, IntegerField,
-                    DecimalField, BooleanField, validators )
+                    DecimalField, BooleanField, SubmitField, validators )
 import sqlalchemy
 from sqlalchemy import or_, and_
 
@@ -20,6 +20,8 @@ from odontux.models import meta, act, compta
 class HealthCarePlanForm(Form):
     healthcare_plan_id = HiddenField(_('id'))
     name = TextField(_('Name of new Healthcare Plan'), [validators.Required()])
+    fees = DecimalField(_("Dentist hour's fees"))
+    submit = SubmitField(_('Update'))
 
 class CotationForm(Form):
     cotation_id = HiddenField(_('ID'))
@@ -113,10 +115,9 @@ def list_healthcare_plan():
 @app.route('/update/healthcare_plan?id=<int:healthcare_plan_id>', 
                                                     methods=['GET', 'POST'])
 def update_healthcare_plan(healthcare_plan_id):
-    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
-                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
+    authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
-        return redirect(url_for('index'))
+        return abort(403)
 
     healthcare_plan = ( meta.session.query(act.HealthCarePlan)
                         .filter(act.HealthCarePlan.id == healthcare_plan_id)
@@ -124,14 +125,37 @@ def update_healthcare_plan(healthcare_plan_id):
                 )
 
     healthcare_plan_form = HealthCarePlanForm(request.form)
+    hcp_user_ref = ( 
+        meta.session.query(act.HealthCarePlanUserReference)
+            .filter(
+                act.HealthCarePlanUserReference.healthcare_plan_id ==
+                                                        healthcare_plan_id,
+                act.HealthCarePlanUserReference.user_id == 
+                                                        session['user_id']
+            )
+            .one_or_none()
+    )
 
     if request.method == 'POST' and healthcare_plan_form.validate():
+        if hcp_user_ref:
+            hcp_user_ref.fees = healthcare_plan_form.fees.data
+        else:
+            values = {
+                'hour_fees': healthcare_plan_form.fees.data,
+                'user_id': session['user_id'],
+                'healthcare_plan_id': healthcare_plan_id
+            }
+            new_hcp_user_fee = act.HealthCarePlanUserReference(**values)
+            meta.session.add(new_hcp_user_fee)
+
         healthcare_plan.name = healthcare_plan_form.name.data
         meta.session.commit()
         return redirect(url_for('view_healthcare_plan', 
                                     healthcare_plan_id=healthcare_plan_id))
 
     healthcare_plan_form.name.data = healthcare_plan.name
+    if hcp_user_ref:
+        healthcare_plan_form.fees.data = hcp_user_ref.hour_fees
 
     return render_template('update_healthcare_plan.html',
                                 healthcare_plan_form=healthcare_plan_form,
