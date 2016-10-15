@@ -309,3 +309,4 @@ class MaterialCategoryClinicGestureReference(Base):
                                                                 nullable=False)
     material_category = relationship('MaterialCategory')
     mean_quantity = Column(Numeric, default=None)
+    enter_in_various_gestures = Column(Numeric, default=1, nullable=False)

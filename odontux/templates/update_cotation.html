@@ -88,6 +88,7 @@ Total Cost: {{ cost_informations['total_cost'] }}<br />
           {{ cg_cot_ref[0].clinic_gesture.name }}</a></td>
       <td>{{ render_sfl_wol(cg_cot_ref[1].appointment_number) }}</td>
       <td>{{ render_sfl_wol(cg_cot_ref[1].appointment_sequence) }}</td>
+      <td>{{ render_sfl_wol(cg_cot_ref[1].official_cotation) }}</td>
       <td>{{ render_sfl_wol(cg_cot_ref[1].submit) }}</td>
       <td><a href="{{ url_for('remove_clinic_gesture_from_cotation',
                                       cg_cot_ref_id=cg_cot_ref[0].id) }}">
