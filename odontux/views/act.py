@@ -47,11 +47,14 @@ class ClinicGestureForm(Form):
 class MaterialCategoryClinicGestureForm(Form):
     mean_quantity = DecimalField(_('Quantity used'), [validators.Required()],
                                                 render_kw={'size': '8'})
+    enter_in_various_gestures = DecimalField(_('Various gestures'), 
+                                                    render_kw={'size':'4'})
     submit = SubmitField('Update')
 
 class ClinicGestureCotationReferenceForm(Form):
     appointment_number = IntegerField(_('Appointment_number'))
     appointment_sequence = IntegerField(_('Appointment_sequence'))
+    official_cotation = BooleanField(_('official'))
     submit = SubmitField(_('Update'))
 
 class GestureForm(Form):
@@ -424,10 +427,14 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
 
     # create update_form for each quantity
     quantity_forms = {}
-    for material in clinic_gesture.materials:
+    for cg_mat_ref in clinic_gesture.materials:
+        material_cost = cost.get_material_cost(cg_mat_ref.id)
         mat_form = MaterialCategoryClinicGestureForm(request.form)
-        mat_form.mean_quantity.data = material.mean_quantity
-        quantity_forms[material.material_category_id] = mat_form
+        mat_form.mean_quantity.data = cg_mat_ref.mean_quantity
+        mat_form.enter_in_various_gestures.data =\
+                                        cg_mat_ref.enter_in_various_gestures
+        quantity_forms[cg_mat_ref.material_category_id] =\
+                                                    ( mat_form, material_cost)
 
     for f in ('name', 'description', 'duration', 'is_daily', 
                                                     'is_appointmently' ):
@@ -458,6 +465,8 @@ def update_mean_quantity_mat_in_gest(mat_gest_id, cotation_id):
     form = MaterialCategoryClinicGestureForm(request.form)
     if form.validate():
         mat_gest_ref.mean_quantity = form.mean_quantity.data
+        mat_gest_ref.enter_in_various_gestures =\
+                                form.enter_in_various_gestures.data
         meta.session.commit()
     return redirect(url_for('update_clinic_gesture', 
                             clinic_gesture_id=mat_gest_ref.clinic_gesture_id,
@@ -702,6 +711,16 @@ def update_clinic_gesture_cotation_reference(cg_cot_ref_id):
     )
     ref_form = ClinicGestureCotationReferenceForm(request.form)
     if ref_form.validate():
+        # only one clinic gesture of cotation bears the official global gesture
+        if ref_form.official_cotation.data:
+            other_cg = ( meta.session.query(act.ClinicGestureCotationReference)
+                .filter(act.ClinicGestureCotationReference.cotation_id == 
+                                                            ref.cotation_id)
+                .all()
+            )
+            for cg in other_cg:
+                cg.official_cotation = False
+        ref.official_cotation = ref_form.official_cotation.data
         ref.appointment_number = ref_form.appointment_number.data
         ref.appointment_sequence = ref_form.appointment_sequence.data
         meta.session.commit()

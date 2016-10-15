@@ -24,7 +24,7 @@ from wtforms import (Form, IntegerField, TextField, PasswordField,
 from odontux import constants, checks
 from odontux.models import meta, users, contact
 from odontux.odonweb import app
-from odontux.views import forms
+from odontux.views import forms, cost
 from odontux.views.log import index
 
 class OdontuxUserGeneralInfoForm(Form):
@@ -288,12 +288,16 @@ def update_user(body_id, form_to_display):
     # For updating info of user, we're dealing with the form 
     gen_info_form = OdontuxUserGeneralInfoForm(request.form)
     gen_info_form.title.choices = forms.get_title_choice_list()
-
+    hours_a_week = 0
     if session['role'] == constants.ROLE_ADMIN:
         gen_info_admin_form = OdontuxUserGeneralInfoAdminForm(request.form)
         gen_info_admin_form.role.choices = constants.ROLES.items()
+        hours_a_week = ( 
+            cost.get_dental_unit_week_hours().total_seconds() / 3600
+        )
     else:
         gen_info_admin_form = ""
+        # hours por semana
 
     if user.role == constants.ROLE_DENTIST: 
         dentist_specific_form = DentistSpecificForm(request.form)
@@ -322,7 +326,7 @@ def update_user(body_id, form_to_display):
                             getattr(dentist_specific_admin_form, f).data)
         meta.session.commit()
         return redirect(url_for('update_user', 
-                                 body_id=body_id, 
+                                 body_id=body_id,
                                  form_to_display="gen_info"))
 
     # When loading the whole update page, we use the form containing all fields
@@ -345,7 +349,7 @@ def update_user(body_id, form_to_display):
 
     timesheet_form = generate_timesheet_form(user.role)
     # populate timesheet_form
-    for weekday in range(1,8):
+    for weekday in range(1, 8):
         for period in constants.PERIODS.keys():
             TS = (
                 meta.session.query(users.TimeSheet)
@@ -379,6 +383,7 @@ def update_user(body_id, form_to_display):
                             timesheet_form=timesheet_form,
                             calendar=calendar,
                             constants=constants,
+                            hours_a_week=hours_a_week,
                        dentist_specific_admin_form=dentist_specific_admin_form)
 
 @app.route('/update/timesheet_1?body_id=<int:body_id>', methods=['POST'])

@@ -236,7 +236,8 @@ def payments_type():
 @app.route('/portal_comptability')
 def portal_comptability():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
-                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY,
+                        constants.ROLE_ADMIN ]
     if session['role'] not in authorized_roles:
         return abort(403)
 

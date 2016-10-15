@@ -15,8 +15,8 @@ from sqlalchemy.ext.associationproxy import association_proxy
 
 import datetime
 
-class OperationCost(Base):
-    __tablename__ = 'operation_cost'
+class OperationalCost(Base):
+    __tablename__ = 'operational_cost'
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     description = Column(String)
