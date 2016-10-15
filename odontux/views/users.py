@@ -517,6 +517,11 @@ def update_timesheet_1(body_id):
     return redirect(url_for('update_user', body_id=body_id,
                                         form_to_display="time_sheet"))
 
+#@app.route('/clone/timesheet?ouid=<int:old_user_id>'
+#            '&fid=<int:follower_id>', methods=['POST'])
+#def clone_timesheet(uid, new_timesheet_id=0)
+#    pass
+#
 ####
 #### update_timesheet was replaced by update_timesheet_1 ; 
 #### je n'ai pas cherché où étaient les diff... à voir peut-être
