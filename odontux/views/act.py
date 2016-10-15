@@ -434,8 +434,9 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
         mat_form.mean_quantity.data = cg_mat_ref.mean_quantity
         mat_form.enter_in_various_gestures.data =\
                                         cg_mat_ref.enter_in_various_gestures
-        quantity_forms[cg_mat_ref.material_category_id] =\
-                                                    ( mat_form, material_cost)
+        quantity_forms[cg_mat_ref.material_category_id] = ( 
+                                    mat_form, "{0:.2f}".format(material_cost)
+        )
 
     for f in ('name', 'description', 'duration', 'is_daily', 
                                                     'is_appointmently' ):
