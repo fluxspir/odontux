@@ -55,6 +55,7 @@ class ClinicGestureCotationReferenceForm(Form):
     appointment_number = IntegerField(_('Appointment_number'))
     appointment_sequence = IntegerField(_('Appointment_sequence'))
     official_cotation = BooleanField(_('official'))
+    appears_on_appointment_resume = BooleanField(_('App resume'))
     submit = SubmitField(_('Update'))
 
 class GestureForm(Form):
@@ -720,6 +721,8 @@ def update_clinic_gesture_cotation_reference(cg_cot_ref_id):
             )
             for cg in other_cg:
                 cg.official_cotation = False
+        ref.appears_on_appointment_resume =\
+                                    ref_form.appears_on_appointment_resume.data
         ref.official_cotation = ref_form.official_cotation.data
         ref.appointment_number = ref_form.appointment_number.data
         ref.appointment_sequence = ref_form.appointment_sequence.data

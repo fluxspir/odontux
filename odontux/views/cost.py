@@ -29,6 +29,7 @@ class ClinicGestureCotationReferenceForm(Form):
     appointment_sequence = IntegerField(_('Appointment_sequence'),
                                                     render_kw={'size':'4'})
     official_cotation = BooleanField(_('official'))
+    appears_on_appointment_resume = BooleanField(_('App resume'))
     submit = SubmitField(_('Update'))
 
 class OperationalCostForm(Form):
@@ -214,6 +215,8 @@ def get_cotation_dictionary(cotation_id):
 
         ref_form = ClinicGestureCotationReferenceForm(request.form)
         ref_form.official_cotation.data = cg_cot_ref.official_cotation
+        ref_form.appears_on_appointment_resume.data =\
+                                    cg_cot_ref.appears_on_appointment_resume
         ref_form.appointment_number.data = cg_cot_ref.appointment_number
         ref_form.appointment_sequence.data = cg_cot_ref.appointment_sequence
 

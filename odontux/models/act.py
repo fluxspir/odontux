@@ -84,6 +84,7 @@ class ClinicGestureCotationReference(Base):
                                                             nullable=False)
     cotation_id = Column(Integer, ForeignKey(Cotation.id), nullable=False)
     official_cotation = Column(Boolean, default=False)
+    appears_on_appointment_resume = Column(Boolean, default=False)
     clinic_gesture = relationship('ClinicGesture') 
     appointment_number = Column(Integer, default=0)
     appointment_sequence = Column(Integer, default=0)
