@@ -172,16 +172,15 @@ def get_hourly_operational_cost():
     hour_cost = 0
     for operation in operations_cost:
         if operation.periodicity == datetime.timedelta(days=365):
-            h_cost = ( float(operation.cost) / 
-                ( get_dental_unit_week_hours().total_seconds() * 52 )
+            h_cost = ( float(operation.cost) / (
+                ( get_dental_unit_week_hours().total_seconds() / 3600 ) * 52 )
             )
         elif operation.periodicity == datetime.timedelta(days=30):
-            h_cost = ( float(operation.cost) /  
-                ( get_dental_unit_week_hours().total_seconds() * 4.5 )
+            h_cost = ( float(operation.cost) /  (
+                ( get_dental_unit_week_hours().total_seconds() / 3600 ) * 4.5 )
             )
 
         hour_cost = hour_cost + h_cost
-
     return hour_cost
 
 def get_cotation_dictionary(cotation_id):
