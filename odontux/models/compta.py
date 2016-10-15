@@ -6,7 +6,6 @@
 #
 
 from meta import Base
-#from tables import payment_gesture_table
 import act, administration, documents
 
 from sqlalchemy import (Table, Column, Integer, String, Boolean, Numeric, Date)
@@ -57,7 +56,3 @@ class Payment(Base):
     mean = relationship('PaymentType', backref='payments')
     receipt = relationship('documents.Files', backref='payment')
     patient = relationship('administration.Patient', backref='payments')
-#    gestures = relationship("AppointmentGestureReference",
-#                          secondary=payment_gesture_table,
-#                          backref="payments")
-#

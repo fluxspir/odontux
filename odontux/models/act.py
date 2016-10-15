@@ -89,22 +89,40 @@ class ClinicGestureCotationReference(Base):
     appointment_number = Column(Integer, default=0)
     appointment_sequence = Column(Integer, default=0)
 
-class AppointmentGestureReference(Base):
+class AppointmentCotationReference(Base):
     """ 
         anatomic_location_id = constants.ANATOMIC_LOCATION
     """
-    __tablename__ = 'appointment_gesture_reference'
+    __tablename__ = 'appointment_cotation_reference'
     id = Column(Integer, primary_key=True)
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                            nullable=False)
-    gesture_id = Column(Integer, ForeignKey(Gesture.id), nullable=False)
+                                                                nullable=False)
+    cotation_id = Column(Integer, ForeignKey(Cotation.id))#, nullable=False)
     anatomic_location = Column(Integer, nullable=False)
-    healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id))
     price = Column(Numeric, nullable=False)
     invoice_id = Column(String, default="")
     is_paid = Column(Boolean, default=False)
-    gesture = relationship('Gesture')
+    cotation = relationship('Cotation')
+    gesture = association_proxy('cotation', 'gesture')
+    gesture_id = association_proxy('cotation', 'gesture_id')
+    healthcare_plan_id = association_proxy('cotation', 'healthcare_plan_id')
 
+#class AppointmentGestureReference(Base):
+#    """ 
+#        anatomic_location_id = constants.ANATOMIC_LOCATION
+#    """
+#    __tablename__ = 'appointment_gesture_reference'
+#    id = Column(Integer, primary_key=True)
+#    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+#                            nullable=False)
+#    gesture_id = Column(Integer, ForeignKey(Gesture.id), nullable=False)
+#    healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id))
+#    anatomic_location = Column(Integer, nullable=False)
+#    price = Column(Numeric, nullable=False)
+#    invoice_id = Column(String, default="")
+#    is_paid = Column(Boolean, default=False)
+#    gesture = relationship('Gesture')
+#
 class HealthCarePlanUserReference(Base):
     """ """
     __tablename__ = 'healthcare_plan_user_reference'

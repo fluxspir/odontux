@@ -38,8 +38,8 @@ from endobuccal import (MouthEvent, SuperiorLipEvent, InferiorLipEvent,
 from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootCanalEvent,
                     Gum, PeriodontalEvent )
 from act import ( Specialty, HealthCarePlan, Gesture, ClinicGesture, Cotation,
-                ClinicGestureCotationReference, AppointmentGestureReference,
-                HealthCarePlanUserReference)
+                ClinicGestureCotationReference, AppointmentCotationReference,
+                HealthCarePlanUserReference, AppointmentGestureReference)
 from compta import PaymentType, Payment
 from assets import (AssetProvider, AssetCategory, MaterialCategory,
                     Asset, Device, Material, AssetKitStructure, AssetKit,
@@ -49,7 +49,8 @@ from traceability import (SterilizationCycleType, SterilizationCycleMode,
                             SterilizationCycle, AssetSterilized, 
                             MaterioVigilance)
 from statements import ( Invoice, Quote, Bill, QuoteGestureReference,
-                            BillAppointmentGestureReference )
+                            BillAppointmentCotationReference,
+                            BillAppointmentGestureReference)
 from certificates import Certificate
 
 from cost import OperationalCost

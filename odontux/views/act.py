@@ -65,7 +65,7 @@ class GestureForm(Form):
     name = TextField('name')
     color = ColorField('color')
 
-class AppointmentGestureReferenceForm(Form):
+class AppointmentCotationReferenceForm(Form):
     anatomic_location = IntegerField(_('Teeth / Anatomic location'), 
                                             [validators.Optional()] )
     healthcare_plan_id = SelectField(_('Healthcare plan'), coerce=int,
@@ -117,7 +117,7 @@ def get_specialty_field_list():
 def get_gesture_field_list():
     return [ "specialty_id", "code", "alias", 
              "name", "color" ]
-def get_appointmentgesturereference_field_list():
+def get_appointmentcotationreference_field_list():
     return [ "appointment_id", "gesture_id", "anatomic_location", 
             'healthcare_plan_id', "price", "majoration" ]
 
@@ -747,61 +747,65 @@ def add_administrativ_gesture(patient_id, appointment_id):
     # gesture
     patient, appointment = checks.get_patient_appointment(patient_id, 
                                                                 appointment_id)
-    appointment_gesture_form = AppointmentGestureReferenceForm(request.form)
+    appointment_cotation_form = AppointmentCotationReferenceForm(request.form)
 
     # Patient is linked to some healthcare plans. Won't be included other plans
-    appointment_gesture_form.healthcare_plan_id.choices = [
+    appointment_cotation_form.healthcare_plan_id.choices = [
                     (hcs.id, hcs.name) for hcs in patient.hcs ]
     # Create a list of all existing gestures.
-    appointment_gesture_form.gesture_id.choices = [
+    appointment_cotation_form.gesture_id.choices = [
         (gesture.id, gesture.name) for gesture in 
                                     meta.session.query(act.Gesture).all() ]
-    appointment_gesture_form.gesture_id.choices.insert( 0, (0, ""))
-    appointment_gesture_form.majoration.choices =\
+    appointment_cotation_form.gesture_id.choices.insert( 0, (0, ""))
+    appointment_cotation_form.majoration.choices =\
                                             get_majoration_choices()
 
-    if request.method == 'POST' and appointment_gesture_form.validate():
+    if request.method == 'POST' and appointment_cotation_form.validate():
         # if gesture_form comes with a code, upade form.gesture_id with the 
         # code provided by user. 
-        if appointment_gesture_form.code.data:
+        if appointment_cotation_form.code.data:
             gesture = (
                 meta.session.query(act.Gesture)
                     .filter(or_(
-                    act.Gesture.code == appointment_gesture_form.code.data,
-                    act.Gesture.id == appointment_gesture_form.gesture_id.data)
+                    act.Gesture.code == appointment_cotation_form.code.data,
+                    act.Gesture.id == appointment_cotation_form.gesture_id.data)
                     ).one_or_none()
             )
         if not gesture:
             # TODO : redirect error + message
             return redirect(url_for('index'))
-
+        cotation = ( meta.session.query(act.Cotation)
+            .filter(act.Cotation.gesture_id == gesture.id,
+                    act.Cotation.healthcare_plan_id ==
+                            appointment_cotation_form.healthcare_plan_id.data
+            )
+            .one()
+        )
         values = {}
         # In the appointment_gesture_reference table, we'll store
         # appointment, act, and anatomic_location
         values['appointment_id'] = appointment.id
-        values['gesture_id'] = gesture.id
-        values['healthcare_plan_id'] =\
-                            appointment_gesture_form.healthcare_plan_id.data
+        values['cotation_id'] = cotation.id
 
         if ( 
-            appointment_gesture_form.anatomic_location.data not in 
+            appointment_cotation_form.anatomic_location.data not in 
                                 constants.ANATOMIC_LOCATION_SOFT_TISSUES.keys()
-            and appointment_gesture_form.anatomic_location.data not in 
+            and appointment_cotation_form.anatomic_location.data not in 
                                 constants.ANATOMIC_LOCATION_TEETH_SET.keys()
-            and appointment_gesture_form.anatomic_location.data not in
+            and appointment_cotation_form.anatomic_location.data not in
                                 constants.ANATOMIC_LOCATION_TEETH.keys() ):
             # TODO redirect error + message
             return redirect(url_for('index'))
-        if appointment_gesture_form.anatomic_location.data is None:
-            appointment_gesture_form.anatomic_location.data = 0
+        if appointment_cotation_form.anatomic_location.data is None:
+            appointment_cotation_form.anatomic_location.data = 0
         values['anatomic_location'] =\
-                                appointment_gesture_form.anatomic_location.data
+                            appointment_cotation_form.anatomic_location.data
 
-        values['price'] = appointment_gesture_form.price.data
-        if not appointment_gesture_form.price.data:
+        values['price'] = appointment_cotation_form.price.data
+        if not appointment_cotation_form.price.data:
             values['is_paid'] = True
 
-        new_technical_gesture = act.AppointmentGestureReference(**values)
+        new_technical_gesture = act.AppointmentCotationReference(**values)
         meta.session.add(new_technical_gesture)
         meta.session.commit()
 
@@ -821,7 +825,7 @@ def add_administrativ_gesture(patient_id, appointment_id):
                             patient=patient,
                             appointment=appointment,
                             cotations=cotations,
-                            admin_gesture_form=appointment_gesture_form)
+                            admin_cotation_form=appointment_cotation_form)
 
 @app.route('/remove/gesture?pid=<int:patient_id>'
            '&aid=<int:appointment_id>&gid=<int:gesture_id>'
@@ -835,8 +839,8 @@ def remove_administrativ_gesture(patient_id, appointment_id, gesture_id, code):
     
     patient, appointment = checks.get_patient_appointment(patient_id, 
                                                                 appointment_id)
-    gesture = meta.session.query(act.AppointmentGestureReference).filter(
-            act.AppointmentGestureReference.id == gesture_id).one()
+    gesture = meta.session.query(act.AppointmentCotationReference).filter(
+            act.AppointmentCotationReference.id == gesture_id).one()
 
     invoice = gnucash_handler.GnuCashInvoice(patient.id, appointment_id, 
                                                      appointment.dentist_id)

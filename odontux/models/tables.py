@@ -11,18 +11,6 @@ from sqlalchemy import Table, Column, Integer, Numeric, Date, Boolean
 from sqlalchemy import ForeignKey, MetaData
 
 
-# act.py Turn to association table
-#clinic_gesture_cotation_table = Table('clinic_gesture_cotation', Base.metadata,
-#Column('clinic_gesture_id', Integer, ForeignKey('clinic_gesture.id')),
-#Column('cotation_id', Integer, ForeignKey('cotation.id'))
-#)
-#
-## act.py / compta.py Turn to association table
-#payment_gesture_table = Table('payment_gesture', Base.metadata,
-#Column('gesture_id', Integer, ForeignKey('appointment_gesture_reference.id')),
-#Column('payment_id', Integer, ForeignKey('payment.id'))
-#)
-#
 # administration.py / contact.py
 patient_mail_table = Table('patient_mail', Base.metadata,
 Column('patient_id', Integer, ForeignKey('patient.id')),
@@ -49,10 +37,6 @@ odontux_user_phone_table = Table('odontux_user_phone', Base.metadata,
 Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),
 Column('phone_id', Integer, ForeignKey('phone.id'))
 )
-#dental_office_address_table = Table('dental_office_address', Base.metadata,
-#Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
-#Column('address_id', Integer, ForeignKey('address.id'))
-#)
 dental_office_mail_table = Table('dental_office_mail', Base.metadata,
 Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
 Column('mail_id', Integer, ForeignKey('mail.id'))

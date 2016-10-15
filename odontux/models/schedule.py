@@ -38,7 +38,7 @@ class Appointment(Base):
     excuse = Column(String, default="")
     dentist = relationship('users.OdontuxUser')
     dental_unit = relationship('users.DentalUnit')
-    administrative_gestures = relationship("AppointmentGestureReference",
+    administrative_gestures = relationship("AppointmentCotationReference",
                                        backref="appointment",
                                        cascade="all, delete, delete-orphan")
     prescriptions = relationship("Prescription", backref="appointment",

@@ -101,15 +101,15 @@ def choose_gestures_in_bill(patient_id, appointment_id,
     patient_appointments_id = [ a.id for a in patient.appointments ]
     # get id list of gestures that could be in bill
     gestures_panel = (
-        meta.session.query(act.AppointmentGestureReference)
+        meta.session.query(act.AppointmentCotationReference)
             .join(schedule.Appointment, schedule.Agenda)
             .filter(
-                act.AppointmentGestureReference.appointment_id.in_(
+                act.AppointmentCotationReference.appointment_id.in_(
                                                     patient_appointments_id),
-                act.AppointmentGestureReference.is_paid.is_(True),
-                ~act.AppointmentGestureReference.id.in_(
+                act.AppointmentCotationReference.is_paid.is_(True),
+                ~act.AppointmentCotationReference.id.in_(
                     meta.session.query(
-            statements.BillAppointmentGestureReference.appointment_gesture_id)
+            statements.BillAppointmentCotationReference.appointment_cotation_id)
                 ),
                 schedule.Agenda.starttime <= appointment.agenda.starttime
             )
@@ -125,9 +125,9 @@ def choose_gestures_in_bill(patient_id, appointment_id,
         gestures_id_in_bill = [ int(i) for i in gestures_id_in_bill.split(",") ]
 
     gestures_in_bill = (
-        meta.session.query(act.AppointmentGestureReference)
+        meta.session.query(act.AppointmentCotationReference)
             .filter(
-                act.AppointmentGestureReference.id.in_(gestures_id_in_bill))
+                act.AppointmentCotationReference.id.in_(gestures_id_in_bill))
             .join(schedule.Appointment, schedule.Agenda)
             .order_by(schedule.Agenda.starttime)
             .all()
@@ -135,10 +135,10 @@ def choose_gestures_in_bill(patient_id, appointment_id,
 
     # get id list of gestures that won't be in bill
     gestures_not_in_bill = (
-        meta.session.query(act.AppointmentGestureReference)
+        meta.session.query(act.AppointmentCotationReference)
             .filter(
-                act.AppointmentGestureReference.id.in_(gestures_id_panel),
-                ~act.AppointmentGestureReference.id.in_(gestures_id_in_bill)
+                act.AppointmentCotationReference.id.in_(gestures_id_panel),
+                ~act.AppointmentCotationReference.id.in_(gestures_id_in_bill)
             )
             .all()
     )
@@ -190,8 +190,8 @@ def make_bill(patient_id, appointment_id, gestures_id_in_bill):
     patient, appointment = checks.get_patient_appointment(patient_id, 
                                                                 appointment_id)
     gestures_in_bill = ( 
-        meta.session.query(act.AppointmentGestureReference)
-        .filter(act.AppointmentGestureReference.id.in_( 
+        meta.session.query(act.AppointmentCotationReference)
+        .filter(act.AppointmentCotationReference.id.in_( 
                 [ int(gid) for gid in gestures_id_in_bill.split(",") ] ) )
         .all()
     )
@@ -257,10 +257,10 @@ def make_bill(patient_id, appointment_id, gestures_id_in_bill):
             for gesture in bill_form.gestures:
                 values = {
                     'bill_id': new_bill.id,
-                    'appointment_gesture_id': int(gesture.gesture_id.data),
+                    'appointment_cotation_id': int(gesture.gesture_id.data),
                 }
                 new_gesture =\
-                    statements.BillAppointmentGestureReference(**values)
+                    statements.BillAppointmentCotationReference(**values)
                 meta.session.add(new_gesture)
                 meta.session.commit()
 
