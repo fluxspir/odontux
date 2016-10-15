@@ -1,0 +1,42 @@
+{% extends "header.html" %}
+{% block main %}
+{% from '_formhelpers.html' import render_simple_field_line, render_sfl_wol %}
+  <a href="{{ url_for('portal_operational_cost') }}">Return</a>
+<h2>Operational Cost</h2>
+{% if session['role'] == constants.ROLE_ADMIN %}
+<br />
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Description</th>
+    <th>Cost</th>
+    <th>Periodicity</th>
+    <th>Hour Cost</th>
+    <th></th>
+  </tr>
+  <form method='post' action="{{ url_for('add_operation_cost') }}">
+    <tr>
+      <td>{{ render_sfl_wol(ope_cost_form.name) }}</td>
+      <td>{{ render_sfl_wol(ope_cost_form.description) }}</td>
+      <td>{{ render_sfl_wol(ope_cost_form.cost) }}</td>
+      <td>{{ render_sfl_wol(ope_cost_form.periodicity) }}</td>
+      <td></td>
+      <td>{{ render_sfl_wol(ope_cost_form.submit) }}</td>
+    </tr>
+  </form>
+  {% for operation, hour_cost, form in operations %}
+    <form method='post' action='{{ url_for('update_operational_cost') }}'>
+    {{ form.id }}
+      <tr>
+        <td>{{ render_sfl_wol(form.name) }}</td>
+        <td>{{ render_sfl_wol(form.description) }}</td>
+        <td>{{ render_sfl_wol(form.cost) }}</td>
+        <td>{{ render_sfl_wol(form.periodicity) }}</td>
+        <td>{{ hour_cost }}</td>
+        <td>{{ render_sfl_wol(form.submit) }}</td>
+      </tr>
+    </form>
+  {% endfor %}
+</table>
+{% endif %}
+{% endblock %}
