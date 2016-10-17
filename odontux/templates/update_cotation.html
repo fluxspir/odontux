@@ -102,6 +102,12 @@ Total Cost: {{ cost_informations['total_cost'] }}<br />
   {% endfor %}
 </table>
 <br />
+<br />
+<form method='post' action='{{ url_for('clone_gestures_in_cotation',
+                                                  cotation_id=cotation.id) }}'>
+Clone gestures from existing cotation 
+{{ clone_cotation_form.cotation_id }} {{ clone_cotation_form.submit }}
+</form>
 <strong>Others clinic gestures availables </strong> or 
   <a href="{{ url_for('add_clinic_gesture', cotation_id=cotation.id) }}">
                                   Add<strong> NEW </strong>clinic gesture</a><br />

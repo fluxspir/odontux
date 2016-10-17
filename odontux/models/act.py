@@ -36,7 +36,7 @@ class Gesture(Base):
     """
     __tablename__ = 'gesture'
     id = Column(Integer, primary_key=True)
-    specialty_id = Column(Integer, ForeignKey(Specialty.id), default=None)
+    specialty_id = Column(Integer, ForeignKey(Specialty.id), nullable=False)
     specialty = relationship("Specialty")
     name = Column(String, nullable=False, unique=True)
     alias = Column(String, default="", unique=True)
@@ -52,11 +52,15 @@ class ClinicGesture(Base):
         and, as a consequence, its cost."""
     __tablename__ = 'clinic_gesture'
     id = Column(Integer, primary_key=True)
+    specialty_id = Column(Integer, ForeignKey(Specialty.id), nullable=False)
+    specialty = relationship("Specialty", order_by='act.Specialty.name')
     name = Column(String, nullable=False, unique=True)
     description = Column(String)
     duration = Column(Interval, default=datetime.timedelta(seconds= 5 * 60))
     materials = relationship('MaterialCategoryClinicGestureReference',
                     cascade="all, delete, delete-orphan", backref="gesture")
+#        order_by=
+#            'assets.MaterialCategoryClinicGestureReference.material_category')
     is_daily = Column(Boolean, default=False)
     is_appointmently = Column(Boolean, default=False)
 

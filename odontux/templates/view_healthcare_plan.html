@@ -6,11 +6,14 @@
                   healthcare_plan_id=healthcare_plan.id) }}">
     Update healthcare_plan name
   </a><br /><br />
-{% for cotation in healthcare_plan.cotations %}
+{% for cotation in cotations %}
   <a href="{{ url_for('view_gesture', gesture_id=cotation.gesture.id) }}">
-    {{ cotation.gesture.name }}</a>: 
-    {{ cotation.price }} -- 
-    {{ cotation.active }} || {{ cotation.gesture.specialty.name }}
+    {% if cotation.active %}<strong>{% endif %}
+      {{ cotation.gesture.name }}
+    {% if cotation.active %} </strong> {% endif %} 
+      </a>: 
+    {{ cotation.price }}
+    || {{ cotation.gesture.specialty.name }}
   <br />
 
 {% endfor %}

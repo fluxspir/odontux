@@ -77,7 +77,10 @@ def add_healthcare_plan():
         }
         new_healthcare_plan = act.HealthCarePlan(**values)
         meta.session.add(new_healthcare_plan)
-        meta.session.commit()
+        try:
+            meta.session.commit()
+        except sqlalchemy.exc.IntegrityError:
+            meta.session.rollback()
 
         return redirect(url_for('list_healthcare_plan'))
 
@@ -197,8 +200,19 @@ def view_healthcare_plan(healthcare_plan_id):
                         .filter(act.HealthCarePlan.id == healthcare_plan_id)
                         .one()
                     )
+    cotations = [ cotation for cotation in 
+                    sorted(healthcare_plan.cotations, 
+                            key=lambda cotation: (cotation.gesture.specialty.name,
+                                                cotation.gesture.name) ) 
+    ]
+#    for cg_cot_ref in sorted(cotation.clinic_gestures,
+#                            key=lambda cg_cot_ref: ( cg_cot_ref.appointment_number,
+#                                                cg_cot_ref.appointment_sequence)):
+#
+    
     return render_template('view_healthcare_plan.html', 
-                                healthcare_plan=healthcare_plan)
+                                healthcare_plan=healthcare_plan,
+                                cotations=cotations)
 
 @app.route('/list_majoration')
 def list_majoration():

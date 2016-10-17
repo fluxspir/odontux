@@ -1,15 +1,17 @@
 {% extends 'header.html' %}
+{% from "_formhelpers.html" import render_simple_field_line, render_sfl_wol %}
 {% block main %}
 Return to gesture <a href="{{ url_for('view_gesture', 
                                 gesture_id=cotation.gesture.id) }}">
                   <strong>{{ cotation.gesture.name }}</strong></a>
   or <a href="{{ url_for('update_cotation', cotation_id=cotation.id) }}">cotation </strong></a>
 <h2>Update clinic gesture <strong>{{ clinic_gesture.name }}</strong></h2>
-{% from "_formhelpers.html" import render_simple_field_line, render_sfl_wol %}
+<div id="clinic_gesture_data" style='float:left;width=65%;'>
 <form method="post" action="{{ url_for('update_clinic_gesture', clinic_gesture_id=clinic_gesture.id,
                                                                         cotation_id=cotation.id) }}">
+      {{ render_simple_field_line(cg_form.specialty_id) }}<br />
       {{ render_simple_field_line(cg_form.name) }}
-      {{ render_simple_field_line(cg_form.description) }}
+      {{ render_simple_field_line(cg_form.description) }}<br />
       {{ render_simple_field_line(cg_form.duration) }}<br />
       {{ render_simple_field_line(cg_form.is_daily) }}
       {{ render_simple_field_line(cg_form.is_appointmently) }}
@@ -26,7 +28,8 @@ Materials used in <strong>{{ clinic_gesture.name }}</strong>:<br />
                             material_category_clinic_gesture_ref_id=material_cg_ref.id,
                                                           cotation_id=cotation.id) }}">
       <strong>Remove </strong></a>
-      {{ material_cg_ref.material_category.brand }} {{ material_cg_ref.material_category.commercial_name }}
+      {{ material_cg_ref.material_category.commercial_name }}
+      {{ material_cg_ref.material_category.brand }} 
       {{ render_sfl_wol(quantity_forms[material_cg_ref.material_category_id][0].mean_quantity) }} 
       {{ constants.UNITIES[material_cg_ref.material_category.unity][1] }}
       {{ render_sfl_wol(quantity_forms[material_cg_ref.material_category_id][0].enter_in_various_gestures) }}
@@ -50,6 +53,21 @@ Materials used in <strong>{{ clinic_gesture.name }}</strong>:<br />
 
 <a href="{{ url_for('update_gesture', gesture_id=cotation.gesture.id) }}">
   Update gesture <strong>{{ cotation.gesture.name }}</strong> for new materials</a>
+
+</div>
+<div id="clone_clinic_gesture">
+Use this clinic gesture to update {{ clinic_gesture.name }}:<br />
+{% for cg in all_clinic_gestures %}
+  <a href="{{ url_for('update_clinic_gesture', clinic_gesture_id=cg.id,
+                                                cotation_id=cotation.id) }}">
+        <strong>{{ cg.name }}</strong></a>
+  <a href="{{ url_for('clone_clinic_gesture',
+                            model_cg_id = cg.id,
+                            cg_to_update_id = clinic_gesture.id,
+                            cotation_id = cotation.id) }}">
+        Clone</a><br />
+{% endfor %}
+</div>
 {% endblock %}
 
 <!---->

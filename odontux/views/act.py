@@ -39,9 +39,11 @@ class ClinicGestureForm(Form):
     name = TextField(_('Name'), [validators.Required()])
     description = TextAreaField(_('Description'))
     duration = IntegerField(_('Duration in minutes'),
-                                                [validators.Optional()] )
+                                                [validators.Optional()],
+                                                render_kw={'size': 8})
     is_daily = BooleanField(_('Happens once a day'))
     is_appointmently = BooleanField(_('Happens once an appointment'))
+    specialty_id = SelectField(_('Specialty'), coerce=int)
     submit = SubmitField(_('Update'))
 
 class MaterialCategoryClinicGestureForm(Form):
@@ -87,6 +89,11 @@ class PriceForm(Form):
     healthcare_plan_id = HiddenField(_('healthcare_plan_id'))
     price = DecimalField(_('Price'), [validators.Optional()],
                         render_kw={'size':'6px'})
+
+class CloneCotationForm(Form):
+    id = HiddenField(_('id'))
+    cotation_id = SelectField(_('Cotation model'), coerce=int)
+    submit = SubmitField(_('Clone'))
 
 class AssetSterilizedUsedForm(Form):
     asset_sterilized_id = IntegerField(_('Asset sterilized id'),
@@ -350,6 +357,8 @@ def update_gesture(gesture_id):
                                                     methods=['GET', 'POST'])
 def add_clinic_gesture(cotation_id):
     form = ClinicGestureForm(request.form)
+    form.specialty_id.choices = [ (spe.id, spe.name) for spe in
+                                    meta.session.query(act.Specialty).all() ]
     if request.method == 'POST' and form.validate():
         new_clinic_gesture = ( meta.session.query(act.ClinicGesture)
                             .filter(act.ClinicGesture.name == form.name.data)
@@ -362,6 +371,7 @@ def add_clinic_gesture(cotation_id):
                 'duration': datetime.timedelta(seconds=form.duration.data*60),
                 'is_daily': False,
                 'is_appointmently': False,
+                'specialty_id': form.specialty_id.data,
             }
             new_clinic_gesture = act.ClinicGesture(**args)
             meta.session.add(new_clinic_gesture)
@@ -373,12 +383,71 @@ def add_clinic_gesture(cotation_id):
     return render_template('add_clinic_gesture.html', cotation_id=cotation_id, 
                                                         form=form)
 
+@app.route('/clone/clinic_gesture?mcgid=<int:model_cg_id>'
+            '&cg_upd_id=<int:cg_to_update_id>&cid=<int:cotation_id>')
+def clone_clinic_gesture(model_cg_id, cg_to_update_id, cotation_id):
+    model_cg = ( meta.session.query(act.ClinicGesture)
+                .filter(act.ClinicGesture.id == model_cg_id)
+                .one()
+    )
+    model_cg_mat_ref = ( 
+        meta.session.query(assets.MaterialCategoryClinicGestureReference)
+            .filter(
+            assets.MaterialCategoryClinicGestureReference.clinic_gesture_id ==
+                                                                model_cg_id
+            )
+            .all()
+    )
+    cg_to_update = ( meta.session.query(act.ClinicGesture)
+                        .filter(act.ClinicGesture.id == cg_to_update_id)
+                        .one()
+    )
+    cg_to_update_mat_ref = ( 
+        meta.session.query(assets.MaterialCategoryClinicGestureReference)
+            .filter(
+            assets.MaterialCategoryClinicGestureReference.clinic_gesture_id == 
+                                                            cg_to_update_id)
+            .all()
+    )
+    cg_to_update.specialty_id = model_cg.specialty_id
+    cg_to_update.duration = model_cg.duration
+    cg_to_update.is_daily = model_cg.is_daily
+    cg_to_update.is_appointmently = model_cg.is_appointmently
+    
+    for old_material in cg_to_update_mat_ref:
+        meta.session.delete(old_material)
+        meta.session.commit()
+
+    for new_material in model_cg_mat_ref:
+        values = {
+            'material_category_id': new_material.material_category_id,
+            'clinic_gesture_id': cg_to_update_id,
+            'mean_quantity': new_material.mean_quantity,
+            'enter_in_various_gestures': new_material.enter_in_various_gestures
+        }
+        new_mat_cg_ref = assets.MaterialCategoryClinicGestureReference(**values)
+        meta.session.add(new_mat_cg_ref)
+    
+    meta.session.commit()
+
+    return redirect(url_for('update_clinic_gesture', 
+                                        clinic_gesture_id=cg_to_update_id,
+                                        cotation_id=cotation_id))
+
+
 @app.route('/update/clinic_gesture?cgid=<int:clinic_gesture_id>'
             '?crel=<int:cotation_id>', methods=['GET', 'POST' ])
 def update_clinic_gesture(clinic_gesture_id, cotation_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
     if session['role'] not in authorized_roles:
         return abort(403)
+
+    all_clinic_gestures = ( meta.session.query(act.ClinicGesture)
+                            .join(act.Specialty)
+                            .order_by(act.Specialty.name,
+                                        act.ClinicGesture.name)
+                            .all()
+    )
 
     clinic_gesture = ( meta.session.query(act.ClinicGesture)
                         .filter(act.ClinicGesture.id == clinic_gesture_id)
@@ -390,7 +459,8 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
     )
 
     cg_form = ClinicGestureForm(request.form)
-
+    cg_form.specialty_id.choices = [ (spe.id, spe.name) for spe in
+                                    meta.session.query(act.Specialty).all() ]
     other_materials = ( meta.session.query(assets.MaterialCategory)
         .filter(
                 ~assets.MaterialCategory.id.in_(
@@ -400,6 +470,9 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
                 [ mat.id for mat in cotation.gesture.materials ]
                 )
         )
+        .join(act.Specialty)
+        .order_by(act.Specialty.name, assets.MaterialCategory.commercial_name,
+                    assets.MaterialCategory.brand )
         .all()
     )
 
@@ -414,7 +487,7 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
         # won't try to update with name already in db to avoid IntegrityError
         if not other_cg_same_new_name:
             for f in ( 'name', 'description', 'duration', 'is_daily', 
-                                                        'is_appointmently' ):
+                                        'specialty_id', 'is_appointmently' ):
                 if f == 'duration':
                     setattr(clinic_gesture, f, 
                         datetime.timedelta(seconds=getattr(cg_form, f).data * 60))
@@ -439,7 +512,7 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
         )
 
     for f in ('name', 'description', 'duration', 'is_daily', 
-                                                    'is_appointmently' ):
+                                        'specialty_id', 'is_appointmently' ):
         if f == 'duration':
             getattr(cg_form, f).data =\
                                 getattr(clinic_gesture, f).seconds % 3600 / 60
@@ -450,6 +523,7 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
                                     clinic_gesture=clinic_gesture,
                                     cotation=cotation,
                                     other_materials=other_materials,
+                                    all_clinic_gestures=all_clinic_gestures,
                                     quantity_forms=quantity_forms,
                                     cg_form=cg_form,
                                     constants=constants)
@@ -633,6 +707,54 @@ def remove_healthcare_plan_from_gesture(gesture_id, healthcare_plan_id):
     meta.session.commit()
     return redirect(url_for('view_gesture', gesture_id=gesture_id))
 
+@app.route('/clone/gestures_in_cotation?cid=<int:cotation_id>', 
+                                                            methods=['POST'])
+def clone_gestures_in_cotation(cotation_id):
+    cotation = ( meta.session.query(act.Cotation)
+                    .filter(act.Cotation.id == cotation_id)
+                    .one()
+    )
+    form = CloneCotationForm(request.form)
+    form.cotation_id.choices = [ 
+        ( cot.id, cot.healthcare_plan.name + " " + str(cot.price) + 
+                                        constants.CURRENCY_SYMBOL ) for cot in
+            meta.session.query(act.Cotation)
+                .filter(act.Cotation.gesture_id == cotation.gesture_id)
+                .order_by(act.Cotation.price)
+                .all()
+    ]
+
+    if form.validate():
+        model_cotation = ( meta.session.query(act.Cotation)
+                            .filter(act.Cotation.id == form.cotation_id.data)
+                            .one()
+        )
+        cg_in_model_cotation_ref = (
+            meta.session.query(act.ClinicGestureCotationReference)
+                .filter(act.ClinicGestureCotationReference.cotation_id == 
+                                                            model_cotation.id)
+                .all()
+        )
+        for cg in cotation.clinic_gestures:
+            meta.session.delete(cg)
+            meta.session.commit()
+
+        for model_cg in cg_in_model_cotation_ref:
+            values = {
+                'clinic_gesture_id': model_cg.clinic_gesture_id,
+                'cotation_id': cotation_id,
+                'official_cotation': model_cg.official_cotation,
+                'appears_on_appointment_resume':
+                                    model_cg.appears_on_appointment_resume,
+                'appointment_number': model_cg.appointment_number,
+                'appointment_sequence': model_cg.appointment_sequence,
+            }
+            clone_cotation = act.ClinicGestureCotationReference(**values)
+            meta.session.add(clone_cotation)
+            meta.session.commit()
+
+    return redirect(url_for('update_cotation', cotation_id=cotation_id))
+
 @app.route('/update/cotation?cid=<int:cotation_id>', methods=['GET', 'POST'])
 def update_cotation(cotation_id):
     authorized_roles = [ constants.ROLE_DENTIST ]
@@ -643,6 +765,15 @@ def update_cotation(cotation_id):
                     .filter(act.Cotation.id == cotation_id)
                     .one()
     )
+    clone_cotation_form = CloneCotationForm(request.form)
+    clone_cotation_form.cotation_id.choices = [ 
+        ( cot.id, cot.healthcare_plan.name + " " + str(cot.price) + 
+                                        constants.CURRENCY_SYMBOL ) for cot in
+            meta.session.query(act.Cotation)
+                .filter(act.Cotation.gesture_id == cotation.gesture_id)
+                .order_by(act.Cotation.price)
+                .all()
+    ]
 
     price_form = PriceForm(request.form)
 
@@ -664,7 +795,8 @@ def update_cotation(cotation_id):
                             price_form=price_form,
                             clinic_gestures=clinic_gestures_available,
                             cg_cot_dict=cg_cot_dict,
-                            cost_informations=cost_informations)
+                            cost_informations=cost_informations,
+                            clone_cotation_form=clone_cotation_form)
 
 @app.route('/add/clinic_gesture_to_cotation?cid=<int:clinic_gesture_id>'
             '&cid=<int:cotation_id>')
