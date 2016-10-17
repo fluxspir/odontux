@@ -202,14 +202,9 @@ def view_healthcare_plan(healthcare_plan_id):
                     )
     cotations = [ cotation for cotation in 
                     sorted(healthcare_plan.cotations, 
-                            key=lambda cotation: (cotation.gesture.specialty.name,
+                        key=lambda cotation: (cotation.gesture.specialty.name,
                                                 cotation.gesture.name) ) 
     ]
-#    for cg_cot_ref in sorted(cotation.clinic_gestures,
-#                            key=lambda cg_cot_ref: ( cg_cot_ref.appointment_number,
-#                                                cg_cot_ref.appointment_sequence)):
-#
-    
     return render_template('view_healthcare_plan.html', 
                                 healthcare_plan=healthcare_plan,
                                 cotations=cotations)
