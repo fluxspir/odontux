@@ -11,12 +11,6 @@ from sqlalchemy import Table, Column, Integer, Numeric, Date, Boolean
 from sqlalchemy import ForeignKey, MetaData
 
 
-# act.py / compta.py
-payment_gesture_table = Table('payment_gesture', Base.metadata,
-Column('gesture_id', Integer, ForeignKey('appointment_gesture_reference.id')),
-Column('payment_id', Integer, ForeignKey('payment.id'))
-)
-
 # administration.py / contact.py
 patient_mail_table = Table('patient_mail', Base.metadata,
 Column('patient_id', Integer, ForeignKey('patient.id')),
@@ -43,10 +37,6 @@ odontux_user_phone_table = Table('odontux_user_phone', Base.metadata,
 Column('odontux_user_id', Integer, ForeignKey('odontux_user.id')),
 Column('phone_id', Integer, ForeignKey('phone.id'))
 )
-#dental_office_address_table = Table('dental_office_address', Base.metadata,
-#Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
-#Column('address_id', Integer, ForeignKey('address.id'))
-#)
 dental_office_mail_table = Table('dental_office_mail', Base.metadata,
 Column('dental_office_id', Integer, ForeignKey('dental_office.id')),
 Column('mail_id', Integer, ForeignKey('mail.id'))
@@ -105,6 +95,13 @@ kitstructure_superassetcategory_table = Table("kit_structure_superasset_category
                                                             Base.metadata,
 Column("kit_structure_id", Integer, ForeignKey("asset_kit_structure.id")),
 Column("superasset_category_id", Integer, ForeignKey("super_asset_category.id"))
+)
+
+# assets - act
+material_category_gesture_table = Table('material_category_gesture', 
+                                                            Base.metadata,
+Column("material_category_id", Integer, ForeignKey('material_category.id')),
+Column("gesture_id", Integer, ForeignKey('gesture.id'))
 )
 
 # teeth.py / documents.py

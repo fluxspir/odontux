@@ -49,31 +49,31 @@ def apply_payment_to_gesture(patient_id, gesture_id):
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY]
     if session['role'] not in authorized_roles:
         return abort(403)
-    appointment_gesture = ( 
-        meta.session.query(act.AppointmentGestureReference)
-            .filter(act.AppointmentGestureReference.id == gesture_id)
+    appointment_cotation = ( 
+        meta.session.query(act.AppointmentCotationReference)
+            .filter(act.AppointmentCotationReference.id == gesture_id)
             .one()
     )
     patient, appointment = checks.get_patient_appointment(
                                                         patient_id=patient_id)
     if patient.balance() < 0:
         return redirect(url_for('list_acts', patient_id=patient_id))
-    if ( appointment_gesture.price <= 
+    if ( appointment_cotation.price <= 
                 patient.already_paid() - patient.gestures_marked_as_paid() ):
-        appointment_gesture.is_paid = True
+        appointment_cotation.is_paid = True
         meta.session.commit()
 
         gestures_in_invoice = (
-            meta.session.query(act.AppointmentGestureReference)
-                .filter(act.AppointmentGestureReference.invoice_id == 
-                                                appointment_gesture.invoice_id)
+            meta.session.query(act.AppointmentCotationReference)
+                .filter(act.AppointmentCotationReference.invoice_id == 
+                                            appointment_cotation.invoice_id)
                 .all()
         )
 
         if all([ gesture.is_paid for gesture in gestures_in_invoice ]):
             invoice = gnucash_handler.GnuCashInvoice(patient.id,
-                        appointment_gesture.appointment_id, None, 
-                        invoice_id = appointment_gesture.invoice_id)
+                        appointment_cotation.appointment_id, None, 
+                        invoice_id = appointment_cotation.invoice_id)
             apply_payment_to_invoice = invoice.apply_payment()
             
             gestures_id_in_bill = ''
@@ -84,12 +84,9 @@ def apply_payment_to_gesture(patient_id, gesture_id):
                 else:
                     gestures_id_in_bill = gestures_id_in_bill + "," +\
                                                                 str(gesture.id)
-#            return redirect(url_for('make_bill', patient_id=patient_id,
-#                            appointment_id=appointment_gesture.appointment_id,
-#                            gestures_id_in_bill=gestures_id_in_bill))
             return redirect(url_for('choose_gestures_in_bill', 
                             patient_id=patient_id,
-                            appointment_id=appointment_gesture.appointment_id,
+                            appointment_id=appointment_cotation.appointment_id,
                             gestures_id_in_bill=gestures_id_in_bill))
             #####
 
@@ -236,7 +233,8 @@ def payments_type():
 @app.route('/portal_comptability')
 def portal_comptability():
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
-                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
+                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY,
+                        constants.ROLE_ADMIN ]
     if session['role'] not in authorized_roles:
         return abort(403)
 

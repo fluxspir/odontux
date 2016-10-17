@@ -5,20 +5,20 @@
                               patient_id=patient.id, 
                               appointment_id=appointment.id) }}">
   <dl>
-    {{ render_field(admin_gesture_form.anatomic_location) }}
+    {{ render_field(admin_cotation_form.anatomic_location) }}
     <div id='div_healthcare_plan'>
-    {{ render_field_js_onchange(admin_gesture_form.healthcare_plan_id) }}
+    {{ render_field_js_onchange(admin_cotation_form.healthcare_plan_id) }}
     </div>
     <div id='div_gesture'>
-    {{ render_field_js_onchange(admin_gesture_form.gesture_id) }}
+    {{ render_field_js_onchange(admin_cotation_form.gesture_id) }}
     </div>
     <div id='div_code'>
-    {{ render_field(admin_gesture_form.code) }}
+    {{ render_field(admin_cotation_form.code) }}
     </div>
     <div id='div_price'>
-    {{ render_field(admin_gesture_form.price) }}
+    {{ render_field(admin_cotation_form.price) }}
     </div>
-    {{ render_field(admin_gesture_form.majoration) }}
+    {{ render_field(admin_cotation_form.majoration) }}
   </dl>
   <p><input type="submit" value="Add">
 </form>

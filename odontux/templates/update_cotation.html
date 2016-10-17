@@ -1,0 +1,124 @@
+{% extends 'header.html' %}
+{% block pagetitle %}
+{% endblock %}
+{% block main %}
+{% from "_formhelpers.html" import render_simple_field_line, render_sfl_wol %}
+<a href="{{ url_for('view_gesture', gesture_id=cotation.gesture.id) }}">Return to gesture {{ cotation.gesture.name }}</a>
+<h2>Update cotation {{ cotation.gesture.name }} {{ cotation.healthcare_plan.name }}</h2>
+<table>
+  <tr>
+    <th>Once a day</th>
+    <th>Once by appointment</th>
+    <th>Duration of gestures</th>
+    <th>Total duration</th>
+    <th></th>
+    <th>Day material</th>
+    <th>App. material</th>
+    <th>Gestures material</th>
+    <th>Total material</th>
+    <th></th>
+    <th>Operational cost</th>
+    <th>Dentist fees</th>
+  </tr>
+  <tr>
+    <td>{{ cost_informations['day_base_duration'] }}</td>
+    <td>{{ cost_informations['appointment_base_duration'] }}</td>
+    <td>{{ cost_informations['gestures_duration'] }}</td>
+    <td><strong>{{ cost_informations['total_duration'] }}<strong></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>{{ cost_informations['hourly_operational_cost'] }}</td>
+    <td>{{ cost_informations['dentist_hour_fees'] }}</td>
+  </tr>
+  <tr>
+    <td>{{ cost_informations['duration_day_base_cost'] }}</td>
+    <td>{{ cost_informations['duration_appointment_base_cost'] }}</td>
+    <td>{{ cost_informations['duration_gestures_cost'] }}</td>
+    <td></td>
+    <td></td>
+    <td>{{ cost_informations['day_base_material_cost'] }}</td>
+    <td>{{ cost_informations['appointment_base_material_cost'] }}</td>
+    <td>{{ cost_informations['gestures_material_cost'] }}</td>
+    <td>{{ cost_informations['total_material_cost'] }}</td>
+    <td></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+<br />
+Time Cost : {{ cost_informations['total_duration_cost'] }}, 
+Material Cost: {{cost_informations['total_material_cost'] }},
+Total Cost: {{ cost_informations['total_cost'] }}<br />
+<form method="post" 
+  action="{{ url_for('update_cotation', cotation_id=cotation.id) }}">
+    {{ render_sfl_wol(price_form.price) }}
+  <input type="submit" value="Update">
+</form>
+<br />
+<br />
+<table>
+  <caption><strong>Clinic Gestures in Cotation: </strong></caption>
+  {% for appointment in cg_cot_dict.items() %}
+    <tr>
+      <th>Appointment {{ appointment[0] }}</th> 
+      <th>duration {{ appointment[1][1] }}, 
+                                      cost {{ appointment[1][3] }}</th>
+    </tr>
+    <tr>
+      <th>Duration</th>
+      <th>Clinic Gesture</th>
+      <th>Appointment number</th>
+      <th>Appointment sequence</th>
+      <th>official cotation</th>
+      <th>appears resume</th>
+      <th>Update</th>
+      <th>Remove</th>
+    </tr>
+
+    {% for cg_cot_ref in appointment[1][0] %}
+    <tr>
+      <form method='post' action="{{ url_for('update_clinic_gesture_cotation_reference',
+                                                  cg_cot_ref_id=cg_cot_ref[0].id) }}">
+      <td>{{ cg_cot_ref[0].clinic_gesture.duration }}</td>
+      <td><a href="{{ url_for('update_clinic_gesture',
+                                clinic_gesture_id=cg_cot_ref[0].clinic_gesture_id,
+                                cotation_id=cg_cot_ref[0].cotation_id) }}">
+          {{ cg_cot_ref[0].clinic_gesture.name }}</a></td>
+      <td>{{ render_sfl_wol(cg_cot_ref[1].appointment_number) }}</td>
+      <td>{{ render_sfl_wol(cg_cot_ref[1].appointment_sequence) }}</td>
+      <td>{{ render_sfl_wol(cg_cot_ref[1].official_cotation) }}</td>
+      <td>{{ render_sfl_wol(cg_cot_ref[1].appears_on_appointment_resume) }}</td>
+      <td>{{ render_sfl_wol(cg_cot_ref[1].submit) }}</td>
+      <td><a href="{{ url_for('remove_clinic_gesture_from_cotation',
+                                      cg_cot_ref_id=cg_cot_ref[0].id) }}">
+            Remove</a></td>
+      </form>
+    </tr>
+    {% endfor %}
+  {% endfor %}
+</table>
+<br />
+<br />
+<form method='post' action='{{ url_for('clone_gestures_in_cotation',
+                                                  cotation_id=cotation.id) }}'>
+Clone gestures from existing cotation 
+{{ clone_cotation_form.cotation_id }} {{ clone_cotation_form.submit }}
+</form>
+<strong>Others clinic gestures availables </strong> or 
+  <a href="{{ url_for('add_clinic_gesture', cotation_id=cotation.id) }}">
+                                  Add<strong> NEW </strong>clinic gesture</a><br />
+{% for clinic_gesture in clinic_gestures %}
+  <a href="{{ url_for('update_clinic_gesture', clinic_gesture_id=clinic_gesture.id,
+                                                cotation_id=cotation.id) }}">
+        {{ clinic_gesture.name }}</a> {{ clinic_gesture.duration }} 
+        <a href="{{ url_for('add_clinic_gesture_to_cotation', 
+                                    clinic_gesture_id=clinic_gesture.id,
+                                    cotation_id=cotation.id) }}">
+        <strong>Add</strong></a>
+        <br />
+{% endfor %}
+{% endblock %}

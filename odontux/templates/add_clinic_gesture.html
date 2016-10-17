@@ -1,0 +1,14 @@
+{% extends 'header.html' %}
+{% block main %}
+<h2>Adding new clinic act</h2>
+{% from "_formhelpers.html" import render_simple_field_line %}
+<form method="post" action="{{ url_for('add_clinic_gesture', cotation_id=cotation_id) }}">
+      {{ render_simple_field_line(form.specialty_id) }}<br />
+      {{ render_simple_field_line(form.name) }}
+      {{ render_simple_field_line(form.description) }}
+      {{ render_simple_field_line(form.duration) }}
+  <input type="submit" value="Add">
+</form>
+{% endblock %}
+
+<!---->

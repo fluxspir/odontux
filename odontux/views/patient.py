@@ -27,7 +27,7 @@ def patient_appointment(appointment_id):
                                                 appointment_id=appointment_id)
 
     acts = checks.get_patient_acts(patient.id, appointment.id,
-                [ act.AppointmentGestureReference.anatomic_location ]
+                [ act.AppointmentCotationReference.anatomic_location ]
                 )
     return render_template("patient_appointment.html",
                             patient=patient,
@@ -71,7 +71,7 @@ def list_acts(patient_id, appointment_id=0):
     patient, appointment = checks.get_patient_appointment(patient_id,
                                                                 appointment_id)
     acts = checks.get_patient_acts(patient.id, None,
-            [ act.AppointmentGestureReference.appointment_id, ]
+            [ act.AppointmentCotationReference.appointment_id, ]
             )
     payments = ( meta.session.query(compta.Payment)
         .filter(compta.Payment.patient_id == patient_id)

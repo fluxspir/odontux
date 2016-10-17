@@ -3,14 +3,18 @@
                                   render_simple_hidden_field %}
 {% block main %}
 <br />
-Gesture : {{ gesture.id }} : {{ gesture.specialty.name }}, {{gesture.name }}
+Global Gesture : ({{ gesture.id }}) : {{ gesture.specialty.name }}, {{gesture.name }}
   <a href="{{ url_for('update_gesture', 
                   gesture_id=gesture.id) }}">Update</a>
-
+<br />
+Materials that may be envolve in global gesture : <br/> 
+{% for material in gesture.materials %}
+  {{ material.brand }} : {{ material.commercial_name }}, 
+{% endfor %}
 
 <br /><br />
 <strong>Healthcare plans in gesture:</strong> <br />
-{% for cotation, price_form in price_forms %}
+{# {% for cotation, price_form in price_forms %}
   <form method="post" 
         action="{{ url_for('update_cotation') }}">
   {{ cotation.healthcare_plan.name }} --
@@ -18,13 +22,19 @@ Gesture : {{ gesture.id }} : {{ gesture.specialty.name }}, {{gesture.name }}
   {{ render_simple_hidden_field(price_form.healthcare_plan_id) }}
   {{ render_simple_field_line(price_form.price) }}
   {{ cotation.healthcare_plan.active }} 
-  <input type="submit" value="Update"> or 
-  <a href="{{ url_for('remove_healthcare_plan_from_gesture',
-                      gesture_id=gesture.id,
-                      healthcare_plan_id=cotation.healthcare_plan.id) }}">
-    Remove</a>
-  </form>
-  <br />
+  <input type="submit" value="Update"> 
+#}
+{% for cotation in gesture.cotations %}
+  {% if cotation.active == True %}
+    {{ cotation.healthcare_plan.name }} : {{ cotation.price }} {{ constants.CURRENCY_SYMBOL }}
+    <a href="{{ url_for('update_cotation', cotation_id=cotation.id) }}"> <strong>Update</strong> </a>
+    or 
+    <a href="{{ url_for('remove_healthcare_plan_from_gesture',
+                        gesture_id=gesture.id,
+                        healthcare_plan_id=cotation.healthcare_plan.id) }}">
+      Remove</a>
+    <br />
+  {% endif %}
 
 {% endfor %}
 
