@@ -162,7 +162,10 @@ def create_cotation_dictionnary(patient):
     cotations = {}
     for healthcare_plan in patient.hcs:
         cotations[healthcare_plan.id] = {}
-        for cotation in healthcare_plan.cotations:
+        for cotation in sorted(healthcare_plan.cotations, 
+                                        key=lambda cotation: ( 
+                                            cotation.gesture.specialty.name,
+                                            cotation.gesture.name ) ):
             if not cotation.active:
                 continue
             cotations[healthcare_plan.id][cotation.gesture_id] =\
@@ -884,11 +887,16 @@ def add_administrativ_gesture(patient_id, appointment_id):
 
     # Patient is linked to some healthcare plans. Won't be included other plans
     appointment_cotation_form.healthcare_plan_id.choices = [
-                    (hcs.id, hcs.name) for hcs in patient.hcs ]
+                    (hcs.id, hcs.name) for hcs in sorted(patient.hcs,
+                                            key=lambda hcs: hcs.name) ]
     # Create a list of all existing gestures.
     appointment_cotation_form.gesture_id.choices = [
         (gesture.id, gesture.name) for gesture in 
-                                    meta.session.query(act.Gesture).all() ]
+                                    meta.session.query(act.Gesture)
+                                        .join(act.Specialty)
+                                        .order_by(act.Specialty.name,
+                                                    act.Gesture.name)
+                                        .all() ]
     appointment_cotation_form.gesture_id.choices.insert( 0, (0, ""))
     appointment_cotation_form.majoration.choices =\
                                             get_majoration_choices()
