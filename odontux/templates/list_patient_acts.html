@@ -25,6 +25,10 @@
     </tr>
   </table>
 
+  <a href="{{ url_for('add_administrativ_gesture',
+                                      patient_id=patient.id,
+                                      appointment_id=appointment.id) }}">
+        Add a global gesture made to patient</a><br />
   {% block list_acts %}
 
     {{ act_table_opening_tag("list of acts made to patient") }}
