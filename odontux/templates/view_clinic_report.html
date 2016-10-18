@@ -36,7 +36,7 @@
     <strong>Clinic Gestures</strong><br />
     {% for cr_cg_ref in clinic_gestures %}
       {{ cr_cg_ref.sequence }} -- {{ cr_cg_ref.anatomic_location }} 
-      {{ cr_cg_ref.clinic_gesture.name }}
+      {{ cr_cg_ref.clinic_gesture.name }} -- {{ cr_cg_ref.duration }}
       <a href="{{ url_for('remove_cg_from_cr', clinic_report_id=cr_cg_ref.id) }}">
           Remove</a><br />
     {% endfor %}

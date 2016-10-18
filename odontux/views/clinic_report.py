@@ -63,14 +63,12 @@ class ClinicReportFromCotationForm(Form):
     submit = SubmitField(_('Submit'))
 
 class ChooseCotationForReportForm(Form):
-    anatomic_location = TextField(_('Anatomic location'), 
-                                                    [validators.Required()])
+    anatomic_location = TextField(_('Anatomic location'))
     cotation_id = SelectField(_('Cotation'), coerce=int)
     submit = SubmitField(_('Choose from Cotation'))
 
 class ChooseClinicGestureForReportForm(Form):
-    anatomic_location = TextField(_('Anatomic location'), 
-                                                    [validators.Required()])
+    anatomic_location = TextField(_('Anatomic location'))
     clinic_gesture_id = SelectField(_('Clinic Gesture'), coerce=int)
     submit = SubmitField(_('Choose clinic gesture'))
 
@@ -174,10 +172,15 @@ def add_to_materio_vigilance(appointment_id, mat_cg_ref, material):
 def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
     patient, appointment = checks.get_patient_appointment(
                                                 appointment_id=appointment_id)
+    clinic_gesture = ( meta.session.query(act.ClinicGesture)
+                        .filter(act.ClinicGesture.id == clinic_gesture_id )
+                        .one()
+    )
     values = {
         'appointment_id': appointment_id,
         'clinic_gesture_id': clinic_gesture_id,
         'anatomic_location': anatomic_location,
+        'duration': clinic_gesture.duration,
     }
     new_cg_in_cr = act.ClinicReport(**values)
     meta.session.add(new_cg_in_cr)
@@ -210,8 +213,10 @@ def add_clinic_gesture_to_clinic_report(appointment_id):
                 .all()
     ]
     if form.validate():
+        if not form.anatomic_location.data:
+            form.anatomic_location.data = 0
         try:
-            if int(form.anatomic_location.data):
+            if int(form.anatomic_location.data) >= 0 : 
                 add_cg_to_cr(appointment_id, form.clinic_gesture_id.data,
                                                 form.anatomic_location.data)
         except ValueError:
