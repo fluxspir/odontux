@@ -6,7 +6,8 @@
 #
 
 from meta import Base
-from tables import material_category_gesture_table
+from tables import ( material_category_gesture_table, 
+                    clinic_report_materio_vigilance_table )
 import schedule, headneck, teeth, users
 import sqlalchemy
 from sqlalchemy import ( Table, Column, Integer, String, Numeric, Boolean, 
@@ -59,8 +60,10 @@ class ClinicGesture(Base):
     duration = Column(Interval, default=datetime.timedelta(seconds= 5 * 60))
     materials = relationship('MaterialCategoryClinicGestureReference',
                     cascade="all, delete, delete-orphan", backref="gesture")
-    is_daily = Column(Boolean, default=False)
-    is_appointmently = Column(Boolean, default=False)
+    before_first_patient = Column(Boolean, default=False)
+    after_last_patient = Column(Boolean, default=False)
+    before_each_appointment = Column(Boolean, default=False)
+    after_each_appointment = Column(Boolean, default=False)
 
 class Cotation(Base):
     """
@@ -123,6 +126,8 @@ class ClinicReport(Base):
     memo = Column(String)
     sequence = Column(Integer)
     clinic_gesture = relationship('ClinicGesture')
+    materio_vigilance = relationship('traceability.MaterioVigilance', 
+                            secondary=clinic_report_materio_vigilance_table )
 
 class HealthCarePlanUserReference(Base):
     """ """

@@ -104,6 +104,13 @@ Column("material_category_id", Integer, ForeignKey('material_category.id')),
 Column("gesture_id", Integer, ForeignKey('gesture.id'))
 )
 
+# act - traceability
+clinic_report_materio_vigilance_table = Table('clinic_report_materio_vigilance', 
+                                                                Base.metadata,
+Column("clinic_report_id", Integer, ForeignKey('clinic_report.id')),
+Column("materio_vigilance_id", Integer, ForeignKey('materio_vigilance.id'))
+)
+
 # teeth.py / documents.py
 teeth_event_file_table = Table("teeth_event_file", Base.metadata,
 Column("teeth_event_id", Integer, ForeignKey("event.id")),

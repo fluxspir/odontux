@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-#from tables import traceability_asset_table, traceability_kit_table
+from tables import  clinic_report_materio_vigilance_table 
 import users, assets, schedule
 import sqlalchemy
 import datetime
@@ -120,4 +120,5 @@ class MaterioVigilance(Base):
     quantity_used = Column(Numeric)
     material = relationship('assets.Material', backref='materio_vigilance')
     appointment = relationship('schedule.Appointment')
-
+    clinic_reports = relationship('act.ClinicReport',
+                            secondary=clinic_report_materio_vigilance_table )

@@ -94,8 +94,10 @@ def view_clinic_report(appointment_id):
     cg_form.clinic_gesture_id.choices = [
         ( cg.id, cg.specialty.name[0:3] + " " + cg.name ) for cg in
             meta.session.query(act.ClinicGesture)
-                .filter(act.ClinicGesture.is_daily.is_(False),
-                        act.ClinicGesture.is_appointmently.is_(False)
+                .filter(act.ClinicGesture.before_first_patient.is_(False),
+                        act.ClinicGesture.after_last_patient.is_(False),
+                        act.ClinicGesture.before_each_appointment.is_(False),
+                        act.ClinicGesture.after_each_appointment.is_(False)
                 )
                 .join(act.Specialty)
                 .order_by(act.Specialty.name,
@@ -204,8 +206,10 @@ def add_clinic_gesture_to_clinic_report(appointment_id):
     form.clinic_gesture_id.choices = [
         ( cg.id, cg.specialty.name[0:3] + " " + cg.name ) for cg in
             meta.session.query(act.ClinicGesture)
-                .filter(act.ClinicGesture.is_daily.is_(False),
-                        act.ClinicGesture.is_appointmently.is_(False)
+                .filter(act.ClinicGesture.before_first_patient.is_(False),
+                        act.ClinicGesture.after_last_patient.is_(False),
+                        act.ClinicGesture.before_each_appointment.is_(False),
+                        act.ClinicGesture.after_each_appointment.is_(False)
                 )
                 .join(act.Specialty)
                 .order_by(act.Specialty.name,

@@ -144,7 +144,10 @@ def get_material_cost_in_clinic_gesture(clinic_gesture):
 def get_daily_data():
     daily = (
         meta.session.query(act.ClinicGesture)
-            .filter(act.ClinicGesture.is_daily == True)
+            .filter(or_(
+                act.ClinicGesture.before_first_patient.is_(True),
+                act.ClinicGesture.after_last_patient.is_(True)
+                ) )
             .all()
     )
     material_cost = 0
@@ -160,7 +163,10 @@ def get_daily_data():
 def get_appointmently_data():
     appointmently = ( 
         meta.session.query(act.ClinicGesture)
-            .filter(act.ClinicGesture.is_appointmently == True)
+            .filter(or_(
+                act.ClinicGesture.before_each_appointment.is_(True),
+                act.ClinicGesture.after_each_appointment.is_(True)
+            ))
             .all()
     )
     total_material_cost = 0
