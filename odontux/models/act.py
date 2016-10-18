@@ -59,8 +59,6 @@ class ClinicGesture(Base):
     duration = Column(Interval, default=datetime.timedelta(seconds= 5 * 60))
     materials = relationship('MaterialCategoryClinicGestureReference',
                     cascade="all, delete, delete-orphan", backref="gesture")
-#        order_by=
-#            'assets.MaterialCategoryClinicGestureReference.material_category')
     is_daily = Column(Boolean, default=False)
     is_appointmently = Column(Boolean, default=False)
 
@@ -78,7 +76,8 @@ class Cotation(Base):
     healthcare_plan = relationship('HealthCarePlan', backref="cotations")
     clinic_gestures = relationship('ClinicGestureCotationReference', 
                                 cascade="all, delete, delete-orphan",
-                                backref="cotations")
+                                backref="cotations",
+                order_by="ClinicGestureCotationReference.appointment_number")
     gests = association_proxy('clinic_gestures', 'clinic_gesture')
 
 class ClinicGestureCotationReference(Base):
@@ -88,7 +87,7 @@ class ClinicGestureCotationReference(Base):
                                                             nullable=False)
     cotation_id = Column(Integer, ForeignKey(Cotation.id), nullable=False)
     official_cotation = Column(Boolean, default=False)
-    appears_on_appointment_resume = Column(Boolean, default=False)
+    appears_on_clinic_report = Column(Boolean, default=False)
     clinic_gesture = relationship('ClinicGesture') 
     appointment_number = Column(Integer, default=0)
     appointment_sequence = Column(Integer, default=0)
@@ -111,22 +110,20 @@ class AppointmentCotationReference(Base):
     gesture_id = association_proxy('cotation', 'gesture_id')
     healthcare_plan_id = association_proxy('cotation', 'healthcare_plan_id')
 
-#class AppointmentGestureReference(Base):
-#    """ 
-#        anatomic_location_id = constants.ANATOMIC_LOCATION
-#    """
-#    __tablename__ = 'appointment_gesture_reference'
-#    id = Column(Integer, primary_key=True)
-#    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-#                            nullable=False)
-#    gesture_id = Column(Integer, ForeignKey(Gesture.id), nullable=False)
-#    healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id))
-#    anatomic_location = Column(Integer, nullable=False)
-#    price = Column(Numeric, nullable=False)
-#    invoice_id = Column(String, default="")
-#    is_paid = Column(Boolean, default=False)
-#    gesture = relationship('Gesture')
-#
+class ClinicReport(Base):
+    """ """
+    __tablename__ = 'clinic_report'
+    id = Column(Integer, primary_key=True)
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
+                                                                nullable=False)
+    clinic_gesture_id = Column(Integer, ForeignKey(ClinicGesture.id),
+                                                            nullable=False)
+    anatomic_location = Column(Integer, nullable=False)
+    duration = Column(Interval)
+    memo = Column(String)
+    sequence = Column(Integer)
+    clinic_gesture = relationship('ClinicGesture')
+
 class HealthCarePlanUserReference(Base):
     """ """
     __tablename__ = 'healthcare_plan_user_reference'

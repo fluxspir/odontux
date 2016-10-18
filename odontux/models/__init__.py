@@ -39,7 +39,7 @@ from teeth import (Tooth, Event, ToothEvent, CrownEvent, RootCanalEvent,
                     Gum, PeriodontalEvent )
 from act import ( Specialty, HealthCarePlan, Gesture, ClinicGesture, Cotation,
                 ClinicGestureCotationReference, AppointmentCotationReference,
-                HealthCarePlanUserReference) 
+                ClinicReport, HealthCarePlanUserReference) 
 from compta import PaymentType, Payment
 from assets import (AssetProvider, AssetCategory, MaterialCategory,
                     Asset, Device, Material, AssetKitStructure, AssetKit,

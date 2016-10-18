@@ -29,7 +29,7 @@ class ClinicGestureCotationReferenceForm(Form):
     appointment_sequence = IntegerField(_('Appointment_sequence'),
                                                     render_kw={'size':'4'})
     official_cotation = BooleanField(_('official'))
-    appears_on_appointment_resume = BooleanField(_('App resume'))
+    appears_on_clinic_report = BooleanField(_('Clinic Report'))
     submit = SubmitField(_('Update'))
 
 class OperationalCostForm(Form):
@@ -78,14 +78,13 @@ def get_dentist_hour_fees(healthcare_plan_id, user_id=0):
     else:
         return 0
 
-def get_material_cost(cg_mat_ref_id):
+def get_material_used(cg_mat_ref_id):
     cg_mat_ref = ( 
         meta.session.query(assets.MaterialCategoryClinicGestureReference)
             .filter(assets.MaterialCategoryClinicGestureReference.id == 
                                                                 cg_mat_ref_id
             ).one()
     )
-                
     material = ( meta.session.query(assets.Material)
         .filter(
             assets.Material.asset_category_id == 
@@ -105,7 +104,18 @@ def get_material_cost(cg_mat_ref_id):
             material.order_by(assets.Material.expiration_date)
             .first()
         )
+    return material_used
 
+def get_material_cost(cg_mat_ref_id):
+    cg_mat_ref = ( 
+        meta.session.query(assets.MaterialCategoryClinicGestureReference)
+            .filter(assets.MaterialCategoryClinicGestureReference.id == 
+                                                                cg_mat_ref_id
+            ).one()
+    )
+
+    material_used = get_material_used(cg_mat_ref_id)
+                
     if not cg_mat_ref.mean_quantity:
         cg_mat_ref.mean_quantity = material.automatic_decrease
 
@@ -214,8 +224,8 @@ def get_cotation_dictionary(cotation_id):
 
         ref_form = ClinicGestureCotationReferenceForm(request.form)
         ref_form.official_cotation.data = cg_cot_ref.official_cotation
-        ref_form.appears_on_appointment_resume.data =\
-                                    cg_cot_ref.appears_on_appointment_resume
+        ref_form.appears_on_clinic_report.data =\
+                                    cg_cot_ref.appears_on_clinic_report
         ref_form.appointment_number.data = cg_cot_ref.appointment_number
         ref_form.appointment_sequence.data = cg_cot_ref.appointment_sequence
 
@@ -463,11 +473,3 @@ def update_operational_cost():
                                                 ope_cost_form=ope_cost_form,
                                                 constants=constants)
 
-#@app.route('/update/mensal_cost/', methods=['GET', 'POST'])
-#def update_mensal_cost():
-#    authorized_roles = [ constants.ROLE_DENTIST ]
-#    if session['role'] not in authorized_roles:
-#        return abort(403)
-#
-#    return render_template('update_anual_cost.html')
-#

@@ -14,6 +14,7 @@ from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.orderinglist import ordering_list
 
 
 class Appointment(Base):
@@ -49,12 +50,17 @@ class Appointment(Base):
                          cascade="all, delete, delete-orphan")
     events = relationship("Event",
                         cascade="all, delete, delete-orphan")
-    materiovigilance = relationship("traceability.MaterioVigilance", 
+    materio_vigilance = relationship("traceability.MaterioVigilance", 
                                                         backref="appointments")
     quotes = relationship("Quote", backref='appointment',
                         cascade="all, delete, delete-orphan")
     bills = relationship("Bill", backref='appointment',
                         cascade="all, delete, delete-orphan")
+    clinic_reports = relationship('ClinicReport', backref='appointment',
+                        cascade="all, delete",
+                        order_by='act.ClinicReport.sequence',
+                        collection_class=ordering_list('sequence', 
+                                                        count_from=1) )
 
 class Agenda(Base):
     __tablename__ = 'agenda'

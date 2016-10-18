@@ -57,7 +57,7 @@ class ClinicGestureCotationReferenceForm(Form):
     appointment_number = IntegerField(_('Appointment_number'))
     appointment_sequence = IntegerField(_('Appointment_sequence'))
     official_cotation = BooleanField(_('official'))
-    appears_on_appointment_resume = BooleanField(_('App resume'))
+    appears_on_clinic_report = BooleanField(_('Clinic Report'))
     submit = SubmitField(_('Update'))
 
 class GestureForm(Form):
@@ -118,6 +118,23 @@ class MaterioVigilanceUsedForm(Form):
     materials_used = FieldList(FormField(MaterioVigilanceForm))
     update = SubmitField(_('Update'))
 
+#@app.route('/get/clinic_gestures_in_cotation?cid=<int:cotation_id>')
+#def clinic_gestures_in_cotation(cotation_id):
+#    
+#    cotation = ( meta.session.query(act.Cotation)
+#                    .filter(act.Cotation.id == cotation_id)
+#                    .one()
+#    )
+#    clinic_gestures = [ 
+#        ( cgref.id, cgref.gesture.name ) for cgref in 
+#            sorted(cotation.clinic_gestures,
+#                                    key=lambda (cgref.appointment_number,
+#                                                cgref.appointment_sequence,
+#                                               cgref.gesture.name) 
+#            )
+#    ]
+#    return jsonify(success=True, clinic_gestures)
+#
 def get_specialty_field_list():
     return [ "name", "color" ]
 
@@ -747,8 +764,8 @@ def clone_gestures_in_cotation(cotation_id):
                 'clinic_gesture_id': model_cg.clinic_gesture_id,
                 'cotation_id': cotation_id,
                 'official_cotation': model_cg.official_cotation,
-                'appears_on_appointment_resume':
-                                    model_cg.appears_on_appointment_resume,
+                'appears_on_clinic_report':
+                                    model_cg.appears_on_clinic_report,
                 'appointment_number': model_cg.appointment_number,
                 'appointment_sequence': model_cg.appointment_sequence,
             }
@@ -857,8 +874,8 @@ def update_clinic_gesture_cotation_reference(cg_cot_ref_id):
             )
             for cg in other_cg:
                 cg.official_cotation = False
-        ref.appears_on_appointment_resume =\
-                                    ref_form.appears_on_appointment_resume.data
+        ref.appears_on_clinic_report =\
+                                    ref_form.appears_on_clinic_report.data
         ref.official_cotation = ref_form.official_cotation.data
         ref.appointment_number = ref_form.appointment_number.data
         ref.appointment_sequence = ref_form.appointment_sequence.data
