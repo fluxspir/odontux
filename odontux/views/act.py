@@ -811,7 +811,13 @@ def update_cotation(cotation_id):
     else:
         price_form.price.data = cotation.price
 
-    clinic_gestures_available = meta.session.query(act.ClinicGesture).all()
+    clinic_gestures_available = ( meta.session.query(act.ClinicGesture)
+                                    .join(act.Specialty)
+                                    .order_by(
+                                        act.Specialty.name,
+                                        act.ClinicGesture.name)
+                                    .all()
+    )
     
     # cg_cot_dics = { appointment_number: [ [ (cg_cot_ref, form) ], duration,
     #                                       [ cg_mat_ref ], material_cost ],
