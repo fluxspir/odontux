@@ -257,19 +257,19 @@ def remove_from_materio_vigilance(clinic_report):
     """
     def _leave_for_other_cg_in_cr(appointment, mat_cg_ref, 
                                                 number_of_cg_in_appointment):
-        
-        if ( number_of_cg_in_appointment % 
-                                mat_cg_ref.enter_in_various_gestures == 1 ):
+        if ( mat_cg_ref.enter_in_various_gestures > 1
+            and ( number_of_cg_in_appointment % 
+                        mat_cg_ref.enter_in_various_gestures ) == 1 ):
             return False
         else:
             return True
 
-    def _get_material_quantity(cr_mv):
+    def _get_material_quantity(cr, cr_mv):
         material_used_in_cr = [
             mat_cg_ref for mat_cg_ref in 
-            clinic_report.clinic_gesture.materials
+            cr.clinic_gesture.materials
                 if mat_cg_ref.material_category_id == 
-                            cr_mv.material.asset_category.id
+                    cr_mv.material.asset_category.id
         ]
         quantity_material_used = 0
         for mat_cg_ref in material_used_in_cr:
@@ -278,46 +278,25 @@ def remove_from_materio_vigilance(clinic_report):
             )
         return quantity_material_used
        
-       
-
-    other_clinic_reports_same_appointment = ( 
-        meta.session.query(act.ClinicReport)
-            .filter(
-            act.ClinicReport.appointment_id == clinic_report.appointment_id,
-            ~act.ClinicReport.id.in_( [ clinic_report.id ] ) )
-            .all()
-    )
     for cr_mv in clinic_report.materio_vigilance:
-        
-        material_quantity_used_this_cr = _get_material_quantity(cr_mv)
-        
-        same_material_used_in_various_clinic_report = []
-        for o_c_r in other_clinic_reports_same_appointment:
-            for other_cr_mv in o_c_r.materio_vigilance:
-                if other_cr_mv.id == cr_mv.id:
-                    same_material_used_in_various_clinic_report.append(
-                                                                other_cr_mv)
 
-        # get the quantity of the material used by other cg in the cr.
-        others_quantity = 0
-        for other_cr_mv in same_material_used_in_various_clinic_report:
-            quantity_used = _get_material_quantity(other_cr_mv)
-            others_quantity = others_quantity + quantity_used
-            
-        percent_mat_used_by_this_cr = (
-            float(material_quantity_used_this_cr) / 
-                float(others_quantity + material_quantity_used_this_cr)
+        mean_quantity_mat_cr = _get_material_quantity(clinic_report, cr_mv)
+        
+        # get the quantity of the material used by other cg in the 
+        # appointment_clinic_report.
+        mean_quantity_material_appointment = 0
+        for cr in clinic_report.appointment.clinic_reports:
+            for materio_vigilance in cr.materio_vigilance:
+                if materio_vigilance.material_id == cr_mv.material_id:
+                    mean_quantity_material_appointment = (
+                        mean_quantity_material_appointment +
+                        _get_material_quantity(cr, materio_vigilance)
+                    )
+          
+        percent_mat_used_by_this_cr = Decimal(
+            mean_quantity_mat_cr / mean_quantity_material_appointment
         )
-
-        # Case material in materio vigilance is used in others
-        # clinic_report of the same appointment, we don't want to delete it
-        # but only to adapt quantity in materio_vigilance.quantity_used
-        # and material.actual_quantity
-        number_of_same_cg_in_appointment = [ cr for cr in
-            clinic_report.appointment.clinic_reports
-            if cr.clinic_gesture_id == clinic_report.clinic_gesture_id
-        ]
-        if cr_mv in same_material_used_in_various_clinic_report:
+        if len(cr_mv.clinic_reports) > 1:
             if not any([ mat_cg_ref for mat_cg_ref in 
                                     clinic_report.clinic_gesture.materials ]):
                 raise Exception('odontux_exception_12345')
@@ -331,30 +310,22 @@ def remove_from_materio_vigilance(clinic_report):
                                             clinic_report.clinic_gesture_id )
                 .one()
             )
-            
-            if not _leave_for_other_cg_in_cr(clinic_report.appointment, 
-                                    mat_cg_ref,
-                                    len(number_of_same_cg_in_appointment) ):
+           
+            if ( mat_cg_ref.enter_in_various_gestures > 1
+                and len(cr_mv.clinic_reports) % 
+                                mat_cg_ref.enter_in_various_gesture == 1 
+                or mat_cg_ref.enter_in_various_gestures == 1 ):
 
-                actual_quantity = ( float(cr_mv.material.actual_quantity) + 
-                    ( 1 - percent_mat_used_by_this_cr ) * 
-                                                float(cr_mv.quantity_used)
-                )
+                cr_mv.material.actual_quantity = round(Decimal( 
+                    cr_mv.material.actual_quantity + 
+                        percent_mat_used_by_this_cr * cr_mv.quantity_used
+                ), 2)
 
-                quantity_used = (
-                    float(cr_mv.quantity_used) -
-                    ( 1 - percent_mat_used_by_this_cr ) * 
-                                                float(cr_mv.quantity_used)
-                )
-                if ( cr_mv.material.asset_category.unity == 
-                                            constants.UNITY_PIECE ):
-                    cr_mv.material.actual_quantity = int(actual_quantity)
-                    cr_mv.quantity_used = int(quantity_used)
-                else:
-                    cr_mv.material.actual_quantity = "{0:.3f}".format(
-                                                            actual_quantity)
-                    cr_mv.quantity_used = "{0:.3f}".format(quantity_used)
-                    
+                cr_mv.quantity_used = round(Decimal(
+                    cr_mv.quantity_used -
+                    ( 1 - percent_mat_used_by_this_cr ) * cr_mv.quantity_used
+                ), 2)
+                   
                 meta.session.commit()
         
         # Case material in materio vigilance is only associated with 
@@ -367,6 +338,7 @@ def remove_from_materio_vigilance(clinic_report):
             )
             meta.session.delete(cr_mv)
             meta.session.commit()
+
     return True 
 
 @app.route('/remove/cg_from_cr?crid=<int:clinic_report_id>')
