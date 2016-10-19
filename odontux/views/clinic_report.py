@@ -128,10 +128,27 @@ def view_clinic_report(appointment_id):
                             cg_form=cg_form,
                             constants=constants)
 
-@app.route('/choose/cg_from_cot_to_cr?aid=<int:appointment_id>')
-def choose_clinic_gestures_from_cotation_to_clinic_report(appointment_id):
-    pass
-
+#@app.route('/choose/cg_from_cot_to_cr?aid=<int:appointment_id>', 
+#                                                            methods=['POST'])
+#def choose_clinic_gestures_from_cotation(appointment_id):
+#    """ """
+#
+#    form = ChooseCotationForReportForm(request.form)
+#    if form.validate():
+#        if not form.anatomic_location.data:
+#            form.anatomic_location.data = 0
+#        try:
+#            if int(form.anatomic_location.data) >= 0 : 
+#                add_cg_to_cr(appointment_id, form.clinic_gesture_id.data,
+#                                                form.anatomic_location.data)
+#        except ValueError:
+#            for anatomic_location in\
+#                            teeth.get_teeth_list(form.anatomic_location.data) :
+#                add_cg_to_cr(appointment_id, form.clinic_gesture_id.data,
+#                                                        anatomic_location)
+# 
+#    return render_template('choose_clinic_gestures_from_cotation.html')
+#
 @app.route('/add/cg_from_cot_to_cr?aid=<int:appointment_id>'
             '&cid=<int:cotation_id>', methods=['GET', 'POST'] )
 def add_clinic_gestures_from_cotation_to_clinic_report(appointment_id,
