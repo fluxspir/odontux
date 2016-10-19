@@ -96,12 +96,3 @@ class BillAppointmentCotationReference(Base):
                             ForeignKey(act.AppointmentCotationReference.id),
                             nullable=False)
     appointment_cotation = relationship('act.AppointmentCotationReference')
-
-#class BillAppointmentGestureReference(Base):
-#    __tablename__ = 'bill_appointment_gesture_reference'
-#    id = Column(Integer, primary_key=True)
-#    bill_id = Column(Integer, ForeignKey(Bill.id), nullable=False)
-#    appointment_gesture_id = Column(Integer,
-#                            ForeignKey(act.AppointmentGestureReference.id),
-#                            nullable=False)
-#    appointment_gesture = relationship('act.AppointmentGestureReference')

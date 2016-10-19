@@ -41,8 +41,10 @@ class ClinicGestureForm(Form):
     duration = IntegerField(_('Duration in minutes'),
                                                 [validators.Optional()],
                                                 render_kw={'size': 8})
-    is_daily = BooleanField(_('Happens once a day'))
-    is_appointmently = BooleanField(_('Happens once an appointment'))
+    before_first_patient = BooleanField(_('Before first patient of the day'))
+    after_last_patient = BooleanField(_('After last patient of the day'))
+    before_each_appointment = BooleanField(_('Before each appointment'))
+    after_each_appointment = BooleanField(_('After each appointment'))
     specialty_id = SelectField(_('Specialty'), coerce=int)
     submit = SubmitField(_('Update'))
 
@@ -57,7 +59,7 @@ class ClinicGestureCotationReferenceForm(Form):
     appointment_number = IntegerField(_('Appointment_number'))
     appointment_sequence = IntegerField(_('Appointment_sequence'))
     official_cotation = BooleanField(_('official'))
-    appears_on_appointment_resume = BooleanField(_('App resume'))
+    appears_on_clinic_report = BooleanField(_('Clinic Report'))
     submit = SubmitField(_('Update'))
 
 class GestureForm(Form):
@@ -118,6 +120,23 @@ class MaterioVigilanceUsedForm(Form):
     materials_used = FieldList(FormField(MaterioVigilanceForm))
     update = SubmitField(_('Update'))
 
+#@app.route('/get/clinic_gestures_in_cotation?cid=<int:cotation_id>')
+#def clinic_gestures_in_cotation(cotation_id):
+#    
+#    cotation = ( meta.session.query(act.Cotation)
+#                    .filter(act.Cotation.id == cotation_id)
+#                    .one()
+#    )
+#    clinic_gestures = [ 
+#        ( cgref.id, cgref.gesture.name ) for cgref in 
+#            sorted(cotation.clinic_gestures,
+#                                    key=lambda (cgref.appointment_number,
+#                                                cgref.appointment_sequence,
+#                                               cgref.gesture.name) 
+#            )
+#    ]
+#    return jsonify(success=True, clinic_gestures)
+#
 def get_specialty_field_list():
     return [ "name", "color" ]
 
@@ -372,8 +391,10 @@ def add_clinic_gesture(cotation_id):
                 'name': form.name.data,
                 'description': form.description.data,
                 'duration': datetime.timedelta(seconds=form.duration.data*60),
-                'is_daily': False,
-                'is_appointmently': False,
+                'before_first_patient': False,
+                'after_last_patient': False,
+                'before_each_appointment': False,
+                'after_each_appointment': False,
                 'specialty_id': form.specialty_id.data,
             }
             new_clinic_gesture = act.ClinicGesture(**args)
@@ -414,8 +435,10 @@ def clone_clinic_gesture(model_cg_id, cg_to_update_id, cotation_id):
     )
     cg_to_update.specialty_id = model_cg.specialty_id
     cg_to_update.duration = model_cg.duration
-    cg_to_update.is_daily = model_cg.is_daily
-    cg_to_update.is_appointmently = model_cg.is_appointmently
+    cg_to_update.before_first_patient = model_cg.before_first_patient
+    cg_to_update.after_last_patient = model_cg.after_last_patient
+    cg_to_update.before_each_appointment = model_cg.before_each_appointment
+    cg_to_update.after_each_appointment = model_cg.after_each_appointment
     
     for old_material in cg_to_update_mat_ref:
         meta.session.delete(old_material)
@@ -489,8 +512,9 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
         )
         # won't try to update with name already in db to avoid IntegrityError
         if not other_cg_same_new_name:
-            for f in ( 'name', 'description', 'duration', 'is_daily', 
-                                        'specialty_id', 'is_appointmently' ):
+            for f in ( 'name', 'description', 'duration', 'specialty_id',
+                    'before_first_patient', 'after_last_patient', 
+                    'before_each_appointment', 'after_each_appointment' ):
                 if f == 'duration':
                     setattr(clinic_gesture, f, 
                         datetime.timedelta(seconds=getattr(cg_form, f).data * 60))
@@ -514,8 +538,9 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
                                     mat_form, "{0:.2f}".format(material_cost)
         )
 
-    for f in ('name', 'description', 'duration', 'is_daily', 
-                                        'specialty_id', 'is_appointmently' ):
+    for f in ('name', 'description', 'duration', 'specialty_id',
+                'before_first_patient', 'after_last_patient',
+                'before_each_appointment', 'after_each_appointment' ):
         if f == 'duration':
             getattr(cg_form, f).data =\
                                 getattr(clinic_gesture, f).seconds % 3600 / 60
@@ -747,8 +772,8 @@ def clone_gestures_in_cotation(cotation_id):
                 'clinic_gesture_id': model_cg.clinic_gesture_id,
                 'cotation_id': cotation_id,
                 'official_cotation': model_cg.official_cotation,
-                'appears_on_appointment_resume':
-                                    model_cg.appears_on_appointment_resume,
+                'appears_on_clinic_report':
+                                    model_cg.appears_on_clinic_report,
                 'appointment_number': model_cg.appointment_number,
                 'appointment_sequence': model_cg.appointment_sequence,
             }
@@ -786,7 +811,13 @@ def update_cotation(cotation_id):
     else:
         price_form.price.data = cotation.price
 
-    clinic_gestures_available = meta.session.query(act.ClinicGesture).all()
+    clinic_gestures_available = ( meta.session.query(act.ClinicGesture)
+                                    .join(act.Specialty)
+                                    .order_by(
+                                        act.Specialty.name,
+                                        act.ClinicGesture.name)
+                                    .all()
+    )
     
     # cg_cot_dics = { appointment_number: [ [ (cg_cot_ref, form) ], duration,
     #                                       [ cg_mat_ref ], material_cost ],
@@ -857,8 +888,8 @@ def update_clinic_gesture_cotation_reference(cg_cot_ref_id):
             )
             for cg in other_cg:
                 cg.official_cotation = False
-        ref.appears_on_appointment_resume =\
-                                    ref_form.appears_on_appointment_resume.data
+        ref.appears_on_clinic_report =\
+                                    ref_form.appears_on_clinic_report.data
         ref.official_cotation = ref_form.official_cotation.data
         ref.appointment_number = ref_form.appointment_number.data
         ref.appointment_sequence = ref_form.appointment_sequence.data

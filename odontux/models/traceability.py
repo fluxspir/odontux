@@ -6,7 +6,7 @@
 #
 
 from meta import Base
-#from tables import traceability_asset_table, traceability_kit_table
+from tables import  clinic_report_materio_vigilance_table 
 import users, assets, schedule
 import sqlalchemy
 import datetime
@@ -108,16 +108,26 @@ class AssetSterilized(Base):
     expiration_date = Column(Date, nullable=False)
     sealed = Column(Boolean, nullable=False, default=True)
 
-
 class MaterioVigilance(Base):
     """ """
     __tablename__ = "materio_vigilance"
     id = Column(Integer, primary_key=True)
-    material_id = Column(Integer, ForeignKey(assets.Material.id), 
-                                                            primary_key=True)
-    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id),
-                                                            primary_key=True)
+    material_id = Column(Integer, ForeignKey(assets.Material.id) )
+    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id) )
     quantity_used = Column(Numeric)
     material = relationship('assets.Material', backref='materio_vigilance')
     appointment = relationship('schedule.Appointment')
+    clinic_reports = relationship('act.ClinicReport',
+                            secondary=clinic_report_materio_vigilance_table )
 
+#class MaterioVigilanceB(Base):
+#    """ """
+#    __tablename__ = "materio_vigilance_b"
+#    id = Column(Integer, primary_key=True)
+#    material_id = Column(Integer, ForeignKey(assets.Material.id) )
+#    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id) )
+#    quantity_used = Column(Numeric)
+#    material = relationship('assets.Material', backref='materio_vigilance')
+#    appointment = relationship('schedule.Appointment')
+#    clinic_reports = relationship('act.ClinicReport',
+#                            secondary=clinic_report_materio_vigilance_table )

@@ -82,3 +82,4 @@ from statements import ( list_statement, find_gesture )
 from compta import portal_comptability
 from patient import patient_appointment
 from documents import display_file
+from clinic_report import view_clinic_report

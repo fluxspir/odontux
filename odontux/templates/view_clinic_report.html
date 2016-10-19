@@ -1,0 +1,53 @@
+{% extends 'summary_patient.html' %}
+{% from '_formhelpers.html' import render_simple_field %}
+{% block main %}
+<a href="{{ url_for('patient_appointment', appointment_id=appointment.id ) }}">
+  Return to appointment</a><br />
+<h2>View appointment's clinic report</h2>
+
+{#<a href="{{ url_for('add_clinic_gestures_from_cotation_to_clinic_report', 
+                                          appointment_id=appointment.id) }}">
+      Add clinic gestures from cotation</a>
+#}
+<table>
+  <tr>
+    <td>
+      <form method='post' 
+            action='{{ url_for('choose_clinic_gestures_from_cotation_to_clinic_report',
+                                                appointment_id=appointment.id) }}'>
+          {{ render_simple_field(cotation_form.anatomic_location) }}
+            {{ cotation_form.cotation_id }} {{ cotation_form.submit }}
+      </form>
+    </td>
+    <td>
+      <form method='post' action='{{ url_for('add_clinic_gesture_to_clinic_report',
+                                                appointment_id=appointment.id) }}'>
+          {{ render_simple_field(cg_form.anatomic_location) }} 
+            {{ cg_form.clinic_gesture_id }} {{ cg_form.submit }}
+      </form>
+    </td>
+  </tr>
+</table>
+
+  <div style="float:left;width:25%;height:100%">
+    <strong>Cotations</strong><br />
+  </div>
+  <div style="float:left;width:40%;height:100%">
+    <strong>Clinic Gestures</strong><br />
+    {% for cr_cg_ref in clinic_gestures %}
+      {{ cr_cg_ref.sequence }} -- {{ cr_cg_ref.anatomic_location }} 
+      {{ cr_cg_ref.clinic_gesture.name }} -- {{ cr_cg_ref.duration }}
+      <a href="{{ url_for('remove_cg_from_cr', clinic_report_id=cr_cg_ref.id) }}">
+          Remove</a><br />
+    {% endfor %}
+  </div>
+    <strong>Materio Vigilance</strong><br />
+    {% for mat_vig in materio_vigilance %}
+      {{ mat_vig.material.asset_category.commercial_name }} 
+        {{ mat_vig.quantity_used }} 
+        {{ constants.UNITIES[mat_vig.material.asset_category.unity][1] }}<br />
+    {% endfor %}
+  <div>
+  </div>
+
+{% endblock %}

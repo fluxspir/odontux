@@ -13,8 +13,10 @@ Return to gesture <a href="{{ url_for('view_gesture',
       {{ render_simple_field_line(cg_form.name) }}
       {{ render_simple_field_line(cg_form.description) }}<br />
       {{ render_simple_field_line(cg_form.duration) }}<br />
-      {{ render_simple_field_line(cg_form.is_daily) }}
-      {{ render_simple_field_line(cg_form.is_appointmently) }}
+      {{ render_simple_field_line(cg_form.before_first_patient) }}
+      {{ render_simple_field_line(cg_form.after_last_patient) }}
+      {{ render_simple_field_line(cg_form.before_each_appointment) }}
+      {{ render_simple_field_line(cg_form.after_each_appointment) }}
       {{ render_sfl_wol(cg_form.submit) }}
 </form>
 <br />

@@ -24,6 +24,23 @@ from odontux.views.log import index
 from decimal import Decimal
 import datetime
 
+#@app.route('/update_materio_vigilance_base')
+#def update_materio_vigilance_base(you_know_what_you_are_doing=False):
+#    """ """
+#    if not you_know_what_you_are_doing:
+#        return abort(403)
+#
+#    old_materio_vigilance = meta.session.query(traceability.MaterioVigilanceB).all()
+#    
+#    for r in old_materio_vigilance:
+#        values = {
+#            'id' = old_materio_vigilance.id
+#
+#        }
+######
+#######
+#####
+
 @app.route('/update_appointment_cotation_ref_base')
 def update_appointment_cotation_ref_base(you_know_what_you_are_doing=False):
     """ Used for migration from appointment_gesture_reference to

@@ -25,6 +25,10 @@
     {% endblock %}
   <br />
   <br />
+    <a href="{{ url_for('view_clinic_report', appointment_id=appointment.id) }}">
+      View clinic report</a>
+    <br />
+    <br />
     <a href="{{ url_for('sterilized_asset_used', patient_id=patient.id,
                                   appointment_id=appointment.id ) }}">
         Update sterilized assets used in this appointment
