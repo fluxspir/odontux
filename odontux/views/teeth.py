@@ -32,11 +32,12 @@ def get_teeth_list(teeth=""):
         teeth may be separated by ";"
         sequence of teeth is separated by "-" and must be on the same arcade
 
-        return a list o teeth.
+        return a list o int(teeth).
         examples : 
          "13" → [ 13 ]
          "13;15" → [ 13, 15 ]
-         "13 ; 37" → [ 13, 37" ]
+         "13 ; 37" → [ 13, 37 ]
+         "13-21" → [ 13, 12, 11, 21 ]
          "26-36" → [ ]
          "stupid_entry; 48" → [ 48 ]
     """
