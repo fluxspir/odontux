@@ -277,7 +277,7 @@ def remove_from_materio_vigilance(clinic_report):
                 quantity_material_used + mat_cg_ref.mean_quantity
             )
         return quantity_material_used
-       
+      
     for cr_mv in clinic_report.materio_vigilance:
 
         mean_quantity_mat_cr = _get_material_quantity(clinic_report, cr_mv)
@@ -310,10 +310,11 @@ def remove_from_materio_vigilance(clinic_report):
                                             clinic_report.clinic_gesture_id )
                 .one()
             )
-           
             if ( mat_cg_ref.enter_in_various_gestures > 1
-                and len(cr_mv.clinic_reports) % 
-                                mat_cg_ref.enter_in_various_gesture == 1 
+                and len(
+                    [ cr for cr in clinic_report.appointment.clinic_reports
+                        if cr.clinic_gesture_id == mat_cg_ref.clinic_gesture_id
+                    ] ) %   mat_cg_ref.enter_in_various_gestures == 1 
                 or mat_cg_ref.enter_in_various_gestures == 1 ):
 
                 cr_mv.material.actual_quantity = round(Decimal( 
@@ -323,7 +324,7 @@ def remove_from_materio_vigilance(clinic_report):
 
                 cr_mv.quantity_used = round(Decimal(
                     cr_mv.quantity_used -
-                    ( 1 - percent_mat_used_by_this_cr ) * cr_mv.quantity_used
+                    percent_mat_used_by_this_cr * cr_mv.quantity_used
                 ), 2)
                    
                 meta.session.commit()
@@ -332,7 +333,6 @@ def remove_from_materio_vigilance(clinic_report):
         # clinic_report we're about to delete, we delete materio_vigilance 
         # entry and adapt material.actual_quantity.
         else:
-            # TODO create function _delete(), 
             cr_mv.material.actual_quantity = (
                 cr_mv.material.actual_quantity + cr_mv.quantity_used
             )
