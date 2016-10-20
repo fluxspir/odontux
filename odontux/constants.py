@@ -22,7 +22,7 @@ elif LOCALE == 'br':
 else:
     CURRENCY_SYMBOL = u"$"
 
-QUOTE_VALIDITY = 3   # in months
+QUOTE_VALIDITY = 2   # in months
 
 
 T11_NAME = _("11") # _("Incisivo central superior right permanent")

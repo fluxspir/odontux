@@ -73,7 +73,7 @@ class Cotation(Base):
     gesture_id = Column(Integer, ForeignKey(Gesture.id), nullable=False)
     healthcare_plan_id = Column(Integer, ForeignKey(HealthCarePlan.id), 
                                                             nullable=False)
-    price = Column(Numeric, nullable=True, default=0)
+    price = Column(Numeric, default=0)
     active = Column(Boolean, default=True)
     gesture = relationship("Gesture")
     healthcare_plan = relationship('HealthCarePlan', backref="cotations")
@@ -92,8 +92,8 @@ class ClinicGestureCotationReference(Base):
     official_cotation = Column(Boolean, default=False)
     appears_on_clinic_report = Column(Boolean, default=False)
     clinic_gesture = relationship('ClinicGesture') 
-    appointment_number = Column(Integer, default=0)
-    appointment_sequence = Column(Integer, default=0)
+    appointment_number = Column(Integer, default=1)
+    appointment_sequence = Column(Integer, default=1)
 
 class AppointmentCotationReference(Base):
     """ 
@@ -105,7 +105,7 @@ class AppointmentCotationReference(Base):
                                                                 nullable=False)
     cotation_id = Column(Integer, ForeignKey(Cotation.id))#, nullable=False)
     anatomic_location = Column(Integer, nullable=False)
-    price = Column(Numeric, nullable=False)
+    price = Column(Numeric, nullable=False, default=0)
     invoice_id = Column(String, default="")
     is_paid = Column(Boolean, default=False)
     cotation = relationship('Cotation')

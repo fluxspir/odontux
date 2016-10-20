@@ -805,7 +805,7 @@ def make_prescription(patient_id, appointment_id, prescription_form):
     Story.append(Spacer(1, 5 * mm))
 
     # Patient's dentification 
-    Story.append(Paragraph('Patiente: ' + patient.firstname + " "\
+    Story.append(Paragraph('Paciente: ' + patient.firstname + " "\
                                     + patient.lastname, styles['patient']))
     Story.append(Paragraph(patient.address.street + ", " +\
                 patient.address.street_number + " " +\
