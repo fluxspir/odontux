@@ -13,7 +13,7 @@
   <tr>
     <td>
       <form method='post' 
-            action='{{ url_for('choose_clinic_gestures_from_cotation_to_clinic_report',
+            action='{{ url_for('choose_clinic_gestures_from_cotation',
                                                 appointment_id=appointment.id) }}'>
           {{ render_simple_field(cotation_form.anatomic_location) }}
             {{ cotation_form.cotation_id }} {{ cotation_form.submit }}
@@ -31,6 +31,9 @@
 
   <div style="float:left;width:25%;height:100%">
     <strong>Cotations</strong><br />
+    {% for cotation in cotations %}
+      {{ cotation.gesture.name }}<br />
+    {% endfor %}
   </div>
   <div style="float:left;width:40%;height:100%">
     <strong>Clinic Gestures</strong><br />

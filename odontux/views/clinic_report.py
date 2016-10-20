@@ -38,30 +38,30 @@ class ClinicGestureInClinicReportForm(Form):
     memo = TextAreaField(_('Memo'))
     delete = BooleanField(_('Delete'))
 
-class ClinicReportForm(Form):
-    clinic_gestures = FieldList(FormField(ClinicGestureInClinicReportForm),
-                                                            min_entries=1)
-    submit = SubmitField(_('Submit'))
-
-
-class ClinicGesturesFromAdmGestureForm(Form):
+#class ClinicReportForm(Form):
+#    clinic_gestures = FieldList(FormField(ClinicGestureInClinicReportForm),
+#                                                            min_entries=1)
+#    submit = SubmitField(_('Submit'))
+#
+#
+class ClinicGestureKeepForm(Form):
     clinic_gesture_id = HiddenField(_('cg_id'))
-    delete = BooleanField(_('Delete'))
-
-class ClinicReportFromAdmGestureForm(Form):
-    clinic_gestures = FieldList(FormField(ClinicGesturesFromAdmGestureForm),
-                                                            min_entries=1)
-    submit = SubmitField(_('Submit'))
+    keep = BooleanField(_('Keep'))
 
 class ClinicGesturesFromCotationForm(Form):
-    clinic_gesture_id = HiddenField(_('cg_id'))
-    delete = BooleanField(_('Delete'))
-
-class ClinicReportFromCotationForm(Form):
-    clinic_gestures = FieldList(FormField(ClinicGesturesFromCotationForm),
+    clinic_gestures = FieldList(FormField(ClinicGestureKeepForm), 
                                                             min_entries=1)
     submit = SubmitField(_('Submit'))
 
+#class ClinicGesturesFromCotationForm(Form):
+#    clinic_gesture_id = HiddenField(_('cg_id'))
+#    delete = BooleanField(_('Delete'))
+#
+#class ClinicReportFromCotationForm(Form):
+#    clinic_gestures = FieldList(FormField(ClinicGesturesFromCotationForm),
+#                                                            min_entries=1)
+#    submit = SubmitField(_('Submit'))
+#
 class ChooseCotationForReportForm(Form):
     anatomic_location = TextField(_('Anatomic location'))
     cotation_id = SelectField(_('Cotation'), coerce=int)
@@ -71,6 +71,23 @@ class ChooseClinicGestureForReportForm(Form):
     anatomic_location = TextField(_('Anatomic location'))
     clinic_gesture_id = SelectField(_('Clinic Gesture'), coerce=int)
     submit = SubmitField(_('Choose clinic gesture'))
+
+def anat_loc_is_list(anat_loc=""):
+    """we want to recognize teeth ( 9 < teeth < 100 )
+                   teeth sets ( 0 <= region < 10 )
+        exoendobuccal regions ( 99 < exoendobuccal
+    """
+    if not anat_loc:
+        anat_loc = 0
+    try:
+        if int(0) >= 0:
+            return False
+    except ValueError:
+        return True
+    else:
+        return None
+
+#
 
 @app.route('/view/clinic_report?aid=<int:appointment_id>', 
                                                     methods=['GET'])
@@ -104,11 +121,17 @@ def view_clinic_report(appointment_id):
                             act.ClinicGesture.name )
                 .all()
     ]
-    clinic_gestures = []
-    for clinic_report in sorted(appointment.clinic_reports,
-                            key=lambda clinic_report: clinic_report.sequence):
+    clinic_gestures = [ clinic_report for clinic_report in 
+                            sorted(appointment.clinic_reports,
+                                key=lambda clinic_report: 
+                                    clinic_report.sequence) 
+    ]
 
-        clinic_gestures.append(clinic_report)
+    cotations = [ cot for cot in sorted(appointment.administrative_gestures,
+                                key=lambda cot: (
+                                    cot.gesture.name,
+                                    cot.anatomic_location ) )
+    ]
     
     materio_vigilance = [ 
         mat_vig for mat_vig in
@@ -123,32 +146,91 @@ def view_clinic_report(appointment_id):
                             patient=patient,
                             appointment=appointment,
                             clinic_gestures=clinic_gestures,
+                            cotations=cotations,
                             materio_vigilance=materio_vigilance,
                             cotation_form=cotation_form,
                             cg_form=cg_form,
                             constants=constants)
 
-#@app.route('/choose/cg_from_cot_to_cr?aid=<int:appointment_id>', 
-#                                                            methods=['POST'])
-#def choose_clinic_gestures_from_cotation(appointment_id):
-#    """ """
-#
-#    form = ChooseCotationForReportForm(request.form)
-#    if form.validate():
-#        if not form.anatomic_location.data:
-#            form.anatomic_location.data = 0
-#        try:
-#            if int(form.anatomic_location.data) >= 0 : 
-#                add_cg_to_cr(appointment_id, form.clinic_gesture_id.data,
-#                                                form.anatomic_location.data)
-#        except ValueError:
-#            for anatomic_location in\
-#                            teeth.get_teeth_list(form.anatomic_location.data) :
-#                add_cg_to_cr(appointment_id, form.clinic_gesture_id.data,
-#                                                        anatomic_location)
-# 
-#    return render_template('choose_clinic_gestures_from_cotation.html')
-#
+@app.route('/choose/cg_from_cot_inserted_in_cr?aid=<int:appointment_id>'
+            '&cid=<int:cotation_id>&aloc=<anat_loc>', methods=['POST'])
+def choose_cg_from_cot_inserted_in_cr(appointment_id, cotation_id, anat_loc):
+    def _insert_cg_in_clinic_report(cg_id, anatomic):
+        pass
+
+    form = ClinicGesturesFromCotationForm(request.form)
+    if form.validate():
+        cotation = ( meta.session.query(act.Cotation)
+            .filter(act.Cotation.id == cotation_id)
+            .one()
+        )
+        for entry in form.clinic_gestures.entries:
+            if anat_loc_is_list(anat_loc):
+                for anatomic_location in teeth.get_teeth_list(anat_loc):
+                    add_cg_to_cr(appointment_id, 
+                    int(entry.data['clinic_gesture_id']), 
+                    anatomic_location)
+            else:
+                add_cg_to_cr(appointment_id, 
+                int(entry.data['clinic_gesture_id']), str(anat_loc))
+
+    return redirect(url_for('view_clinic_report', 
+                                                appointment_id=appointment_id))
+
+@app.route('/choose/cg_from_cot?aid=<int:appointment_id>', methods=['POST'])
+def choose_clinic_gestures_from_cotation(appointment_id):
+    """ """
+    patient, appointment = checks.get_patient_appointment(
+                                                appointment_id=appointment_id)
+    form = ChooseCotationForReportForm(request.form)
+    form.cotation_id.choices = [ (cot.id, cot.gesture.name) for cot in
+        meta.session.query(act.Cotation)
+            .join(act.Gesture, act.Specialty)
+            .order_by(act.Specialty.name, act.Gesture.name)
+            .all()
+    ]
+    if form.validate():
+        cotation = ( meta.session.query(act.Cotation)
+            .filter(act.Cotation.id == form.cotation_id.data)
+            .one()
+        )
+        anatomic_locations = ""
+        if not form.anatomic_location.data:
+            form.anatomic_location.data = 0
+        try:
+            if int(form.anatomic_location.data) >= 0 :
+                anatomic_locations = str(form.anatomic_location.data)
+        except ValueError:
+            for idx, anat_loc in\
+                enumerate(teeth.get_teeth_list(form.anatomic_location.data)) :
+                if idx:
+                    anatomic_locations = anatomic_locations + ","
+                anatomic_locations = anatomic_locations + str(anat_loc)
+
+        cg_form = ClinicGesturesFromCotationForm(request.form)
+        for cg_cot_ref in sorted(cotation.clinic_gestures,
+                                key=lambda cg_cot_ref: (
+                                    cg_cot_ref.appointment_number,
+                                    cg_cot_ref.appointment_sequence )
+                                                                         ):
+            cg_keep_form = ClinicGestureKeepForm(request.form)
+            cg_keep_form.clinic_gesture_id = cg_cot_ref.clinic_gesture_id
+            cg_keep_form.keep = cg_cot_ref.appears_on_clinic_report
+            cg_form.clinic_gestures.append_entry(cg_keep_form)
+            cg_form.clinic_gestures.entries[-1].label.text =\
+                                                cg_cot_ref.clinic_gesture.name
+        cg_form.clinic_gestures.entries = [ entry for entry in 
+            cg_form.clinic_gestures.entries if entry.data['clinic_gesture_id'] 
+        ]
+        return render_template('choose_clinic_gestures_from_cotation.html', 
+                                    anatomic_locations=anatomic_locations,
+                                                    appointment=appointment,
+                                                    cotation_id=cotation.id,
+                                                                form=cg_form)
+    return redirect(url_for('view_clinic_report', 
+                                                appointment_id=appointment.id))
+ 
+
 @app.route('/add/cg_from_cot_to_cr?aid=<int:appointment_id>'
             '&cid=<int:cotation_id>', methods=['GET', 'POST'] )
 def add_clinic_gestures_from_cotation_to_clinic_report(appointment_id,

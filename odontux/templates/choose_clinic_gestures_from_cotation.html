@@ -1,10 +1,13 @@
 {% extends 'summary_patient.html' %}
 
 {% block main %}
-<h2>Choose clinic gestures that enter in clinic report</h2>
+<h2>Choose clinic gestures for {{ anatomic_locations }}</h2>
 
-{% for cg_ref in app_cot_ref.cotation.clinic_gestures %}
-
-{% endfor %}
-
+<form method='post' action='{{ url_for('choose_cg_from_cot_inserted_in_cr',
+                                            appointment_id=appointment.id,
+                                            cotation_id=cotation_id,
+                                            anat_loc=anatomic_locations) }}'>
+{{ form.clinic_gestures }}
+{{ form.submit }}
+</form>
 {% endblock %}
