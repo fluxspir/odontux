@@ -13,7 +13,7 @@ from sqlalchemy import or_, and_, desc
 from gettext import gettext as _
 
 from odontux.odonweb import app
-from odontux import constants, checks
+from odontux import constants, checks, gnucash_handler
 from odontux.models import ( meta, act, schedule, administration, traceability,
                             assets, teeth, compta)
 import teeth, cost
@@ -49,6 +49,8 @@ class ClinicGestureKeepForm(Form):
     keep = BooleanField(_('Keep'))
 
 class ClinicGesturesFromCotationForm(Form):
+#    healthcare_plan_id = SelectField(_('Healthcare plan'), coerce=int)
+    price = DecimalField(_('Price'))
     clinic_gestures = FieldList(FormField(ClinicGestureKeepForm), 
                                                             min_entries=1)
     submit = SubmitField(_('Submit'))
@@ -97,14 +99,16 @@ def view_clinic_report(appointment_id):
 
     cotation_form = ChooseCotationForReportForm(request.form)
     cotation_form.cotation_id.choices = [
-        ( cotation.id, cotation.gesture.name) for cotation in
+        ( cotation.id, cotation.gesture.name +  " " + 
+            cotation.healthcare_plan.name) for cotation in
          meta.session.query(act.Cotation)
             .filter(act.Cotation.healthcare_plan_id.in_(
                                             [ hc.id for hc in patient.hcs ] )
             )
-            .join(act.Gesture, act.Specialty)
+            .join(act.Gesture, act.Specialty, act.HealthCarePlan)
             .order_by(act.Specialty.name,
-                        act.Gesture.name )
+                        act.Gesture.name,
+                        act.HealthCarePlan.name.desc())
             .all()
     ]
     cg_form = ChooseClinicGestureForReportForm(request.form)
@@ -127,6 +131,8 @@ def view_clinic_report(appointment_id):
                                     clinic_report.sequence) 
     ]
 
+    # only appears cotation that were administraly officially indentified,
+    # by a single clinic gesture in the global gesture repair.
     cotations = [ cot for cot in sorted(appointment.administrative_gestures,
                                 key=lambda cot: (
                                     cot.gesture.name,
@@ -152,13 +158,67 @@ def view_clinic_report(appointment_id):
                             cg_form=cg_form,
                             constants=constants)
 
+def add_appointment_cotation(appointment_id, cotation_id, price,
+                                                            anatomic_location):
+    values = {
+        'appointment_id': appointment_id,
+        'cotation_id': cotation_id,
+        'anatomic_location': anatomic_location,
+    }
+    if not price:
+        values['is_paid'] = True
+        values['price'] = 0
+    else:
+        values['price'] = price
+    new_appointment_cotation_ref = act.AppointmentCotationReference(**values)
+    meta.session.add(new_appointment_cotation_ref)
+    meta.session.commit()
+
+    invoice = gnucash_handler.GnuCashInvoice(
+                        new_appointment_cotation_ref.appointment.patient.id, 
+                                new_appointment_cotation_ref.appointment_id, 
+                        new_appointment_cotation_ref.appointment.dentist_id)
+
+    invoice_id = invoice.add_act(new_appointment_cotation_ref.gesture.name, 
+                                            new_appointment_cotation_ref.price,
+                                            new_appointment_cotation_ref.id)
+
+    new_appointment_cotation_ref.invoice_id = invoice_id
+    meta.session.commit()
+
+    return new_appointment_cotation_ref
+
 @app.route('/choose/cg_from_cot_inserted_in_cr?aid=<int:appointment_id>'
             '&cid=<int:cotation_id>&aloc=<anat_loc>', methods=['POST'])
 def choose_cg_from_cot_inserted_in_cr(appointment_id, cotation_id, anat_loc):
-    def _insert_cg_in_clinic_report(cg_id, anatomic):
-        pass
+
+    def _add_cg_to_cr(a_id, cg_id, anat_loc, cot_id, price):
+
+        clinic_report = add_cg_to_cr(a_id, cg_id, anat_loc)
+
+        cg_cot_ref = ( 
+            meta.session.query(act.ClinicGestureCotationReference)
+            .filter(
+                act.ClinicGestureCotationReference.clinic_gesture_id == cg_id,
+                act.ClinicGestureCotationReference.cotation_id == cot_id)
+            .one()
+        )
+
+        if cg_cot_ref.official_cotation:
+            new_administrativ_cotation = add_appointment_cotation(
+                                                    appointment_id=a_id,
+                                                    cotation_id=cot_id,
+                                                    price=price,
+                                                    anatomic_location=anat_loc
+            )
+
+#    patient, appointment = checks.get_patient_appointment(
+#                                                appointment_id=appointment_id)
 
     form = ClinicGesturesFromCotationForm(request.form)
+#    form.healthcare_plan_id.choices = [ ( hcp.id, hcp.name ) for hcp in
+#                    sorted(patient.hcs, key=lambda hcp: hcp.name.desc()) 
+#    ]
     if form.validate():
         cotation = ( meta.session.query(act.Cotation)
             .filter(act.Cotation.id == cotation_id)
@@ -167,13 +227,18 @@ def choose_cg_from_cot_inserted_in_cr(appointment_id, cotation_id, anat_loc):
         for entry in form.clinic_gestures.entries:
             if anat_loc_is_list(anat_loc):
                 for anatomic_location in teeth.get_teeth_list(anat_loc):
-                    add_cg_to_cr(appointment_id, 
-                    int(entry.data['clinic_gesture_id']), 
-                    anatomic_location)
+                    clinic_report = _add_cg_to_cr(appointment_id, 
+                                        int(entry.data['clinic_gesture_id']),
+                                        anatomic_location,
+                                        cotation_id,
+                                        form.price.data)
             else:
-                add_cg_to_cr(appointment_id, 
-                int(entry.data['clinic_gesture_id']), str(anat_loc))
-
+                clinic_report = _add_cg_to_cr(appointment_id, 
+                                        int(entry.data['clinic_gesture_id']), 
+                                        str(anat_loc),
+                                        cotation_id,
+                                        form.price.data)
+    
     return redirect(url_for('view_clinic_report', 
                                                 appointment_id=appointment_id))
 
@@ -222,11 +287,13 @@ def choose_clinic_gestures_from_cotation(appointment_id):
         cg_form.clinic_gestures.entries = [ entry for entry in 
             cg_form.clinic_gestures.entries if entry.data['clinic_gesture_id'] 
         ]
+        cg_form.price.data = cotation.price
         return render_template('choose_clinic_gestures_from_cotation.html', 
                                     anatomic_locations=anatomic_locations,
                                                     appointment=appointment,
                                                     cotation_id=cotation.id,
-                                                                form=cg_form)
+                                                                form=cg_form,
+                                                    constants=constants)
     return redirect(url_for('view_clinic_report', 
                                                 appointment_id=appointment.id))
  
@@ -290,6 +357,7 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
                         .filter(act.ClinicGesture.id == clinic_gesture_id )
                         .one()
     )
+                                                        
     values = {
         'appointment_id': appointment_id,
         'clinic_gesture_id': clinic_gesture_id,
@@ -316,6 +384,8 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
                                                     mat_cg_ref, material_used)
             new_clinic_report.materio_vigilance.append(materio_vigilance)
             meta.session.commit()
+
+    return new_clinic_report
 
 @app.route('/add/cg_to_cr?aid=<int:appointment_id>', methods=['POST'])
 def add_clinic_gesture_to_clinic_report(appointment_id):
