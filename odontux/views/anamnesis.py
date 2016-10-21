@@ -132,7 +132,8 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
     past_surgery_form = PastSurgeryForm(request.form)
     allergy_form = AllergyForm(request.form)
     allergy_form.allergy_type.choices = constants.ALLERGIES.items()
-    allergy_form.reaction.choices = constants.ALLERGIC_REACTIONS.items()
+    allergy_form.reaction.choices = [ ( al_re[0], al_re[1][0] ) for al_re in 
+                                        constants.ALLERGIC_REACTIONS.items() ]
     oral_hygiene_form = OralHygieneForm(request.form)
     oral_hygiene_form.oral_type.choices = constants.ORAL_HYGIENE.items()
 
