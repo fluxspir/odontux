@@ -105,8 +105,7 @@ def view_clinic_report(appointment_id):
                         act.ClinicGesture.after_each_appointment.is_(False)
                 )
                 .join(act.Specialty)
-                .order_by(act.Specialty.name,
-                            act.ClinicGesture.name )
+                .order_by(act.Specialty.name, act.ClinicGesture.name )
                 .all()
     ]
     clinic_gestures = [ clinic_report for clinic_report in 
@@ -391,11 +390,10 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
             'tooth_id': tooth.id,
             'location': event_model.location,
             'state': event_model.state,
+            'description': event_model.description,
+            'comment': event_model.comment,
+            'color': event_model.color,
         }
-
-#        new_event = model_teeth.Event(**values)
-#        meta.session.add(new_event)
-#        meta.session.commit()
         if event_model.location == constants.TOOTH_EVENT_LOCATION_PERIODONTAL :
             pass
         elif event_model.location == constants.TOOTH_EVENT_LOCATION_TOOTH:
