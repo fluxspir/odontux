@@ -21,7 +21,7 @@ from gettext import gettext as _
 from odontux import constants, checks
 from odontux.odonweb import app
 from odontux.views import forms
-from odontux.models import meta, teeth, schedule, headneck, documents
+from odontux.models import meta, teeth, schedule, headneck, documents, act
 from odontux.views.log import index
 from documents import insert_document_in_db
 
@@ -153,6 +153,11 @@ class ToothForm(Form):
                                                                 coerce=int)
     surveillance = BooleanField(_('Surveillance'))
 
+class ToothModelForm(Form):
+    choose_tooth_model_state = SelectField(_("Choose state of tooth/teeth"), 
+                                                                coerce=int)
+    surveillance = BooleanField(_('Surveillance'))
+
 class DocumentForm(Form):
     document = FileField(_('Document'))
     document_type = SelectField(_('Type'), coerce=int, 
@@ -168,7 +173,7 @@ class EventForm(Form):
     description = TextField(_("Description"))
     comment = TextAreaField(_("General comments of this event"))
     color = forms.ColorField(_("color"))
-    anatomic_location = SelectField(_("Location"), coerce=int,
+    location = SelectField(_("Location"), coerce=int,
                         description='ChangementToothAnatomicLocation()')
 
 class CrownEventForm(Form):
@@ -318,21 +323,8 @@ def add_file_to_tooth_event(patient_id, appointment_id, event_id):
     return redirect(url_for('show_tooth', patient_id=patient_id,
                                         appointment_id=appointment_id,
                                         tooth_codename=event.tooth.codename))
-#    return render_template('add_file_to_tooth_event.html', patient=patient,
-#                                            appointment=appointment,
-#                                            event=event,
-#                                            document_form=document_form)
-#
-@app.route('/add/event_tooth_located?pid=<int:patient_id>'
-                        '&aid=<int:appointment_id>', methods=['GET','POST'])
-def add_event_tooth_located(patient_id, appointment_id):
-    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
-                        constants.ROLE_ASSISTANT ]
-    if session['role'] not in authorized_roles:
-        return abort(403)
 
-    patient, appointment = checks.get_patient_appointment(patient_id,
-                                                                appointment_id)
+def get_event_forms(appointment=None):
     tooth_form = ToothForm(request.form)
     event_form = EventForm(request.form)
     crown_event_form = CrownEventForm(request.form)
@@ -343,18 +335,25 @@ def add_event_tooth_located(patient_id, appointment_id):
                             for id, state in constants.TOOTH_STATES.items() ]
 
     anatomic_locations = constants.TOOTH_EVENT_LOCATIONS.items()
-    event_form.anatomic_location.choices = [ 
+    event_form.location.choices = [ 
             (id, location[0]) for id, location in anatomic_locations ]
+    tooth_model_form = ToothModelForm(request.form)
+    tooth_model_form.choose_tooth_model_state.choices = [ (id, state[0]) 
+                            for id, state in constants.TOOTH_STATES.items() ]
 
-    event_form.appointment_id.choices = [
+    if appointment:
+        event_form.appointment_id.choices = [
             (a.id, str(a.agenda.starttime.date()) 
             + " " + str(a.agenda.starttime.time()) 
             ) for a in meta.session.query(schedule.Appointment)
-                        .filter(schedule.Appointment.patient_id == patient.id)
+                        .filter(schedule.Appointment.patient_id == 
+                                                        appointment.patient.id)
                         .join(schedule.Agenda)
                         .order_by(schedule.Agenda.starttime.desc())
                         .all() 
-            ]
+        ]
+    else:
+        event_form.appointment_id.choices = [ (0, '--') ]
 
     crown_event_form.choose_crown_state.choices = [ (id, state[0]) 
                             for id, state in constants.CROWN_STATES.items() ]
@@ -362,6 +361,24 @@ def add_event_tooth_located(patient_id, appointment_id):
                             for id, state in constants.ROOT_STATES.items() ]
     periodontal_event_form.choose_periodontal_state.choices = [ (id, state[0]) 
                         for id, state in constants.PERIODONTAL_STATES.items() ]
+
+    return tooth_form, event_form, crown_event_form, root_event_form,\
+                                    periodontal_event_form, tooth_model_form
+
+@app.route('/add/event_tooth_located?pid=<int:patient_id>'
+                        '&aid=<int:appointment_id>', methods=['GET','POST'])
+def add_event_tooth_located(patient_id, appointment_id):
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE,
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+
+    patient, appointment = checks.get_patient_appointment(patient_id,
+                                                                appointment_id)
+    ( tooth_form, event_form, crown_event_form, 
+        root_event_form, periodontal_event_form,
+        tooth_model_form ) = get_event_forms(appointment)
+
     if ( request.method == 'POST' and event_form.validate() 
                                                 and tooth_form.validate() ):
 
@@ -381,11 +398,11 @@ def add_event_tooth_located(patient_id, appointment_id):
             'description': event_form.description.data,
             'comment': event_form.comment.data,
             'color': event_form.color.data,
-            'location': event_form.anatomic_location.data,
+            'location': event_form.location.data,
             'state': tooth_form.choose_tooth_state.data,
         }
 
-        if ( event_form.anatomic_location.data == 
+        if ( event_form.location.data == 
                                         constants.TOOTH_EVENT_LOCATION_TOOTH ):
             
             for tooth_codename in teeth_to_add:
@@ -396,7 +413,7 @@ def add_event_tooth_located(patient_id, appointment_id):
                 meta.session.add(new_tooth_event)
                 meta.session.commit()
 
-        elif ( event_form.anatomic_location.data == 
+        elif ( event_form.location.data == 
                                         constants.TOOTH_EVENT_LOCATION_CROWN
                                             and crown_event_form.validate() ):
             crown_values = {
@@ -415,7 +432,7 @@ def add_event_tooth_located(patient_id, appointment_id):
                 meta.session.add(new_crown_event)
                 meta.session.commit()
 
-        elif ( event_form.anatomic_location.data == 
+        elif ( event_form.location.data == 
                                             constants.TOOTH_EVENT_LOCATION_ROOT
                                             and root_event_form.validate() ):
             root_values = {
@@ -434,7 +451,7 @@ def add_event_tooth_located(patient_id, appointment_id):
                 meta.session.add(new_root_event)
                 meta.session.commit()
         
-        elif ( event_form.anatomic_location.data == 
+        elif ( event_form.location.data == 
                                     constants.TOOTH_EVENT_LOCATION_PERIODONTAL
                                     and periodontal_event_form.validate() ):
             periodontal_values = {
@@ -476,4 +493,194 @@ def add_event_tooth_located(patient_id, appointment_id):
                     periodontal_event_form=periodontal_event_form,
                     clear_form=clear_form)
 
+@app.route('/add/new_event_model?cg_id=<int:clinic_gesture_id>'
+            '&cid=<int:cotation_id>',                methods=['GET', 'POST'])
+def add_event_model(clinic_gesture_id, cotation_id):
+    ( tooth_form, event_form, crown_event_form, 
+    root_event_form, periodontal_event_form,
+    tooth_model_form ) = get_event_forms()
+    clinic_gesture = ( meta.session.query(act.ClinicGesture)
+        .filter(act.ClinicGesture.id == clinic_gesture_id)
+        .one()
+    )
+
+    if ( request.method == 'POST' and event_form.validate() 
+                                            and tooth_model_form.validate() ):
+        values = {
+            'description': event_form.description.data,
+            'comment': event_form.comment.data,
+            'color': event_form.color.data,
+            'location': event_form.location.data,
+            'tooth_state': tooth_model_form.choose_tooth_model_state.data,
+            'surveillance': tooth_model_form.surveillance.data,
+        }
+
+        if ( event_form.location.data == 
+                                        constants.TOOTH_EVENT_LOCATION_TOOTH ):
+            new_tooth_event = teeth.ToothEventModel(**values)
+            meta.session.add(new_tooth_event)
+            meta.session.commit()
+            new_event = new_tooth_event
+
+        elif ( event_form.location.data == 
+                                        constants.TOOTH_EVENT_LOCATION_CROWN
+                                            and crown_event_form.validate() ):
+            crown_values = {
+                'state': crown_event_form.choose_crown_state.data,
+                'tooth_shade': crown_event_form.tooth_shade.data,
+                }
+            values.update(crown_values)
+            for side in crown_sides():
+                values[side] = getattr(crown_event_form, side).data
+            new_crown_event = teeth.CrownEventModel(**values)
+            meta.session.add(new_crown_event)
+            meta.session.commit()
+            new_event = new_crown_event
+
+        elif ( event_form.location.data == 
+                                            constants.TOOTH_EVENT_LOCATION_ROOT
+                                            and root_event_form.validate() ):
+            root_values = {
+                'state': root_event_form.choose_root_state.data,
+                }
+            values.update(root_values)
+            for root_canal in root_canals():
+                values[root_canal] =\
+                                getattr(root_event_form, root_canal).data
+            new_root_event = teeth.RootCanalEventModel(**values)
+            meta.session.add(new_root_event)
+            meta.session.commit()
+            new_event = new_root_event
+#        elif ( event_form.location.data == 
+#                                    constants.TOOTH_EVENT_LOCATION_PERIODONTAL
+#                                    and periodontal_event_form.validate() ):
+#            periodontal_values = {
+#                'furcation': periodontal_event_form.furcation.data,
+#                'recession': periodontal_event_form.recession.data,
+#                'pocket_depth': periodontal_event_form.pocket_depth.data,
+#                }
+#            values.update(periodontal_values)
+#            del values['state'] # As there is no "state" in PeriodontalEvent
+#                # updating gum table
+#                gum.state = periodontal_event_form.choose_periodontal_state.data
+#                gum.bleeding = periodontal_event_form.bleeding.data
+#                # working with event_values for state !
+#                _update_tooth_datas(tooth, tooth_values)
+#                values['tooth_id'] = tooth.id
+#                for site in periodontal_locations():
+#                    values[site] = getattr(periodontal_event_form, site).data
+#                new_periodontal_event = teeth.PeriodontalEventModel(**values)
+#                meta.session.add(new_periodontal_event)
+#                meta.session.commit()
+        
+        clinic_gesture.event_model_id = new_event.id
+        meta.session.commit()
+    
+        return redirect(url_for('update_clinic_gesture',
+                                        clinic_gesture_id=clinic_gesture_id,
+                                        cotation_id=cotation_id))
+
+    return render_template('add_event_model.html',
+                    clinic_gesture_id=clinic_gesture_id,
+                    event_form=event_form,
+                    crown_event_form=crown_event_form,
+                    root_event_form=root_event_form,
+                    periodontal_event_form=periodontal_event_form,
+                    tooth_model_form=tooth_model_form,
+                    cotation_id=cotation_id)
+
+@app.route('/update/event_model?cgid=<int:clinic_gesture_id>'
+            '&cid=<int:cotation_id>',                methods=['GET', 'POST'])
+def update_event_model(clinic_gesture_id, cotation_id):
+    def get_event_model_attributes():
+        return [ 'description', 'comment', 'color',
+                    'location' ]
+    def get_tooth_event_model_attributes():
+        return [ 'surveillance']
+    def get_crown_event_model_attributes():
+        crown_event_list = [ 'tooth_shade' ]
+        for side in crown_sides():
+            crown_event_list.append(side)
+        return crown_event_list
+    def get_root_event_model_attributes():
+        root_event_list = [ ]
+        for root_canal in root_canals():
+            root_event_list.append(root_canal)
+        return root_event_list
+    def get_periodontal_event_model_attributes():
+        return []
+        
+    ( tooth_form, event_form, crown_event_form, 
+        root_event_form, periodontal_event_form,
+        tooth_model_form ) = get_event_forms()
+
+    clinic_gesture = ( meta.session.query(act.ClinicGesture)
+        .filter(act.ClinicGesture.id == clinic_gesture_id)
+        .one()
+    )
+    event_model = ( meta.session.query(teeth.EventModel)
+        .filter(teeth.EventModel.id == clinic_gesture.event_model_id)
+        .one()
+    )
+
+    if ( request.method == 'POST' and event_form.validate() 
+                                        and tooth_model_form.validate() ):
+        
+        event_model.tooth_state =\
+                                tooth_model_form.choose_tooth_model_state.data
+        event_model.surveillance = tooth_model_form.surveillance.data
+        for f in get_event_model_attributes():
+            setattr(event_model, f, getattr(event_form, f).data)
+#        for f in get_tooth_event_model_attributes():
+#            setattr(event_model, f, getattr(tooth_model_form, f).data)
+        meta.session.commit()
+
+        if ( event_form.location.data == 
+                                        constants.TOOTH_EVENT_LOCATION_TOOTH ):
+            pass
+
+        elif ( event_form.location.data == 
+                                        constants.TOOTH_EVENT_LOCATION_CROWN
+                                            and crown_event_form.validate() ):
+            event_model.state = crown_event_form.choose_crown_state.data
+            for f in get_crown_event_model_attributes():
+                setattr(event_model, f, getattr(crown_event_form, f).data)
+                meta.session.commit()
+
+        elif ( event_form.location.data == 
+                                            constants.TOOTH_EVENT_LOCATION_ROOT
+                                            and root_event_form.validate() ):
+            event_model.state = root_event_form.choose_root_state.data
+            for f in get_root_event_model_attributes():
+                setattr(event_model, f, getattr(root_event_form, f).data)
+                meta.session.commit()
+
+        return redirect(url_for('update_clinic_gesture',
+                                        clinic_gesture_id=clinic_gesture_id,
+                                        cotation_id=cotation_id))
+
+    tooth_model_form.choose_tooth_model_state.data = event_model.tooth_state
+    tooth_model_form.surveillance.data = event_model.surveillance
+    for f in get_event_model_attributes():
+        getattr(event_form, f).data = getattr(event_model, f)
+    if event_model.location == constants.TOOTH_EVENT_LOCATION_TOOTH :
+        for f in get_tooth_event_model_attributes():
+            getattr(tooth_form, f).data = getattr(event_model, f)
+    elif event_model.location == constants.TOOTH_EVENT_LOCATION_CROWN:
+        crown_event_form.choose_crown_state.data = event_model.state
+        for f in get_crown_event_model_attributes():
+            getattr(crown_event_form, f).data = getattr(event_model, f)
+    elif event_model.location == constants.TOOTH_EVENT_LOCATION_ROOT :
+        root_event_form.choose_root_state.data = event_model.state
+        for f in get_root_event_model_attributes():
+            getattr(root_event_form, f).data = getattr(event_model, f)
+                
+    return render_template('update_event_model.html',
+                    clinic_gesture=clinic_gesture,
+                    tooth_model_form=tooth_model_form,
+                    event_form=event_form,
+                    crown_event_form=crown_event_form,
+                    root_event_form=root_event_form,
+                    periodontal_event_form=periodontal_event_form,
+                    cotation_id=cotation_id)
 

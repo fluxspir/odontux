@@ -38,32 +38,16 @@ class ClinicGestureInClinicReportForm(Form):
     memo = TextAreaField(_('Memo'))
     delete = BooleanField(_('Delete'))
 
-#class ClinicReportForm(Form):
-#    clinic_gestures = FieldList(FormField(ClinicGestureInClinicReportForm),
-#                                                            min_entries=1)
-#    submit = SubmitField(_('Submit'))
-#
-#
 class ClinicGestureKeepForm(Form):
     clinic_gesture_id = HiddenField(_('cg_id'))
     keep = BooleanField(_('Keep'))
 
 class ClinicGesturesFromCotationForm(Form):
-#    healthcare_plan_id = SelectField(_('Healthcare plan'), coerce=int)
     price = DecimalField(_('Price'))
     clinic_gestures = FieldList(FormField(ClinicGestureKeepForm), 
                                                             min_entries=1)
     submit = SubmitField(_('Submit'))
 
-#class ClinicGesturesFromCotationForm(Form):
-#    clinic_gesture_id = HiddenField(_('cg_id'))
-#    delete = BooleanField(_('Delete'))
-#
-#class ClinicReportFromCotationForm(Form):
-#    clinic_gestures = FieldList(FormField(ClinicGesturesFromCotationForm),
-#                                                            min_entries=1)
-#    submit = SubmitField(_('Submit'))
-#
 class ChooseCotationForReportForm(Form):
     anatomic_location = TextField(_('Anatomic location'))
     cotation_id = SelectField(_('Cotation'), coerce=int)
@@ -88,8 +72,6 @@ def anat_loc_is_list(anat_loc=""):
         return True
     else:
         return None
-
-#
 
 @app.route('/view/clinic_report?aid=<int:appointment_id>', 
                                                     methods=['GET'])
@@ -212,13 +194,7 @@ def choose_cg_from_cot_inserted_in_cr(appointment_id, cotation_id, anat_loc):
                                                     anatomic_location=anat_loc
             )
 
-#    patient, appointment = checks.get_patient_appointment(
-#                                                appointment_id=appointment_id)
-
     form = ClinicGesturesFromCotationForm(request.form)
-#    form.healthcare_plan_id.choices = [ ( hcp.id, hcp.name ) for hcp in
-#                    sorted(patient.hcs, key=lambda hcp: hcp.name.desc()) 
-#    ]
     if form.validate():
         cotation = ( meta.session.query(act.Cotation)
             .filter(act.Cotation.id == cotation_id)
@@ -298,12 +274,6 @@ def choose_clinic_gestures_from_cotation(appointment_id):
                                                 appointment_id=appointment.id))
  
 
-@app.route('/add/cg_from_cot_to_cr?aid=<int:appointment_id>'
-            '&cid=<int:cotation_id>', methods=['GET', 'POST'] )
-def add_clinic_gestures_from_cotation_to_clinic_report(appointment_id,
-                                                            cotation_id):
-    pass
-
 def add_to_materio_vigilance(appointment_id, mat_cg_ref, material):
     """ 
         update both:
@@ -339,6 +309,13 @@ def add_to_materio_vigilance(appointment_id, mat_cg_ref, material):
     return materio_vigilance
 
 def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
+    """
+        anatomic_location = int.
+        * Create a clinic_report entry with a clinic_gesture.
+        * Add material in use from model_material_category from clinic_gesture
+        to MaterioVigilance and update quantities
+        * If clinic_gesture as a model_event, create the event adapted
+    """
     def _needs_redondance(appointment, material, mat_cg_ref):
 
         number_of_same_cg_in_appointment = [ cr.clinic_gesture for cr in
@@ -357,11 +334,12 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
                         .filter(act.ClinicGesture.id == clinic_gesture_id )
                         .one()
     )
-                                                        
+    ##
+    ## Create new clinic_report entry
     values = {
         'appointment_id': appointment_id,
         'clinic_gesture_id': clinic_gesture_id,
-        'anatomic_location': anatomic_location,
+        'anatomic_location': int(anatomic_location),
         'duration': clinic_gesture.duration,
     }
     new_clinic_report = act.ClinicReport(**values)
@@ -375,6 +353,8 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
     appointment.clinic_reports.reorder()
     meta.session.commit()
     
+    ##
+    ## Update Material and MaterioVigilance
     for mat_cg_ref in new_clinic_report.clinic_gesture.materials:
         
         material_used = cost.get_material_used(mat_cg_ref.id)
@@ -384,7 +364,37 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
                                                     mat_cg_ref, material_used)
             new_clinic_report.materio_vigilance.append(materio_vigilance)
             meta.session.commit()
-
+    
+    ##
+    ## Create event 
+    if clinic_gesture.event_model_id:
+        event_model = ( meta.session.query(teeth.EventModel)
+            .filter(teeth.EventModel.id == clinic_gesture.event_model_id )
+            .one()
+        )
+        values = {
+            'appointment_id': appointment_id,
+            'tooth_id': teeth.get_patient_tooth(appointment.patient_id, 
+                                                    int(anatomic_location) ),
+            'location': event_model.location
+        }
+        if event_model.location == constants.TOOTH_EVENT_LOCATION_PERIODONTAL :
+            pass
+        elif event_model_location == constants.TOOTH_EVENT_LOCATION_TOOTH:
+            values['state'] = event_model.state
+        elif event_model_location == constants.TOOTH_EVENT_LOCATION_CROWN:
+            for att in [ 'state', 'is_occlusal', 'is_buccal', 'is_lingual',
+                    'is_mesial', 'is_distal', 'tooth_shade' ] :
+                setattr(values, att, getattr(event_model_location, att))
+        elif event_model_location == constants.TOOTH_EVENT_LOCATION_ROOT:
+            for att in ['state', 'is_central', 'is_buccal', 'is_lingual',
+                'is_mesial', 'is_distal', 'is_mesio_buccal', 'is_disto_buccal',
+                'is_mesio_lingual', 'is_disto_lingual', 'is_mesio_buccal_2' ] :
+                setattr(values, att, getattr(event_model_location, att))
+ 
+        new_event = teeth.Event(**values)
+        meta.session.add(new_event)
+        meta.session.commit()
     return new_clinic_report
 
 @app.route('/add/cg_to_cr?aid=<int:appointment_id>', methods=['POST'])
@@ -418,6 +428,7 @@ def add_clinic_gesture_to_clinic_report(appointment_id):
         
     return redirect(url_for('view_clinic_report', 
                                             appointment_id=appointment_id))
+
 
 def remove_from_materio_vigilance(clinic_report):
     """ 
@@ -532,28 +543,3 @@ def remove_cg_from_cr(clinic_report_id):
     return redirect(url_for('view_clinic_report', 
                                                 appointment_id=appointment.id))
 
-
-#def add_clin_gest_on_clin_report_from_adm_gest(app_cot_ref_id):
-#    app_cot_ref = ( meta.session.query(act.AppointmentCotationReference)
-#                .filter(act.AppointmentCotationReference.id == app_cot_ref_id )
-#                .one()
-#    )
-#    
-#    clinic_report_form = ClinicReportFromAdmGestureForm(request.form)
-#    
-#    if request.method == 'POST' and cg_form.validate():
-#        pass
-#    
-#    for cg_data in sorted(app_cot_ref.cotation.clinic_gestures,
-#                        key=lambda cg_data: ( cg_data.appointment_number,
-#                                            cg_data.appointment_sequence,
-#                                            cg_data.clinic_gesture.name ) )
-#        cg_form = ClinicGestureFromAdmGestureForm(request.form)
-#
-#        cg_form.clinic_gestures_id = cg_data.clinic_gesture_id
-#        cg_form.clinic_gestures_delete = False
-#
-#        clinic_report.form.append_entry(cg_form)
-#
-#    return render_template('choose_clinic_gestures_from_adm_gesture.html',
-#                                                    app_cot_ref=app_cot_ref)

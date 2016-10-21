@@ -30,7 +30,7 @@ function InService() {
 
 
 function ChangementToothAnatomicLocation() {
-  var anat_loc_val = document.getElementById("anatomic_location").value;
+  var anat_loc_val = document.getElementById("location").value;
   var tooth = document.getElementById("tooth");
   var crown = document.getElementById("crown");
   var root = document.getElementById("root");

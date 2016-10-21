@@ -66,6 +66,21 @@ class Gum(Base):
     bleeding = Column(Boolean)
     tooth = relationship('Tooth', backref='periodonte')
 
+class EventModel(Base):
+    __tablename__ = "event_model"
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+    comment = Column(String, default="")
+    color = Column(String, default="")
+    tooth_state = Column(Integer)
+    surveillance = Column(Boolean, default=False)
+    location = Column(Integer, nullable=False)
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'event_model',
+        'polymorphic_on': location
+    }
+
 class Event(Base):
     """
     location : constants.TOOTH_EVENT_LOCATIONS
@@ -88,6 +103,14 @@ class Event(Base):
         'polymorphic_on': location
     }
 
+class PeriodontEventModel(EventModel):
+    __tablename__ = "periodontal_event_model"
+    id = Column(Integer, ForeignKey(EventModel.id), primary_key=True)
+ 
+    __mapper_args__ = {
+        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_PERIODONTAL
+    }
+
 class PeriodontalEvent(Event):
     """
         perio_location : constants.PERIODONTAL_LOCATIONS 
@@ -108,6 +131,15 @@ class PeriodontalEvent(Event):
         'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_PERIODONTAL
     }
 
+class ToothEventModel(EventModel):
+    __tablename__ = 'tooth_event_model'
+    id = Column(Integer, ForeignKey(EventModel.id), primary_key=True)
+    state = Column(Integer, nullable=False) 
+    
+    __mapper_args__ = {
+        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_TOOTH
+    }
+
 class ToothEvent(Event):
     """
     A tooth event is an event we can't really class neither as a crown event,
@@ -123,6 +155,21 @@ class ToothEvent(Event):
     
     __mapper_args__ = {
         'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_TOOTH
+    }
+
+class CrownEventModel(EventModel):
+    __tablename__ = 'crown_event_model'
+    id = Column(Integer, ForeignKey(EventModel.id), primary_key=True)
+    state = Column(Integer, nullable=False) 
+    is_occlusal = Column(Boolean, default=False)
+    is_buccal = Column(Boolean, default=False)
+    is_lingual = Column(Boolean, default=False)
+    is_mesial = Column(Boolean, default=False)
+    is_distal = Column(Boolean, default=False)
+    tooth_shade = Column(String, default=None)
+
+    __mapper_args__ = {
+        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_CROWN
     }
 
 class CrownEvent(Event):
@@ -147,6 +194,25 @@ class CrownEvent(Event):
 
     __mapper_args__ = {
         'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_CROWN
+    }
+
+class RootCanalEventModel(EventModel):
+    __tablename__ = 'root_canal_event_model'
+    id = Column(Integer, ForeignKey(EventModel.id), primary_key=True)
+    state = Column(Integer, nullable=False) 
+    is_central = Column(Boolean, default=False)
+    is_buccal = Column(Boolean, default=False)
+    is_lingual = Column(Boolean, default=False)
+    is_mesial = Column(Boolean, default=False)
+    is_distal = Column(Boolean, default=False)
+    is_mesio_buccal = Column(Boolean, default=False)
+    is_disto_buccal = Column(Boolean, default=False)
+    is_mesio_lingual = Column(Boolean, default=False)
+    is_disto_lingual = Column(Boolean, default=False)
+    is_mesio_buccal_2 = Column(Boolean, default=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': constants.TOOTH_EVENT_LOCATION_ROOT
     }
 
 class RootCanalEvent(Event):

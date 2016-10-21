@@ -64,6 +64,7 @@ class ClinicGesture(Base):
     after_last_patient = Column(Boolean, default=False)
     before_each_appointment = Column(Boolean, default=False)
     after_each_appointment = Column(Boolean, default=False)
+    event_model_id = Column(Integer, ForeignKey(teeth.EventModel.id))
 
 class Cotation(Base):
     """
