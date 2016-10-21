@@ -28,6 +28,9 @@
         <br/><br />
   <div id="anamnesis">
   {% for entry in patient_anamnesis %}
+    {% if entry.alert %}
+      <p style='color:red'>
+    {% endif %}
     {% if entry.anamnesis_type == constants.ANAMNESIS_MEDICAL_HISTORY %}
       {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
       {{ constants.MEDICAL_HISTORIES[entry.type] }} - 
@@ -56,6 +59,9 @@
       {{ constants.ANAMNESIS[entry.anamnesis_type][0] }}
       {{ constants.ORAL_HYGIENE[entry.type] }}
       <br />------<br />
+    {% endif %}
+    {% if entry.alert %}
+      </p>
     {% endif %}
 
   {% endfor %}

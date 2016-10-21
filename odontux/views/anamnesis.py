@@ -304,8 +304,8 @@ def list_anamnesis(patient_id, appointment_id=None):
     patient_anamnesis = (
         meta.session.query(global_anamnesis)
             .filter(anamnesis.Anamnesis.patient_id == patient_id)
-            .order_by(anamnesis.Anamnesis.anamnesis_type,
-                        anamnesis.Anamnesis.alert.desc(),
+            .order_by(anamnesis.Anamnesis.alert.desc(),
+                        anamnesis.Anamnesis.anamnesis_type,
                         anamnesis.MedicalHistory.type,
                         anamnesis.MedicalHistory.disease,
                         anamnesis.Anamnesis.time_stamp)
