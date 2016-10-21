@@ -1,23 +1,25 @@
-{% extends 'summary_patient.html' %}
+{% extends 'header.html' %}
 
 {% block main %}
 {% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_field, render_hidden_field, render_field_js_onchange, render_simple_field, render_simple_field_line%}
 
 <h3>Add an event on a tooth (or set of teeth).</h3>
-<form method="post" action={{ url_for('add_event_tooth_located',
-                              patient_id=patient.id,
-                              appointment_id=appointment.id) }}>
+<form method="post" action={{ url_for('add_event_model',
+                              clinic_gesture_id=clinic_gesture_id,
+                              cotation_id=cotation_id) }}>
 
   <div id="anat_loc">
     {{ render_field_js_onchange(event_form.location) }}
   <br />
-  <br />
+{#  <br />
     {{ render_simple_field(event_form.teeth) }}
   </div>
+#}
   <br />
     {{ render_simple_field(event_form.appointment_id) }}
-    {{ render_simple_field_line(tooth_form.choose_tooth_state) }}
-    {{ render_simple_field_line(tooth_form.surveillance) }}
+
+    {{ render_simple_field_line(tooth_model_form.choose_tooth_model_state) }}
+    {{ render_simple_field_line(tooth_model_form.surveillance) }}
   <br />
     {{ render_simple_field(event_form.description) }}
 

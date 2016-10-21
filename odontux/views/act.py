@@ -1317,3 +1317,5 @@ def view_material_used_in_appointment(patient_id, appointment_id):
 #                            materials_used=materials_used,
                             materials_used_form=materials_used_form,
                             other_materials=other_materials)
+
+
