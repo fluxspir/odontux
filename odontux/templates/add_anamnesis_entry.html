@@ -1,7 +1,12 @@
 {% extends 'summary_patient.html' %}
 
 {% block main %}
-{% from "_formhelpers.html" import render_table_field, render_table_hidden_field, render_simple_field, render_hidden_field, render_field_js_onchange, render_simple_field_line%}
+{% from "_formhelpers.html" import render_table_field, 
+                                    render_table_hidden_field, 
+                                    render_simple_field, 
+                                    render_hidden_field, 
+                                    render_field_js_onchange, 
+                                    render_simple_field_line%}
 <h3>New anamnesis entry</h3>
 {% if question %}
   <h4>{{ question.question }}</h4>
@@ -9,7 +14,7 @@
                     appointment_id=appointment.id,
                     survey_id=survey_id,
                     survey_entry=survey_entry + 1) }}">
-      Next Question<a><br />
+      Next Question</a><br />
       <br />
 {% endif %}
 
