@@ -103,7 +103,7 @@ class Event(Base):
         'polymorphic_on': location
     }
 
-class PeriodontEventModel(EventModel):
+class PeriodontalEventModel(EventModel):
     __tablename__ = "periodontal_event_model"
     id = Column(Integer, ForeignKey(EventModel.id), primary_key=True)
  
