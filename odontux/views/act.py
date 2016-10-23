@@ -330,6 +330,23 @@ def add_gesture():
         return redirect(url_for('list_gesture'))
     return render_template('/add_gesture.html', form=form)
 
+@app.route('/clone/material_category_gesture?gid=<int:gesture_id>'
+            '&gcid=<int:gesture_to_clone_id>')
+def clone_material_category_gesture(gesture_id, gesture_to_clone_id):
+    gesture = ( meta.session.query(act.Gesture)
+                    .filter(act.Gesture.id == gesture_id)
+                    .one()
+    )
+    gesture_to_clone = ( meta.session.query(act.Gesture)
+                            .filter(act.Gesture.id == gesture_to_clone_id)
+                            .one()
+    )
+    for material_category in gesture_to_clone.materials:
+        if material_category not in gesture.materials:
+            gesture.materials.append(material_category)
+
+    return redirect(url_for('update_gesture', gesture_id=gesture.id))
+
 @app.route('/update/gesture?gid=<int:gesture_id>/', methods=['GET', 'POST'])
 def update_gesture(gesture_id):
     gesture = meta.session.query(act.Gesture).filter\
@@ -349,6 +366,12 @@ def update_gesture(gesture_id):
     # d'on ne sait quand...
     # (update 160504 : toujours pas d'idée)
     
+    other_gestures = ( meta.session.query(act.Gesture)
+                        .filter(act.Gesture.id != gesture.id)
+                        .join(act.Specialty)
+                        .order_by(act.Specialty.name, act.Gesture.name)
+                        .all()
+    )
     other_materials = ( meta.session.query(assets.MaterialCategory)
                             .filter(~assets.MaterialCategory.id.in_(
                                 [ mat.id for mat in gesture.materials ]
@@ -372,7 +395,8 @@ def update_gesture(gesture_id):
                             gesture_form=gesture_form, 
                             specialty_form=specialty_form,
                             gesture=gesture,
-                            other_materials=other_materials
+                            other_materials=other_materials,
+                            other_gestures=other_gestures
                             )
 
 @app.route('/add/clinic_gesture?crel=<int:cotation_id>', 

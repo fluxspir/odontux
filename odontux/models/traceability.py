@@ -120,14 +120,3 @@ class MaterioVigilance(Base):
     clinic_reports = relationship('act.ClinicReport',
                             secondary=clinic_report_materio_vigilance_table )
 
-#class MaterioVigilanceB(Base):
-#    """ """
-#    __tablename__ = "materio_vigilance_b"
-#    id = Column(Integer, primary_key=True)
-#    material_id = Column(Integer, ForeignKey(assets.Material.id) )
-#    appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id) )
-#    quantity_used = Column(Numeric)
-#    material = relationship('assets.Material', backref='materio_vigilance')
-#    appointment = relationship('schedule.Appointment')
-#    clinic_reports = relationship('act.ClinicReport',
-#                            secondary=clinic_report_materio_vigilance_table )

@@ -114,6 +114,26 @@ def view_clinic_report(appointment_id):
                                     clinic_report.sequence) 
     ]
 
+    material_each_appointment = ( 
+        meta.session.query(traceability.MaterioVigilance)
+        .filter(traceability.MaterioVigilance.appointment_id == appointment.id)
+        .all()
+    )
+    if not material_each_appointment:
+        cg_all_appointment = ( meta.session.query(act.ClinicGesture)
+            .filter(or_(
+                act.ClinicGesture.before_each_appointment.is_(True),
+                act.ClinicGesture.after_each_appointment.is_(True)
+                ) )
+            .all()
+        )
+        for cg in cg_all_appointment:
+            for mat_cg_ref in cg.materials:
+                material_used = cost.get_material_used(mat_cg_ref.id)
+                add_to_materio_vigilance(appointment.id, mat_cg_ref, 
+                                                                material_used)
+                meta.session.commit()
+
     # only appears cotation that were administraly officially indentified,
     # by a single clinic gesture in the global gesture repair.
     cotations = [ cot for cot in sorted(appointment.administrative_gestures,
