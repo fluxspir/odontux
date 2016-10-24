@@ -98,7 +98,7 @@ class DentalOfficeForm(Form):
 
 def generate_timesheet_form(user_role):
     timesheet_form = {}
-    for weekday in range(1,8):
+    for weekday in range(7):
         timesheet_form[weekday] = {}
         for period in constants.PERIODS.keys():
             timesheet_form[weekday][period] =\
@@ -349,7 +349,7 @@ def update_user(body_id, form_to_display):
 
     timesheet_form = generate_timesheet_form(user.role)
     # populate timesheet_form
-    for weekday in range(1, 8):
+    for weekday in range(7):
         for period in constants.PERIODS.keys():
             TS = (
                 meta.session.query(users.TimeSheet)
@@ -385,6 +385,21 @@ def update_user(body_id, form_to_display):
                             constants=constants,
                             hours_a_week=hours_a_week,
                        dentist_specific_admin_form=dentist_specific_admin_form)
+
+@app.route('/clone/dental_unit_timesheet?duid=<int:dental_unit_id>'
+            '&bid=<int:body_id>')
+def clone_dental_unit_timesheet(dental_unit_id, body_id):
+    dental_unit_time_sheet = ( meta.session.query(users.DentalUnitTimeSheet)
+        .filter(users.DentalUnitTimeSheet.dental_unit_id == dental_unit_id)
+        .all()
+    )
+    body = ( meta.session.query(users.OdontuxUser)
+        .filter(users.OdontuxUser.id == body_id)
+        .one()
+    )
+    for du_ts in dental_unit_time_sheet:
+        pass
+
 
 @app.route('/update/timesheet_1?body_id=<int:body_id>', methods=['POST'])
 def update_timesheet_1(body_id):

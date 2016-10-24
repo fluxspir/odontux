@@ -132,7 +132,8 @@ def add_anamnesis_entry(patient_id, appointment_id, survey_id=None,
     past_surgery_form = PastSurgeryForm(request.form)
     allergy_form = AllergyForm(request.form)
     allergy_form.allergy_type.choices = constants.ALLERGIES.items()
-    allergy_form.reaction.choices = constants.ALLERGIC_REACTIONS.items()
+    allergy_form.reaction.choices = [ ( al_re[0], al_re[1][0] ) for al_re in 
+                                        constants.ALLERGIC_REACTIONS.items() ]
     oral_hygiene_form = OralHygieneForm(request.form)
     oral_hygiene_form.oral_type.choices = constants.ORAL_HYGIENE.items()
 
@@ -303,8 +304,8 @@ def list_anamnesis(patient_id, appointment_id=None):
     patient_anamnesis = (
         meta.session.query(global_anamnesis)
             .filter(anamnesis.Anamnesis.patient_id == patient_id)
-            .order_by(anamnesis.Anamnesis.anamnesis_type,
-                        anamnesis.Anamnesis.alert.desc(),
+            .order_by(anamnesis.Anamnesis.alert.desc(),
+                        anamnesis.Anamnesis.anamnesis_type,
                         anamnesis.MedicalHistory.type,
                         anamnesis.MedicalHistory.disease,
                         anamnesis.Anamnesis.time_stamp)

@@ -1,32 +1,44 @@
 {% extends 'header.html' %}
-{% block main %}
 {% from "_formhelpers.html" import render_field %}
-<form method="post" action="{{ url_for('update_gesture', 
-                                gesture_id=gesture.id) }}">
-  <dl>
-    {{ render_field(gesture_form.specialty_id) }}
-    {{ render_field(gesture_form.code) }}
-    {{ render_field(gesture_form.alias) }}
-    {{ render_field(gesture_form.name) }}
-    {{ render_field(gesture_form.color) }}
-  </dl>
-  <p><input type="submit" value="Update">
-</form>
-<br />
-<strong>Materials used</strong> : <br />
-{% for material in gesture.materials %}
-<a href="{{ url_for('remove_material_category_from_gesture', gesture_id=gesture.id, 
-                                      material_category_id=material.id) }}">
-        <strong>Remove</strong></a> 
-  {{ material.brand }} : {{ material.commercial_name }}<br />
-{% endfor %}
-<br />
-<strong>Other materials available</strong> :<br />
-{% for material in other_materials %}
-<a href="{{ url_for('add_material_category_to_gesture', gesture_id=gesture.id, 
-                                      material_category_id=material.id) }}">
-        <strong>Add</strong></a> 
-  {{ material.brand}} : {{ material.commercial_name }}<br />
-{% endfor %}
+{% block main %}
+<h2> Update Gesture {{ gesture.name }}</h2>
+<div id='gesture' style='float:left;width:75%;height:100%'>
+  <form method="post" action="{{ url_for('update_gesture', 
+                                  gesture_id=gesture.id) }}">
+    <dl>
+      {{ render_field(gesture_form.specialty_id) }}
+      {{ render_field(gesture_form.code) }}
+      {{ render_field(gesture_form.alias) }}
+      {{ render_field(gesture_form.name) }}
+      {{ render_field(gesture_form.color) }}
+    </dl>
+    <p><input type="submit" value="Update">
+  </form>
+  <br />
+  <strong>Materials used</strong> : <br />
+  {% for material in gesture.materials %}
+    <a href="{{ url_for('remove_material_category_from_gesture', gesture_id=gesture.id, 
+                                          material_category_id=material.id) }}">
+            <strong>Remove</strong></a> 
+      {{ material.brand }} : {{ material.commercial_name }}<br />
+    {% endfor %}
+    <br />
+    <strong>Other materials available</strong> :<br />
+    {% for material in other_materials %}
+    <a href="{{ url_for('add_material_category_to_gesture', gesture_id=gesture.id, 
+                                          material_category_id=material.id) }}">
+            <strong>Add</strong></a> 
+    {{ material.brand}} : {{ material.commercial_name }}<br />
+  {% endfor %}
+</div>
+<div>
+<strong>Clone material from others gestures</strong><br />
+  {% for gest_clone in other_gestures %}
+    {{ gest_clone.name }}<a href='{{ url_for('clone_material_category_gesture',
+                                              gesture_id=gesture.id,
+                                              gesture_to_clone_id=gest_clone.id) }}'>
+      clone</a><br />
+  {% endfor %}
+</div>
 
 {% endblock %}

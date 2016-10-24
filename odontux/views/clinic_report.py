@@ -10,6 +10,7 @@ from flask import ( session, render_template, request, redirect, url_for,
                     jsonify, abort )
 import sqlalchemy
 from sqlalchemy import or_, and_, desc
+from sqlalchemy import cast, Date
 from sqlalchemy.orm import with_polymorphic
 from gettext import gettext as _
 
@@ -105,8 +106,7 @@ def view_clinic_report(appointment_id):
                         act.ClinicGesture.after_each_appointment.is_(False)
                 )
                 .join(act.Specialty)
-                .order_by(act.Specialty.name,
-                            act.ClinicGesture.name )
+                .order_by(act.Specialty.name, act.ClinicGesture.name )
                 .all()
     ]
     clinic_gestures = [ clinic_report for clinic_report in 
@@ -114,6 +114,62 @@ def view_clinic_report(appointment_id):
                                 key=lambda clinic_report: 
                                     clinic_report.sequence) 
     ]
+
+    # In case this day is the first where happens something, we add in this 
+    # clinic report the material that is used every morning and every night 
+    # before opening and closing the dental_unit
+    # We need to check this first.
+    material_used_this_day = ( 
+        meta.session.query(traceability.MaterioVigilance)
+        .filter(
+            traceability.MaterioVigilance.appointment_id.in_(
+                meta.session.query(schedule.Agenda.appointment_id)
+                    .filter(
+                        cast(schedule.Agenda.starttime, Date) == 
+                                        appointment.agenda.starttime.date(),
+                        schedule.Agenda.dental_unit_id ==
+                                                    appointment.dental_unit_id
+                    )
+            )
+        )
+        .all()
+    )
+    # In case no material has been marqued used in this appointment, we now add
+    # the minimum material used in each appointment
+    # This query is made before adding eventual "material before first patient
+    material_each_appointment = ( 
+        meta.session.query(traceability.MaterioVigilance)
+        .filter(traceability.MaterioVigilance.appointment_id == appointment.id)
+        .all()
+    )
+
+    if not material_used_this_day:
+        cg_every_work_day = (  meta.session.query(act.ClinicGesture)
+            .filter(or_(
+                act.ClinicGesture.before_first_patient.is_(True),
+                act.ClinicGesture.after_last_patient.is_(True)
+                ) )
+            .all()
+        )
+        for cg in cg_every_work_day:
+            for mat_cg_ref in cg.materials:
+                material_used = cost.get_material_used(mat_cg_ref.id)
+                opening_materio_vigilance = add_to_materio_vigilance(
+                                    appointment.id, mat_cg_ref, material_used)
+
+    if not material_each_appointment:
+        cg_all_appointment = ( meta.session.query(act.ClinicGesture)
+            .filter(or_(
+                act.ClinicGesture.before_each_appointment.is_(True),
+                act.ClinicGesture.after_each_appointment.is_(True)
+                ) )
+            .all()
+        )
+        for cg in cg_all_appointment:
+            for mat_cg_ref in cg.materials:
+                material_used = cost.get_material_used(mat_cg_ref.id)
+                materio_vigilance_appointment = add_to_materio_vigilance(
+                                    appointment.id, mat_cg_ref, material_used)
 
     # only appears cotation that were administraly officially indentified,
     # by a single clinic gesture in the global gesture repair.
@@ -391,11 +447,10 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
             'tooth_id': tooth.id,
             'location': event_model.location,
             'state': event_model.state,
+            'description': event_model.description,
+            'comment': event_model.comment,
+            'color': event_model.color,
         }
-
-#        new_event = model_teeth.Event(**values)
-#        meta.session.add(new_event)
-#        meta.session.commit()
         if event_model.location == constants.TOOTH_EVENT_LOCATION_PERIODONTAL :
             pass
         elif event_model.location == constants.TOOTH_EVENT_LOCATION_TOOTH:
