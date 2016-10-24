@@ -10,7 +10,8 @@ import users, administration
 import sqlalchemy
 import datetime
 
-from sqlalchemy import Table, Column, Integer, String, Date, DateTime, Boolean
+from sqlalchemy import ( Table, Column, Integer, String, Date, DateTime, 
+                            Boolean, Numeric )
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
 from sqlalchemy.orm import relationship, backref
@@ -37,6 +38,8 @@ class Appointment(Base):
     next_appointment = Column(String, default="")
     absent = Column(Boolean, default=False)
     excuse = Column(String, default="")
+    hour_cost = Column(Numeric, default=1, nullable=False)
+    dentist_fees = Column(Numeric, default=1, nullable=False)
     dentist = relationship('users.OdontuxUser')
     dental_unit = relationship('users.DentalUnit')
     administrative_gestures = relationship("AppointmentCotationReference",

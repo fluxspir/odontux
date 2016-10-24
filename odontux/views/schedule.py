@@ -18,9 +18,10 @@ import calendar
 
 from odontux import constants, checks
 from odontux.odonweb import app
-from odontux.models import meta, schedule, administration, users
+from odontux.models import meta, schedule, administration, users, act
 from odontux.views.forms import TimeField
 from odontux.views.log import index
+from odontux.views import cost
 
 class AppointmentForm(Form):
     patient_id = HiddenField(_('patient_id'))
@@ -660,6 +661,19 @@ def add_patient_appointment(body_id, meeting_id=0):
                 return redirect(url_for('patient_appointment', 
                                             appointment_id=new_appointment.id))
 
+#        dentist_fees = ( meta.session.query(act.HealthCarePlanUserReference)
+#            .filter(
+#                act.HealthCarePlanUserReference.healthcare_plan_id.in_(
+#                                            [ hcp.id for hcp in patient.hcs] ),
+#                act.HealthCarePlanUserReference.user_id == 
+#                                                    appointment.dentist_id )
+#                .order_by(act.HealthCarePlanUserReference.hour_fees)
+#                .first()
+#        )
+#        if not dentist_fees:
+#            dentist_fees = 1
+#
+#        hour_cost = cost.get_hourly_operational_cost()
         args = {}
         args['dentist_id'] = new_appointment.dentist_id
         args['date_taker_id'] = new_appointment.dentist_id
@@ -667,6 +681,8 @@ def add_patient_appointment(body_id, meeting_id=0):
         args['appointment_id'] = new_appointment.id
         args['starttime'] = starttime
         args['endtime'] = endtime
+#        args['hour_cost'] = hour_cost
+#        args['dentist_fees'] = dentist_fees
         new_schedule = schedule.Agenda(**args)
         meta.session.add(new_schedule)
         meta.session.commit()

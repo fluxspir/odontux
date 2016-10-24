@@ -19,7 +19,7 @@ from odontux import constants, checks, gnucash_handler
 from odontux.models import ( meta, act, schedule, administration, traceability,
                             assets, compta)
 from odontux.models import teeth as model_teeth
-import teeth, cost
+from odontux.views import teeth, cost
 
 
 from odontux.views.log import index
@@ -114,6 +114,26 @@ def view_clinic_report(appointment_id):
                                 key=lambda clinic_report: 
                                     clinic_report.sequence) 
     ]
+
+    # Case dentist_fees and hour_cost isn't provided yet:
+    if not appointment.dentist_fees:
+        appointment.dentist_fees = ( 
+            meta.session.query(act.HealthCarePlanUserReference.hour_fees)
+                .filter(
+                    act.HealthCarePlanUserReference.user_id == 
+                                                        appointment.dentist_id,
+                    act.HealthCarePlanUserReference.healthcare_plan_id.in_(
+                        [ hcp.id for hcp in appointment.patient.hcs ] )
+                )
+                .order_by(act.HealthCarePlanUserReference.hour_fees)
+                .first()
+        )
+        if not appointment.dentist_fees:
+            appointment.dentist_fees = 1
+        meta.session.commit()
+    if not appointment.hour_cost:
+        appointment.hour_cost = cost.get_hourly_operational_cost()
+        meta.session.commit()
 
     # In case this day is the first where happens something, we add in this 
     # clinic report the material that is used every morning and every night 

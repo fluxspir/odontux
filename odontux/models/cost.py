@@ -26,14 +26,3 @@ class OperationalCost(Base):
 
     def hourly(self):
         return cost / periodicity.totals_seconds() * 3600
-
-#class ClinicGesturePeriodicyReference(Base):
-#    __tablename__ = 'clinic_gesture_periodicity_reference'
-#    id = Column(Integer, primary_key=True)
-#    clinic_gesture_id = Column(Integer, ForeignKey(act.ClinicGesture.id),
-#                                                                nullable=False)
-#    periodicity_id = Column(Integer, ForeignKey(Periodicity.id), 
-#                                                                nullable=False)
-#    period = relationship('Periodicity')
-#    periodicity = association_proxy('period', 'periodicity')
-#
