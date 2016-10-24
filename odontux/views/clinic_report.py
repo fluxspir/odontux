@@ -130,7 +130,9 @@ def view_clinic_report(appointment_id):
         )
         if not appointment.dentist_fees:
             appointment.dentist_fees = 1
+
         meta.session.commit()
+
     if not appointment.hour_cost:
         appointment.hour_cost = cost.get_hourly_operational_cost()
         meta.session.commit()
