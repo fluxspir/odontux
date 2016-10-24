@@ -10,6 +10,7 @@ from flask import ( session, render_template, request, redirect, url_for,
                     jsonify, abort )
 import sqlalchemy
 from sqlalchemy import or_, and_, desc
+from sqlalchemy import cast, Date
 from sqlalchemy.orm import with_polymorphic
 from gettext import gettext as _
 
@@ -114,11 +115,53 @@ def view_clinic_report(appointment_id):
                                     clinic_report.sequence) 
     ]
 
+    # In case this day is the first where happens something, we add in this 
+    # clinic report the material that is used every morning and every night 
+    # before opening and closing the dental_unit
+    # We need to check this first.
+
+    material_used_this_day = ( 
+        meta.session.query(traceability.MaterioVigilance)
+        .filter(
+            traceability.MaterioVigilance.appointment_id.in_(
+                meta.session.query(act.ClinicReport.appointment_id)
+                .filter(act.ClinicReport.appointment_id.in_(
+                    meta.session.query(schedule.Agenda.appointment_id)
+                        .filter(
+                            cast(schedule.Agenda.starttime, Date) == 
+                                        appointment.agenda.starttime.date(),
+                            schedule.Agenda.dental_unit_id ==
+                                                    appointment.dental_unit_id
+                        )   
+                    )
+                )
+                )
+            )
+        .all()
+    )
+    # In case no material has been marqued used in this appointment, we now add
+    # the minimum material used in each appointment
+    # This query is made before adding eventual "material before first patient
     material_each_appointment = ( 
         meta.session.query(traceability.MaterioVigilance)
         .filter(traceability.MaterioVigilance.appointment_id == appointment.id)
         .all()
     )
+
+    if not material_used_this_day:
+        cg_every_work_day = (  meta.session.query(act.ClinicGesture)
+            .filter(or_(
+                act.ClinicGesture.before_first_patient.is_(True),
+                act.ClinicGesture.after_last_patient.is_(True)
+                ) )
+            .all()
+        )
+        for cg in cg_every_work_day:
+            for mat_cg_ref in cg.materials:
+                material_used = cost.get_material_used(mat_cg_ref.id)
+                opening_materio_vigilance = add_to_materio_vigilance(
+                                    appointment.id, mat_cg_ref, material_used)
+
     if not material_each_appointment:
         cg_all_appointment = ( meta.session.query(act.ClinicGesture)
             .filter(or_(
@@ -130,9 +173,8 @@ def view_clinic_report(appointment_id):
         for cg in cg_all_appointment:
             for mat_cg_ref in cg.materials:
                 material_used = cost.get_material_used(mat_cg_ref.id)
-                add_to_materio_vigilance(appointment.id, mat_cg_ref, 
-                                                                material_used)
-                meta.session.commit()
+                materio_vigilance_appointment = add_to_materio_vigilance(
+                                    appointment.id, mat_cg_ref, material_used)
 
     # only appears cotation that were administraly officially indentified,
     # by a single clinic gesture in the global gesture repair.
