@@ -119,24 +119,19 @@ def view_clinic_report(appointment_id):
     # clinic report the material that is used every morning and every night 
     # before opening and closing the dental_unit
     # We need to check this first.
-
     material_used_this_day = ( 
         meta.session.query(traceability.MaterioVigilance)
         .filter(
             traceability.MaterioVigilance.appointment_id.in_(
-                meta.session.query(act.ClinicReport.appointment_id)
-                .filter(act.ClinicReport.appointment_id.in_(
-                    meta.session.query(schedule.Agenda.appointment_id)
-                        .filter(
-                            cast(schedule.Agenda.starttime, Date) == 
+                meta.session.query(schedule.Agenda.appointment_id)
+                    .filter(
+                        cast(schedule.Agenda.starttime, Date) == 
                                         appointment.agenda.starttime.date(),
-                            schedule.Agenda.dental_unit_id ==
+                        schedule.Agenda.dental_unit_id ==
                                                     appointment.dental_unit_id
-                        )   
                     )
-                )
-                )
             )
+        )
         .all()
     )
     # In case no material has been marqued used in this appointment, we now add
