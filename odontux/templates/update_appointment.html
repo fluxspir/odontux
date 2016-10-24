@@ -6,7 +6,8 @@
       {% block appointment_data %}
         {{ render_hidden_field(appointment_form.patient_id, value=patient.id) }}
         {{ render_simple_field_line(appointment_form.dentist_id) }}
-        {{ render_simple_field_line(appointment_form.dental_unit_id) }}<br />
+        {{ render_simple_field_line(appointment_form.dental_unit_id) }} 
+        Costs :  {{ appointment.hour_cost }} ; {{ appointment.dentist_fees }}<br /><br />
         {{ render_simple_field_line(appointment_form.emergency) }}
         {{ render_simple_field_line(appointment_form.absent) }}
         {{ render_simple_field_line(appointment_form.excuse) }}<br />

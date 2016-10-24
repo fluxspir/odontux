@@ -134,7 +134,7 @@ def view_clinic_report(appointment_id):
         meta.session.commit()
 
     if not appointment.hour_cost:
-        appointment.hour_cost = cost.get_hourly_operational_cost()
+        appointment.hour_cost = round(cost.get_hourly_operational_cost(), 2)
         meta.session.commit()
 
     # In case this day is the first where happens something, we add in this 
