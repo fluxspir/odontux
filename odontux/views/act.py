@@ -45,6 +45,7 @@ class ClinicGestureForm(Form):
     after_last_patient = BooleanField(_('After last patient of the day'))
     before_each_appointment = BooleanField(_('Before each appointment'))
     after_each_appointment = BooleanField(_('After each appointment'))
+    is_autoclave_cycle = BooleanField(_('Is an autoclave cycle'))
     specialty_id = SelectField(_('Specialty'), coerce=int)
     submit = SubmitField(_('Update'))
 
@@ -419,6 +420,7 @@ def add_clinic_gesture(cotation_id):
                 'after_last_patient': False,
                 'before_each_appointment': False,
                 'after_each_appointment': False,
+                'is_autoclave_cycle': False,
                 'specialty_id': form.specialty_id.data,
             }
             new_clinic_gesture = act.ClinicGesture(**args)
@@ -538,10 +540,11 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
         if not other_cg_same_new_name:
             for f in ( 'name', 'description', 'duration', 'specialty_id',
                     'before_first_patient', 'after_last_patient', 
-                    'before_each_appointment', 'after_each_appointment' ):
+                    'before_each_appointment', 'after_each_appointment',
+                                                        'is_autoclave_cycle' ):
                 if f == 'duration':
                     setattr(clinic_gesture, f, 
-                        datetime.timedelta(seconds=getattr(cg_form, f).data * 60))
+                    datetime.timedelta(seconds=getattr(cg_form, f).data * 60))
                     
                 else:
                     setattr(clinic_gesture, f, getattr(cg_form, f).data)
@@ -564,7 +567,8 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
 
     for f in ('name', 'description', 'duration', 'specialty_id',
                 'before_first_patient', 'after_last_patient',
-                'before_each_appointment', 'after_each_appointment' ):
+                'before_each_appointment', 'after_each_appointment',
+                                            'is_autoclave_cycle' ):
         if f == 'duration':
             getattr(cg_form, f).data =\
                                 getattr(clinic_gesture, f).seconds % 3600 / 60

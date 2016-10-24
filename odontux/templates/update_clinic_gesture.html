@@ -7,7 +7,7 @@
                   <strong>{{ cotation.gesture.name }}</strong></a>
     or <a href="{{ url_for('update_cotation', cotation_id=cotation.id) }}">cotation </strong></a>
   <h2>Update clinic gesture <strong>{{ clinic_gesture.name }}</strong></h2>
-  <div id="clinic_gesture_data" style='float:left;width=65%;'>
+  <div id="clinic_gesture_data" style='float:left;width=75%;'>
       <form method="post" action="{{ url_for('update_clinic_gesture', 
                                           clinic_gesture_id=clinic_gesture.id,
                                                 cotation_id=cotation.id) }}">
@@ -16,9 +16,10 @@
             {{ render_simple_field_line(cg_form.description) }}<br />
             {{ render_simple_field_line(cg_form.duration) }}<br />
             {{ render_simple_field_line(cg_form.before_first_patient) }}
-            {{ render_simple_field_line(cg_form.after_last_patient) }}
+            {{ render_simple_field_line(cg_form.after_last_patient) }}<br />
             {{ render_simple_field_line(cg_form.before_each_appointment) }}
-            {{ render_simple_field_line(cg_form.after_each_appointment) }}
+            {{ render_simple_field_line(cg_form.after_each_appointment) }}<br />
+            {{ render_simple_field_line(cg_form.is_autoclave_cycle) }}<br />
             {{ render_sfl_wol(cg_form.submit) }}
       </form>
       {% if clinic_gesture.event_model_id %}
