@@ -23,7 +23,7 @@ from wtforms import (Form, IntegerField, TextField, PasswordField, HiddenField,
 from odontux import constants, checks
 from odontux.models import meta, traceability, assets, users, act
 from odontux.odonweb import app
-from odontux.views import forms
+from odontux.views import forms, cost
 from odontux.views.assets import get_assets_in_superasset
 from odontux.views.log import index
 
@@ -37,6 +37,7 @@ class SterilizationCycleTypeForm(Form):
     id = HiddenField(_('id'))
     name = TextField(_('Sterilization Cycle Type Name'), [validators.Required(
                             message=_('Sterilization cycle name required'))])
+    is_test_cycle = BooleanField(_('This cycle type include biologic test ?'))
 
 class SterilizationComplementForm(Form):
     complement = TextField(_('Test, conforme ou non ?'), [validators.Required(
@@ -71,14 +72,16 @@ class AssetSterilizedForm(Form):
     item_id = HiddenField(_('id'))
     item_type = HiddenField(_('type'))
     validity = IntegerField(_('Validity in days'), [validators.Required()],
-                                default=90)
+                                default=90,
+                                render_kw={'size': 8})
 
 class UncategorizedAssetSterilizedForm(Form):
     number = IntegerField(_('Number of uncategorized items'), 
                                                 [validators.InputRequired()],
                                                     default=0)
     validity = IntegerField(_('Validity in days'), [validators.Required()],
-                                default=90)
+                                default=90,
+                                render_kw={'size': 8})
 
 class StickerForm(Form):
     position = IntegerField(_('Position of the sticker ; Between 0 and 64'),
@@ -108,12 +111,15 @@ def add_sterilization_cycle_type():
     
     if request.method == "POST" and ste_cycle_type_form.validate():
         values = {
-            'name': ste_cycle_type_form.name.data
+            'name': ste_cycle_type_form.name.data,
+            'is_cycle_test': ste_cycle_type_form.is_test_cycle.data,
             }
         new_ste_cycle_type = traceability.SterilizationCycleType(**values)
         meta.session.add(new_ste_cycle_type)
         meta.session.commit()
         return redirect(url_for('list_sterilization_cycle_type'))
+
+    ste_cycle_type_form.is_test_cycle.data = False
 
     return render_template('add_sterilization_cycle_type.html',
                                     ste_cycle_type_form=ste_cycle_type_form)
@@ -126,17 +132,24 @@ def update_sterilization_cycle_type(ste_cycle_type_id):
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
 
-    ste_cycle_type = meta.session.query(traceability.SterilizationCycleType
-                            ).filter(traceability.SterilizationCycleType.id == 
-                                                    ste_cycle_type_id).one()
+    ste_cycle_type = (
+        meta.session.query(traceability.SterilizationCycleType)
+            .filter(traceability.SterilizationCycleType.id == 
+                                                    ste_cycle_type_id)
+            .one()
+    )
 
     ste_cycle_type_form = SterilizationCycleTypeForm(request.form)
 
     if request.method == "POST" and ste_cycle_type_form.validate():
         ste_cycle_type.name = ste_cycle_type_form.name.data
+        ste_cycle_type.is_test_cycle = ste_cycle_type_form.is_test_cycle.data
         meta.session.commit()
         return redirect(url_for('list_sterilization_cycle_type'))
     
+    ste_cycle_type_form.name.data = ste_cycle_type.name
+    ste_cycle_type_form.is_test_cycle.data = ste_cycle_type.is_test_cycle
+
     return render_template('/update_sterilization_cycle_type.html',
                             ste_cycle_type=ste_cycle_type,
                             ste_cycle_type_form=ste_cycle_type_form)
@@ -789,7 +802,45 @@ def add_sterilization_cycle():
         new_sterilization_cycle = traceability.SterilizationCycle(**values)
         meta.session.add(new_sterilization_cycle)
         meta.session.commit()
-        
+ 
+        # Updating materio_vigilance and material_quantity with this
+        # sterilization cycle.
+        autoclave_cycle_clinic_gestures = meta.session.query(act.ClinicGesture)
+
+        if new_sterilization_cycle.cycle_type.is_test_cycle:
+            autoclave_cycle_clinic_gestures = (
+                autoclave_cycle_clinic_gestures
+                    .filter(or_(
+                        act.ClinicGesture.is_autoclave_test.is_(True),
+                        act.ClinicGesture.is_autoclave_cycle.is_(True)
+                        )
+                    )
+                    .all()
+            )
+        else:
+            autoclave_cycle_clinic_gestures = (
+                autoclave_cycle_clinic_gestures
+                .filter(act.ClinicGesture.is_autoclave_cycle.is_(True) )
+                .all()
+            )
+                    
+        for cg in autoclave_cycle_clinic_gestures:
+            for mat_cg_ref in cg.materials:
+                material_used = cost.get_material_used(mat_cg_ref.id)
+                values = {
+                    'material_id': material_used.id,
+                    'sterilization_cycle_id': new_sterilization_cycle.id,
+                    'quantity_used': mat_cg_ref.mean_quantity,
+                }
+                new_materio_vigilance = traceability.MaterioVigilance(**values)
+                meta.session.add(new_materio_vigilance)
+                meta.session.commit()
+
+                material_used.actual_quantity = ( 
+                    material_used.actual_quantity - mat_cg_ref.mean_quantity )
+                meta.session.commit()
+
+        # Adding assets sterilized in sterilization cycle:
         while session['assets_to_sterilize']:
             asset = session['assets_to_sterilize'].pop()
             values = {}

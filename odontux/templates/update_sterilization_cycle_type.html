@@ -3,7 +3,8 @@
 {% from "_formhelpers.html" import render_field %}
 <form method="post" action={{ url_for('update_sterilization_cycle_type', ste_cycle_type_id=ste_cycle_type.id) }}>
   <dl>
-    {{ render_field(ste_cycle_type_form.name, value=ste_cycle_type.name) }}
+    {{ render_field(ste_cycle_type_form.name) }}
+    {{ render_field(ste_cycle_type_form.is_test_cycle) }}
   </dl>
   <p><input type="submit" value="Update">
 </form>

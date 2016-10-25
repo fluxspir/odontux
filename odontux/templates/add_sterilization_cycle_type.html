@@ -6,6 +6,7 @@ Add a new sterilization cycle type
 {% from "_formhelpers.html" import render_simple_field %}
 <form method="post" action={{ url_for('add_sterilization_cycle_type') }}>
     {{ render_simple_field(ste_cycle_type_form.name, autofocus="autofocus") }}
+    {{ render_simple_field(ste_cycle_type_form.is_test_cycle) }}
 
   <p><input type="submit" value="Add">
 </form>
