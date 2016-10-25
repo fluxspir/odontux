@@ -130,15 +130,19 @@ def view_clinic_report(appointment_id):
         )
         if not appointment.dentist_fees:
             appointment.dentist_fees = 1
+
         meta.session.commit()
+
     if not appointment.hour_cost:
-        appointment.hour_cost = cost.get_hourly_operational_cost()
+        appointment.hour_cost = round(cost.get_hourly_operational_cost(), 2)
         meta.session.commit()
 
     # In case this day is the first where happens something, we add in this 
     # clinic report the material that is used every morning and every night 
     # before opening and closing the dental_unit
     # We need to check this first.
+    # TODO Add a verification if material found is only materials use in an
+    # autoclave cycle because it doesn't count
     material_used_this_day = ( 
         meta.session.query(traceability.MaterioVigilance)
         .filter(
@@ -157,6 +161,8 @@ def view_clinic_report(appointment_id):
     # In case no material has been marqued used in this appointment, we now add
     # the minimum material used in each appointment
     # This query is made before adding eventual "material before first patient
+    # TODO Add a verification if material found is only materials use in an
+    # autoclave cycle because it doesn't count
     material_each_appointment = ( 
         meta.session.query(traceability.MaterioVigilance)
         .filter(traceability.MaterioVigilance.appointment_id == appointment.id)
