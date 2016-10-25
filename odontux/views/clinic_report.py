@@ -141,6 +141,8 @@ def view_clinic_report(appointment_id):
     # clinic report the material that is used every morning and every night 
     # before opening and closing the dental_unit
     # We need to check this first.
+    # TODO Add a verification if material found is only materials use in an
+    # autoclave cycle because it doesn't count
     material_used_this_day = ( 
         meta.session.query(traceability.MaterioVigilance)
         .filter(
@@ -159,6 +161,8 @@ def view_clinic_report(appointment_id):
     # In case no material has been marqued used in this appointment, we now add
     # the minimum material used in each appointment
     # This query is made before adding eventual "material before first patient
+    # TODO Add a verification if material found is only materials use in an
+    # autoclave cycle because it doesn't count
     material_each_appointment = ( 
         meta.session.query(traceability.MaterioVigilance)
         .filter(traceability.MaterioVigilance.appointment_id == appointment.id)

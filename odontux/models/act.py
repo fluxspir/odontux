@@ -65,6 +65,7 @@ class ClinicGesture(Base):
     before_each_appointment = Column(Boolean, default=False)
     after_each_appointment = Column(Boolean, default=False)
     is_autoclave_cycle = Column(Boolean, default=False)
+    is_autoclave_test = Column(Boolean, default=False)
     event_model_id = Column(Integer, ForeignKey(teeth.EventModel.id))
 
 class Cotation(Base):

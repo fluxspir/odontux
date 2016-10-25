@@ -15,11 +15,7 @@
             {{ render_simple_field_line(cg_form.name) }}
             {{ render_simple_field_line(cg_form.description) }}<br />
             {{ render_simple_field_line(cg_form.duration) }}<br />
-            {{ render_simple_field_line(cg_form.before_first_patient) }}
-            {{ render_simple_field_line(cg_form.after_last_patient) }}<br />
-            {{ render_simple_field_line(cg_form.before_each_appointment) }}
-            {{ render_simple_field_line(cg_form.after_each_appointment) }}<br />
-            {{ render_simple_field_line(cg_form.is_autoclave_cycle) }}<br />
+            {{ render_simple_field_line(cg_form.modificator) }}
             {{ render_sfl_wol(cg_form.submit) }}
       </form>
       {% if clinic_gesture.event_model_id %}

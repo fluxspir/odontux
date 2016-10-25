@@ -26,6 +26,7 @@ class SterilizationCycleType(Base):
     __tablename__ = "sterilization_cycle_type"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    is_test_cycle = Column(Boolean, default=False)
 
 class SterilizationComplement(Base):
     """
@@ -114,6 +115,7 @@ class MaterioVigilance(Base):
     id = Column(Integer, primary_key=True)
     material_id = Column(Integer, ForeignKey(assets.Material.id) )
     appointment_id = Column(Integer, ForeignKey(schedule.Appointment.id) )
+    sterilization_cycle_id = Column(Integer, ForeignKey(SterilizationCycle.id))
     quantity_used = Column(Numeric)
     material = relationship('assets.Material', backref='materio_vigilance')
     appointment = relationship('schedule.Appointment')

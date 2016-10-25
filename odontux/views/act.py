@@ -23,8 +23,9 @@ from odontux.views.log import index
 #from odontux.views.patient import list_acts
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
-                     DecimalField, HiddenField, IntegerField, validators,
-                     FieldList, FormField, SubmitField)
+                     DecimalField, HiddenField, IntegerField, RadioField,
+                     FieldList, FormField, SubmitField, 
+                     validators )
 from odontux.views.forms import ColorField
 from decimal import Decimal
 import datetime
@@ -41,11 +42,16 @@ class ClinicGestureForm(Form):
     duration = IntegerField(_('Duration in minutes'),
                                                 [validators.Optional()],
                                                 render_kw={'size': 8})
-    before_first_patient = BooleanField(_('Before first patient of the day'))
-    after_last_patient = BooleanField(_('After last patient of the day'))
-    before_each_appointment = BooleanField(_('Before each appointment'))
-    after_each_appointment = BooleanField(_('After each appointment'))
-    is_autoclave_cycle = BooleanField(_('Is an autoclave cycle'))
+    modificator = RadioField(_('Special clinic gesture'),
+        choices=[ ( 0, _('Normal') ),
+            ( 1, _('Before first patient of the day') ),
+            ( 2, _('After last patient of the day') ),
+            ( 3, _('Before each appointment') ),
+            ( 4, _('After each appointment') ),
+            ( 5, _('Is an autoclave cycle') ),
+            ( 6, _('Is an autoclave test cycle') )
+        ],
+        coerce=int)
     specialty_id = SelectField(_('Specialty'), coerce=int)
     submit = SubmitField(_('Update'))
 
@@ -406,6 +412,7 @@ def add_clinic_gesture(cotation_id):
     form = ClinicGestureForm(request.form)
     form.specialty_id.choices = [ (spe.id, spe.name) for spe in
                                     meta.session.query(act.Specialty).all() ]
+    form.modificator.data = 0
     if request.method == 'POST' and form.validate():
         new_clinic_gesture = ( meta.session.query(act.ClinicGesture)
                             .filter(act.ClinicGesture.name == form.name.data)
@@ -421,6 +428,7 @@ def add_clinic_gesture(cotation_id):
                 'before_each_appointment': False,
                 'after_each_appointment': False,
                 'is_autoclave_cycle': False,
+                'is_autoclave_test': False,
                 'specialty_id': form.specialty_id.data,
             }
             new_clinic_gesture = act.ClinicGesture(**args)
@@ -539,13 +547,31 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
         # won't try to update with name already in db to avoid IntegrityError
         if not other_cg_same_new_name:
             for f in ( 'name', 'description', 'duration', 'specialty_id',
-                    'before_first_patient', 'after_last_patient', 
-                    'before_each_appointment', 'after_each_appointment',
-                                                        'is_autoclave_cycle' ):
+                    'modificator' ):
                 if f == 'duration':
                     setattr(clinic_gesture, f, 
                     datetime.timedelta(seconds=getattr(cg_form, f).data * 60))
-                    
+
+                elif f == 'modificator':
+                    for m in ( 'before_first_patient', 'after_last_patient',
+                        'before_each_appointment', 'after_each_appointment',
+                        'is_autoclave_cycle', 'is_autoclave_test' ) :
+                        setattr(clinic_gesture, m, False )
+                    if getattr(cg_form, f).data == 1:
+                        setattr(clinic_gesture, 'before_first_patient', True)
+                    elif getattr(cg_form, f).data == 2:
+                        setattr(clinic_gesture, 'after_last_patient', True)
+                    elif getattr(cg_form, f).data == 3:
+                        setattr(clinic_gesture, 'before_each_appointment', 
+                                                                        True)
+                    elif getattr(cg_form, f).data == 4:
+                        setattr(clinic_gesture, 'after_each_appointment', True)
+                    elif getattr(cg_form, f).data == 5:
+                        setattr(clinic_gesture, 'is_autoclave_cycle', True)
+                    elif getattr(cg_form, f).data == 6:
+                        setattr(clinic_gesture, 'is_autoclave_test', True)
+                    else:
+                        pass
                 else:
                     setattr(clinic_gesture, f, getattr(cg_form, f).data)
             meta.session.commit()
@@ -566,12 +592,29 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
         )
 
     for f in ('name', 'description', 'duration', 'specialty_id',
-                'before_first_patient', 'after_last_patient',
-                'before_each_appointment', 'after_each_appointment',
-                                            'is_autoclave_cycle' ):
-        if f == 'duration':
-            getattr(cg_form, f).data =\
-                                getattr(clinic_gesture, f).seconds % 3600 / 60
+                'modificator' ) :
+
+        if f == 'modificator':
+            if getattr(clinic_gesture, 'before_first_patient'):
+                getattr(cg_form, f).data = 1
+            elif getattr(clinic_gesture, 'after_last_patient'):
+                getattr(cg_form, f).data = 2
+            elif getattr(clinic_gesture, 'before_each_appointment'):
+                getattr(cg_form, f).data = 3
+            elif getattr(clinic_gesture, 'after_each_appointment'):
+                getattr(cg_form, f).data = 4
+            elif getattr(clinic_gesture, 'is_autoclave_cycle'):
+                getattr(cg_form, f).data = 5
+            elif getattr(clinic_gesture, 'is_autoclave_test'):
+                getattr(cg_form, f).data = 6
+            else:
+                getattr(cg_form, f).data = 0
+
+        elif f == 'duration':
+            hour_duration = clinic_gesture.duration.seconds / 3600 * 60
+            minute_duration = clinic_gesture.duration.seconds % 3600 / 60
+            getattr(cg_form, f).data = hour_duration + minute_duration
+                        
         else:
             getattr(cg_form, f).data = getattr(clinic_gesture, f)
 
