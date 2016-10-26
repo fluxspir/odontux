@@ -219,7 +219,7 @@ def get_cotation_dictionary(cotation_id):
     # create materials_used = list of materials that may be used
     for cg_cot_ref in sorted(cotation.clinic_gestures,
                         key=lambda cg_cot_ref: ( cg_cot_ref.appointment_number,
-                                            cg_cot_ref.appointment_sequence)):
+                                            cg_cot_ref.appointment_sequence) ):
         if cg_cot_ref.appointment_number not in dictionnary:
             dictionnary[cg_cot_ref.appointment_number] = [ 
                                                 [], # ( cg_cot_ref, ref_form )
@@ -247,8 +247,9 @@ def get_cotation_dictionary(cotation_id):
 
         dictionnary[cg_cot_ref.appointment_number][2] = cg_mat_ref_list
         # cost of appointment in material
-        dictionnary[cg_cot_ref.appointment_number][3] =\
-            dictionnary[cg_cot_ref.appointment_number][3] +\
+        if cg_cot_ref.appears_on_clinic_report:
+            dictionnary[cg_cot_ref.appointment_number][3] =\
+                dictionnary[cg_cot_ref.appointment_number][3] +\
                                                         material_used_cost
     return dictionnary
 

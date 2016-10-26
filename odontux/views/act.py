@@ -109,16 +109,9 @@ class AssetSterilizedUsedForm(Form):
                                             [validators.Required()] )
 
 class MaterioVigilanceForm(Form):
-#    def max_quantity(material_id):
-#        max_quantity = ( meta.session.query(assets.Material)
-#            .filter(assets.Material.id == material_id)
-#            .one()[0]
-#        )
-#        return max_quantity
     material_id = HiddenField(_('Material id'))
     old_quantity_used = HiddenField(_('Old Quantity Used'))
     new_quantity_used = DecimalField(_('Quantity used'), 
-#                                [validators.NumberRange(min=0)],
                                 [validators.Optional()],
                                 render_kw={'size':4})
     material_data = HiddenField(_('material_data'))
@@ -127,23 +120,7 @@ class MaterioVigilanceUsedForm(Form):
     materials_used = FieldList(FormField(MaterioVigilanceForm))
     update = SubmitField(_('Update'))
 
-#@app.route('/get/clinic_gestures_in_cotation?cid=<int:cotation_id>')
-#def clinic_gestures_in_cotation(cotation_id):
-#    
-#    cotation = ( meta.session.query(act.Cotation)
-#                    .filter(act.Cotation.id == cotation_id)
-#                    .one()
-#    )
-#    clinic_gestures = [ 
-#        ( cgref.id, cgref.gesture.name ) for cgref in 
-#            sorted(cotation.clinic_gestures,
-#                                    key=lambda (cgref.appointment_number,
-#                                                cgref.appointment_sequence,
-#                                               cgref.gesture.name) 
-#            )
-#    ]
-#    return jsonify(success=True, clinic_gestures)
-#
+
 def get_specialty_field_list():
     return [ "name", "color" ]
 
