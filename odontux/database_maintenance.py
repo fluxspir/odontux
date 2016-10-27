@@ -26,9 +26,9 @@ import datetime
 
 
 @app.route('/update_materio_vigilance_sterilization')
-def update_materio_vigilance_sterilization():#you_know_you_are_doing=False):
-#    if not you_know_what_you_are_doing:
-#        return abort(403)
+def update_materio_vigilance_sterilization(you_know_you_are_doing=False):
+    if not you_know_what_you_are_doing:
+        return abort(403)
 
     sterilization_cycles = ( 
         meta.session.query(traceability.SterilizationCycle).all()
