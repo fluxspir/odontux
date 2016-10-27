@@ -517,6 +517,8 @@ def add_event_model(clinic_gesture_id, cotation_id):
 
         if ( event_form.location.data == 
                                         constants.TOOTH_EVENT_LOCATION_TOOTH ):
+
+            values['state'] = tooth_model_form.choose_tooth_model_state.data
             new_tooth_event = teeth.ToothEventModel(**values)
             meta.session.add(new_tooth_event)
             meta.session.commit()
