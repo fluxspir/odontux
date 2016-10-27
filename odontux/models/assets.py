@@ -83,6 +83,7 @@ class AssetCategory(Base):
     asset_specialty = relationship("act.Specialty", 
                                                 order_by='act.Specialty.name')
     manufacture_sterilization = Column(Boolean, default=False)
+    last_price = Column(Numeric)
     type = Column(String)
 
     __mapper_args__ = {

@@ -86,7 +86,10 @@ class AssetCategoryForm(Form):
     description = TextAreaField(_('Description'), [validators.Optional()])
     asset_specialty_id = SelectField(_('Specialty'), coerce=int, 
                                         validators=[validators.Optional()])
-    manufacture_sterilization = BooleanField(_('Asset was sterilized made by Manufacturer'))
+    manufacture_sterilization = BooleanField(
+                                _('Asset was sterilized made by Manufacturer'))
+    last_price = DecimalField(_('Last price'), 
+                                            validators=[validators.Optional()])
     type = SelectField(_('Type'), description='ChangementType()')
 
 class DeviceCategoryForm(Form):
@@ -214,7 +217,7 @@ def get_end_use_reason_choices():
     
 def get_asset_cat_field_list():
     return [ "brand", "commercial_name", "manufacture_sterilization",
-                "description", "type"]
+                "description", "type", 'last_price']
 
 def get_device_cat_field_list():
     return [ "sterilizable", "sterilizer" ]
@@ -548,6 +551,7 @@ def add_asset():
         if asset_form.service.data:
             values['start_of_use'] = asset_form.start_of_use.data
         values['asset_category_id'] = asset_cat.id
+        asset_cat.last_price = asset_form.acquisition_price.data
         
         if device_form.lifetime_expected.data:
             values['lifetime_expected'] = datetime.timedelta(
@@ -567,6 +571,8 @@ def add_asset():
         if asset_form.office_id.data:
             values['office_id'] = asset_form.office_id.data
         values['asset_category_id'] = asset_cat.id
+        asset_cat.last_price = asset_form.acquisition_price.data
+
         if asset_form.service.data:
             values['start_of_use'] = asset_form.start_of_use.data
         for f in add_material_field_list:
