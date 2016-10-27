@@ -22,7 +22,7 @@
                                       {% endif %}-- 
                             {% if asset.end_of_use %} 
                               {% if asset.end_use_reason %} 
-                                  {{asset.end_use_reason }}
+                                  {{constants.END_USE_REASONS[asset.end_use_reason][1] }}
                               {% else %}
                                   Asset thrown away
                               {% endif %}

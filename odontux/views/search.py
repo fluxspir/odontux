@@ -107,11 +107,16 @@ def find():
                     assets.SuperAssetCategory.name.ilike(keyword)
                     )
         assets_list = []
-        for asset in query_asset.all():
+        assets_to_render = ( query_asset
+                    .order_by(assets.Asset.start_of_use)
+                    .all()
+        )
+        for asset in assets_to_render:
             assets_list.append(asset)
         for superasset in query_superasset.all():
             assets_list.append(superasset)
-        return render_template('list_assets.html', assets_list=assets_list)
+        return render_template('list_assets.html', assets_list=assets_list,
+                                                    constants=constants)
         
     if request.form['database'] == 'sterilized_asset':
         sterilized_id = int(request.form['keywords'])

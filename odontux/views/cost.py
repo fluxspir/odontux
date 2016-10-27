@@ -78,32 +78,67 @@ def get_dentist_hour_fees(healthcare_plan_id, user_id=0):
     else:
         return 0
 
-def get_material_used(cg_mat_ref_id):
+def get_material_used(cg_mat_ref_id, appointment=None, 
+                                                    sterilization_cycle=None):
+    def _update_materials_potentials(materials, appointment=None,
+                                                    sterilization_cycle=None):
+        materials = ( materials
+            .filter(assets.Material.actual_quantity <= 0)
+            .all()
+        ) 
+        for material in materials:
+            if material.actual_quantity <= 0:
+                if appointment:
+                    material.end_of_use = appointment.agenda.starttime.date()
+                elif sterilization_cycle:
+                    material.end_of_use = sterilization_cycle.cycle_date
+                else:
+                    material.end_of_use = datetime.date.today()
+                material.end_use_reason = constants.END_USE_REASON_NATURAL_END
+                meta.session.commit()
+
+
     cg_mat_ref = ( 
         meta.session.query(assets.MaterialCategoryClinicGestureReference)
             .filter(assets.MaterialCategoryClinicGestureReference.id == 
                                                                 cg_mat_ref_id
             ).one()
     )
-    material = ( meta.session.query(assets.Material)
+    materials_potentials = ( meta.session.query(assets.Material)
         .filter(
             assets.Material.asset_category_id == 
                                     cg_mat_ref.material_category_id,
             assets.Material.end_of_use.is_(None),
-            assets.Material.end_use_reason == 0
+            assets.Material.end_use_reason == 
+                                        constants.END_USE_REASON_IN_USE_STOCK,
         )
     )
-    material_in_use = (
-        material.filter(assets.Material.start_of_use.isnot(None))
+
+    _update_materials_potentials(materials_potentials, appointment, 
+                                                        sterilization_cycle)
+
+    materials_potentials = ( materials_potentials
+                .filter(assets.Material.actual_quantity > 0)
+    )
+    material_in_use = ( materials_potentials
+                .filter(assets.Material.start_of_use.isnot(None))
         .first()
     )
+
     if material_in_use:
         material_used = material_in_use
     else:
         material_used = (
-            material.order_by(assets.Material.expiration_date)
+            materials_potentials.order_by(assets.Material.expiration_date)
             .first()
         )
+        if appointment:
+            material_used.start_of_use = appointment.agenda.starttime.date()
+        elif sterilization_cycle:
+            material_used.start_of_use = sterilization_cycle.cycle_date
+        else:
+            material_used.start_of_use = datetime.date.today()
+        meta.session.commit()
     return material_used
 
 def get_material_cost(cg_mat_ref_id):

@@ -498,12 +498,9 @@ def list_assets(asset_type="all"):
 #               .limit(100)
                 .all()
             )
-    for asset in query:
-        if asset.end_use_reason:
-            asset.end_user_reason =\
-                constants.END_USE_REASONS[asset.end_use_reason][0]
     return render_template('list_assets.html', 
-                            assets_list=query)
+                            assets_list=query,
+                            constants=constants)
 
 @app.route('/add/asset/', methods=['POST', 'GET'])
 def add_asset():

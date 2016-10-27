@@ -24,6 +24,52 @@ from odontux.views.log import index
 from decimal import Decimal
 import datetime
 
+
+@app.route('/update_materio_vigilance_sterilization')
+def update_materio_vigilance_sterilization():#you_know_you_are_doing=False):
+#    if not you_know_what_you_are_doing:
+#        return abort(403)
+
+    sterilization_cycles = ( 
+        meta.session.query(traceability.SterilizationCycle).all()
+    )
+    for cycle in sterilization_cycles:  
+        autoclave_cycle_clinic_gestures = meta.session.query(act.ClinicGesture)
+        if cycle.cycle_type.is_test_cycle:
+            autoclave_cycle_clinic_gestures = (
+                autoclave_cycle_clinic_gestures
+                    .filter(or_(
+                        act.ClinicGesture.is_autoclave_test.is_(True),
+                        act.ClinicGesture.is_autoclave_cycle.is_(True)
+                        )
+                    )
+                    .all()
+            )
+        else:
+            autoclave_cycle_clinic_gestures = (
+                autoclave_cycle_clinic_gestures
+                    .filter(act.ClinicGesture.is_autoclave_cycle.is_(True))
+                    .all()
+
+                )
+        for cg in autoclave_cycle_clinic_gestures:
+            for mat_cg_ref in cg.materials:
+                material_used = cost.get_material_used(mat_cg_ref.id, 
+                                                        sterilization_cycle=cycle)
+                values = {
+                    'material_id': material_used.id,
+                    'sterilization_cycle_id': cycle.id,
+                    'quantity_used': mat_cg_ref.mean_quantity,
+                }
+                new_materio_vigilance = traceability.MaterioVigilance(**values)
+                meta.session.add(new_materio_vigilance)
+                meta.session.commit()
+
+                material_used.actual_quantity = ( 
+                    material_used.actual_quantity - mat_cg_ref.mean_quantity )
+                meta.session.commit()
+    return redirect(url_for('index'))
+
 #@app.route('/update_materio_vigilance_base')
 #def update_materio_vigilance_base(you_know_what_you_are_doing=False):
 #    """ """
