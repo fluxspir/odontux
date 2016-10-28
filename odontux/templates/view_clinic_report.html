@@ -44,6 +44,7 @@
           Remove</a><br />
     {% endfor %}
   </div>
+  <div style="float:right">
     <strong>Materio Vigilance</strong><br />
 {#    {% for mat_vig in materio_vigilance %}
       {{ mat_vig.material.asset_category.commercial_name }} 
@@ -71,8 +72,6 @@
         <br />
         {{ materials_used_form.update }}
       </form>
-
-  <div>
   </div>
 
 {% endblock %}
