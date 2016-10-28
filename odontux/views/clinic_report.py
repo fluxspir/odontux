@@ -61,6 +61,19 @@ class ChooseClinicGestureForReportForm(Form):
     clinic_gesture_id = SelectField(_('Clinic Gesture'), coerce=int)
     submit = SubmitField(_('Choose clinic gesture'))
 
+class MaterioVigilanceForm(Form):
+    material_id = HiddenField(_('Material id'))
+    old_quantity_used = HiddenField(_('Old Quantity Used'))
+    new_quantity_used = DecimalField(_('Quantity used'), 
+                                [validators.Optional()],
+                                render_kw={'size':4})
+    material_data = HiddenField(_('material_data'))
+
+class MaterioVigilanceUsedForm(Form):
+    materials_used = FieldList(FormField(MaterioVigilanceForm))
+    update = SubmitField(_('Update'))
+
+
 def anat_loc_is_list(anat_loc=""):
     """we want to recognize teeth ( 9 < teeth < 100 )
                    teeth sets ( 0 <= region < 10 )
@@ -109,6 +122,8 @@ def view_clinic_report(appointment_id):
                 .order_by(act.Specialty.name, act.ClinicGesture.name )
                 .all()
     ]
+    materials_used_form = MaterioVigilanceUsedForm(request.form)
+
     clinic_gestures = [ clinic_report for clinic_report in 
                             sorted(appointment.clinic_reports,
                                 key=lambda clinic_report: 
@@ -205,24 +220,89 @@ def view_clinic_report(appointment_id):
                                     cot.anatomic_location ) )
     ]
     
-    materio_vigilance = [ 
-        mat_vig for mat_vig in
-            sorted(appointment.materio_vigilance, key=lambda mat_vig: (
-                mat_vig.material.asset_category.asset_specialty.name,
-                        mat_vig.material.asset_category.commercial_name
-            )
-        )
-    ]
+#    materio_vigilance = [ 
+#        mat_vig for mat_vig in
+#            sorted(appointment.materio_vigilance, key=lambda mat_vig: (
+#                mat_vig.material.asset_category.asset_specialty.name,
+#                        mat_vig.material.asset_category.commercial_name
+#            )
+#        )
+#    ]
+    for mat_vig in sorted(appointment.materio_vigilance, key=lambda mat_vig:(
+                        mat_vig.material.asset_category.asset_specialty.name,
+                            mat_vig.material.asset_category.commercial_name) ):
+
+        mat_vig_form = MaterioVigilanceForm(request.form)
+        mat_vig_form.material_id = mat_vig.material_id
+        mat_vig_form.old_quantity_used = mat_vig.quantity_used
+        mat_vig_form.new_quantity_used = mat_vig.quantity_used
+        
+        mat_vig_form.material_data = (
+            mat_vig.material.asset_category.commercial_name + " | " +
+            str(mat_vig.material.actual_quantity) + " " +
+            constants.UNITIES[mat_vig.material.asset_category.unity][1] )
+        materials_used_form.materials_used.append_entry(mat_vig_form)
 
     return render_template('view_clinic_report.html', 
                             patient=patient,
                             appointment=appointment,
                             clinic_gestures=clinic_gestures,
                             cotations=cotations,
-                            materio_vigilance=materio_vigilance,
+                            materials_used_form=materials_used_form,
                             cotation_form=cotation_form,
                             cg_form=cg_form,
                             constants=constants)
+
+@app.route('/update/material_quantity?aid=<int:appointment_id>', 
+                                                            methods=['POST'])
+def update_material_quantity(appointment_id):
+
+    patient, appointment = checks.get_patient_appointment(
+                                                appointment_id=appointment_id)
+    materials_used_form = MaterioVigilanceUsedForm(request.form)
+    if materials_used_form.validate():
+        for entry in materials_used_form.materials_used.entries:
+#            materio_vigilance_form = MaterioVigilanceForm(request.form)
+            if Decimal(entry.old_quantity_used.data) ==\
+                                                entry.new_quantity_used.data:
+                continue
+            material = ( 
+                meta.session.query(assets.Material)
+                    .filter(assets.Material.id == int(entry.material_id.data))
+                    .one()
+            )
+            materio_vigilance = (
+                meta.session.query(traceability.MaterioVigilance)
+                    .filter(
+                        traceability.MaterioVigilance.appointment_id == 
+                                                                appointment.id,
+                        traceability.MaterioVigilance.material_id == 
+                                                                material.id)
+                    .one()
+            )
+
+            delta_quantity = Decimal(entry.old_quantity_used.data) -\
+                                                entry.new_quantity_used.data
+            materio_vigilance.quantity_used -= delta_quantity
+            material.actual_quantity += delta_quantity
+            # Case the material was marked as terminated, but finally there is
+            # some left :
+            if ( material.end_of_use == appointment.agenda.endtime.date()
+                    and material.end_use_reason == 
+                                        constants.END_USE_REASON_NATURAL_END
+                    and material.actual_quantity > 0 ):
+                material.end_of_use = None
+                material.end_use_reason = constants.END_USE_REASON_IN_USE_STOCK
+                meta.session.commit()
+
+            # Case material terminate :
+            if material.actual_quantity <= 0:
+                material.end_of_use = appointment.agenda.endtime.date()
+                material.end_use_reason = constants.END_USE_REASON_NATURAL_END
+                meta.session.commit()
+
+    return redirect(url_for('view_clinic_report', 
+                                                appointment_id=appointment.id))
 
 def add_appointment_cotation(appointment_id, cotation_id, price,
                                                             anatomic_location):
