@@ -342,21 +342,22 @@ def choose_cg_from_cot_inserted_in_cr(appointment_id, cotation_id, anat_loc):
 
         clinic_report = add_cg_to_cr(a_id, cg_id, anat_loc)
 
-        cg_cot_ref = ( 
+        cg_cot_refs = ( 
             meta.session.query(act.ClinicGestureCotationReference)
             .filter(
                 act.ClinicGestureCotationReference.clinic_gesture_id == cg_id,
                 act.ClinicGestureCotationReference.cotation_id == cot_id)
-            .one()
+            .all()
         )
 
-        if cg_cot_ref.official_cotation:
-            new_administrativ_cotation = add_appointment_cotation(
+        for cg_cot_ref in cg_cot_refs:
+            if cg_cot_ref.official_cotation:
+                new_administrativ_cotation = add_appointment_cotation(
                                                     appointment_id=a_id,
                                                     cotation_id=cot_id,
                                                     price=price,
                                                     anatomic_location=anat_loc
-            )
+                )
 
     form = ClinicGesturesFromCotationForm(request.form)
     if form.validate():
