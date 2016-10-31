@@ -69,8 +69,18 @@ class MaterioVigilanceForm(Form):
                                 render_kw={'size':4})
     material_data = HiddenField(_('material_data'))
 
-class MaterioVigilanceUsedForm(Form):
+class ClinicGestureDurationForm(Form):
+    clinic_report_id = HiddenField(_('clinic_report_id'))
+    clinic_gesture_id = HiddenField(_('Clinic Gesture id'))
+    old_duration = HiddenField(_('Old clinic gesture duration'))
+    new_duration = IntegerField(_('Clinic gesture duration'),
+                                    [validators.Optional()],
+                                    render_kw={'size': 4})
+    clinic_gesture_data = HiddenField(_('cg_data'))
+
+class ClinicReportForm(Form):
     materials_used = FieldList(FormField(MaterioVigilanceForm))
+    clinic_gestures = FieldList(FormField(ClinicGestureDurationForm))
     update = SubmitField(_('Update'))
 
 
@@ -122,7 +132,7 @@ def view_clinic_report(appointment_id):
                 .order_by(act.Specialty.name, act.ClinicGesture.name )
                 .all()
     ]
-    materials_used_form = MaterioVigilanceUsedForm(request.form)
+    clinic_report_form = ClinicReportForm(request.form)
 
     clinic_gestures = [ clinic_report for clinic_report in 
                             sorted(appointment.clinic_reports,
@@ -220,14 +230,6 @@ def view_clinic_report(appointment_id):
                                     cot.anatomic_location ) )
     ]
     
-#    materio_vigilance = [ 
-#        mat_vig for mat_vig in
-#            sorted(appointment.materio_vigilance, key=lambda mat_vig: (
-#                mat_vig.material.asset_category.asset_specialty.name,
-#                        mat_vig.material.asset_category.commercial_name
-#            )
-#        )
-#    ]
     for mat_vig in sorted(appointment.materio_vigilance, key=lambda mat_vig:(
                         mat_vig.material.asset_category.asset_specialty.name,
                             mat_vig.material.asset_category.commercial_name) ):
@@ -236,33 +238,58 @@ def view_clinic_report(appointment_id):
         mat_vig_form.material_id = mat_vig.material_id
         mat_vig_form.old_quantity_used = mat_vig.quantity_used
         mat_vig_form.new_quantity_used = mat_vig.quantity_used
-        
         mat_vig_form.material_data = (
             mat_vig.material.asset_category.commercial_name + " | " +
             str(mat_vig.material.actual_quantity) + " " +
             constants.UNITIES[mat_vig.material.asset_category.unity][1] )
-        materials_used_form.materials_used.append_entry(mat_vig_form)
+
+        clinic_report_form.materials_used.append_entry(mat_vig_form)
+
+    for clinic_report in sorted(appointment.clinic_reports, 
+                                    key=lambda clinic_report:
+                                        clinic_report.sequence ):
+        
+        hour_duration = clinic_report.duration.seconds / 3600 * 60
+        minute_duration = clinic_report.duration.seconds % 3600 / 60
+        cg_duration_form = ClinicGestureDurationForm(request.form)
+        cg_duration_form.clinic_report_id = clinic_report.id
+        cg_duration_form.clinic_gesture_id = clinic_report.clinic_gesture_id
+        cg_duration_form.old_duration = str(hour_duration + minute_duration)
+        cg_duration_form.new_duration = hour_duration + minute_duration
+        cg_duration_form.clinic_gesture_data =\
+                                            clinic_report.clinic_gesture.name
+
+        clinic_report_form.clinic_gestures.append_entry(cg_duration_form)
 
     return render_template('view_clinic_report.html', 
                             patient=patient,
                             appointment=appointment,
-                            clinic_gestures=clinic_gestures,
+#                            clinic_gestures=clinic_gestures,
                             cotations=cotations,
-                            materials_used_form=materials_used_form,
+                            clinic_report_form=clinic_report_form,
                             cotation_form=cotation_form,
                             cg_form=cg_form,
                             constants=constants)
 
-@app.route('/update/material_quantity?aid=<int:appointment_id>', 
-                                                            methods=['POST'])
-def update_material_quantity(appointment_id):
+@app.route('/update/clinic_report?aid=<int:appointment_id>', methods=['POST'])
+def update_clinic_report(appointment_id):
 
     patient, appointment = checks.get_patient_appointment(
                                                 appointment_id=appointment_id)
-    materials_used_form = MaterioVigilanceUsedForm(request.form)
-    if materials_used_form.validate():
-        for entry in materials_used_form.materials_used.entries:
-#            materio_vigilance_form = MaterioVigilanceForm(request.form)
+    clinic_report_form = ClinicReportForm(request.form)
+    if clinic_report_form.validate():
+        for entry in clinic_report_form.clinic_gestures.entries:
+            if entry.old_duration.data != entry.new_duration.data:
+                clinic_report = ( meta.session.query(act.ClinicReport)
+                    .filter(act.ClinicReport.id == 
+                                        int(entry.clinic_report_id.data) )
+                    .one()
+                )
+                clinic_report.duration = datetime.timedelta(
+                        seconds=int(entry.new_duration.data) * 60 )
+                meta.session.commit()
+                
+        for entry in clinic_report_form.materials_used.entries:
             if Decimal(entry.old_quantity_used.data) ==\
                                                 entry.new_quantity_used.data:
                 continue
@@ -285,6 +312,7 @@ def update_material_quantity(appointment_id):
                                                 entry.new_quantity_used.data
             materio_vigilance.quantity_used -= delta_quantity
             material.actual_quantity += delta_quantity
+            meta.session.commit()
             # Case the material was marked as terminated, but finally there is
             # some left :
             if ( material.end_of_use == appointment.agenda.endtime.date()
