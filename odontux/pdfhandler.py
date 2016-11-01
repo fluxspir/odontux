@@ -657,27 +657,59 @@ def make_quote(patient_id, appointment_id, quotes):
                 # duration in months; else, print in weeks.
                 if months < 3:
                     months = 0
-                    weeks = 52 / quote.treatment_duration.days
+                    weeks = quote.treatment_duration.days / 7
+
+                if not weeks:
+                    days = quote.treatment_duration.days
                     
 #        if any(years, months, weeks):
         if years and months:   
+            if years == 1:
+                write_year = _(u' ano e ')
+            else:
+                write_year = _(u' anos e ')
+            if months == 1:
+                write_month = _(u' mês.')
+            else:
+                write_month = _(u' meses.')
             Story.append(Paragraph(
-                u"Tempo de tratamento estimado: " + str(years) + u" anos e " +
-                str(months) + " meses.", styles['normal'])
+                u"Tempo de tratamento estimado: " + str(years) + write_year +
+                str(months) + write_month, styles['normal'])
             )
         elif years and not months:
+            if years == 1:
+                write_year = _(u' ano.')
+            else:
+                write_year = _(u' anos.')
             Story.append(Paragraph(
-                u"Tempo de tratamento estimado: " + str(years) + u" anos.", 
+                u"Tempo de tratamento estimado: " + str(years) + write_year, 
                                                             styles['normal'])
             )
         elif months:
+            if months == 1:
+                write_month = _(u' mês.')
+            else:
+                write_month = _(u' meses.')
             Story.append(Paragraph(
-                u"Tempo de tratamento estimado: " + str(months) + u" meses",
+                u"Tempo de tratamento estimado: " + str(months) + write_month,
                                                             styles['normal'])
             )
         elif weeks:
+            if weeks == 1:
+                write_week = _(u' semana.')
+            else:
+                write_week = _(u' semanas.')
             Story.append(Paragraph(
-                u"Tempo de tratamento estimado: " + str(weeks) + u" semanas",
+                u"Tempo de tratamento estimado: " + str(weeks) + write_week,
+                                                            styles['normal'])
+            )
+        elif days:
+            if days == 1:
+                write_day = _(u' dia.')
+            else:
+                write_day = _(u' dias.')
+            Story.append(Paragraph(
+                u"Tempo de tratament estimado: " + str(days) + write_day,
                                                             styles['normal'])
             )
         Story.append(Spacer(1, 10 * mm))
