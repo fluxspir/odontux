@@ -132,6 +132,9 @@ def get_material_used(cg_mat_ref_id, appointment=None,
             materials_potentials.order_by(assets.Material.expiration_date)
             .first()
         )
+        if not material_used:
+            return None
+
         if appointment:
             material_used.start_of_use = appointment.agenda.starttime.date()
         elif sterilization_cycle:
@@ -150,6 +153,8 @@ def get_material_cost(cg_mat_ref_id):
     )
 
     material_used = get_material_used(cg_mat_ref_id)
+    if not material_used:
+        return get_material_category_cost(cg_mat_ref_id)
                 
     if not cg_mat_ref.mean_quantity:
         cg_mat_ref.mean_quantity = material.automatic_decrease
@@ -164,6 +169,34 @@ def get_material_cost(cg_mat_ref_id):
         )
             / cg_mat_ref.enter_in_various_gestures
     )
+    return material_used_cost
+
+def get_material_category_cost(cg_mat_ref_id):
+    cg_mat_ref = ( 
+        meta.session.query(assets.MaterialCategoryClinicGestureReference)
+            .filter(assets.MaterialCategoryClinicGestureReference.id == 
+                                                            cg_mat_ref_id )
+            .one()
+    )
+    material_category = ( meta.session.query(assets.AssetCategory)
+        .filter(assets.AssetCategory.id == cg_mat_ref.material_category_id)
+        .one()
+    )
+    
+    if material_category.last_price is None:
+        material_category.last_price = 0
+
+    material_used_cost = (
+        (
+            (
+                cg_mat_ref.mean_quantity /
+                material_category.initial_quantity
+            )
+                * material_category.last_price
+        )
+            / cg_mat_ref.enter_in_various_gestures
+    )
+    
     return material_used_cost
 
 def get_material_cost_in_clinic_gesture(clinic_gesture):

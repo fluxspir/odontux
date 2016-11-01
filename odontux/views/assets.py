@@ -502,9 +502,17 @@ def list_assets(asset_type="all"):
                             assets_list=query,
                             constants=constants)
 
+#@app.route('/add/asset_category', methods=['GET', 'POST'])
+#def add_asset_category():
+#    form = AssetCategoryForm(request.form)
+#    if request.method == 'POST' and form.validate():
+#        values = 
+#
+#    return render_template('add_asset_category.html', form=form)
+#
 @app.route('/add/asset/', methods=['POST', 'GET'])
 def add_asset():
-    def _add_device_category(asset_cat_form, device_cat_form):
+    def _add_device_category(asset_cat_form, device_cat_form, asset_form):
         values = {f: getattr(asset_cat_form, f).data
                 for f in get_asset_cat_field_list()}
         if asset_cat_form.barcode.data:
@@ -516,12 +524,14 @@ def add_asset():
                                         asset_cat_form.asset_specialty_id.data
         for f in get_device_cat_field_list():
             values[f] = getattr(device_cat_form, f).data
+        values['last_price'] = asset_form.acquisition_price.data
+
         new_device_cat = assets.DeviceCategory(**values)
         meta.session.add(new_device_cat)
         meta.session.commit()
         return new_device_cat
 
-    def _add_material_category(asset_cat_form, material_cat_form):
+    def _add_material_category(asset_cat_form, material_cat_form, asset_form):
         values = {f: getattr(asset_cat_form, f).data
                 for f in get_asset_cat_field_list()}
         if asset_cat_form.barcode.data:
@@ -533,6 +543,8 @@ def add_asset():
                                         asset_cat_form.asset_specialty_id.data
         for f in get_material_cat_field_list():
             values[f] = getattr(material_cat_form, f).data
+        values['last_price'] = asset_form.acquisition_price.data
+       
         new_material_cat = assets.MaterialCategory(**values)
         meta.session.add(new_material_cat)
         meta.session.commit()
@@ -616,14 +628,16 @@ def add_asset():
             and asset_category_form.validate() 
             and device_category_form.validate() ):
             asset_cat = _add_device_category(asset_category_form, 
-                                            device_category_form)
+                                            device_category_form,
+                                            asset_form)
 
         if ( request.method == 'POST'
             and asset_category_form.type.data == "material"
             and asset_category_form.validate() 
             and material_category_form.validate() ):
             asset_cat = _add_material_category(asset_category_form, 
-                                            material_category_form)
+                                            material_category_form,
+                                            asset_form)
     add_asset_field_list = [ "provider_id", "acquisition_date", 
                         "acquisition_price", "new", "description" ]
 

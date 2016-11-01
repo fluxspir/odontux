@@ -559,13 +559,13 @@ def update_clinic_gesture(clinic_gesture_id, cotation_id):
     # create update_form for each quantity
     quantity_forms = {}
     for cg_mat_ref in clinic_gesture.materials:
-        material_cost = cost.get_material_cost(cg_mat_ref.id)
+        material_category_cost = cost.get_material_category_cost(cg_mat_ref.id)
         mat_form = MaterialCategoryClinicGestureForm(request.form)
         mat_form.mean_quantity.data = cg_mat_ref.mean_quantity
         mat_form.enter_in_various_gestures.data =\
                                         cg_mat_ref.enter_in_various_gestures
         quantity_forms[cg_mat_ref.material_category_id] = ( 
-                                    mat_form, "{0:.2f}".format(material_cost)
+                            mat_form, "{0:.2f}".format(material_category_cost)
         )
 
     for f in ('name', 'description', 'duration', 'specialty_id',
