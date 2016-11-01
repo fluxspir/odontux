@@ -84,6 +84,8 @@ class AssetCategory(Base):
                                                 order_by='act.Specialty.name')
     manufacture_sterilization = Column(Boolean, default=False)
     last_price = Column(Numeric)
+#    is_sterilizable = Column(Boolean, nullable=False)
+#    sterilization_validity = Column(Interval, default=datetime.timedelta(90))
     type = Column(String)
 
     __mapper_args__ = {
