@@ -54,6 +54,8 @@
     {% else %}
       Item to sterilize 
     {% endif %}
+    <a href="{{ url_for('view_asset_sterilizations', asset_id=asset.id) }}">
+      View all sterilizations of this asset</a>
   {% elif asset.asset_category.manufacture_sterilization 
         and not asset.appointment_id %}
     Asset was sterilized by the manufacturer.

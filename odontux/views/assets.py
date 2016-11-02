@@ -1106,7 +1106,7 @@ def view_superasset(asset_id):
     return render_template('view_superasset.html', asset=asset, 
                                                     constants=constants)
 
-@app.route('/view_asset_sterilizations')
+@app.route('/view_asset_sterilizations?aid=<int:asset_id>')
 def view_asset_sterilizations(asset_id):
     asset = ( meta.session.query(assets.Asset)
                 .filter(assets.Asset.id == asset_id)

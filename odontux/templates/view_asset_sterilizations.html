@@ -1,0 +1,19 @@
+{% extends "header.html" %}
+{% block main %}
+
+<a href="{{ url_for('view_asset', asset_id=asset.id) }}">
+  Return to {{ asset.asset_category.commercial_name }}</a><br /><br />
+
+{% for ste in asset.sterilizations %}
+  <a href="{{ url_for('view_sterilization_cycle', 
+                    ste_cycle_id=ste.sterilization_cycle_id) }}">
+  {{ ste.sterilization_cycle.cycle_date }}</a> 
+  {% if ste.appointment %}
+    <a href="{{ url_for('patient_appointment', 
+                                  appointment_id=ste.appointment_id) }}">
+    with patient {{ ste.appointment.patient.firstname }} 
+    {{ste.appointment.patient.lastname }}</a>
+  {% endif %}
+  <br />
+{% endfor %}
+{% endblock %}
