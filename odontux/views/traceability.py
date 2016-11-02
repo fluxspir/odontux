@@ -485,8 +485,8 @@ def get_assets_list_for_sterilization_cycle():
             # the asset is something "sterilizable"
             #.filter(assets.Asset.is_sterilizable() == True)    # NOT WORKING
             .filter(assets.Asset.asset_category_id.in_(
-                meta.session.query(assets.DeviceCategory.id)
-                    .filter(assets.DeviceCategory.sterilizable == True)
+                meta.session.query(assets.AssetCategory.id)
+                    .filter(assets.DeviceCategory.is_sterilizable.is_(True) )
                     )
                 )
             # The asset isn't element of a kit.
