@@ -91,6 +91,7 @@ class AssetSterilized(Base):
     id = Column(Integer, primary_key=True)
     sterilization_cycle_id = Column(Integer, ForeignKey(SterilizationCycle.id),
                                                                 nullable=False)
+    sterilization_cycle = relationship("SterilizationCycle")
     asset_id = Column(Integer, ForeignKey(assets.Asset.id), default=None)
     asset = relationship("assets.Asset")
     kit_id = Column(Integer, ForeignKey(assets.AssetKit.id), default=None)

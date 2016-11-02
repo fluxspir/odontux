@@ -861,13 +861,17 @@ def change_asset_category_type(asset_category_id):
                         'acquisition_date', 'acquisition_price', 'new',
                         'user_id', 'office_id', 'start_of_use', 'end_of_use',
                         'end_use_reason', 'description' ]
+
     if asset_category.type == 'material':
         material_category = ( meta.session.query(assets.MaterialCategory)
                 .filter(assets.MaterialCategory.id == asset_category_id)
                 .one()
         )
+        superasset_categories = material_category.superasset_categories
+        kits_structures = material_category.kits_structure
+        
         values = {}
-        for f in entry_list_category:
+        for f in entry_list_asset_category:
             values[f] =  getattr(asset_category, f)
         values['type'] = 'device'
         new_device_category = assets.DeviceCategory(**values)
@@ -875,7 +879,36 @@ def change_asset_category_type(asset_category_id):
         meta.session.commit()
         meta.session.add(new_device_category)
         meta.session.commit()
+        for superasset_category in superasset_categories:
+            superasset_category.asset_category_id = new_device_category.id
+            meta.session.commit()
+        for kit_structure in kits_structures:
+            kit_structure.asset_category_id = new_device_category.id
+            meta.session.commit()
 
+        for asset in assets_in_asset_category:
+            asset_sterilizations = asset.sterilizations
+            superassets = asset.superassets
+            kits = asset.kits
+            values = {}
+            for f in entry_list_asset:
+                values[f] = getattr(asset, f)
+            values['type'] = 'device'
+            values['asset_category_id'] = new_device_category.id
+            new_device = assets.Device(**values)
+            meta.session.delete(asset)
+            meta.session.commit()
+            meta.session.add(new_device)
+            meta.session.commit()
+            for sterilization in asset.sterilizations:
+                sterilization.asset_id = new_device.id
+                meta.session.commit()
+            for superasset in superassets:
+                superasset.asset_id = new_device.id
+                meta.session.commit()
+            for kit in kits:
+                kit.asset_id = new_device.id
+                meta.session.commit()
 
     elif asset_category.type == 'device':
         device_category = ( meta.session.query(assets.DeviceCategory)
@@ -886,7 +919,7 @@ def change_asset_category_type(asset_category_id):
         kits_structures = device_category.kits_structure
 
         values = {}
-        for f in entry_list_category:
+        for f in entry_list_asset_category:
             values[f] =  getattr(asset_category, f)
         values['type'] = 'material'
         new_material_category = assets.MaterialCategory(**values)
@@ -924,7 +957,6 @@ def change_asset_category_type(asset_category_id):
             for kit in kits:
                 kit.asset_id = new_material.id
                 meta.session.commit()
-                    
 
     return redirect(url_for('update_asset_category', 
                                         asset_category_id=asset_category_id))
@@ -1064,6 +1096,7 @@ def view_material(asset_id):
     asset = meta.session.query(assets.Asset).filter(
                                 assets.Asset.id == asset_id).one()
     return render_template('view_material.html', asset=asset,
+                                                today=datetime.date.today(),
                                                 constants=constants)
 
 @app.route('/view/superasset&id=<int:asset_id>')
@@ -1072,6 +1105,15 @@ def view_superasset(asset_id):
                                 assets.Asset.id == asset_id).one()
     return render_template('view_superasset.html', asset=asset, 
                                                     constants=constants)
+
+@app.route('/view_asset_sterilizations')
+def view_asset_sterilizations(asset_id):
+    asset = ( meta.session.query(assets.Asset)
+                .filter(assets.Asset.id == asset_id)
+                .one()
+    )
+    return render_template('view_asset_sterilizations.html',
+                                                    asset=asset)
 
 @app.route('/test_barcode/')
 def test_barcode():

@@ -20,4 +20,9 @@
   </dl>
   <p><input type="submit" value="Update">
 </form>
+<br />
+<a href="{{ url_for('change_asset_category_type',
+                            asset_category_id=asset_category.id) }}",
+                            onclick="return confirm('Are you sure ?')">
+    Transform this material into device</a>
 {% endblock %}
