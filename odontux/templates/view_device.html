@@ -21,7 +21,7 @@
       SuperAsset {{ asset.superassets[-1].id }} - 
                   {{ asset.superassets[-1].superasset_category.name }}
       </a><br />
-      {% if asset.superassets[-1].superasset_category.sterilizable %}
+      {% if asset.superassets[-1].superasset_category.is_sterilizable %}
         This super asset was sterilized 
         <a href="{{ url_for('view_sterilization_cycle', 
         ste_cycle_id=asset.superassets[-1].sterilizations[-1].sterilization_cycle_id) }}">
@@ -35,7 +35,7 @@
         {% endif %}
       {% endif %}
   {% endif %}
-  {% if asset.is_sterilizable() and asset.sterilizations[-1]%}
+  {% if asset.asset_category.is_sterilizable and asset.sterilizations[-1]%}
     {% if asset.sterilizations[-1].sealed %}
       The <a href="{{ url_for('view_sterilization_cycle', 
           ste_cycle_id=asset.sterilizations[-1].sterilization_cycle_id ) }}">

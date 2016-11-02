@@ -90,14 +90,17 @@ class AssetCategoryForm(Form):
                                 _('Asset was sterilized made by Manufacturer'))
     last_price = DecimalField(_('Last price'), 
                                             validators=[validators.Optional()])
+    is_sterilizable = BooleanField(_('Sterilizable'))
+    sterilization_validity = IntegerField(_('Validity in days'), 
+                                        validators=[validators.Optional()])
     type = SelectField(_('Type'), description='ChangementType()')
 
 class DeviceCategoryForm(Form):
     id = HiddenField(_('id'))
-    sterilizable = BooleanField(_('Sterilizable'))
-    sterilizer = BooleanField(_('This device is an Autoclave/Sterilizer ?'))
-    validity = IntegerField(_('Validity in days'), 
-                                        validators=[validators.Optional()])
+#    sterilizable = BooleanField(_('Sterilizable'))
+    is_sterilizer = BooleanField(_('This device is an Autoclave/Sterilizer ?'))
+#    validity = IntegerField(_('Validity in days'), 
+#                                        validators=[validators.Optional()])
 
 class MaterialCategoryForm(Form):
     id = HiddenField(_('id'))
@@ -152,7 +155,7 @@ class SuperAssetCategoryForm(Form):
     id = HiddenField(_('id'))
     name = TextField(_('Name'), [validators.Required(
                                     message=_('Name of superasset required'))])
-    sterilizable = BooleanField(_('Sterilizable'))
+    is_sterilizable = BooleanField(_('Sterilizable'))
     assets_category_list = SelectMultipleField(_('Type of Assets'), coerce=int)
 
 class SuperAssetForm(Form):
@@ -179,9 +182,10 @@ class AssetKitForm(Form):
     end_use_reason = SelectField(_('Reason to end of use'), coerce=int ) 
 
 def get_kit_structure_assets_choices():
-    assets_category = meta.session.query(assets.DeviceCategory).filter(
-                                    assets.DeviceCategory.sterilizable == True
-                                    ).all()
+    assets_category = ( meta.session.query(assets.DeviceCategory)
+        .filter(assets.AssetCategory.is_sterilizable.is_(True) )
+        .all()
+    )
     if not assets_category:
         return [ (0, "") ]
     return [ (r.id, r.brand + " || " + r.commercial_name) 
@@ -190,7 +194,7 @@ def get_kit_structure_assets_choices():
 def get_kit_structure_superassets_choices():
     superassets_category = (
         meta.session.query(assets.SuperAssetCategory)
-            .filter(assets.SuperAssetCategory.sterilizable == True)
+            .filter(assets.SuperAssetCategory.is_sterilizable.is_(True) )
             .all()
         )
     if not superassets_category:
@@ -217,10 +221,10 @@ def get_end_use_reason_choices():
     
 def get_asset_cat_field_list():
     return [ "brand", "commercial_name", "manufacture_sterilization",
-                "description", "type", 'last_price']
+                "description", "type", 'last_price', 'is_sterilizable']
 
 def get_device_cat_field_list():
-    return [ "sterilizable", "sterilizer" ]
+    return [ "is_sterilizer" ]
 
 def get_material_cat_field_list():
     return [ "order_threshold", "unity", 
@@ -714,6 +718,16 @@ def update_device_category(device_category_id):
                                 and device_category_form.validate() ):
         for f in get_asset_cat_field_list():
             setattr(asset_category, f, getattr(asset_category_form, f).data)
+        if asset_category.is_sterilizable:
+            if asset_category_form.sterilization_validity:
+                asset_category.sterilization_validity = datetime.timedelta(
+                        days=asset_category_form.sterilization_validity.data)
+            else:
+                asset_category.sterilization_validity =\
+                                                    datetime.timedelta(days=90)
+        else:
+            asset_category.sterilization_validity = None
+
         if not asset_category_form.barcode.data:
             asset_category_form.barcode.data = None
         asset_category.barcode = asset_category_form.barcode.data
@@ -721,20 +735,19 @@ def update_device_category(device_category_id):
                                     asset_category_form.asset_specialty_id.data
         for f in get_device_cat_field_list():
             setattr(asset_category, f, getattr(device_category_form, f).data)
-        asset_category.validity = datetime.timedelta(
-                                            device_category_form.validity.data)
         meta.session.commit()
         return redirect(url_for('view_asset_category', 
                                         asset_category_id=device_category_id))
     for f in get_asset_cat_field_list():
         getattr(asset_category_form, f).data = getattr(asset_category, f)
+    if asset_category.is_sterilizable:
+        asset_category_form.sterilization_validity.data =\
+                                    asset_category.sterilization_validity.days
     asset_category_form.asset_specialty_id.data =\
                                             asset_category.asset_specialty_id
     asset_category_form.barcode.data = asset_category.barcode
     for f in get_device_cat_field_list():
         getattr(device_category_form, f).data = getattr(asset_category, f)
-    device_category_form.validity.data =\
-                        int(asset_category.validity.total_seconds() / 86400)
     return render_template('update_device_category.html',
                                 asset_category=asset_category,
                                 asset_category_form=asset_category_form,
@@ -764,6 +777,16 @@ def update_material_category(material_category_id):
                                 and material_category_form.validate() ):
         for f in get_asset_cat_field_list():
             setattr(asset_category, f, getattr(asset_category_form, f).data)
+        if asset_category.is_sterilizable:
+            if asset_category_form.sterilization_validity:
+                asset_category.sterilization_validity = datetime.timedelta(
+                        days=asset_category_form.sterilization_validity.data)
+            else:
+                asset_category.sterilization_validity =\
+                                                    datetime.timedelta(days=90)
+        else:
+            asset_category.sterilization_validity = None
+
         if not asset_category_form.barcode.data:
             asset_category_form.barcode.data = None
         asset_category.barcode = asset_category_form.barcode.data
@@ -776,6 +799,9 @@ def update_material_category(material_category_id):
                                     asset_category_id=material_category_id))
     for f in get_asset_cat_field_list():
         getattr(asset_category_form, f).data = getattr(asset_category, f)
+    if asset_category.is_sterilizable:
+        asset_category_form.sterilization_validity.data =\
+                                    asset_category.sterilization_validity.days
     asset_category_form.asset_specialty_id.data =\
                                             asset_category.asset_specialty_id
     asset_category_form.barcode.data = asset_category.barcode
@@ -958,7 +984,8 @@ def view_material(asset_id):
 def view_superasset(asset_id):
     asset = meta.session.query(assets.Asset).filter(
                                 assets.Asset.id == asset_id).one()
-    return render_template('view_superasset.html', asset=asset, constants=constants)
+    return render_template('view_superasset.html', asset=asset, 
+                                                    constants=constants)
 
 @app.route('/test_barcode/')
 def test_barcode():
@@ -973,31 +1000,35 @@ def test_barcode():
             asset = meta.session.query(assets.DeviceCategory).filter(
                             assets.DeviceCategory.barcode == barcode).one()
             return jsonify(success=True, type="device",
-                                brand=asset.brand,
-                                barcode=asset.barcode,
-                                commercial_name=asset.commercial_name,
-                                description=asset.description,
-                                asset_specialty_id=asset.asset_specialty_id,
-                                sterilizable=asset.sterilizable,
-                                )
+                        brand=asset.brand,
+                        barcode=asset.barcode,
+                        commercial_name=asset.commercial_name,
+                        description=asset.description,
+                        asset_specialty_id=asset.asset_specialty_id,
+                        is_sterilizable=asset.is_sterilizable,
+                        sterilization_validity=asset.sterilization_validity,
+                        )
 
         if asset_category.type == "material":
             asset = meta.session.query(assets.MaterialCategory).filter(
                             assets.MaterialCategory.barcode == barcode).one()
             return jsonify(success=True, type="material",
-                            brand=asset.brand,
-                            barcode=asset.barcode,
-                            commercial_name=asset.commercial_name,
-                            description=asset.description,
-                            asset_specialty_id=asset.asset_specialty_id,
-                            order_threshold=float(asset.order_threshold),
-                            unity=asset.unity,
-                            initial_quantity=float(asset.initial_quantity),
-                            automatic_decrease=float(asset.automatic_decrease),
-                            )
+                        brand=asset.brand,
+                        barcode=asset.barcode,
+                        commercial_name=asset.commercial_name,
+                        description=asset.description,
+                        asset_specialty_id=asset.asset_specialty_id,
+                        order_threshold=float(asset.order_threshold),
+                        unity=asset.unity,
+                        initial_quantity=float(asset.initial_quantity),
+                        automatic_decrease=float(asset.automatic_decrease),
+                        is_sterilizable=asset.is_sterilizable,
+                        sterilization_validity=asset.sterilization_validity,
+                        )
                             
 
-        raise ValueError('The asset type in database neither is "device" nor "material"')
+        raise ValueError(_
+            ('The asset type in database neither is "device" nor "material"'))
     return jsonify(success=False)
 
 @app.route('/add/superasset_category/', methods=['GET', 'POST'])
@@ -1013,7 +1044,7 @@ def add_superasset_category():
     if request.method == 'POST' and superasset_category_form.validate():
         values = {
             'name': superasset_category_form.name.data,
-            'sterilizable': superasset_category_form.sterilizable.data,
+            'is_sterilizable': superasset_category_form.is_sterilizable.data,
         }
         new_superasset_category = assets.SuperAssetCategory(**values)
         meta.session.add(new_superasset_category)

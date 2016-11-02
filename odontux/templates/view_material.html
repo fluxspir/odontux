@@ -13,6 +13,36 @@
   Category description : {{ asset.asset_category.description }} <br />
   Material description : {{ asset.description }} <br />
   Asset provider : {{ asset.provider.name }} <br />
+  {% if asset.asset_category.is_sterilizable and asset.sterilizations[-1]%}
+    {% if asset.sterilizations[-1].sealed %}
+      The <a href="{{ url_for('view_sterilization_cycle', 
+          ste_cycle_id=asset.sterilizations[-1].sterilization_cycle_id ) }}">
+          Sterilization {{ asset.sterilizations[-1].sterilization_cycle_id }}
+        </a> is valid until :
+      {% if not asset.sterilizations[-1].appointment_id 
+         and asset.sterilizations[-1].expiration_date > today %}
+            {{ asset.sterilizations[-1].expiration_date }}
+        <br />
+        You may <a href="{{ url_for('unseal_asset', 
+                          asset_sterilized_id=asset.sterilizations[-1].id) }}">
+          unseal</a> this asset.<br />
+      {% else %}
+        Item to sterilize
+      {% endif %}
+    {% else %}
+      Item to sterilize 
+    {% endif %}
+  {% elif asset.asset_category.manufacture_sterilization 
+        and not asset.appointment_id %}
+    Asset was sterilized by the manufacturer.
+  {% else %}
+    Item was never sterilized
+  {% endif %}<br />
+  {% if asset.element_of_kit() %}
+  Element of kit : <a href="{{ url_for('view_kit', kit_id=asset.element_of_kit().id) }}">
+                    {{ asset.element_of_kit().asset_kit_structure.name }} </a><br />
+  {% endif %}
+
   Acquisition Date : {{ asset.acquisition_date }} <br />
   Acquisition Price : {{ asset.acquisition_price }} <br />   
   Owner : {{ asset.user.username }} <br />

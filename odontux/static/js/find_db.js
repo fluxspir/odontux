@@ -9,6 +9,8 @@ $(function () {
     $('#commercial_name').val(null);
     $('#description').val(null);
     $('#asset_specialty_id').val(null);
+    $('#is_sterilizable').val(null);
+    $('#sterilization_validity').val(null);
   }
   var set_default_asset = function() {
     $('#acquisition_date').val(today.getFullYear()+"-"+(today.getMonth()+1)+"-"+today.getDate() );
@@ -63,6 +65,8 @@ $(function () {
       document.getElementById( "commercial_name" ).value = data.commercial_name;
       $('#description').val(data.description);
       $('#asset_specialty_id').val(data.asset_specialty_id);
+      $('#is_sterilizable').val(data.is_sterilizable);
+      $('#sterilization_validity').val(data.sterilization_validity);
       document.getElementById( "asset" ).style.display = "block";
       set_default_asset();
       set_default_device();

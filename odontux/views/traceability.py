@@ -302,7 +302,7 @@ def get_ste_cycle_form_sterilizer_id_choices():
     ste_cycle_form_list = []
 
     query = meta.session.query(assets.DeviceCategory).filter(
-                            assets.DeviceCategory.sterilizer == True).all()
+                            assets.DeviceCategory.is_sterilizer == True).all()
     for q in query:
         device_list = meta.session.query(assets.Device).filter(
                                 assets.Device.asset_category_id == q.id).all()
@@ -310,13 +310,6 @@ def get_ste_cycle_form_sterilizer_id_choices():
             ste_cycle_form_list.append( (dev.id, q.commercial_name) )
 
     return ste_cycle_form_list
-#        
-#    return meta.session.query(assets.Device.id, 
-#                            assets.DeviceCategory.commercial_name
-#                    ).filter(assets.DeviceCategory.sterilizer == True
-#                            ).all()
-#
-
 
 def get_ste_cycle_form_cycle_type_id_choices():
     return meta.session.query(traceability.SterilizationCycleType.id,

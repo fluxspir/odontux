@@ -6,7 +6,7 @@ Add a new superasset category
 {% from "_formhelpers.html" import render_simple_field %}
 <form method="post" action={{ url_for('add_superasset_category') }}>
     {{ render_simple_field(superasset_category_form.name) }}
-    {{ render_simple_field(superasset_category_form.sterilizable) }}
+    {{ render_simple_field(superasset_category_form.is_sterilizable) }}
     {{ render_simple_field(superasset_category_form.assets_category_list) }}
   <p><input type="submit" value="Add">
 </form>

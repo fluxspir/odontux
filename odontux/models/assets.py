@@ -84,8 +84,9 @@ class AssetCategory(Base):
                                                 order_by='act.Specialty.name')
     manufacture_sterilization = Column(Boolean, default=False)
     last_price = Column(Numeric)
-#    is_sterilizable = Column(Boolean, nullable=False)
-#    sterilization_validity = Column(Interval, default=datetime.timedelta(90))
+    is_sterilizable = Column(Boolean, nullable=False)
+    sterilization_validity = Column(Interval, 
+                                        default=datetime.timedelta(days=90))
     type = Column(String)
 
     __mapper_args__ = {
@@ -98,7 +99,7 @@ class DeviceCategory(AssetCategory):
     id = Column(Integer, ForeignKey(AssetCategory.id), primary_key=True)
     sterilizable = Column(Boolean, nullable=False)
     validity = Column(Interval, default=datetime.timedelta(90))
-    sterilizer = Column(Boolean, default=False)
+    is_sterilizer = Column(Boolean, default=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'device'
@@ -136,8 +137,9 @@ class SuperAssetCategory(Base):
     __tablename__ = "super_asset_category"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    sterilizable = Column(Boolean, nullable=False, default=True)
-    validity = Column(Interval, default=datetime.timedelta(90))
+    is_sterilizable = Column(Boolean, nullable=False, default=True)
+    sterilization_validity = Column(Interval, 
+                                        default=datetime.timedelta(days=90))
     type_of_assets = relationship("AssetCategory", 
                             secondary=superassetcategory_assetcategory_table,
                             backref="superasset_categories")
@@ -183,14 +185,6 @@ class Asset(Base):
         'polymorphic_identity': 'asset',
         'polymorphic_on': type
     }
-
-    def is_sterilizable(self):
-        query = (
-            meta.session.query(DeviceCategory)
-                .filter(DeviceCategory.id == self.asset_category_id)
-                .one_or_none().sterilizable
-            )
-        return query
 
     def element_of_kit(self):
         query = (

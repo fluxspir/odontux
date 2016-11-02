@@ -9,9 +9,9 @@
     {% if asset_category.manufacture_sterilization %}
       This asset comes sterilized by the manufacturer <br />
     {% endif %}
-    This asset is {% if not asset_category.sterilizable %} not {% endif %} sterilizable.<br />
-    {% if asset_category.sterilizable %}
-      The mean validity of sterilization is {{ asset_category.validity }}.
+    This asset is {% if not asset_category.is_sterilizable %} not {% endif %} sterilizable.<br />
+    {% if asset_category.is_sterilizable %}
+      The mean validity of sterilization is {{ asset_category.sterilization_validity }}.
     {% endif %}<br />
   <a href="{{ url_for('update_asset_category', 
                         asset_category_id=asset_category.id) }}">

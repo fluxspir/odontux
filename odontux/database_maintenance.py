@@ -25,6 +25,20 @@ from decimal import Decimal
 import datetime
 
 
+@app.route('/pass_ste_dev_cat_to_asset_cat')
+def pass_ste_dev_cat_to_asset_cat():
+    dev_cats = meta.session.query(assets.DeviceCategory).all()
+    for dev_cat in dev_cats:
+        dev_cat.is_sterilizable = dev_cat.sterilizable
+        dev_cat.sterilization_validity = dev_cat.validity
+        meta.session.commit()
+    asset_cat = meta.session.query(assets.AssetCategory).all()
+    for a_c in asset_cat:
+        if not a_c.is_sterilizable:
+            a_c.sterilization_validity = None
+            meta.session.commit()
+    return redirect(url_for('index'))
+
 #@app.route('/update_last_price_asset_category')
 #def update_last_price_asset_category(you_know_what_you_are_doing=False):
 #    if not you_know_what_you_are_doing:
