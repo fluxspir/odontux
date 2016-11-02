@@ -97,8 +97,6 @@ class AssetCategory(Base):
 class DeviceCategory(AssetCategory):
     __tablename__ = "device_category"
     id = Column(Integer, ForeignKey(AssetCategory.id), primary_key=True)
-    sterilizable = Column(Boolean, nullable=False)
-    validity = Column(Interval, default=datetime.timedelta(90))
     is_sterilizer = Column(Boolean, default=False)
 
     __mapper_args__ = {

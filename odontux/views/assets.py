@@ -843,6 +843,92 @@ def view_asset_category(asset_category_id):
     else:
         return redirect(url_for('index'))
 
+@app.route('/change/asset_category_type?acid=<int:asset_category_id>')
+def change_asset_category_type(asset_category_id):
+    asset_category = ( meta.session.query(assets.AssetCategory)
+        .filter(assets.AssetCategory.id == asset_category_id)
+        .one()
+    )
+    assets_in_asset_category = ( meta.session.query(assets.Asset)
+        .filter(assets.Asset.asset_category_id == asset_category_id)
+        .all()
+    )
+    entry_list_asset_category = [ 'id', 'barcode', 'brand', 'commercial_name', 
+                'description', 'asset_specialty_id', 
+                'manufacture_sterilization','last_price', 'is_sterilizable', 
+                                                    'sterilization_validity' ]
+    entry_list_asset = [ 'id', 'provider_id', 'asset_category_id', 
+                        'acquisition_date', 'acquisition_price', 'new',
+                        'user_id', 'office_id', 'start_of_use', 'end_of_use',
+                        'end_use_reason', 'description' ]
+    if asset_category.type == 'material':
+        material_category = ( meta.session.query(assets.MaterialCategory)
+                .filter(assets.MaterialCategory.id == asset_category_id)
+                .one()
+        )
+        values = {}
+        for f in entry_list_category:
+            values[f] =  getattr(asset_category, f)
+        values['type'] = 'device'
+        new_device_category = assets.DeviceCategory(**values)
+        meta.session.delete(material_category)
+        meta.session.commit()
+        meta.session.add(new_device_category)
+        meta.session.commit()
+
+
+    elif asset_category.type == 'device':
+        device_category = ( meta.session.query(assets.DeviceCategory)
+                .filter(assets.DeviceCategory.id == asset_category_id)
+                .one()
+        )
+        superasset_categories = device_category.superasset_categories
+        kits_structures = device_category.kits_structure
+
+        values = {}
+        for f in entry_list_category:
+            values[f] =  getattr(asset_category, f)
+        values['type'] = 'material'
+        new_material_category = assets.MaterialCategory(**values)
+        meta.session.delete(device_category)
+        meta.session.commit()
+        meta.session.add(new_material_category)
+        meta.session.commit()
+        for superasset_category in superasset_categories:
+            superasset_category.asset_category_id = new_material_category.id
+            meta.session.commit()
+        for kit_structure in kits_structures:
+            kit_structure.asset_category_id = new_material_category.id
+            meta.session.commit()
+
+        for asset in assets_in_asset_category:
+            asset_sterilizations = asset.sterilizations
+            superassets = asset.superassets
+            kits = asset.kits
+            values = {}
+            for f in entry_list_asset:
+                values[f] = getattr(asset, f)
+            values['type'] = 'material'
+            values['asset_category_id'] = new_material_category.id
+            new_material = assets.Material(**values)
+            meta.session.delete(asset)
+            meta.session.commit()
+            meta.session.add(new_material)
+            meta.session.commit()
+            for sterilization in asset.sterilizations:
+                sterilization.asset_id = new_material.id
+                meta.session.commit()
+            for superasset in superassets:
+                superasset.asset_id = new_material.id
+                meta.session.commit()
+            for kit in kits:
+                kit.asset_id = new_material.id
+                meta.session.commit()
+                    
+
+    return redirect(url_for('update_asset_category', 
+                                        asset_category_id=asset_category_id))
+
 @app.route('/update/asset?id=<int:asset_id>', methods=['GET', 'POST'])
 def update_asset(asset_id):
     authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
