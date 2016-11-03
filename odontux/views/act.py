@@ -108,7 +108,7 @@ class ClinicGestureInCotationForm(Form):
                                             render_kw={'size':4})
     sequence = IntegerField(_('Sequence'),
                                             render_kw={'size':4})
-    appears_resume = BooleanField(_('Appears resume'))
+    appears_on_clinic_report = BooleanField(_('Appears resume'))
 
 class CotationForm(Form):
     cotation_id = HiddenField(_('cotation_id'))
@@ -888,9 +888,16 @@ def update_cotation(cotation_id):
                                     .all()
     )
     
-    # cg_cot_dics = { appointment_number: [ [ (cg_cot_ref, form) ], duration,
-    #                                       [ cg_mat_ref ], material_cost ],
-    #               }
+    for cg_cot_ref in cotation.clinic_gestures:
+        cg_form = ClinicGestureInCotationForm(request.form)
+        cg_form.clinic_gesture_id = cg_cot_ref.clinic_gesture_id
+        cg_form.clinic_gesture_data = cg_cot_ref.clinic_gesture.name
+        cg_form.duration = cg_cot_ref.clinic_gesture.duration
+        cg_form.appointment_number = cg_cot_ref.appointment_number
+        cg_form.sequence = cg_cot_ref.sequence
+        cg_form.appears_on_clinic_report = cg_cot_ref.appears_on_clinic_report
+        cotation_form.clinic_gestures.append_entry(cg_form)
+
     cg_cot_dict = cost.get_cotation_dictionary(cotation_id)
     cost_informations = cost.get_cost_informations(cg_cot_dict, cotation_id)
    

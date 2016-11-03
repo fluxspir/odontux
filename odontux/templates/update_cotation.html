@@ -50,17 +50,29 @@
   </tr>
 </table>
 <br />
-Time Cost : {{ cost_informations['total_duration_cost'] }}, 
-Material Cost: {{cost_informations['total_material_cost'] }},
-Total Cost: {{ cost_informations['total_cost'] }}<br />
 <form method="post" 
   action="{{ url_for('update_cotation', cotation_id=cotation.id) }}">
-    {{ render_sfl_wol(cotation_form.price) }}
-  <input type="submit" value="Update">
-</form>
+Time Cost : {{ cost_informations['total_duration_cost'] }}, 
+Material Cost: {{cost_informations['total_material_cost'] }},
+Total Cost: {{ cost_informations['total_cost'] }}, 
+Price {{ render_sfl_wol(cotation_form.price) }}
 <br />
 <br />
 <table>
+  <caption><strong>Clinic Gestures in Cotation</strong>
+                    {{ cotation_form.submit_cotation }}</caption>
+  {% for cg_form in cotation_form.clinic_gestures %}
+  <tr>
+    <td>{{ cg_form.clinic_gesture_id }}
+      {{ cg_form.duration }}{{ cg_form.duration.data }}</td>
+    <td>{{ cg_form.clinic_gesture_data.data }}</td>
+    <td>{{ cg_form.appointment_number }}</td>
+    <td>{{ cg_form.sequence }}</td>
+  </tr>
+{% endfor %}
+</table>
+</form>
+{#<table>
   <caption><strong>Clinic Gestures in Cotation: </strong></caption>
   {% for appointment in cg_cot_dict.items() %}
     <tr>
@@ -101,6 +113,7 @@ Total Cost: {{ cost_informations['total_cost'] }}<br />
     {% endfor %}
   {% endfor %}
 </table>
+#}
 <br />
 <br />
 <form method='post' action='{{ url_for('clone_gestures_in_cotation',
