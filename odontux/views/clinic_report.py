@@ -452,7 +452,7 @@ def choose_clinic_gestures_from_cotation(appointment_id):
         for cg_cot_ref in sorted(cotation.clinic_gestures,
                                 key=lambda cg_cot_ref: (
                                     cg_cot_ref.appointment_number,
-                                    cg_cot_ref.appointment_sequence )
+                                    cg_cot_ref.sequence )
                                                                          ):
             cg_keep_form = ClinicGestureKeepForm(request.form)
             cg_keep_form.clinic_gesture_id = cg_cot_ref.clinic_gesture_id

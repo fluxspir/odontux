@@ -26,7 +26,7 @@ from odontux.views.log import index
 class ClinicGestureCotationReferenceForm(Form):
     appointment_number = IntegerField(_('Appointment_number'), 
                                                     render_kw={'size':'4'})
-    appointment_sequence = IntegerField(_('Appointment_sequence'),
+    sequence = IntegerField(_('Sequence'),
                                                     render_kw={'size':'4'})
     official_cotation = BooleanField(_('official'))
     appears_on_clinic_report = BooleanField(_('Clinic Report'))
@@ -287,7 +287,7 @@ def get_cotation_dictionary(cotation_id):
     # create materials_used = list of materials that may be used
     for cg_cot_ref in sorted(cotation.clinic_gestures,
                         key=lambda cg_cot_ref: ( cg_cot_ref.appointment_number,
-                                            cg_cot_ref.appointment_sequence) ):
+                                            cg_cot_ref.sequence) ):
         if cg_cot_ref.appointment_number not in dictionnary:
             dictionnary[cg_cot_ref.appointment_number] = [ 
                                                 [], # ( cg_cot_ref, ref_form )
@@ -301,7 +301,7 @@ def get_cotation_dictionary(cotation_id):
         ref_form.appears_on_clinic_report.data =\
                                     cg_cot_ref.appears_on_clinic_report
         ref_form.appointment_number.data = cg_cot_ref.appointment_number
-        ref_form.appointment_sequence.data = cg_cot_ref.appointment_sequence
+        ref_form.sequence.data = cg_cot_ref.sequence
 
         dictionnary[cg_cot_ref.appointment_number][0].append( 
                                                     ( cg_cot_ref, ref_form ) )

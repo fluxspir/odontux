@@ -15,6 +15,7 @@ from sqlalchemy import ( Table, Column, Integer, String, Numeric, Boolean,
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.orderinglist import ordering_list
 
 import datetime
 
@@ -81,9 +82,10 @@ class Cotation(Base):
     gesture = relationship("Gesture")
     healthcare_plan = relationship('HealthCarePlan', backref="cotations")
     clinic_gestures = relationship('ClinicGestureCotationReference', 
-                                cascade="all, delete, delete-orphan",
-                                backref="cotations",
-                order_by="ClinicGestureCotationReference.appointment_number")
+                    cascade="all, delete, delete-orphan",
+                    backref="cotations",
+                    order_by='ClinicGestureCotationReference.sequence',
+                    collection_class=ordering_list('sequence', count_from=1) )
     gests = association_proxy('clinic_gestures', 'clinic_gesture')
 
 class ClinicGestureCotationReference(Base):
@@ -96,7 +98,7 @@ class ClinicGestureCotationReference(Base):
     appears_on_clinic_report = Column(Boolean, default=False)
     clinic_gesture = relationship('ClinicGesture') 
     appointment_number = Column(Integer, default=1)
-    appointment_sequence = Column(Integer, default=1)
+    sequence = Column(Integer)
 
 class AppointmentCotationReference(Base):
     """ 

@@ -55,7 +55,7 @@ Material Cost: {{cost_informations['total_material_cost'] }},
 Total Cost: {{ cost_informations['total_cost'] }}<br />
 <form method="post" 
   action="{{ url_for('update_cotation', cotation_id=cotation.id) }}">
-    {{ render_sfl_wol(price_form.price) }}
+    {{ render_sfl_wol(cotation_form.price) }}
   <input type="submit" value="Update">
 </form>
 <br />
@@ -89,7 +89,7 @@ Total Cost: {{ cost_informations['total_cost'] }}<br />
                                 cotation_id=cg_cot_ref[0].cotation_id) }}">
           {{ cg_cot_ref[0].clinic_gesture.name }}</a></td>
       <td>{{ render_sfl_wol(cg_cot_ref[1].appointment_number) }}</td>
-      <td>{{ render_sfl_wol(cg_cot_ref[1].appointment_sequence) }}</td>
+      <td>{{ render_sfl_wol(cg_cot_ref[1].sequence) }}</td>
       <td>{{ render_sfl_wol(cg_cot_ref[1].official_cotation) }}</td>
       <td>{{ render_sfl_wol(cg_cot_ref[1].appears_on_clinic_report) }}</td>
       <td>{{ render_sfl_wol(cg_cot_ref[1].submit) }}</td>

@@ -64,7 +64,7 @@ class MaterialCategoryClinicGestureForm(Form):
 
 class ClinicGestureCotationReferenceForm(Form):
     appointment_number = IntegerField(_('Appointment_number'))
-    appointment_sequence = IntegerField(_('Appointment_sequence'))
+    sequence = IntegerField(_('Sequence'))
     official_cotation = BooleanField(_('official'))
     appears_on_clinic_report = BooleanField(_('Clinic Report'))
     submit = SubmitField(_('Update'))
@@ -93,11 +93,29 @@ class AppointmentCotationReferenceForm(Form):
     price = DecimalField(_('Price'), [validators.Optional()])
     majoration = SelectField(_('Majoration'), coerce=int)
 
-class PriceForm(Form):
-    gesture_id = HiddenField(_('gesture_id'))
-    healthcare_plan_id = HiddenField(_('healthcare_plan_id'))
+#class PriceForm(Form):
+#    gesture_id = HiddenField(_('gesture_id'))
+#    healthcare_plan_id = HiddenField(_('healthcare_plan_id'))
+#    price = DecimalField(_('Price'), [validators.Optional()],
+#                        render_kw={'size':'6px'})
+#    submit_price = SubmitField(_('Submit'))
+#
+class ClinicGestureInCotationForm(Form):
+    clinic_gesture_id = HiddenField(_('gesture_id'))
+    duration = HiddenField(_('duration'))
+    clinic_gesture_data = HiddenField(_('clinic_gesture_data'))
+    appointment_number = IntegerField(_('Appointment'),
+                                            render_kw={'size':4})
+    sequence = IntegerField(_('Sequence'),
+                                            render_kw={'size':4})
+    appears_resume = BooleanField(_('Appears resume'))
+
+class CotationForm(Form):
+    cotation_id = HiddenField(_('cotation_id'))
     price = DecimalField(_('Price'), [validators.Optional()],
                         render_kw={'size':'6px'})
+    clinic_gestures = FieldList(FormField(ClinicGestureInCotationForm))
+    submit_cotation = SubmitField(_('Submit'))
 
 class CloneCotationForm(Form):
     id = HiddenField(_('id'))
@@ -823,7 +841,7 @@ def clone_gestures_in_cotation(cotation_id):
                 'appears_on_clinic_report':
                                     model_cg.appears_on_clinic_report,
                 'appointment_number': model_cg.appointment_number,
-                'appointment_sequence': model_cg.appointment_sequence,
+                'sequence': model_cg.sequence,
             }
             clone_cotation = act.ClinicGestureCotationReference(**values)
             meta.session.add(clone_cotation)
@@ -851,13 +869,16 @@ def update_cotation(cotation_id):
                 .all()
     ]
 
-    price_form = PriceForm(request.form)
+#    price_form = PriceForm(request.form)
 
-    if request.method == 'POST' and price_form.validate():
-        cotation.price = price_form.price.data
+    cotation_form = CotationForm(request.form)
+
+    if request.method == 'POST' and cotation_form.validate() :
+        cotation.price = cotation_form.price.data
         meta.session.commit()
+
     else:
-        price_form.price.data = cotation.price
+        cotation_form.price.data = cotation.price
 
     clinic_gestures_available = ( meta.session.query(act.ClinicGesture)
                                     .join(act.Specialty)
@@ -874,7 +895,7 @@ def update_cotation(cotation_id):
     cost_informations = cost.get_cost_informations(cg_cot_dict, cotation_id)
    
     return render_template('update_cotation.html', cotation=cotation,
-                            price_form=price_form,
+                            cotation_form=cotation_form,
                             clinic_gestures=clinic_gestures_available,
                             cg_cot_dict=cg_cot_dict,
                             cost_informations=cost_informations,
@@ -895,7 +916,6 @@ def add_clinic_gesture_to_cotation(clinic_gesture_id, cotation_id):
         'clinic_gesture_id': clinic_gesture_id,
         'cotation_id': cotation_id,
         'appointment_number': 1,
-        'appointment_sequence': 1,
     }
     new_cg_in_cot = act.ClinicGestureCotationReference(**values)
     meta.session.add(new_cg_in_cot)
@@ -920,9 +940,7 @@ def remove_clinic_gesture_from_cotation(cg_cot_ref_id):
 def update_clinic_gesture_cotation_reference(cg_cot_ref_id):
     ref = ( meta.session.query(act.ClinicGestureCotationReference)
             .filter(act.ClinicGestureCotationReference.id == cg_cot_ref_id)
-            .order_by(
-                act.ClinicGestureCotationReference.appointment_number,
-                act.ClinicGestureCotationReference.appointment_sequence )
+            .order_by(act.ClinicGestureCotationReference.sequence )
             .one()
     )
     ref_form = ClinicGestureCotationReferenceForm(request.form)
@@ -940,7 +958,7 @@ def update_clinic_gesture_cotation_reference(cg_cot_ref_id):
                                     ref_form.appears_on_clinic_report.data
         ref.official_cotation = ref_form.official_cotation.data
         ref.appointment_number = ref_form.appointment_number.data
-        ref.appointment_sequence = ref_form.appointment_sequence.data
+        ref.sequence = ref_form.sequence.data
         meta.session.commit()
     return redirect(url_for('update_cotation', cotation_id=ref.cotation_id))
         
