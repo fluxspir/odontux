@@ -97,10 +97,7 @@ class AssetCategoryForm(Form):
 
 class DeviceCategoryForm(Form):
     id = HiddenField(_('id'))
-#    sterilizable = BooleanField(_('Sterilizable'))
     is_sterilizer = BooleanField(_('This device is an Autoclave/Sterilizer ?'))
-#    validity = IntegerField(_('Validity in days'), 
-#                                        validators=[validators.Optional()])
 
 class MaterialCategoryForm(Form):
     id = HiddenField(_('id'))
@@ -115,7 +112,6 @@ class MaterialCategoryForm(Form):
 class AssetForm(Form):
     id  = HiddenField(_('id'))
     provider_id = SelectField(_('Provider'), coerce=int)
-    #asset_category_id = SelectField(_('Asset Category'), coerce=int)
     acquisition_date = DateField(_('Acquisition Date'), format='%Y-%m-%d')
     acquisition_price = DecimalField(_('Acquisition Price'))
     new = BooleanField(_('Asset new'), default=True)
@@ -123,7 +119,6 @@ class AssetForm(Form):
                                                 default=last_user_asset())
     office_id = SelectField(_("Office_where it is"), coerce=int,
                                                 default=last_office_asset())
-    #type = SelectField(_('Type'), description='ChangementType()')
     quantity = IntegerField(_('Quantity'), [validators.Optional()], default=1)
     service = BooleanField(_('In service since'), description='InService()')
     description = TextAreaField(_('Description'), [validators.Optional()])
@@ -338,8 +333,6 @@ def add_provider():
             meta.session.add(new_address)
             meta.session.commit()
             new_provider.address_id = new_address.id
-#            new_provider.addresses.append(
-#                                        administration.Address(**address_args))
             meta.session.commit()
 
         phone_args = {g: getattr(phone_form, f).data
@@ -414,22 +407,7 @@ def update_provider_address(body_id, form_to_display):
                                  form_to_display="address"))
     return redirect(url_for('list_providers'))
  
-#@app.route('/provider/add_provider_address?id=<int:body_id>'
-#           '&form_to_display=<form_to_display>/', methods=['POST'])
-#def add_provider_address(body_id, form_to_display):
-#    if forms.add_body_address(body_id, "provider"):
-#        return redirect(url_for("update_provider", provider_id=body_id, 
-#                                 form_to_display="address"))
-#    return redirect(url_for('list_providers'))
-#
-#@app.route('/provider/delete_provider_address?id=<int:body_id>'
-#           '&form_to_display=<form_to_display>/', methods=['POST'])
-#def delete_provider_address(body_id, form_to_display):
-#    if forms.delete_body_address(body_id, "provider"):
-#        return redirect(url_for("update_provider", provider_id=body_id,
-#                                 form_to_display="address"))
-#    return redirect(url_for('list_providers'))
-# 
+ 
 @app.route('/provider/update_provider_phone?id=<int:body_id>'
            '&form_to_display=<form_to_display>/', methods=['POST'])
 def update_provider_phone(body_id, form_to_display):
@@ -506,14 +484,6 @@ def list_assets(asset_type="all"):
                             assets_list=query,
                             constants=constants)
 
-#@app.route('/add/asset_category', methods=['GET', 'POST'])
-#def add_asset_category():
-#    form = AssetCategoryForm(request.form)
-#    if request.method == 'POST' and form.validate():
-#        values = 
-#
-#    return render_template('add_asset_category.html', form=form)
-#
 @app.route('/add/asset/', methods=['POST', 'GET'])
 def add_asset():
     def _add_device_category(asset_cat_form, device_cat_form, asset_form):
@@ -922,6 +892,7 @@ def change_asset_category_type(asset_category_id):
         for f in entry_list_asset_category:
             values[f] =  getattr(asset_category, f)
         values['type'] = 'material'
+#        values['automatic_decrease'] = 0
         new_material_category = assets.MaterialCategory(**values)
         meta.session.delete(device_category)
         meta.session.commit()
@@ -1201,7 +1172,8 @@ def list_superasset_category():
     return render_template('list_superasset_category.html',
                         superasset_categories=superasset_categories)
 
-@app.route('/add/asset_category_in_superasset_category&sac=<int:superasset_category_id>&ac=<int:asset_category_id>')
+@app.route('/add/asset_category_in_superasset_category'
+            '?sac=<int:superasset_category_id>&ac=<int:asset_category_id>')
 def add_asset_category_in_superasset_category(superasset_category_id,
                                                         asset_category_id):
     superasset_category = ( 
@@ -1218,7 +1190,8 @@ def add_asset_category_in_superasset_category(superasset_category_id,
     return redirect(url_for('update_assets_in_superasset_category',
                             superasset_category_id=superasset_category_id))
 
-@app.route('/remove/asset_category_in_superasset_category&sac=<int:superasset_category_id>&ac=<int:asset_category_id>')
+@app.route('/remove/asset_category_in_superasset_category'
+            '?sac=<int:superasset_category_id>&ac=<int:asset_category_id>')
 def remove_asset_category_in_superasset_category(superasset_category_id,
                                                         asset_category_id):
     superasset_category = ( 
@@ -1393,7 +1366,9 @@ def update_kit_type(kit_type_id):
                                 kit_structure_form=kit_structure_form,
                                 kit_structure=kit_structure)
 
-@app.route('/add/asset_category_in_kit_structure&kit_structure=<int:kit_structure_id>&asset_cat=<int:asset_cat_id>&asset_type=<asset_type>')
+@app.route('/add/asset_category_in_kit_structure'
+            '?kit_structure=<int:kit_structure_id>&'
+            'asset_cat=<int:asset_cat_id>&asset_type=<asset_type>')
 def add_asset_category_in_kit_structure(kit_structure_id, asset_cat_id, 
                                                                 asset_type):
     kit_structure = ( 
@@ -1419,7 +1394,9 @@ def add_asset_category_in_kit_structure(kit_structure_id, asset_cat_id,
     return redirect(url_for('update_assets_categories_in_kit_structure', 
                                             kit_structure_id=kit_structure_id))
 
-@app.route('/remove/asset_category_from_kit_structure&kit_structure=<int:kit_structure_id>&asset_cat=<int:asset_cat_id>&asset_type=<asset_type>')
+@app.route('/remove/asset_category_from_kit_structure'
+            '?kit_structure=<int:kit_structure_id>'
+            '&asset_cat=<int:asset_cat_id>&asset_type=<asset_type>')
 def remove_asset_category_from_kit_structure(kit_structure_id, asset_cat_id,
                                                                 asset_type):
     kit_structure = ( 
