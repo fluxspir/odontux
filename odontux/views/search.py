@@ -108,7 +108,12 @@ def find():
                     )
         assets_list = []
         assets_to_render = ( query_asset
-                    .order_by(assets.Asset.start_of_use)
+                    .join(act.Specialty)
+                    .order_by(
+                        act.Specialty.name,
+                        assets.AssetCategory.brand,
+                        assets.AssetCategory.commercial_name,
+                        assets.Asset.start_of_use)
                     .all()
         )
         for asset in assets_to_render:
@@ -117,7 +122,71 @@ def find():
             assets_list.append(superasset)
         return render_template('list_assets.html', assets_list=assets_list,
                                                     constants=constants)
+ 
+    if request.form["database"] == "device":
+        keywords = request.form["keywords"].encode("utf_8").split()
+        query_device = (
+            meta.session.query(assets.Device)
+                .join(assets.DeviceCategory)
+                .filter(assets.Device.end_of_use == None,
+                        assets.Device.end_use_reason == 
+                            constants.END_USE_REASON_IN_USE_STOCK
+                )
+            )
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query_device = query_device.filter(or_(
+                    assets.DeviceCategory.brand.ilike(keyword),
+                    assets.DeviceCategory.commercial_name.ilike(keyword),
+                    assets.DeviceCategory.description.ilike(keyword),
+                    ))
+        assets_list = []
+        assets_to_render = ( query_device
+                    .join(assets.DeviceCategory, act.Specialty)
+                    .order_by(
+                        act.Specialty.name,
+                        assets.DeviceCategory.brand,
+                        assets.DeviceCategory.commercial_name,
+                        assets.Device.start_of_use)
+                    .all()
+        )
+        for asset in assets_to_render:
+            assets_list.append(asset)
+        return render_template('list_assets.html', assets_list=assets_list,
+                                                    constants=constants)
         
+    if request.form["database"] == "material":
+        keywords = request.form["keywords"].encode("utf_8").split()
+        query_material = (
+            meta.session.query(assets.Material)
+                .join(assets.MaterialCategory)
+                .filter(assets.Material.end_of_use == None,
+                        assets.Material.end_use_reason == 
+                            constants.END_USE_REASON_IN_USE_STOCK
+                )
+            )
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query_material = query_material.filter(or_(
+                    assets.MaterialCategory.brand.ilike(keyword),
+                    assets.MaterialCategory.commercial_name.ilike(keyword),
+                    assets.MaterialCategory.description.ilike(keyword),
+                    ))
+        assets_list = []
+        assets_to_render = ( query_material
+                    .join(assets.MaterialCategory, act.Specialty)
+                    .order_by(
+                        act.Specialty.name,
+                        assets.MaterialCategory.brand,
+                        assets.MaterialCategory.commercial_name,
+                        assets.Material.start_of_use)
+                    .all()
+        )
+        for asset in assets_to_render:
+            assets_list.append(asset)
+        return render_template('list_assets.html', assets_list=assets_list,
+                                                    constants=constants)
+ 
     if request.form['database'] == 'sterilized_asset':
         sterilized_id = int(request.form['keywords'])
         sterilized_asset = (
