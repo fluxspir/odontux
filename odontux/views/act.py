@@ -851,10 +851,8 @@ def update_cotation(cotation_id):
     if session['role'] not in authorized_roles:
         return abort(403)
 
-    cotation = ( meta.session.query(act.Cotation)
-                    .filter(act.Cotation.id == cotation_id)
-                    .one()
-    )
+    cotation = meta.session.query(act.Cotation).get(cotation_id)
+    
     clone_cotation_form = CloneCotationForm(request.form)
     clone_cotation_form.cotation_id.choices = [ 
         ( cot.id, cot.healthcare_plan.name + " " + str(cot.price) + 
@@ -873,9 +871,7 @@ def update_cotation(cotation_id):
         for cg_form in cotation_form.clinic_gestures.entries:
             cg_cot_ref = ( 
                 meta.session.query(act.ClinicGestureCotationReference)
-                    .filter(act.ClinicGestureCotationReference.id == 
-                                                    cg_form.cg_cot_ref_id.data)
-                    .one()
+                    .get(cg_form.cg_cot_ref_id.data)
             )
             cg_cot_ref.appointment_number = cg_form.appointment_number.data
             cg_cot_ref.sequence = cg_form.sequence.data
