@@ -93,28 +93,24 @@ class AppointmentCotationReferenceForm(Form):
     price = DecimalField(_('Price'), [validators.Optional()])
     majoration = SelectField(_('Majoration'), coerce=int)
 
-#class PriceForm(Form):
-#    gesture_id = HiddenField(_('gesture_id'))
-#    healthcare_plan_id = HiddenField(_('healthcare_plan_id'))
-#    price = DecimalField(_('Price'), [validators.Optional()],
-#                        render_kw={'size':'6px'})
-#    submit_price = SubmitField(_('Submit'))
-#
 class ClinicGestureInCotationForm(Form):
+    cg_cot_ref_id = HiddenField(_('cg_cot_ref_id'))
     clinic_gesture_id = HiddenField(_('gesture_id'))
-    duration = HiddenField(_('duration'))
-    clinic_gesture_data = HiddenField(_('clinic_gesture_data'))
+    duration = HiddenField(_('Duration'))
+    clinic_gesture_data = HiddenField(_('Clinic Gesture'))
     appointment_number = IntegerField(_('Appointment'),
                                             render_kw={'size':4})
-    sequence = IntegerField(_('Sequence'),
-                                            render_kw={'size':4})
-    appears_on_clinic_report = BooleanField(_('Appears resume'))
+    sequence = IntegerField(_('Sequence'),render_kw={'size':4})
+    appears_on_clinic_report = BooleanField(_('Appears'))
 
 class CotationForm(Form):
     cotation_id = HiddenField(_('cotation_id'))
     price = DecimalField(_('Price'), [validators.Optional()],
                         render_kw={'size':'6px'})
     clinic_gestures = FieldList(FormField(ClinicGestureInCotationForm))
+    official_cotation = IntegerField(_('Official Cotation on sequence number:'),
+                                            validators=[validators.Optional()],
+                                            render_kw={'size':4})
     submit_cotation = SubmitField(_('Submit'))
 
 class CloneCotationForm(Form):
@@ -869,16 +865,34 @@ def update_cotation(cotation_id):
                 .all()
     ]
 
-#    price_form = PriceForm(request.form)
-
     cotation_form = CotationForm(request.form)
 
     if request.method == 'POST' and cotation_form.validate() :
         cotation.price = cotation_form.price.data
         meta.session.commit()
+        for cg_form in cotation_form.clinic_gestures.entries:
+            cg_cot_ref = ( 
+                meta.session.query(act.ClinicGestureCotationReference)
+                    .filter(act.ClinicGestureCotationReference.id == 
+                                                    cg_form.cg_cot_ref_id.data)
+                    .one()
+            )
+            cg_cot_ref.appointment_number = cg_form.appointment_number.data
+            cg_cot_ref.sequence = cg_form.sequence.data
+            cg_cot_ref.appears_on_clinic_report =\
+                                        cg_form.appears_on_clinic_report.data
+            cg_cot_ref.official_cotation = False
+            if cotation_form.official_cotation.data == cg_form.sequence.data:
+                cg_cot_ref.official_cotation = True
+            else:
+                cg_cot_ref.official_cotation = False
+            meta.session.commit()
+            cotation.clinic_gestures.reorder()
+            meta.session.commit()
 
-    else:
-        cotation_form.price.data = cotation.price
+        return redirect(url_for('update_cotation', cotation_id=cotation.id))
+
+    cotation_form.price.data = cotation.price
 
     clinic_gestures_available = ( meta.session.query(act.ClinicGesture)
                                     .join(act.Specialty)
@@ -889,7 +903,12 @@ def update_cotation(cotation_id):
     )
     
     for cg_cot_ref in cotation.clinic_gestures:
+        if cg_cot_ref.official_cotation:
+            cotation_form.official_cotation.data = cg_cot_ref.sequence
+
         cg_form = ClinicGestureInCotationForm(request.form)
+
+        cg_form.cg_cot_ref_id = cg_cot_ref.id
         cg_form.clinic_gesture_id = cg_cot_ref.clinic_gesture_id
         cg_form.clinic_gesture_data = cg_cot_ref.clinic_gesture.name
         cg_form.duration = cg_cot_ref.clinic_gesture.duration
@@ -904,7 +923,7 @@ def update_cotation(cotation_id):
     return render_template('update_cotation.html', cotation=cotation,
                             cotation_form=cotation_form,
                             clinic_gestures=clinic_gestures_available,
-                            cg_cot_dict=cg_cot_dict,
+#                            cg_cot_dict=cg_cot_dict,
                             cost_informations=cost_informations,
                             clone_cotation_form=clone_cotation_form)
 

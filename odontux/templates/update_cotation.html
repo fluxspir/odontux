@@ -62,58 +62,37 @@ Price {{ render_sfl_wol(cotation_form.price) }}
   <caption><strong>Clinic Gestures in Cotation</strong>
                     {{ cotation_form.submit_cotation }}</caption>
   {% for cg_form in cotation_form.clinic_gestures %}
-  <tr>
-    <td>{{ cg_form.clinic_gesture_id }}
-      {{ cg_form.duration }}{{ cg_form.duration.data }}</td>
-    <td>{{ cg_form.clinic_gesture_data.data }}</td>
-    <td>{{ cg_form.appointment_number }}</td>
-    <td>{{ cg_form.sequence }}</td>
-  </tr>
+    {% if loop.index0 == 0 %}
+      <tr>
+        <th><strong>{{ cg_form.appointment_number.label }}</strong></th>
+        <th><strong>{{ cg_form.sequence.label }}</strong></th>
+        <th><strong>{{ cg_form.duration.label }}</strong></th>
+        <th><strong>{{ cg_form.clinic_gesture_data.label }}</strong></th>
+        <th><strong>{{ cg_form.appears_on_clinic_report.label }}</strong></th>
+        <th></th>
+      </tr>
+    {% endif %}
+    <tr>
+      <td>{{ cg_form.appointment_number }}</td>
+      <td>{{ cg_form.sequence }}</td>
+      <td>{{ cg_form.cg_cot_ref_id }} {{ cg_form.clinic_gesture_id }}
+        {{ cg_form.duration }}{{ cg_form.duration.data }}</td>
+      <td><a href="{{ url_for('update_clinic_gesture',
+                              clinic_gesture_id=cg_form.clinic_gesture_id.data,
+                              cotation_id=cotation.id) }}">
+            {{ cg_form.clinic_gesture_data.data }}</a></td>
+      <td>{{ cg_form.appears_on_clinic_report }}</td>
+      <td><a href="{{ url_for('remove_clinic_gesture_from_cotation',
+                        cg_cot_ref_id=cg_form.cg_cot_ref_id.data) }}",
+                          onclick="return confirm('Are you sure ?')">
+              Remove</a></td>
+    </tr>
 {% endfor %}
 </table>
+<br />
+{{ cotation_form.official_cotation.label }} {{ cotation_form.official_cotation }}
 </form>
-{#<table>
-  <caption><strong>Clinic Gestures in Cotation: </strong></caption>
-  {% for appointment in cg_cot_dict.items() %}
-    <tr>
-      <th>Appointment {{ appointment[0] }}</th> 
-      <th>duration {{ appointment[1][1] }}, 
-                                      cost {{ appointment[1][3] }}</th>
-    </tr>
-    <tr>
-      <th>Duration</th>
-      <th>Clinic Gesture</th>
-      <th>Appointment number</th>
-      <th>Appointment sequence</th>
-      <th>official cotation</th>
-      <th>appears resume</th>
-      <th>Update</th>
-      <th>Remove</th>
-    </tr>
 
-    {% for cg_cot_ref in appointment[1][0] %}
-    <tr>
-      <form method='post' action="{{ url_for('update_clinic_gesture_cotation_reference',
-                                                  cg_cot_ref_id=cg_cot_ref[0].id) }}">
-      <td>{{ cg_cot_ref[0].clinic_gesture.duration }}</td>
-      <td><a href="{{ url_for('update_clinic_gesture',
-                                clinic_gesture_id=cg_cot_ref[0].clinic_gesture_id,
-                                cotation_id=cg_cot_ref[0].cotation_id) }}">
-          {{ cg_cot_ref[0].clinic_gesture.name }}</a></td>
-      <td>{{ render_sfl_wol(cg_cot_ref[1].appointment_number) }}</td>
-      <td>{{ render_sfl_wol(cg_cot_ref[1].sequence) }}</td>
-      <td>{{ render_sfl_wol(cg_cot_ref[1].official_cotation) }}</td>
-      <td>{{ render_sfl_wol(cg_cot_ref[1].appears_on_clinic_report) }}</td>
-      <td>{{ render_sfl_wol(cg_cot_ref[1].submit) }}</td>
-      <td><a href="{{ url_for('remove_clinic_gesture_from_cotation',
-                                      cg_cot_ref_id=cg_cot_ref[0].id) }}">
-            Remove</a></td>
-      </form>
-    </tr>
-    {% endfor %}
-  {% endfor %}
-</table>
-#}
 <br />
 <br />
 <form method='post' action='{{ url_for('clone_gestures_in_cotation',
