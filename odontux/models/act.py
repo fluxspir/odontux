@@ -29,6 +29,7 @@ class HealthCarePlan(Base):
     __tablename__ = "healthcare_plan"
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
+    active = Column(Boolean, default=True)
 
 class Gesture(Base):
     """ a Gesture is the common name of the global act

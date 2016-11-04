@@ -1,6 +1,7 @@
 {% extends 'summary_patient.html' %}
 
 {% block main %}
+{% from "_formhelpers.html" import render_sfl_wol %}
 <h2>Choose clinic gestures for {{ anatomic_locations }}</h2>
 
 <form method='post' action='{{ url_for('choose_cg_from_cot_inserted_in_cr',
@@ -8,7 +9,12 @@
                                             cotation_id=cotation_id,
                                             anat_loc=anatomic_locations) }}'>
 {{ form.price }} {{ constants['CURRENCY_SYMBOL'] }}<br /><br />
-{{ form.clinic_gestures }}
+{% for cg_form in form.clinic_gestures %}
+  {{ cg_form.clinic_gesture_id }}
+  {{ cg_form.clinic_gesture_data.data }}
+  {{ cg_form.keep }}
+  <br />
+{% endfor %}
 {{ form.submit }}
 </form>
 {% endblock %}

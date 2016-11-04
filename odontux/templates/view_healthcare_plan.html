@@ -1,10 +1,11 @@
 {% extends "header.html" %}
 {% block main %}
 <br />
-<h3>{{ healthcare_plan.name }}</h3>
+<h3>{{ healthcare_plan.name }}
+    {% if not healthcare_plan.active %} is inactive {% endif %}</h3>
   <a href="{{ url_for('update_healthcare_plan', 
                   healthcare_plan_id=healthcare_plan.id) }}">
-    Update healthcare_plan name
+    Update healthcare_plan {{ healthcare_plan.name }}
   </a><br /><br />
 {% for cotation in cotations %}
   <a href="{{ url_for('view_gesture', gesture_id=cotation.gesture.id) }}">

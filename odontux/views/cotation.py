@@ -20,6 +20,7 @@ from odontux.models import meta, act, compta
 class HealthCarePlanForm(Form):
     healthcare_plan_id = HiddenField(_('id'))
     name = TextField(_('Name of new Healthcare Plan'), [validators.Required()])
+    active = BooleanField(_('active'))
     fees = DecimalField(_("Dentist hour's fees"))
     submit = SubmitField(_('Update'))
 
@@ -82,7 +83,7 @@ def add_healthcare_plan():
         except sqlalchemy.exc.IntegrityError:
             meta.session.rollback()
 
-        return redirect(url_for('list_healthcare_plan'))
+        return redirect(url_for('list_healthcare_plans'))
 
     return render_template('add_healthcare_plan.html', 
                                 healthcare_plan_form=healthcare_plan_form)
@@ -102,16 +103,21 @@ def add_majoration():
         new_majoration = compta.Majoration(**values)
         meta.session.add(new_majoration)
         meta.session.commit()
-        return redirect(url_for('list_healthcare_plan') )
+        return redirect(url_for('list_healthcare_plans') )
 
     return render_template('add_majoration.html',
                                     majoration_form=majoration_form)
 
-@app.route('/list/healthcare_plan')
-def list_healthcare_plan():
-    healthcare_plans = meta.session.query(act.HealthCarePlan).all()
+@app.route('/list/healthcare_plans')
+def list_healthcare_plans():
+    healthcare_plans = ( meta.session.query(act.HealthCarePlan)
+                            .order_by(
+                                act.HealthCarePlan.active.desc(),
+                                act.HealthCarePlan.name)
+                            .all()
+    )
     majorations = meta.session.query(compta.Majoration).all()
-    return render_template('list_healthcare_plan.html', 
+    return render_template('list_healthcare_plans.html', 
                                             majorations=majorations,
                                             healthcare_plans=healthcare_plans)
 
@@ -152,17 +158,34 @@ def update_healthcare_plan(healthcare_plan_id):
             meta.session.add(new_hcp_user_fee)
 
         healthcare_plan.name = healthcare_plan_form.name.data
-        meta.session.commit()
+        healthcare_plan.active = healthcare_plan_form.active.data
+        try:
+            meta.session.commit()
+        except sqlalchemy.exc.IntegrityError:
+            meta.session.rollback()
         return redirect(url_for('view_healthcare_plan', 
                                     healthcare_plan_id=healthcare_plan_id))
 
     healthcare_plan_form.name.data = healthcare_plan.name
+    healthcare_plan_form.active.data = healthcare_plan.active
     if hcp_user_ref:
         healthcare_plan_form.fees.data = hcp_user_ref.hour_fees
 
     return render_template('update_healthcare_plan.html',
                                 healthcare_plan_form=healthcare_plan_form,
                                 healthcare_plan=healthcare_plan)
+
+@app.route('/delete/healthcare_plan?hcpid=<int:healthcare_plan_id>')
+def delete_healthcare_plan(healthcare_plan_id):
+    authorized_roles = [ constants.ROLE_DENTIST ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+    healthcare_plan = ( meta.session.query(act.HealthCarePlan)
+                                            .get(healthcare_plan_id)
+    )
+    meta.session.delete(healthcare_plan)
+    meta.session.commit()
+    return redirect(url_for('list_healthcare_plans'))
 
 @app.route('/update/majoration?mid=<int:majoration_id>', methods=['GET', 'POST'])
 def update_majoration(majoration_id):

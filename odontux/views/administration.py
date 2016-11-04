@@ -148,7 +148,9 @@ def add_patient(meeting_id=0):
 
     hcp_patient_form = HealthCarePlanPatientForm(request.form)
     hcp_patient_form.healthcare_plans_id.choices = [ (hc.id, hc.name) 
-                for hc in meta.session.query(act.HealthCarePlan).all() ]
+                for hc in meta.session.query(act.HealthCarePlan)
+                            .filter(act.HealthCarePlan.active.is_(True))
+                            .all() ]
     if not hcp_patient_form.healthcare_plans_id.choices:
         return redirect(url_for('add_healthcare_plan'))
 
@@ -362,6 +364,7 @@ def update_patient(body_id, form_to_display):
     other_healthcare_plans = (
         meta.session.query(act.HealthCarePlan)
             .filter(
+                act.HealthCarePlan.active.is_(True),
                 ~act.HealthCarePlan.patients.any(
                     administration.Patient.id == patient.id)
             )
@@ -378,33 +381,22 @@ def update_patient(body_id, form_to_display):
 @app.route('/add/patient_to_healthcare_plan?pid=<int:patient_id>'
             '&hcpid=<int:healthcare_plan_id>')
 def add_patient_to_healthcare_plan(patient_id, healthcare_plan_id):
-    patient = (
-        meta.session.query(administration.Patient)
-            .filter(administration.Patient.id == patient_id)
-            .one()
-        )
-    healthcare_plan = (
-        meta.session.query(act.HealthCarePlan)
-            .filter(act.HealthCarePlan.id == healthcare_plan_id)
-            .one()
-        )
+    patient = meta.session.query(administration.Patient).get(patient_id)
+    healthcare_plan = ( meta.session.query(act.HealthCarePlan)
+                                            .get(healthcare_plan_id)
+    )
     patient.hcs.append(healthcare_plan)
     meta.session.commit()
     return redirect(url_for('update_patient', body_id=patient_id,
                                 form_to_display='healthcare_plans'))
 
-@app.route('/remove/patient_from_healthcare_plan?pid=<int:patient_id>&hcpid=<int:healthcare_plan_id>')
+@app.route('/remove/patient_from_healthcare_plan?pid=<int:patient_id>'
+            '&hcpid=<int:healthcare_plan_id>')
 def remove_patient_from_healthcare_plan(patient_id, healthcare_plan_id):
-    patient = (
-        meta.session.query(administration.Patient)
-            .filter(administration.Patient.id == patient_id)
-            .one()
-        )
-    healthcare_plan = (
-        meta.session.query(act.HealthCarePlan)
-            .filter(act.HealthCarePlan.id == healthcare_plan_id)
-            .one()
-        )
+    patient = meta.session.query(administration.Patient).get(patient_id)
+    healthcare_plan = ( meta.session.query(act.HealthCarePlan)
+                                                .get(healthcare_plan_id)
+    )
     patient.hcs.remove(healthcare_plan)
     meta.session.commit()
     return redirect(url_for('update_patient', body_id=patient_id,

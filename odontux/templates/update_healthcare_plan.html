@@ -10,6 +10,13 @@ Update the healthcare plan
     {{ render_field(healthcare_plan_form.name) }}
     {{ render_field(healthcare_plan_form.fees) }}
     {{ render_field(healthcare_plan_form.submit) }}
+    {{ render_field(healthcare_plan_form.active) }}
   </dl>
 </form>
+<br />
+{#<a href="{{ url_for('delete_healthcare_plan', 
+                      healthcare_plan_id=healthcare_plan.id) }}",
+                      onclick='return confirm("Are you sure")'>
+    Delete</a>
+#}
 {% endblock %}

@@ -722,13 +722,11 @@ def view_gesture(gesture_id):
                         constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
     if session['role'] not in authorized_roles:
         return redirect(url_for('index'))
-    gesture = ( meta.session.query(act.Gesture)
-                    .filter(act.Gesture.id == gesture_id)
-                    .one() 
-            )
+    gesture = meta.session.query(act.Gesture).get(gesture_id)
 
     healthcare_plans_not_in_gesture = (
         meta.session.query(act.HealthCarePlan)
+        .filter(act.HealthCarePlan.active.is_(True))
         .filter(or_(
             # Gesture that never had the cotation
             ~act.HealthCarePlan.cotations.any(
@@ -858,7 +856,10 @@ def update_cotation(cotation_id):
         ( cot.id, cot.healthcare_plan.name + " " + str(cot.price) + 
                                         constants.CURRENCY_SYMBOL ) for cot in
             meta.session.query(act.Cotation)
-                .filter(act.Cotation.gesture_id == cotation.gesture_id)
+                .join(act.HealthCarePlan)
+                .filter(
+                    act.Cotation.gesture_id == cotation.gesture_id,
+                    act.HealthCarePlan.active.is_(True))
                 .order_by(act.Cotation.price)
                 .all()
     ]
@@ -883,8 +884,8 @@ def update_cotation(cotation_id):
             else:
                 cg_cot_ref.official_cotation = False
             meta.session.commit()
-            cotation.clinic_gestures.reorder()
-            meta.session.commit()
+        cotation.clinic_gestures.reorder()
+        meta.session.commit()
 
         return redirect(url_for('update_cotation', cotation_id=cotation.id))
 

@@ -43,12 +43,12 @@ class ClinicGestureInClinicReportForm(Form):
 
 class ClinicGestureKeepForm(Form):
     clinic_gesture_id = HiddenField(_('cg_id'))
+    clinic_gesture_data = HiddenField(_('cg_data'))
     keep = BooleanField(_('Keep'))
 
 class ClinicGesturesFromCotationForm(Form):
     price = DecimalField(_('Price'))
-    clinic_gestures = FieldList(FormField(ClinicGestureKeepForm), 
-                                                            min_entries=1)
+    clinic_gestures = FieldList(FormField(ClinicGestureKeepForm))
     submit = SubmitField(_('Submit'))
 
 class ChooseCotationForReportForm(Form):
@@ -72,6 +72,7 @@ class MaterioVigilanceForm(Form):
 class ClinicGestureDurationForm(Form):
     clinic_report_id = HiddenField(_('clinic_report_id'))
     clinic_gesture_id = HiddenField(_('Clinic Gesture id'))
+    anatomic_location = HiddenField(_('Anatomic location'))
     old_duration = HiddenField(_('Old clinic gesture duration'))
     new_duration = IntegerField(_('Clinic gesture duration'),
                                     [validators.Optional()],
@@ -246,14 +247,17 @@ def view_clinic_report(appointment_id):
         clinic_report_form.materials_used.append_entry(mat_vig_form)
 
     for clinic_report in sorted(appointment.clinic_reports, 
-                                    key=lambda clinic_report:
-                                        clinic_report.sequence ):
+                                    key=lambda clinic_report: (
+                                        clinic_report.anatomic_location,
+                                        clinic_report.sequence )
+                                                                        ):
         
         hour_duration = clinic_report.duration.seconds / 3600 * 60
         minute_duration = clinic_report.duration.seconds % 3600 / 60
         cg_duration_form = ClinicGestureDurationForm(request.form)
         cg_duration_form.clinic_report_id = clinic_report.id
         cg_duration_form.clinic_gesture_id = clinic_report.clinic_gesture_id
+        cg_duration_form.anatomic_location = clinic_report.anatomic_location
         cg_duration_form.old_duration = str(hour_duration + minute_duration)
         cg_duration_form.new_duration = hour_duration + minute_duration
         cg_duration_form.clinic_gesture_data =\
@@ -399,13 +403,13 @@ def choose_cg_from_cot_inserted_in_cr(appointment_id, cotation_id, anat_loc):
             if anat_loc_is_list(anat_loc):
                 for anatomic_location in teeth.get_teeth_list(anat_loc):
                     clinic_report = _add_cg_to_cr(appointment_id, 
-                                        int(entry.data['clinic_gesture_id']),
+                                        int(entry.clinic_gesture_id.data),
                                         anatomic_location,
                                         cotation_id,
                                         form.price.data)
             else:
                 clinic_report = _add_cg_to_cr(appointment_id, 
-                                        int(entry.data['clinic_gesture_id']), 
+                                        int(entry.clinic_gesture_id.data), 
                                         str(anat_loc),
                                         cotation_id,
                                         form.price.data)
@@ -456,13 +460,13 @@ def choose_clinic_gestures_from_cotation(appointment_id):
                                                                          ):
             cg_keep_form = ClinicGestureKeepForm(request.form)
             cg_keep_form.clinic_gesture_id = cg_cot_ref.clinic_gesture_id
+            cg_keep_form.clinic_gesture_data = cg_cot_ref.clinic_gesture.name
             cg_keep_form.keep = cg_cot_ref.appears_on_clinic_report
             cg_form.clinic_gestures.append_entry(cg_keep_form)
-            cg_form.clinic_gestures.entries[-1].label.text =\
-                                                cg_cot_ref.clinic_gesture.name
-        cg_form.clinic_gestures.entries = [ entry for entry in 
-            cg_form.clinic_gestures.entries if entry.data['clinic_gesture_id'] 
-        ]
+        
+#        cg_form.clinic_gestures.entries = [ entry for entry in 
+#            cg_form.clinic_gestures.entries if entry.data['clinic_gesture_id'] 
+#        ]
         cg_form.price.data = cotation.price
         return render_template('choose_clinic_gestures_from_cotation.html', 
                                     anatomic_locations=anatomic_locations,

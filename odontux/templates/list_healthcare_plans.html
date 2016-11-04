@@ -19,7 +19,8 @@
         <td>
           <a href="{{ url_for('view_healthcare_plan', 
                           healthcare_plan_id=healthcare_plan.id) }}">
-            {{ healthcare_plan.name }}
+            <strong>{{ healthcare_plan.name }}</strong>
+            {% if not healthcare_plan.active %} (inactivated) {% endif %}
           </a></td>
         {% if session.role != session.ROLE_ADMIN or session.role != session.ROLE_PATIENT %}
           <td>

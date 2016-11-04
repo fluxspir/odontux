@@ -24,7 +24,7 @@ Materials that may be envolve in global gesture : <br/>
   {{ cotation.healthcare_plan.active }} 
   <input type="submit" value="Update"> 
 #}
-{% for cotation in gesture.cotations %}
+{% for cotation in gesture.cotations if cotation.healthcare_plan.active %}
   {% if cotation.active == True %}
     {{ cotation.healthcare_plan.name }} : {{ cotation.price }} {{ constants.CURRENCY_SYMBOL }}
     <a href="{{ url_for('update_cotation', cotation_id=cotation.id) }}"> <strong>Update</strong> </a>

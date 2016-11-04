@@ -47,6 +47,7 @@
     {% for cg_form in clinic_report_form.clinic_gestures %}
       {{ cg_form.clinic_report_id }}
       {{ cg_form.clinic_gesture_id }}
+      {{ cg_form.anatomic_location.data }} : 
       {{ cg_form.clinic_gesture_data.data }} --  
       {{ cg_form.old_duration }}
       {{ cg_form.new_duration }}
