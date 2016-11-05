@@ -13,7 +13,7 @@ from odontux.models import (meta, act, administration, md, users, medication,
 from odontux.odonweb import app
 from gettext import gettext as _
 from odontux import constants
-from odontux.views.act import list_gesture
+from odontux.views.act import list_gestures
 
 @app.route('/search/', methods=['GET', 'POST'])
 def find():
@@ -33,7 +33,7 @@ def find():
                                 role_admin=constants.ROLE_ADMIN)
     
     if request.form["database"] == "act":
-        return redirect(url_for('list_gesture', 
+        return redirect(url_for('list_gestures', 
                         keywords=request.form["keywords"],
                         ordering=" "))
 

@@ -196,14 +196,14 @@ def portal_gesture():
 
 @app.route('/specialty/')
 @app.route('/specialties/')
-def list_specialty(ordering=[]):
+def list_specialties(ordering=[]):
     query = meta.session.query(act.Specialty)
     if not ordering:
         ordering = [act.Specialty.id]
     for order in ordering:
         query = query.order_by(order)
     specialties = query.all()
-    return render_template('list_specialty.html', specialties=specialties)
+    return render_template('list_specialties.html', specialties=specialties)
 
 @app.route('/add/specialty/', methods=['GET', 'POST'])
 def add_specialty():
@@ -213,7 +213,7 @@ def add_specialty():
         new_specialty = act.Specialty(**args)
         meta.session.add(new_specialty)
         meta.session.commit()
-        return redirect(url_for('list_specialty'))
+        return redirect(url_for('list_specialties'))
     return render_template('add_specialty.html', form=form)
 
 @app.route('/act/update_specialty/id=<int:specialty_id>/', 
@@ -224,7 +224,7 @@ def update_specialty(specialty_id):
                     .one_or_none()
     )
     if not specialty:
-        return redirect(url_for('list_specialty'))
+        return redirect(url_for('list_specialties'))
 
     form = SpecialtyForm(request.form)
 
@@ -232,7 +232,7 @@ def update_specialty(specialty_id):
         specialty.name = form.name.data
         specialty.color = form.color.data
         meta.session.commit()
-        return redirect(url_for('list_specialty'))
+        return redirect(url_for('list_specialties'))
     
 
     return render_template('update_specialty.html', form=form, 
@@ -244,7 +244,7 @@ def delete_specialty(specialty_id):
                     act.Specialty.id == specialty_id).one()
     meta.session.delete(specialty)
     meta.session.commit()
-    return redirect(url_for('list_specialty'))
+    return redirect(url_for('list_specialties'))
         
 
 #####
@@ -253,7 +253,7 @@ def delete_specialty(specialty_id):
 
 @app.route('/list/gesture')
 @app.route('/list/gesture?kwds=<keywords>&order=<ordering>')
-def list_gesture(keywords="", ordering=""):
+def list_gestures(keywords="", ordering=""):
     """ The target is to display dentist's gesture, describing it, its values.
     Looking in Gesture table, we may decide to print only 
         acts from one specialty
@@ -306,7 +306,7 @@ def list_gesture(keywords="", ordering=""):
         except sqlalchemy.orm.exc.NoResultFound:
             specialty = ""
         gestures_list.append( (gesture, specialty) )
-    return render_template('list_gesture.html', 
+    return render_template('list_gestures.html', 
                             gestures_list=gestures_list)
 
 @app.route('/add/gesture/', methods=['GET', 'POST'])
@@ -325,7 +325,7 @@ def add_gesture():
         new_gesture = act.Gesture(**values)
         meta.session.add(new_gesture)
         meta.session.commit()
-        return redirect(url_for('list_gesture'))
+        return redirect(url_for('list_gestures'))
     return render_template('/add_gesture.html', form=form)
 
 @app.route('/clone/material_category_gesture?gid=<int:gesture_id>'
@@ -350,7 +350,7 @@ def update_gesture(gesture_id):
     gesture = meta.session.query(act.Gesture).filter\
               (act.Gesture.id == gesture_id).one()
     if not gesture:
-        return redirect(url_for('list_gesture'))
+        return redirect(url_for('list_gestures'))
     try:
         specialty = meta.session.query(act.Specialty)\
                 .filter(act.Specialty.id == gesture.specialty_id).one()
@@ -375,6 +375,11 @@ def update_gesture(gesture_id):
                                 [ mat.id for mat in gesture.materials ]
                                 )
                             )
+                            .join(act.Specialty)
+                            .order_by(
+                                act.Specialty.name,
+                                assets.MaterialCategory.brand,
+                                assets.MaterialCategory.commercial_name )
                             .all()
     )
     if request.method == 'POST' and gesture_form.validate():

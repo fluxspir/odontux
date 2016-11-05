@@ -16,8 +16,8 @@ from administration import (
                  update_patient_mail, add_patient_mail, delete_patient_mail,
                  )
 from search import find
-from act import (list_gesture, add_gesture, update_gesture, view_gesture,
-                 list_specialty, add_specialty, update_specialty)
+from act import (list_gestures, add_gesture, update_gesture, view_gesture,
+                 list_specialties, add_specialty, update_specialty)
 from md import (
                 list_md,
                 add_md,
