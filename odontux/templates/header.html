@@ -15,11 +15,11 @@
             {{ patient.firstname }} {{ patient.lastname }}</a>, 
             {{ patient.age() }} years old, 
 
+    {% if appointment %}
     <a href="{{ url_for('patient_appointment', appointment_id=appointment.id )}}">
     from {{ appointment.agenda.starttime.time() }}
                           to {{ appointment.agenda.endtime.time() }}</a>
         the
-    {% if appointment %}
       <a href="{{ url_for('display_day', 
                           dateday=appointment.agenda.starttime.date(), 
                           dentist_id=appointment.dentist_id,
