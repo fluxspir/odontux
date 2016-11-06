@@ -26,6 +26,16 @@
             {{ cg_form.clinic_gesture_id }} {{ cg_form.submit }}
       </form>
     </td>
+    
+    <td>
+      <form method='post'
+            action='{{ url_for('add_materio_vigilance_to_clinic_report',
+                                            appointment_id=appointment.id ) }}'>
+        {{ render_simple_field(material_form.material_id) }}
+          {{ material_form.submit }}
+      </form>
+    </td>
+
   </tr>
 </table>
 <br />
@@ -35,14 +45,14 @@
   {{ clinic_report_form.update }}
 </center>
 
-  <div style="float:left;width:25%;height:100%">
+  <div style="float:left;width:33%;height:100%">
     <strong>Cotations</strong><br />
     {% for cotation in cotations %}
       {{ cotation.anatomic_location }} 
       {{ cotation.gesture.name }}<br />
     {% endfor %}
   </div>
-  <div style="float:left;width:40%;height:100%">
+  <div style="float:left;width:33%;height:100%">
     <strong>Clinic Gestures</strong><br />
     {% for cg_form in clinic_report_form.clinic_gestures %}
       {{ cg_form.clinic_report_id }}

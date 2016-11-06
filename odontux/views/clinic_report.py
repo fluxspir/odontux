@@ -61,6 +61,10 @@ class ChooseClinicGestureForReportForm(Form):
     clinic_gesture_id = SelectField(_('Clinic Gesture'), coerce=int)
     submit = SubmitField(_('Choose clinic gesture'))
 
+class ChooseMaterialForReportForm(Form):
+    material_id = SelectField(_('Material'), coerce=int)
+    submit = SubmitField(_('Choose material'))
+
 class MaterioVigilanceForm(Form):
     material_id = HiddenField(_('Material id'))
     old_quantity_used = HiddenField(_('Old Quantity Used'))
@@ -207,7 +211,7 @@ def view_clinic_report(appointment_id):
             for mat_cg_ref in cg.materials:
                 material_used = cost.get_material_used(mat_cg_ref.id)
                 opening_materio_vigilance = add_to_materio_vigilance(
-                                    appointment.id, mat_cg_ref, material_used)
+                    appointment.id, mat_cg_ref.mean_quantity, material_used)
 
     if not material_each_appointment:
         cg_all_appointment = ( meta.session.query(act.ClinicGesture)
@@ -221,7 +225,37 @@ def view_clinic_report(appointment_id):
             for mat_cg_ref in cg.materials:
                 material_used = cost.get_material_used(mat_cg_ref.id)
                 materio_vigilance_appointment = add_to_materio_vigilance(
-                                    appointment.id, mat_cg_ref, material_used)
+                    appointment.id, mat_cg_ref.mean_quantity, material_used)
+
+    material_form = ChooseMaterialForReportForm(request.form)
+    
+    materials_for_materio_vigilance = (
+        meta.session.query(assets.Material)
+            .filter(
+                assets.Material.end_of_use.is_(None),
+                assets.Material.end_use_reason ==
+                                    constants.END_USE_REASON_IN_USE_STOCK,
+                assets.Material.start_of_use.isnot(None),
+                ~assets.Material.id.in_(
+                    meta.session.query(
+                        traceability.MaterioVigilance.material_id)
+                        .filter(traceability.MaterioVigilance.appointment_id ==
+                                                                appointment.id
+                    )
+                )
+            )
+            .join(assets.MaterialCategory, act.Specialty)
+            .order_by(
+                act.Specialty.name,
+                assets.MaterialCategory.commercial_name,
+                assets.MaterialCategory.brand )
+            .all()
+    )
+    material_form.material_id.choices = [ 
+        ( material.id, material.asset_category.commercial_name + " " +
+                        material.asset_category.brand ) for material in
+                        materials_for_materio_vigilance 
+    ]
 
     # only appears cotation that were administraly officially indentified,
     # by a single clinic gesture in the global gesture repair.
@@ -268,11 +302,11 @@ def view_clinic_report(appointment_id):
     return render_template('view_clinic_report.html', 
                             patient=patient,
                             appointment=appointment,
-#                            clinic_gestures=clinic_gestures,
                             cotations=cotations,
                             clinic_report_form=clinic_report_form,
                             cotation_form=cotation_form,
                             cg_form=cg_form,
+                            material_form=material_form,
                             constants=constants)
 
 @app.route('/update/clinic_report?aid=<int:appointment_id>', methods=['POST'])
@@ -478,8 +512,7 @@ def choose_clinic_gestures_from_cotation(appointment_id):
     return redirect(url_for('view_clinic_report', 
                                                 appointment_id=appointment.id))
  
-
-def add_to_materio_vigilance(appointment_id, mat_cg_ref, material):
+def add_to_materio_vigilance(appointment_id, quantity, material):
     """ 
         update both:
             materio_vigilance.quantity_used and material.actual_quantity
@@ -497,7 +530,7 @@ def add_to_materio_vigilance(appointment_id, mat_cg_ref, material):
         values = {
             'material_id': material.id,
             'appointment_id': appointment_id,
-            'quantity_used': mat_cg_ref.mean_quantity
+            'quantity_used': quantity
         }
         new_materio_vigilance = traceability.MaterioVigilance(**values)
         meta.session.add(new_materio_vigilance)
@@ -505,11 +538,10 @@ def add_to_materio_vigilance(appointment_id, mat_cg_ref, material):
         materio_vigilance = new_materio_vigilance
     else:
         materio_vigilance.quantity_used = (
-            materio_vigilance.quantity_used + mat_cg_ref.mean_quantity )
+            materio_vigilance.quantity_used + quantity )
         meta.session.commit()
 
-    material.actual_quantity = ( material.actual_quantity - 
-                                                    mat_cg_ref.mean_quantity )
+    material.actual_quantity = ( material.actual_quantity - quantity )
     meta.session.commit()
     return materio_vigilance
 
@@ -566,7 +598,7 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
         
         if _needs_redondance(appointment, material_used, mat_cg_ref):
             materio_vigilance = add_to_materio_vigilance(appointment_id, 
-                                                    mat_cg_ref, material_used)
+                                    mat_cg_ref.mean_quantity, material_used)
             new_clinic_report.materio_vigilance.append(materio_vigilance)
             meta.session.commit()
     
@@ -612,6 +644,53 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
         meta.session.commit()
  
     return new_clinic_report
+
+@app.route('/add_materio_vigilance_to_clinic_report'
+            '?aid=<int:appointment_id>', methods=['POST'])
+def add_materio_vigilance_to_clinic_report(appointment_id):
+    patient, appointment = checks.get_patient_appointment(
+                                    appointment_id=appointment_id)
+    material_form = ChooseMaterialForReportForm(request.form)
+    
+    materials_for_materio_vigilance = (
+        meta.session.query(assets.Material)
+            .filter(
+                assets.Material.end_of_use.is_(None),
+                assets.Material.end_use_reason ==
+                                    constants.END_USE_REASON_IN_USE_STOCK,
+                assets.Material.start_of_use.isnot(None),
+                ~assets.Material.id.in_(
+                    meta.session.query(
+                        traceability.MaterioVigilance.material_id)
+                        .filter(traceability.MaterioVigilance.appointment_id ==
+                                                                appointment.id
+                    )
+                )
+            )
+            .join(assets.MaterialCategory, act.Specialty)
+            .order_by(
+                act.Specialty.name,
+                assets.MaterialCategory.commercial_name,
+                assets.MaterialCategory.brand )
+            .all()
+    )
+    material_form.material_id.choices = [ 
+        ( material.id, material.asset_category.commercial_name + " " +
+                        material.asset_category.brand ) for material in
+                        materials_for_materio_vigilance 
+    ]
+
+    if material_form.validate():
+        material = ( meta.session.query(assets.Material)
+                        .get(material_form.material_id.data) 
+        )
+        materio_vigilance = add_to_materio_vigilance(appointment_id, 
+                                material.asset_category.automatic_decrease, 
+                                                                    material)
+
+    return redirect(url_for('view_clinic_report', 
+                                            appointment_id=appointment_id))
+                
 
 @app.route('/add/cg_to_cr?aid=<int:appointment_id>', methods=['POST'])
 def add_clinic_gesture_to_clinic_report(appointment_id):

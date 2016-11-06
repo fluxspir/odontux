@@ -14,17 +14,17 @@
     <a href="{{url_for('enter_patient_file', body_id=patient.id)}}">
             {{ patient.firstname }} {{ patient.lastname }}</a>, 
             {{ patient.age() }} years old, 
-    
+
+    <a href="{{ url_for('patient_appointment', appointment_id=appointment.id )}}">
+    from {{ appointment.agenda.starttime.time() }}
+                          to {{ appointment.agenda.endtime.time() }}</a>
+        the
     {% if appointment %}
       <a href="{{ url_for('display_day', 
                           dateday=appointment.agenda.starttime.date(), 
                           dentist_id=appointment.dentist_id,
-                          dental_unit_id=appointment.dental_unit_id
-                          
-                          ) }}">from {{ appointment.agenda.starttime.time() }}
-                          to {{ appointment.agenda.endtime.time() }}
-                          the {{ appointment.agenda.starttime.date() }}
-      </a>
+                          dental_unit_id=appointment.dental_unit_id) }}"> 
+            {{ appointment.agenda.starttime.date() }}</a>
 {#      <span class="right">
         <a href="{{ url_for( 'patient_appointment', appointment_id=appointment.id +1 ) }}">
           Next RV
