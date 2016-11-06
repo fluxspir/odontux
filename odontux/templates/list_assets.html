@@ -13,8 +13,8 @@
                             {{ asset.superasset_category.name }}</a><br />
       {% else %}
         <a href="{{ url_for('view_asset', asset_id=asset.id) }}">
-                            {{ asset.id }} -- {{ asset.asset_category.brand }} 
-                            {{ asset.asset_category.commercial_name }} -- 
+                            {{ asset.id }} --  {{ asset.asset_category.commercial_name }} -- 
+                            {{ asset.asset_category.brand }}  
                             {{ asset.asset_category.description }}</a> -- 
                             Expire :  {% if asset.expiration_date %}
                                           {{ asset.expiration_date }}

@@ -111,8 +111,8 @@ def find():
                     .join(act.Specialty)
                     .order_by(
                         act.Specialty.name,
-                        assets.AssetCategory.brand,
                         assets.AssetCategory.commercial_name,
+                        assets.AssetCategory.brand,
                         assets.Asset.start_of_use)
                     .all()
         )
@@ -145,8 +145,8 @@ def find():
                     .join(assets.DeviceCategory, act.Specialty)
                     .order_by(
                         act.Specialty.name,
-                        assets.DeviceCategory.brand,
                         assets.DeviceCategory.commercial_name,
+                        assets.DeviceCategory.brand,
                         assets.Device.start_of_use)
                     .all()
         )
@@ -177,8 +177,8 @@ def find():
                     .join(assets.MaterialCategory, act.Specialty)
                     .order_by(
                         act.Specialty.name,
-                        assets.MaterialCategory.brand,
                         assets.MaterialCategory.commercial_name,
+                        assets.MaterialCategory.brand,
                         assets.Material.start_of_use)
                     .all()
         )
