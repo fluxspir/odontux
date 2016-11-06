@@ -328,6 +328,8 @@ def update_clinic_report(appointment_id):
                 meta.session.commit()
                 
         for entry in clinic_report_form.materials_used.entries:
+            if entry.new_quantity_used.data is None:
+                entry.new_quantity_used.data = 0
             if Decimal(entry.old_quantity_used.data) ==\
                                                 entry.new_quantity_used.data:
                 continue
