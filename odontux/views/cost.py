@@ -157,7 +157,8 @@ def get_material_cost(cg_mat_ref_id):
         return get_material_category_cost(cg_mat_ref_id)
                 
     if not cg_mat_ref.mean_quantity:
-        cg_mat_ref.mean_quantity = material.automatic_decrease
+        cg_mat_ref.mean_quantity =\
+                                material_used.asset_category.automatic_decrease
 
     material_used_cost = ( 
         (

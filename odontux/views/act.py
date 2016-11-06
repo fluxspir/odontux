@@ -56,7 +56,7 @@ class ClinicGestureForm(Form):
     submit = SubmitField(_('Update'))
 
 class MaterialCategoryClinicGestureForm(Form):
-    mean_quantity = DecimalField(_('Quantity used'), [validators.Required()],
+    mean_quantity = DecimalField(_('Quantity used'), [validators.Optional()],
                                                 render_kw={'size': '8'})
     enter_in_various_gestures = DecimalField(_('Various gestures'), 
                                                     render_kw={'size':'4'})
