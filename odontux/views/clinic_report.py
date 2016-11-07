@@ -769,10 +769,10 @@ def remove_from_materio_vigilance(clinic_report):
                         mean_quantity_material_appointment +
                         _get_material_quantity(cr, materio_vigilance)
                     )
-          
-        percent_mat_used_by_this_cr = Decimal(
-            mean_quantity_mat_cr / mean_quantity_material_appointment
-        )
+        if mean_quantity_material_appointment:  
+            percent_mat_used_by_this_cr = Decimal(
+                mean_quantity_mat_cr / mean_quantity_material_appointment
+            )
         if len(cr_mv.clinic_reports) > 1:
             if not any([ mat_cg_ref for mat_cg_ref in 
                                     clinic_report.clinic_gesture.materials ]):
