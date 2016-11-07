@@ -1189,8 +1189,8 @@ def add_manufacture_sterilized_asset_to_appointment(patient_id,
         return redirect(url_for('index'))
 
     asset = (
-        meta.session.query(assets.Device)
-            .filter(assets.Device.id == asset_id)
+        meta.session.query(assets.Asset)
+            .filter(assets.Asset.id == asset_id)
             .one()
         )
     asset.appointment_id = appointment_id
@@ -1208,14 +1208,13 @@ def choose_manufacture_sterilized_assets(patient_id, appointment_id):
     patient, appointment = checks.get_patient_appointment(patient_id, 
                                                                 appointment_id)
     assets_manufacture_sterilized = (
-        meta.session.query(assets.Device)
+        meta.session.query(assets.Asset)
             .filter(
-                assets.Device.appointment_id.is_(None),
-                assets.Device.start_of_use.isnot(None)
+                assets.Asset.start_of_use.isnot(None)
                 )
-            .filter(assets.Device.id.in_(
-                meta.session.query(assets.Device.id)
-                    .filter(assets.Device.asset_category.has(
+            .filter(assets.Asset.id.in_(
+                meta.session.query(assets.Asset.id)
+                    .filter(assets.Asset.asset_category.has(
                         assets.AssetCategory.manufacture_sterilization.is_(True)
                         )
                     )
