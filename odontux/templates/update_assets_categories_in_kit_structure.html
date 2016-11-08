@@ -14,8 +14,8 @@ SuperAssets' categories in kit structure {{ kit_structure.name }} :<br />
   <br />
 Assets' categories in kit structure {{ kit_structure.name }} :<br />
   {% for asset_cat in kit_structure.type_of_assets %}
-    {{ asset_cat.id }} -- {{ asset_cat.brand }} 
-                              {{ asset_cat.commercial_name }} ;
+    {{ asset_cat.id }} -- {{ asset_cat.commercial_name }} 
+                              {{ asset_cat.brand }} ;
     <a href="{{ url_for('remove_asset_category_from_kit_structure',
                     kit_structure_id=kit_structure.id,
                     asset_cat_id=asset_cat.id,
@@ -36,8 +36,8 @@ SuperAssets not in kit :<br />
 <br />
 Assets not in kit :<br />
   {% for asset_cat in assets_categories %}
-    {{ asset_cat.id }} -- {{ asset_cat.brand }}
-                          {{ asset_cat.commercial_name }} ;
+    {{ asset_cat.id }} -- {{ asset_cat.commercial_name }}
+                          {{ asset_cat.brand }} ;
     <a href="{{ url_for('add_asset_category_in_kit_structure', 
                             kit_structure_id=kit_structure.id, 
                             asset_cat_id=asset_cat.id,

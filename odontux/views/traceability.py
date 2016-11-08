@@ -473,7 +473,7 @@ def get_assets_list_for_sterilization_cycle():
                 )
     
     query_assets = (
-        meta.session.query(assets.Device)
+        meta.session.query(assets.Asset)
             # the asset hasn't a throw_away date : it's probably in service
             # the asset is still marked : in use or in stock
             # Asset is in use, not in stock
@@ -729,7 +729,8 @@ def create_sterilization_list():
             form.item_id.data = asset.id
             form.item_type.data = "asset"
             form.validity.data = int(
-                    asset.asset_category.validity.total_seconds() / 86400)
+                asset.asset_category.sterilization_validity.total_seconds() / 
+                                                                        86400)
             assets_form_list['assets'].append((asset, form))
     # creation of the superassets' forms.
     for superasset in assets_list['superassets']:
@@ -738,8 +739,8 @@ def create_sterilization_list():
             form.item_id.data = superasset.id
             form.item_type.data = "superasset"
             form.validity.data = int(
-                    superasset.superasset_category.validity.total_seconds() / 
-                    86400)
+                superasset.superasset_category.sterilization_validity.total_seconds() / 
+                                                                        86400)
             assets_form_list['superassets'].append((superasset, form))
 
     uncategorized_form = UncategorizedAssetSterilizedForm(request.form)

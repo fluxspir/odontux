@@ -1629,6 +1629,11 @@ def update_kit(kit_id):
                 # Asset not marked in this kit ; not necessary.
                 #~assets.Asset.id.in_(assets_already_in_this_kit)
             )
+            .join(assets.AssetCategory, act.Specialty)
+            .order_by(
+                act.Specialty.name,
+                assets.AssetCategory.commercial_name,
+                assets.AssetCategory.brand )
             .all()
         )
     superassets_categories_in_kit_structure = []
