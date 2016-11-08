@@ -324,7 +324,10 @@ def add_gesture():
         values['color'] = form.color.data
         new_gesture = act.Gesture(**values)
         meta.session.add(new_gesture)
-        meta.session.commit()
+        try:
+            meta.session.commit()
+        except sqlalchemy.exc.IntegrityError:
+            meta.session.rollback()
         return redirect(url_for('list_gestures'))
     return render_template('/add_gesture.html', form=form)
 
