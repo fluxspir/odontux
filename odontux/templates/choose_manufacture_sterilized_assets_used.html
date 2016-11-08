@@ -1,6 +1,6 @@
 {% extends "summary_patient.html" %}
 {% block main %}
-Manufacture sterilized assets used in this appointment :
+<h3>Manufacture sterilized assets used in this appointment</h3>
 <br />
 {% for asset in assets_manufacture_sterilized %}
     <a href="{{ url_for('view_asset', asset_id=asset.id ) }}">

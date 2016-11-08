@@ -503,10 +503,10 @@ def get_assets_list_for_sterilization_cycle():
             # If they seems under manufacture_sterilization because they never
             # were used in an appointment but were sterilized anyway, we 
             # won't eliminate
-            .filter(~assets.Device.id.in_(
-                meta.session.query(assets.Device.id)
+            .filter(~assets.Asset.id.in_(
+                meta.session.query(assets.Asset.id)
                     ## Asset may be manufacture by manufacturer
-                    .filter(assets.Device.asset_category.has(
+                    .filter(assets.Asset.asset_category.has(
                         assets.AssetCategory.id.in_(
                             meta.session.query(assets.AssetCategory.id)
                                 .filter(
@@ -516,10 +516,10 @@ def get_assets_list_for_sterilization_cycle():
                             )
                         )
                     ## And Asset was never use in appointment
-                    .filter(assets.Device.appointment_id.is_(None)
+                    .filter(assets.Asset.appointment_id.is_(None)
                         )
                     ## And Asset id was NEVER viewed in the sterilized_assets
-                    .filter(~assets.Device.id.in_(
+                    .filter(~assets.Asset.id.in_(
                         meta.session.query(
                                         traceability.AssetSterilized.asset_id)
                             )

@@ -24,7 +24,22 @@ from odontux.views.log import index
 from decimal import Decimal
 import datetime
 
-
+#@app.route('/appointment_from_device_to_asset')
+#def mv_appointment_id_from_device_to_asset(you_know_what_you_are_doing=False):
+#    if not you_know_what_you_are_doing:
+#        return abort(403)
+#   
+#    devices = ( meta.session.query(assets.Device)
+#                .filter(assets.Device.old_appointment_id.isnot(None) )
+#                .all()
+#    )
+#
+#    for device in devices:
+#        device.appointment_id = device.old_appointment_id
+#        meta.session.commit()
+#
+#    return redirect(url_for('index'))
+#
 #@app.route('/pass_ste_dev_cat_to_asset_cat')
 #def pass_ste_dev_cat_to_asset_cat(you_know_what_you_are_doing=False):
 #    if not you_know_what_you_are_doing:

@@ -1156,8 +1156,8 @@ def sterilized_asset_used(patient_id, appointment_id):
             .all()
         )
     manufacture_sterilized_assets_used = (
-        meta.session.query(assets.Device)
-            .filter(assets.Device.appointment_id == appointment_id)
+        meta.session.query(assets.Asset)
+            .filter(assets.Asset.appointment_id == appointment_id)
             .all()
         )
     material_used = (
