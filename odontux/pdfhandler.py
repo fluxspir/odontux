@@ -643,7 +643,7 @@ def make_quote(patient_id, appointment_id, quotes):
                             ] )
         )
         Story.append(t)
-        years = months = weeks = 0
+        years = months = weeks = days = 0
         if quote.treatment_duration:
             years = quote.treatment_duration.days / 365
             # if treatment last for one year or more, we'll print the treatment
