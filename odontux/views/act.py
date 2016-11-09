@@ -812,8 +812,8 @@ def clone_gestures_in_cotation(cotation_id):
     )
     form = CloneCotationForm(request.form)
     form.cotation_id.choices = [ 
-        ( cot.id, cot.healthcare_plan.name + " " + str(cot.price) + 
-                                        constants.CURRENCY_SYMBOL ) for cot in
+        ( cot.id, cot.healthcare_plan.name + " " + cot.gesture.name + " " +
+                        str(cot.price) + constants.CURRENCY_SYMBOL ) for cot in
             meta.session.query(act.Cotation)
                 .filter(act.Cotation.gesture_id == cotation.gesture_id)
                 .order_by(act.Cotation.price)
@@ -861,12 +861,13 @@ def update_cotation(cotation_id):
     
     clone_cotation_form = CloneCotationForm(request.form)
     clone_cotation_form.cotation_id.choices = [ 
-        ( cot.id, cot.healthcare_plan.name + " " + str(cot.price) + 
-                                        constants.CURRENCY_SYMBOL ) for cot in
+        ( cot.id, cot.healthcare_plan.name + " " + cot.gesture.name + " " +
+                            str(cot.price) + constants.CURRENCY_SYMBOL ) 
+                            for cot in
             meta.session.query(act.Cotation)
                 .join(act.HealthCarePlan)
                 .filter(
-                    act.Cotation.gesture_id == cotation.gesture_id,
+#                    act.Cotation.gesture_id == cotation.gesture_id,
                     act.HealthCarePlan.active.is_(True))
                 .order_by(act.Cotation.price)
                 .all()

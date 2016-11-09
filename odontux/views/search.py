@@ -77,6 +77,35 @@ def find():
                 ))
         return render_template('list_drugs.html', drugs=query.all())
 
+    if request.form['database'] == 'asset_category':
+        keywords = request.form["keywords"].encode("utf_8").split()
+        query_asset_category = (
+            meta.session.query(assets.AssetCategory)
+        )
+        for keyword in keywords:
+            keyword = '%{}%'.format(keyword)
+            query_asset_category = query_asset_category.filter(or_(
+                    assets.AssetCategory.brand.ilike(keyword),
+                    assets.AssetCategory.commercial_name.ilike(keyword),
+                    assets.AssetCategory.description.ilike(keyword),
+                    ))
+        asset_categories_list = []
+        assets_to_render = ( query_asset_category
+                    .join(act.Specialty)
+                    .order_by(
+                        act.Specialty.name,
+                        assets.AssetCategory.commercial_name,
+                        assets.AssetCategory.brand)
+                    .all()
+        )
+ 
+        for asset_category in assets_to_render:
+            asset_categories_list.append(asset_category)
+
+        return render_template('list_asset_categories.html', 
+                            asset_categories_list=asset_categories_list,
+                                                    constants=constants)
+ 
     if request.form["database"] == "asset":
         keywords = request.form["keywords"].encode("utf_8").split()
         query_asset = (
