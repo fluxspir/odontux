@@ -10,6 +10,7 @@
     in {{ constants['UNITIES'][asset_category.unity][1] }} --
     Automatic decrease : {{ asset_category.automatic_decrease }} --
     Order threshold : {{ asset_category.order_threshold }}<br />
+    Last price : {{ asset_category.last_price }}<br />
     {% if asset_category.is_sterilizable %}
       The mean validity of sterilization is {{ asset_category.sterilization_validity }}.
     {% endif %}<br />

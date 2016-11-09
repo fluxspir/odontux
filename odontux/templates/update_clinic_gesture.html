@@ -41,8 +41,10 @@
                                 material_category_clinic_gesture_ref_id=material_cg_ref.id,
                                                               cotation_id=cotation.id) }}">
           <strong>Remove </strong></a>
+          <a href="{{ url_for('update_asset_category',
+                              asset_category_id=material_cg_ref.material_category_id) }}">
           {{ material_cg_ref.material_category.commercial_name }}
-          {{ material_cg_ref.material_category.brand }} 
+          {{ material_cg_ref.material_category.brand }}</a> 
           {{ render_sfl_wol(quantity_forms[material_cg_ref.material_category_id][0].mean_quantity) }} 
           {{ constants.UNITIES[material_cg_ref.material_category.unity][1] }}
           {{ render_sfl_wol(quantity_forms[material_cg_ref.material_category_id][0].enter_in_various_gestures) }}
