@@ -147,7 +147,10 @@ def get_appointmentcotationreference_field_list():
 
 def get_specialty_choice_list():
     return [ (choice.id, choice.name) for choice in 
-                                    meta.session.query(act.Specialty).all() ]
+                                    meta.session.query(act.Specialty)
+                                        .order_by(act.Specialty.name)
+                                        .all() 
+    ]
 
 def get_appointment_choices(patient_id):
     appointments = ( meta.session.query(schedule.Appointment)
