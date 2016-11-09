@@ -19,19 +19,23 @@
   {% for material in gesture.materials %}
     <a href="{{ url_for('remove_material_category_from_gesture', gesture_id=gesture.id, 
                                           material_category_id=material.id) }}">
-            <strong>Remove</strong></a> 
-      {{ material.brand }} : {{ material.commercial_name }}<br />
+            <strong>Remove</strong></a> : 
+      <a href="{{ url_for('update_asset_category', 
+                                  asset_category_id=material.id) }}">
+      {{ material.commercial_name }} {{ material.brand }}</a><br />
     {% endfor %}
     <br />
     <strong>Other materials available</strong> :<br />
     {% for material in other_materials %}
     <a href="{{ url_for('add_material_category_to_gesture', gesture_id=gesture.id, 
                                           material_category_id=material.id) }}">
-            <strong>Add</strong></a> 
-    {{ material.brand}} : {{ material.commercial_name }}<br />
+            <strong>Add</strong></a> : 
+      <a href="{{ url_for('update_asset_category', 
+                                  asset_category_id=material.id) }}">
+     {{ material.commercial_name }} {{ material.brand}}</a><br />
   {% endfor %}
 </div>
-<div>
+<div style='float:right;height:100%'>
 <strong>Clone material from others gestures</strong><br />
   {% for gest_clone in other_gestures %}
     {{ gest_clone.name }}<a href='{{ url_for('clone_material_category_gesture',
