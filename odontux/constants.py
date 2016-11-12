@@ -715,6 +715,8 @@ FILE_X_RAY_PANORAMIC = 33
 FILE_X_RAY_TELERADIO_FACE = 34
 FILE_X_RAY_TELERADIO_PROFIL = 35
 
+FILE_ANAMNESIS = 40
+
 FILES = {
     FILE_PHOTO: ( _('Photo'), [ 'tooth' ] ),
     FILE_PRESCRIPTION: ( _('Prescription'), None ),
@@ -732,6 +734,7 @@ FILES = {
     FILE_X_RAY_TELERADIO_FACE: ( _('X_ray teleradiography face'), [ 'face' ] ),
     FILE_X_RAY_TELERADIO_PROFIL: ( _('X_ray teleradiography profil'), 
                                                                 [ 'face' ] ),
+    FILE_ANAMNESIS: (_('Anamnesis'), None),
 }
 
 # ----------------------------------------------------------
