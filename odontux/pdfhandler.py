@@ -726,7 +726,7 @@ def make_quote(patient_id, appointment_id, quotes):
             ],
         ], 
         colWidths=( ( WIDTH_PAPER - L_MARG - R_MARG ) / 2 ),
-        rowHeights=( 30 * mm, 5 * mm, 5 * mm )
+        rowHeights=( 20 * mm, 5 * mm, 5 * mm )
     )
     t.setStyle(TableStyle( [ 
                             ('FONTSIZE', (0,0), (-1,-1), 11),
