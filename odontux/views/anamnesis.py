@@ -11,17 +11,18 @@ from flask import ( session, render_template, request, redirect, url_for,
                     abort, jsonify, make_response )
 from wtforms import (Form, SelectField, TextField, BooleanField, TextAreaField,
                      IntegerField, HiddenField, DateField, DecimalField, 
-                    validators )
+                    FileField, SubmitField, validators )
 from sqlalchemy.orm import with_polymorphic
 
 from odontux.views.log import index
-from odontux.models import meta, anamnesis, md
+from odontux.models import meta, anamnesis, md, schedule
 from odontux.odonweb import app
 from odontux.views import forms
 from gettext import gettext as _
 
 from odontux import constants, checks
 from odontux.pdfhandler import make_base_survey, make_patient_survey_info
+from documents import insert_document_in_db
 
 class SurveyForm(Form):
     id = HiddenField(_('id'))
@@ -37,6 +38,11 @@ class PositionForm(Form):
     old_position = HiddenField(_('old_position'))
     new_position = IntegerField(_('Position'),
                         render_kw={'size': '3'})
+
+class PatientSurveyForm(Form):
+    document = FileField(_('Survey'))
+    appointment_id = SelectField(_('Appointment'), coerce=int)
+    submit = SubmitField(_('Add survey'))
 
 class AnamnesisForm(Form):
     id = HiddenField(_('id'))
@@ -300,6 +306,10 @@ def list_anamnesis(patient_id, appointment_id=None):
 
     patient, appointment = checks.get_patient_appointment(patient_id, 
                                                                 appointment_id)
+#    anamnesis_file_exists = ( meta.session.query(documents.Files)
+#        .filter(
+#            documents.Files.file_type == constants.FILE_ANAMNESIS,
+#            doc
     global_anamnesis = with_polymorphic(anamnesis.Anamnesis, '*')
     patient_anamnesis = (
         meta.session.query(global_anamnesis)
@@ -314,13 +324,73 @@ def list_anamnesis(patient_id, appointment_id=None):
   
     doctor = meta.session.query(md.MedecineDoctor).filter(
         md.MedecineDoctor.id == patient.gen_doc_id).one_or_none()
+
+    patient_survey_form = PatientSurveyForm(request.form)
+    patient_survey_form.appointment_id.choices = [ 
+            ( appointment.id, appointment.agenda.starttime ) for appointment in
+            meta.session.query(schedule.Appointment)
+                .filter(
+                    schedule.Appointment.patient_id == patient.id,
+                    schedule.Appointment.id.in_(
+                        [ anamnesis_entry.appointment_id for 
+                                anamnesis_entry in patient_anamnesis
+                        ]
+                    )
+                )
+                .join(schedule.Agenda)
+                .order_by(schedule.Agenda.starttime.desc())
+                .all()
+    ]
+
+#    anamnesis_files = ""
+
     return render_template("patient_anamnesis.html",
                             patient=patient,
                             appointment=appointment,
                             patient_anamnesis=patient_anamnesis,
                             doctor=doctor,
                             survey_form=survey_form,
-                            constants=constants)
+                            constants=constants,
+                            patient_survey_form=patient_survey_form)
+
+@app.route('/add/patient_survey?aid=<int:appointment_id>', methods=['POST'])
+def add_patient_survey(appointment_id):
+    patient, appointment = checks.get_patient_appointment(
+                                                appointment_id=appointment_id)
+    patient_survey_form = PatientSurveyForm(request.form)
+
+    patient_survey_form.appointment_id.choices = [
+        ( appointment.id, appointment.agenda.starttime ) for appointment in
+            meta.session.query(schedule.Appointment)
+                .filter(schedule.Appointment.patient_id == patient.id)
+                .all()
+    ]
+    
+    if patient_survey_form.validate():
+        # !!! Beware of this two variables really seemful ! Bad.
+        anamnesis_appointment = ( meta.session.query(schedule.Appointment)
+            .filter(schedule.Appointment.id == 
+                                    patient_survey_form.appointment_id.data)
+            .one()
+        )
+        appointment_anamnesis = ( meta.session.query(anamnesis.Anamnesis)
+            .filter(anamnesis.Anamnesis.appointment_id == 
+                                                    anamnesis_appointment.id)
+            .all()
+        )
+
+        document_data = request.files[patient_survey_form.document.name].read()
+        if document_data:
+            new_file = insert_document_in_db(document_data, 
+                                                    constants.FILE_ANAMNESIS, 
+                                                        anamnesis_appointment)
+            for anamnesis_entry in appointment_anamnesis:
+                if not anamnesis_entry.file_id:
+                    anamnesis_entry.file_id = new_file.id
+                    meta.session.commit()
+
+    return redirect(url_for('list_anamnesis', patient_id=patient.id,
+                                        appointment_id=appointment.id))
 
 @app.route('/update/anamnesis?pid=<int:patient_id>')
 def update_anamnesis(patient_id):

@@ -435,29 +435,35 @@ def manual_adjustment_in_prescription(patient_id, appointment_id, drug_list):
         }
         new_file = documents.Files(**file_values)
         meta.session.add(new_file)
-        meta.session.commit()
-
-        prescription_values = {
-            'dentist_id': appointment.dentist_id,
-            'patient_id': patient_id,
-            'appointment_id': appointment_id,
-            'file_id': new_file.id,
-        }
-        new_prescription = medication.Prescription(**prescription_values)
-        meta.session.add(new_prescription)
-        meta.session.commit()
-
-        for drug_pos in drug_list.split(','):
-            drug_id, position = drug_pos.split('-')
-            prescribed_drug_values = {
-                'prescription_id': new_prescription.id,
-                'drug_id': drug_id,
-                'position': position,
-            }
-            new_drug_in_prescription = medication.PrescribedDrugReference(
-                                                    **prescribed_drug_values)
-            meta.session.add(new_drug_in_prescription)
+        try:
             meta.session.commit()
+            file_exists = False
+        except sqlalchemy.exc.IntegrityError:
+            meta.session.rollback()
+            file_exists = True
+
+        if not file_exists:
+            prescription_values = {
+                'dentist_id': appointment.dentist_id,
+                'patient_id': patient_id,
+                'appointment_id': appointment_id,
+                'file_id': new_file.id,
+            }
+            new_prescription = medication.Prescription(**prescription_values)
+            meta.session.add(new_prescription)
+            meta.session.commit()
+
+            for drug_pos in drug_list.split(','):
+                drug_id, position = drug_pos.split('-')
+                prescribed_drug_values = {
+                    'prescription_id': new_prescription.id,
+                    'drug_id': drug_id,
+                    'position': position,
+                }
+                new_drug_in_prescription = medication.PrescribedDrugReference(
+                                                        **prescribed_drug_values)
+                meta.session.add(new_drug_in_prescription)
+                meta.session.commit()
                 
         return response
 

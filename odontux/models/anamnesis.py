@@ -5,7 +5,7 @@
 # licence BSD
 #
 from meta import Base
-import administration, schedule
+import administration, schedule, documents
 import sqlalchemy
 import datetime
 
@@ -69,6 +69,7 @@ class Anamnesis(Base):
     alert = Column(Boolean, default=False)
     document = Column(Boolean, default=False)
     time_stamp = Column(Date, default=func.current_date())
+    file_id = Column(Integer, ForeignKey(documents.Files.id))
     anamnesis_type = Column(Integer, nullable=False)
 
     __mapper_args__ = {

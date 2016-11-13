@@ -11,21 +11,38 @@
       {% endif %}
     {% endblock %}
   </p>
-    <form method="post" action={{ url_for('enter_in_survey', patient_id=patient.id,
+  <div style='float:left;width:100%'>
+    <div style='float:left;width:50%;height:100%'>
+{#      {% for anamnesis_file in anamnesis_files %}
+        <a href="{{ url_for('display_file', file_id=anamnesis_file.id) }}">
+          {{ anamnesis_file.timestamp }}</a><br />
+      {% endfor %}
+#}
+    </div>
+    <div style='float:right;width:50%;height:100%'>
+      <form method="post" action={{ url_for('enter_in_survey', patient_id=patient.id,
+                                              appointment_id=appointment.id) }}>
+        {{ render_simple_field_line(survey_form.survey_id) }} 
+      <input type="submit" value="enter survey">
+      </form>
+    <br />
+    <a href="{{ url_for('add_anamnesis_entry', patient_id=patient.id,
+                        appointment_id=appointment.id) }}">
+          Add an anamnesis entry
+          </a><br />
+    <a href="{{ url_for('print_patient_data_on_anamnesis', patient_id=patient.id,
+                                              appointment_id=appointment.id) }}">
+          Print patient's data on anamnesis
+          </a><br />
+    <form method='post' enctype="multipart/form-data" 
+                        action={{ url_for('add_patient_survey', 
                                             appointment_id=appointment.id) }}>
-      {{ render_simple_field_line(survey_form.survey_id) }} 
-    <input type="submit" value="enter survey">
+    {{ patient_survey_form.document }} 
+    {{ patient_survey_form.appointment_id }}
+    {{ patient_survey_form.submit }}
     </form>
-  <br />
-  <a href="{{ url_for('add_anamnesis_entry', patient_id=patient.id,
-                      appointment_id=appointment.id) }}">
-        Add an anamnesis entry
-        </a> --
-  <a href="{{ url_for('print_patient_data_on_anamnesis', patient_id=patient.id,
-                                            appointment_id=appointment.id) }}">
-        Print patient's data on anamnesis
-        </a>
-        <br/><br />
+    </div>
+  </div>
   <div id="anamnesis">
   {% for entry in patient_anamnesis %}
     {% if entry.alert %}

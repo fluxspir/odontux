@@ -598,7 +598,9 @@ def add_cg_to_cr(appointment_id, clinic_gesture_id, anatomic_location):
         
         material_used = cost.get_material_used(mat_cg_ref.id)
         
-        if _needs_redondance(appointment, material_used, mat_cg_ref):
+        if ( _needs_redondance(appointment, material_used, mat_cg_ref)
+            and material_used ):
+
             materio_vigilance = add_to_materio_vigilance(appointment_id, 
                                     mat_cg_ref.mean_quantity, material_used)
             new_clinic_report.materio_vigilance.append(materio_vigilance)
