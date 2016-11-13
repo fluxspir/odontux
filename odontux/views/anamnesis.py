@@ -15,7 +15,7 @@ from wtforms import (Form, SelectField, TextField, BooleanField, TextAreaField,
 from sqlalchemy.orm import with_polymorphic
 
 from odontux.views.log import index
-from odontux.models import meta, anamnesis, md, schedule
+from odontux.models import meta, anamnesis, md, schedule, documents
 from odontux.odonweb import app
 from odontux.views import forms
 from gettext import gettext as _
@@ -306,10 +306,6 @@ def list_anamnesis(patient_id, appointment_id=None):
 
     patient, appointment = checks.get_patient_appointment(patient_id, 
                                                                 appointment_id)
-#    anamnesis_file_exists = ( meta.session.query(documents.Files)
-#        .filter(
-#            documents.Files.file_type == constants.FILE_ANAMNESIS,
-#            doc
     global_anamnesis = with_polymorphic(anamnesis.Anamnesis, '*')
     patient_anamnesis = (
         meta.session.query(global_anamnesis)
@@ -342,7 +338,13 @@ def list_anamnesis(patient_id, appointment_id=None):
                 .all()
     ]
 
-#    anamnesis_files = ""
+    anamnesis_files = ( meta.session.query(documents.Files)
+        .filter(documents.Files.id.in_(
+            [ anamn.file_id for anamn in patient_anamnesis ] )
+            )
+        .order_by(documents.Files.timestamp.desc())
+        .all()
+    )
 
     return render_template("patient_anamnesis.html",
                             patient=patient,
@@ -351,7 +353,8 @@ def list_anamnesis(patient_id, appointment_id=None):
                             doctor=doctor,
                             survey_form=survey_form,
                             constants=constants,
-                            patient_survey_form=patient_survey_form)
+                            patient_survey_form=patient_survey_form,
+                            anamnesis_files=anamnesis_files)
 
 @app.route('/add/patient_survey?aid=<int:appointment_id>', methods=['POST'])
 def add_patient_survey(appointment_id):

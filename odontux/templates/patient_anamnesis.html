@@ -13,11 +13,11 @@
   </p>
   <div style='float:left;width:100%'>
     <div style='float:left;width:50%;height:100%'>
-{#      {% for anamnesis_file in anamnesis_files %}
+      {% for anamnesis_file in anamnesis_files %}
         <a href="{{ url_for('display_file', file_id=anamnesis_file.id) }}">
           {{ anamnesis_file.timestamp }}</a><br />
       {% endfor %}
-#}
+
     </div>
     <div style='float:right;width:50%;height:100%'>
       <form method="post" action={{ url_for('enter_in_survey', patient_id=patient.id,
