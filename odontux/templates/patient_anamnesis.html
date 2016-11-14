@@ -2,15 +2,26 @@
   <link rel="stylesheet" type="text/css" href="/static/anamnesis.css">
 {% block main %}
 {% from "_formhelpers.html" import render_simple_field_line %}
-  <p id="patient_doctor">
-    {% block medecine_doctor %}
-      {% if doctor %}
-        <a href="{{ url_for('update_md', body_id=doctor.id, form_to_display="gen_info") }}">Dr {{ doctor.lastname }} {{ doctor.firstname }}</a>
-      {% else %}
-        Patient without doctor
-      {% endif %}
-    {% endblock %}
-  </p>
+  <div style='width:100%'>
+    <div style='float:left;height:100%;width:50%'>
+        {% block medecine_doctor %}
+          <h2>
+          {% if doctor %}
+            <a href="{{ url_for('update_md', body_id=doctor.id, form_to_display="gen_info") }}">Dr {{ doctor.lastname }} {{ doctor.firstname }}</a>
+          {% else %}
+            Patient without doctor
+          {% endif %}
+          </h2>
+        {% endblock %}
+    </div>
+    <div>
+      <a href="{{ url_for('print_patient_data_on_anamnesis', patient_id=patient.id,
+                                              appointment_id=appointment.id) }}">
+          Print patient's data on anamnesis
+          </a><br />
+    </div>
+  </div>
+  <br />
   <div style='float:left;width:100%'>
     <div style='float:left;width:50%;height:100%'>
       {% for anamnesis_file in anamnesis_files %}
@@ -26,14 +37,6 @@
       <input type="submit" value="enter survey">
       </form>
     <br />
-    <a href="{{ url_for('add_anamnesis_entry', patient_id=patient.id,
-                        appointment_id=appointment.id) }}">
-          Add an anamnesis entry
-          </a><br />
-    <a href="{{ url_for('print_patient_data_on_anamnesis', patient_id=patient.id,
-                                              appointment_id=appointment.id) }}">
-          Print patient's data on anamnesis
-          </a><br />
     <form method='post' enctype="multipart/form-data" 
                         action={{ url_for('add_patient_survey', 
                                             appointment_id=appointment.id) }}>
@@ -43,7 +46,14 @@
     </form>
     </div>
   </div>
+  <br />
   <div id="anamnesis">
+    <div>
+      <a href="{{ url_for('add_anamnesis_entry', patient_id=patient.id,
+                        appointment_id=appointment.id) }}">
+          Add an anamnesis entry
+          </a><br /><br />
+    </div>
   {% for entry in patient_anamnesis %}
     {% if entry.alert %}
       <p style='color:red'>
