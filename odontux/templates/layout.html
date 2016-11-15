@@ -1,143 +1,203 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ session['lang'] }}">
   {% block head %}
   <head>
       {% block base %}
       	<!--base href="/static/"-->
-        {% block meta %}
           <meta name="description" content="Odontux odonweb">
           <meta name="keywords" content="odontux odonweb">
           <meta name="author" content="Franck LABADILLE">
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% block meta %}
         {% endblock %}
       {% endblock %}
-      {% block css %}
+      {% block css_layout %}
         <link rel="stylesheet" type="text/css" href="/static/vendors/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="/static/vendors/bootstrap/css/bootstrap-theme.min.css">
         <link rel="stylesheet" type="text/css" href="/static/style.css">
-      	<link rel="stylesheet" type="text/css" href="/static/header.css">
 {#      	
-      	<link rel="stylesheet" type="text/css" href="/static/main.css">
+      	<link rel="stylesheet" type="text/css" href="/static/header.css">
       	<link rel="stylesheet" type="text/css" href="/static/footer.css">
+      	<link rel="stylesheet" type="text/css" href="/static/main.css">
       	<link rel="stylesheet" type="text/css" href="/static/table.css">
 #}
+      {% endblock %} {# css_layout #}
+
+      {% block css %}
       {% endblock %} {# css #}
 {#
-	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <link rel="stylesheet" type="text/css" src='/static/js/jquery-ui.css'>
+      	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="stylesheet" type="text/css" src='/static/js/jquery-ui.css'>
 #}
-  <script src="/static/js/jquery.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="/static/js/brothel.js"></script>
-
-{#
+      {% block js_layout %}
+        <script src="/static/js/jquery.min.js"></script>
+        <script src="/static/vendors/bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="/static/js/clock.js"></script>
+      {% endblock %} {# js_layout #}
+      
       {% block javascript_specific %}
       {% endblock %}
-#}
-      	<title>{% block title %}Odontux{% endblock %}</title>
+      	
+      <title>{% block title %}Odontux{% endblock %}</title>
 
   </head>
   {% endblock %} {# block head #}
 
 
   <body>
-      <nav>
-        <time>
-          <script>
-            var myVar = setInterval(function(){clock2()}, 5000)
-            clock2();
-          </script>
-        </time>
-      {% block nav %}
-        <a href="{{ url_for('allpatients') }}">Patients</a>
-        <a href="{{ url_for('agenda') }}">Agenda</a>
-        <a href="{{ url_for('list_gestures') }}">Gestures</a>
-        <a href="{{ url_for('list_healthcare_plans', keywords=" ", ordering=" ") }}">Healthcare</a>
-        <a href="{{ url_for('portal_users') }}">Users</a>
-        <a href="{{ url_for('my_assets') }}">Assets</a>
-        <a href="{{ url_for('traceability_portal') }}">Traceability</a>
-        <a href="{{ url_for('portal_anamnesis') }}">Survey</a>
-        <a href="{{ url_for('list_drugs') }}">Drugs</a>
-        <a href="{{ url_for('portal_comptability') }}">Compta</a>
+    <nav class="navbar navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+
+          {% block logo %}
+          <a class="navbar-brand" href="https://github.com/fluxspir/odontux" 
+                                                          target="_blank">
+            O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</a> 
+          {% endblock %} {# logo #}
+
+        </div> <!-- navbar-header -->
+
+        {% block nav %}
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              <a href="#"
+                  class="btn btn-success btn-md dropdown-toggle" data-toggle="dropdown" role="button" 
+                  aria-haspopup="true" aria-expanded="false">
+                  Clinic<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('allpatients') }}">Patients</a></li>
+                <li><a href="{{ url_for('agenda') }}">Agenda</a></li>
+                <li><a href="{{ url_for('portal_anamnesis') }}">Survey</a></li>
+                <li><a href="{{ url_for('list_drugs') }}">Drugs</a></li>
+              </ul>
+            <li class='dropdown'>
+              <a href="#"
+                        class="btn btn-primary btn-md dropdown-toggle" data-toggle="dropdown" role="button" 
+                        aria-haspopup="true" aria-expanded="false">
+                          Gestures<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('list_gestures') }}">Gestures</a></li>
+                <li><a href="{{ url_for('list_healthcare_plans', 
+                                          keywords=" ", ordering=" ") }}">
+                          Healthcare</a></li>
+                <li><a href="{{ url_for('portal_comptability') }}">Compta</a></li>
+              </ul>
+            </li>
+            <li class='dropdown'>
+              <a href="#"
+                        class="btn btn-info btn-md dropdown-toggle" data-toggle="dropdown" role="button" 
+                        aria-haspopup="true" aria-expanded="false">
+                          Assets<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('my_assets') }}">Assets</a></li>
+                <li><a href="{{ url_for('traceability_portal') }}">Traceability</a></li>
+              </ul>
+            </li>
+
+            <li class='dropdown'> 
+              <a href="#"
+                        class="btn btn-danger btn-md dropdown-toggle" data-toggle="dropdown" role="button" 
+                        aria-haspopup="true" aria-expanded="false">
+                          Users<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ url_for('update_user', body_id=session.user_id,
+                                            form_to_display="gen_info") }}">
+                        {{ session['username'] }}</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="{{ url_for('list_users') }}">All users</a></li>
+              </ul>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <div>
+                <form action="{{ url_for('find') }}" method="post" autocomplete="on"
+                                                      role="form"
+                                                      class="navbar-form">
+                  <div class="form-group">
+                    <input type="search" name="keywords" placeholder="Quick Search" 
+                                          class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <select name="database" id="dbtable" class="form-control">
+                    <option value="patient">Patient</option>
+                    <option value="act">Act</option>
+                    <option value="odontuxuser">User</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="drug">Drug</option>
+                    <option value="asset">Asset</option>
+                    <option value="device">Device</option>
+                    <option value="material">Material</option>
+                    <option value="asset_category">Asset Category</option>
+                    <option value="sterilized_asset">Sterilized_asset</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-info">
+                    <span class="glyphicon glyphicon-search">Search
+                  </button>
+                </form>
+              </div>
+            </li>
+            <li>
+              <time class='navbar'>
+              <script>
+                var myVar = setInterval(function(){clock2()}, 5000)
+                clock2();
+              </script>
+              </time>
+            </li>
+          </ul>
+        </div> {# navbar #}
+      </div> {# container #}
+    {% endblock %} {# nav #}
+    </nav>
+
+    {% block header %}
+    <header>
+      <div class='container-fluid'>
+        <div class='row'>
+          <div class='col-sm-12'>
         
-        <div id="search">
-        {% block search %}
-          <form action="/search/" method="post" autocomplete="on">
-            <input type="search" name="keywords" placeholder="Quick Search" />
-            <select name="database" id="dbtable">
-              <option value="patient">Patient</option>
-              <option value="act">Act</option>
-              <option value="odontuxuser">User</option>
-              <option value="doctor">Doctor</option>
-              <option value="drug">Drug</option>
-              <option value="asset">Asset</option>
-              <option value="device">Device</option>
-              <option value="material">Material</option>
-              <option value="asset_category">Asset Category</option>
-              <option value="sterilized_asset">Sterilized_asset</option>
-            </select>
-            <input type="submit" value="Find" />
-          </form>
-        {% endblock %} {# search #}
-        </div>
-
-        {% block login %}
-          <div id="login"> 
-            <a href="{{ url_for('update_user', body_id=session.user_id,
-                                              form_to_display="gen_info") }}" 
-                            onmouseover="mopen('useropen')" 
-                            onmouseout="mclosetime()">
-              {{ session['username'] }}</a>
-
-{#            <div id="useropen" onmouseover="mcancelclosetime()" 
-                                      onmouseout="mclosetime()">
-              <a href="/logout/">Logout</a>
-            </div>
-#}           
+            {% block pagetitle %}
+            {% endblock %}
           </div>
-        {% endblock %} {# login #}
-      {% endblock %} {# nav #}
-      </nav>
 
-      {% block header %}
-      <header>
-        <div id="generalinfo">
-        {% block generalinfo %}
-          <div id="pagetitle">
-          {% block pagetitle %}
-          {% endblock %}
-          </div>
-          <div style="clear:both"></div>
-        {% endblock %}
         </div>
-        <div id="logo">
-        {% block logo %}
-          <a href="https://github.com/fluxspir/odontux" target="_blank">O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</a> 
-        {% endblock %}
-        </div>
+
         <div id="mainsummary">
         {% block mainsummary %}
         {% endblock %}
         </div>
-        <ul id="user">
-        </ul>
 
+      </div>
     </header>
     {% endblock %}  {# header #}
     
+
+  <div class='container-fluid'>
     <div id="main_container">
-      <section id="main">
       {% block main %}
       {% endblock %}
-      </section>
     </div>
+  </div>
 
 
     {% block footer %}
-    <footer>
-      &copy; Copyright 2012-2016 by <a class="footer" href="mailto:franck@kernlog.net">Franck Labadille</a>.
+    <footer class="footer">
+      <div class="container">
+        &copy; Copyright 2012-2016 by 
+        <a class="footer" href="mailto:franck@kernlog.net">Franck Labadille</a>.
       <!--BTC : 12X27E9ZeApwLrbEphnQNgPM9DvRRKiUYq-->
+      </div>
     </footer>
     {% endblock %} {# footer #}
   </body>

@@ -1,19 +1,11 @@
 {% extends "layout.html" %}
 {% block pagetitle %}
   {% if patient %}
-
-    {% if appointment %}
-{#      <span class="left">
-        <a href="{{ url_for( 'patient_appointment', appointment_id=appointment.id - 1) }}">
-          Previous RV
-        </a>
-      </span>
-#}
-    {% endif %}
-
+    <h2>
     <a href="{{url_for('enter_patient_file', body_id=patient.id)}}">
-            {{ patient.firstname }} {{ patient.lastname }}</a>, 
-            {{ patient.age() }} years old, 
+            {{ patient.firstname }} {{ patient.lastname }}</a>
+            <small>, 
+            {{ patient.age() }} years old,
 
     {% if appointment %}
     <a href="{{ url_for('patient_appointment', appointment_id=appointment.id )}}">
@@ -31,13 +23,14 @@
         </a>
 #}
       </span>
-
+    </small></h2>
     {% else %}
       Out of appointment
+    </small></h2>
     {% endif %}
-
+    
   {% else %}
     Not in patient file
   {% endif %}
-
+  </h2>
 {% endblock %}

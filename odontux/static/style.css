@@ -1,10 +1,42 @@
 body
 {
-background-color:#FDF6DF ;
+  background-color:#FDF6DF ;
+  padding-top:30px;
+}
+
+nav
+{
+  background-color:#FFECB0;
+  margin:0;
+  padding:0;
+  font-size:8px;
+  letter-spacing:2px;
+}
+
+header
+{
+  background-color:#FFEFBE;
+}
+
+footer
+{
+  text-align:center;
+  background-color:black;
+  color:white;
+}
+
+footer a:link {
+  color:yellow ;
+}
+
+h2 {
+  text-align:center;
+  color:black;
+}
+  
 /*background-color:rgba(125, 125, 125, 0.2);*/
 /*font-size:100% ; /* In order to make the font size in all browsers look the same ; use it with "em"  (1em = 16px) */
 /*font-family:"Times New Roman", "Helvetica", "Arial", "Sans-serif" ; */
-}
 /*
 h1 {
 font-size:250% ;
