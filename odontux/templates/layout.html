@@ -1,107 +1,130 @@
 <!DOCTYPE html>
 <html>
+  {% block head %}
   <head>
-    {% block head %}
       {% block base %}
       	<!--base href="/static/"-->
+        {% block meta %}
+          <meta name="description" content="Odontux odonweb">
+          <meta name="keywords" content="odontux odonweb">
+          <meta name="author" content="Franck LABADILLE">
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% endblock %}
       {% endblock %}
-      	<meta name="description" content="Odontux odonweb">
-      	<meta name="keywords" content="odontux odonweb">
-      	<meta name="author" content="Franck LABADILLE">
-      	<meta charset="UTF-8">
-      {% block meta %}
-      {% endblock %}
-      	<link rel="stylesheet" type="text/css" href="/static/style.css">
+      {% block css %}
+        <link rel="stylesheet" type="text/css" href="/static/vendors/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/vendors/bootstrap/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/style.css">
       	<link rel="stylesheet" type="text/css" href="/static/header.css">
+{#      	
       	<link rel="stylesheet" type="text/css" href="/static/main.css">
       	<link rel="stylesheet" type="text/css" href="/static/footer.css">
       	<link rel="stylesheet" type="text/css" href="/static/table.css">
+#}
+      {% endblock %} {# css #}
+{#
 	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link rel="stylesheet" type="text/css" src='/static/js/jquery-ui.css'>
-      {% block css %} 
-      {% endblock %}
-      {% block css_sum %}
-      {% endblock %}
-      <script type="text/javascript" src="/static/js/brothel.js"></script>
+#}
+  <script src="/static/js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/static/js/brothel.js"></script>
+
+{#
       {% block javascript_specific %}
       {% endblock %}
+#}
       	<title>{% block title %}Odontux{% endblock %}</title>
-    {% endblock %}
+
   </head>
+  {% endblock %} {# block head #}
 
 
   <body>
-    <header>
-    {% block header %}
-      <div id="generalinfo">
-      {% block generalinfo %}
+      <nav>
         <time>
           <script>
             var myVar = setInterval(function(){clock2()}, 5000)
             clock2();
           </script>
-	      </time>
-        <div id="pagetitle">
-        {% block pagetitle %}
-      	{% endblock %}
-	      </div>
-	      <div style="clear:both"></div>
-      {% endblock %}
-      </div>
-      <div id="logo">
-      {% block logo %}
-      	<a href="https://github.com/fluxspir/odontux" target="_blank">O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</a> 
-      {% endblock %}
-      </div>
-      <div id="mainsummary">
-      {% block mainsummary %}
-      {% endblock %}
-      </div>
-      <nav>
+        </time>
       {% block nav %}
         <a href="{{ url_for('allpatients') }}">Patients</a>
         <a href="{{ url_for('agenda') }}">Agenda</a>
-      	<a href="{{ url_for('list_gestures') }}">Gestures</a>
+        <a href="{{ url_for('list_gestures') }}">Gestures</a>
         <a href="{{ url_for('list_healthcare_plans', keywords=" ", ordering=" ") }}">Healthcare</a>
-      	<a href="{{ url_for('portal_users') }}">Users</a>
+        <a href="{{ url_for('portal_users') }}">Users</a>
         <a href="{{ url_for('my_assets') }}">Assets</a>
         <a href="{{ url_for('traceability_portal') }}">Traceability</a>
         <a href="{{ url_for('portal_anamnesis') }}">Survey</a>
         <a href="{{ url_for('list_drugs') }}">Drugs</a>
         <a href="{{ url_for('portal_comptability') }}">Compta</a>
+        
         <div id="search">
         {% block search %}
           <form action="/search/" method="post" autocomplete="on">
-	          <input type="search" name="keywords" placeholder="Quick Search" />
-	          <select name="database" id="dbtable">
-	            <option value="patient">Patient</option>
-	            <option value="act">Act</option>
-	            <option value="odontuxuser">User</option>
-	            <option value="doctor">Doctor</option>
+            <input type="search" name="keywords" placeholder="Quick Search" />
+            <select name="database" id="dbtable">
+              <option value="patient">Patient</option>
+              <option value="act">Act</option>
+              <option value="odontuxuser">User</option>
+              <option value="doctor">Doctor</option>
               <option value="drug">Drug</option>
               <option value="asset">Asset</option>
               <option value="device">Device</option>
               <option value="material">Material</option>
               <option value="asset_category">Asset Category</option>
               <option value="sterilized_asset">Sterilized_asset</option>
- 	          </select>
-	          <input type="submit" value="Find" />
-	        </form>
+            </select>
+            <input type="submit" value="Find" />
+          </form>
+        {% endblock %} {# search #}
+        </div>
+
+        {% block login %}
+          <div id="login"> 
+            <a href="{{ url_for('update_user', body_id=session.user_id,
+                                              form_to_display="gen_info") }}" 
+                            onmouseover="mopen('useropen')" 
+                            onmouseout="mclosetime()">
+              {{ session['username'] }}</a>
+
+{#            <div id="useropen" onmouseover="mcancelclosetime()" 
+                                      onmouseout="mclosetime()">
+              <a href="/logout/">Logout</a>
+            </div>
+#}           
+          </div>
+        {% endblock %} {# login #}
+      {% endblock %} {# nav #}
+      </nav>
+
+      {% block header %}
+      <header>
+        <div id="generalinfo">
+        {% block generalinfo %}
+          <div id="pagetitle">
+          {% block pagetitle %}
+          {% endblock %}
+          </div>
+          <div style="clear:both"></div>
         {% endblock %}
         </div>
-      {% endblock %}
-      </nav>
-      <ul id="user">
-      {% block user %}
-	      <li><a href="/user/list_user/id={{session.userid}}" onmouseover="mopen('useropen')" onmouseout="mclosetime()">{{ session['username'] }}</a>
-          <div id="useropen" onmouseover="mcancelclosetime()" onmouseout="mclosetime()">
-	          <a href="/logout/">Logout</a>
-	        </div>
-	      </li>
-	    {% endblock %}
-	    </ul>
-    {% endblock %}
+        <div id="logo">
+        {% block logo %}
+          <a href="https://github.com/fluxspir/odontux" target="_blank">O<sub>d</sub>o<sup>n</sup>t<sub>u</sub>X</a> 
+        {% endblock %}
+        </div>
+        <div id="mainsummary">
+        {% block mainsummary %}
+        {% endblock %}
+        </div>
+        <ul id="user">
+        </ul>
+
     </header>
+    {% endblock %}  {# header #}
     
     <div id="main_container">
       <section id="main">
@@ -111,11 +134,11 @@
     </div>
 
 
+    {% block footer %}
     <footer>
-      {% block footer %}
       &copy; Copyright 2012-2016 by <a class="footer" href="mailto:franck@kernlog.net">Franck Labadille</a>.
       <!--BTC : 12X27E9ZeApwLrbEphnQNgPM9DvRRKiUYq-->
-      {% endblock %}
     </footer>
+    {% endblock %} {# footer #}
   </body>
 </html>

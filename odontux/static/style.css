@@ -1,11 +1,11 @@
 body
 {
-background-color:#F0F0F0 ;
+background-color:#FDF6DF ;
 /*background-color:rgba(125, 125, 125, 0.2);*/
-font-size:100% ; /* In order to make the font size in all browsers look the same ; use it with "em"  (1em = 16px) */
-font-family:"Times New Roman", "Helvetica", "Arial", "Sans-serif" ; 
+/*font-size:100% ; /* In order to make the font size in all browsers look the same ; use it with "em"  (1em = 16px) */
+/*font-family:"Times New Roman", "Helvetica", "Arial", "Sans-serif" ; */
 }
-
+/*
 h1 {
 font-size:250% ;
 color: #191970;
@@ -35,3 +35,4 @@ nav ul {list-style-type:none;}
 nav li {display:inline;} 
 
 .alert {color:red;}
+*/
