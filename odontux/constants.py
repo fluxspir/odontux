@@ -14,6 +14,7 @@ parser = ConfigParser.ConfigParser()
 home = os.path.expanduser("~")
 parser.read(os.path.join(home, ".odontuxrc"))
 LOCALE = parser.get("environment", "locale").lower()
+LANG = parser.get("environment", "lang")
 
 if LOCALE == 'fr':
     CURRENCY_SYMBOL = u"€"
