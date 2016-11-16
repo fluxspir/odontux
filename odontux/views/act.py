@@ -36,6 +36,9 @@ class SpecialtyForm(Form):
                      message=_("Must be less than 20 characters"))])
     color = ColorField('color')
 
+class SpecialtiesForm(Form):
+    specialties = FieldList(FormField(SpecialtyForm)
+
 class ClinicGestureForm(Form):
     name = TextField(_('Name'), [validators.Required()])
     description = TextAreaField(_('Description'))
@@ -197,9 +200,9 @@ def create_cotation_dictionnary(patient):
 def portal_gesture():
     return render_template('portal_gestures.html')
 
-@app.route('/specialty/')
 @app.route('/specialties/')
 def list_specialties(ordering=[]):
+    specialties_form = SpecialtiesForm(request.form)
     query = meta.session.query(act.Specialty)
     if not ordering:
         ordering = [act.Specialty.id]
@@ -224,7 +227,12 @@ def add_specialty():
         meta.session.add(new_specialty)
         meta.session.commit()
         return redirect(url_for('list_specialties'))
-    return render_template('add_specialty.html', form=form)
+    page_data = {
+        'title': _('Add specialty'),
+        'menu': ( ),
+    }
+    return render_template('add_specialty.html', form=form,
+                                        page_data=page_data)
 
 @app.route('/act/update_specialty/id=<int:specialty_id>/', 
             methods=['GET', 'POST'])
