@@ -1,11 +1,10 @@
 {% extends "layout.html" %}
-{% block pagetitle %}
+{% block patient_appointment %}
+  <h3>
   {% if patient %}
-    <h2>
     <a href="{{url_for('enter_patient_file', body_id=patient.id)}}">
             {{ patient.firstname }} {{ patient.lastname }}</a>
-            <small>, 
-            {{ patient.age() }} years old,
+      <small>, {{ patient.age() }} years old,
 
     {% if appointment %}
     <a href="{{ url_for('patient_appointment', appointment_id=appointment.id )}}">
@@ -17,20 +16,38 @@
                           dentist_id=appointment.dentist_id,
                           dental_unit_id=appointment.dental_unit_id) }}"> 
             {{ appointment.agenda.starttime.date() }}</a>
-{#      <span class="right">
-        <a href="{{ url_for( 'patient_appointment', appointment_id=appointment.id +1 ) }}">
-          Next RV
-        </a>
-#}
-      </span>
-    </small></h2>
     {% else %}
       Out of appointment
-    </small></h2>
     {% endif %}
+    </small>
     
   {% else %}
-    Not in patient file
+    <small>Not in patient file</small>
   {% endif %}
-  </h2>
+  </h3>
 {% endblock %}
+
+{% block page_title %}
+  <h4>{{ page_data['title'] }}</h4>
+{% endblock %}
+
+{% block page_menu %}
+  {% for menu_item in page_data['menu'] %}
+    <li>
+      <a href="{{ menu_item[0] }}">
+        {{ menu_item[1] }}
+      </a>
+{#      <a href="{{ url_for(menu_item[1]
+        {% if menu_item[2] %}
+          {% for argument in menu_item[2] %}
+            , argument
+          {% endfor %}
+        {% endif %}
+        ) }}">
+        menu_item[0]
+      </a>
+#}
+    </li>
+  {% endfor %}
+{% endblock %}
+

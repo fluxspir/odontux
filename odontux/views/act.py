@@ -206,7 +206,12 @@ def list_specialties(ordering=[]):
     for order in ordering:
         query = query.order_by(order)
     specialties = query.all()
-    return render_template('list_specialties.html', specialties=specialties)
+    page_data = { 
+        'title': _('Specialties'),
+        'menu': ( ),
+    }
+    return render_template('list_specialties.html', specialties=specialties,
+                                                    page_data=page_data)
 
 @app.route('/add/specialty/', methods=['GET', 'POST'])
 def add_specialty():
@@ -309,8 +314,17 @@ def list_gestures(keywords="", ordering=""):
         except sqlalchemy.orm.exc.NoResultFound:
             specialty = ""
         gestures_list.append( (gesture, specialty) )
+
+    page_data = {
+        'title': _('Gestures'),
+        'menu': ( ( 'url_for("list_specialty")', _('List specialties') ),
+                    ( 'url_for("add_gesture")', _('Add gesture') ),
+        ),
+    }
+
     return render_template('list_gestures.html', 
-                            gestures_list=gestures_list)
+                            gestures_list=gestures_list,
+                            page_data=page_data)
 
 @app.route('/add/gesture/', methods=['GET', 'POST'])
 def add_gesture():

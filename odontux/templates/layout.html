@@ -16,12 +16,6 @@
         <link rel="stylesheet" type="text/css" href="/static/vendors/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="/static/vendors/bootstrap/css/bootstrap-theme.min.css">
         <link rel="stylesheet" type="text/css" href="/static/style.css">
-{#      	
-      	<link rel="stylesheet" type="text/css" href="/static/header.css">
-      	<link rel="stylesheet" type="text/css" href="/static/footer.css">
-      	<link rel="stylesheet" type="text/css" href="/static/main.css">
-      	<link rel="stylesheet" type="text/css" href="/static/table.css">
-#}
       {% endblock %} {# css_layout #}
 
       {% block css %}
@@ -106,11 +100,11 @@
               <a href="#"
                         class="btn btn-danger btn-md dropdown-toggle" data-toggle="dropdown" role="button" 
                         aria-haspopup="true" aria-expanded="false">
-                          Users<span class="caret"></span></a>
+                          {{ session['username'] }}<span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li><a href="{{ url_for('update_user', body_id=session.user_id,
                                             form_to_display="gen_info") }}">
-                        {{ session['username'] }}</a></li>
+                        Update</a></li>
                 <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 <li role="separator" class="divider"></li>
                 <li><a href="{{ url_for('list_users') }}">All users</a></li>
@@ -166,18 +160,23 @@
       <div class='container-fluid'>
         <div class='row'>
           <div class='col-sm-12'>
-        
-            {% block pagetitle %}
+            {% block patient_appointment %}
             {% endblock %}
           </div>
-
         </div>
-
-        <div id="mainsummary">
-        {% block mainsummary %}
-        {% endblock %}
+        
+        <div class='row'>
+          <div class='col-sm-2'>
+            {% block page_title %}
+            {% endblock %}
+          </div>
+          <div class='col-sm-10'>
+            <ul class='nav nav-tabs nav-justified'>
+              {% block page_menu %}
+              {% endblock %}
+            </ul>
+          </div>
         </div>
-
       </div>
     </header>
     {% endblock %}  {# header #}

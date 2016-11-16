@@ -23,17 +23,30 @@ footer
   text-align:center;
   background-color:black;
   color:white;
+  position:fixed;
+  width:100%;
+  bottom:0%;
 }
 
 footer a:link {
   color:yellow ;
 }
 
-h2 {
+h3 {
   text-align:center;
   color:black;
 }
-  
+
+h4 {
+  text-align:center;
+  color:blue;
+}
+
+/*
+pagetitle {
+  background-color:#FFFFFF;
+}
+
 /*background-color:rgba(125, 125, 125, 0.2);*/
 /*font-size:100% ; /* In order to make the font size in all browsers look the same ; use it with "em"  (1em = 16px) */
 /*font-family:"Times New Roman", "Helvetica", "Arial", "Sans-serif" ; */
