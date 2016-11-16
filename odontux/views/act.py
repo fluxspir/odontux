@@ -249,60 +249,27 @@ def list_specialties():
 #####
 
 @app.route('/list/gesture')
-@app.route('/list/gesture?kwds=<keywords>&order=<ordering>')
-def list_gestures(keywords="", ordering=""):
+def list_gestures():
     """ The target is to display dentist's gesture, describing it, its values.
     Looking in Gesture table, we may decide to print only 
-        acts from one specialty
-        then filter by keyword
-        ordering the printing
-    
-    The result will be a list of tuples :
-     ( gesture, specialty, cotat, plan )
+    The result will be a dict = { specialty_id: gesture, }
     """
-    keywords = keywords.encode("utf_8").split()
-    ordering = ordering.split()
-    # Get the acts list, named as "gesture", because it is the gesture
-    # the dentist make in the patient mouth.
-    query = meta.session.query(act.Gesture)
-    # If we only need ones of a specialty : 
-    if request.form and request.form['specialty']:
-        try:
-            specialty = meta.session.query(act.Specialty)\
-                .filter(act.Specialty.id == request.form['specialty'].one())
-            query = query.filter(act.Gesture.specialty_id == specialty.id)
-        except sqlalchemy.orm.exc.NoResultFound:
-            pass
-    # Filter by keywords
-    if keywords:
-        for keyword in keywords:
-            keyword = '%{}%'.format(keyword)
-            query = query.filter(or_(
-                act.Gesture.alias.ilike(keyword),
-                act.Gesture.name.ilike(keyword),
-                act.Gesture.code.ilike(keyword),
-                (and_(
-                    act.Gesture.specialty_id == act.Specialty.id,
-                    act.Specialty.name.ilike(keyword)
-                    )
-                )
-            ))
-    # We want to order the result to find what we are looking for more easily
-    if not ordering:
-        ordering = [ act.Gesture.specialty_id, act.Gesture.alias ]
-    for o in ordering:
-        query = query.order_by(o)
-    gestures = query.all()
+    gestures_dict = {}
 
-    gestures_list = []
+    specialty_names = meta.session.query(act.Specialty.name).all()
+
+    gestures = ( meta.session.query(act.Gesture)
+                    .join(act.Specialty)
+                    .order_by(
+                        act.Specialty.name,
+                        act.Gesture.name )
+                    .all()
+    )
+    
     for gesture in gestures:
-        try:
-            specialty = meta.session.query(act.Specialty)\
-                .filter(act.Specialty.id == gesture.specialty_id)\
-                .one()
-        except sqlalchemy.orm.exc.NoResultFound:
-            specialty = ""
-        gestures_list.append( (gesture, specialty) )
+        if gesture.specialty.name not in gestures_dict:
+            gestures_dict[gesture.specialty.name] = []
+        gestures_dict[gesture.specialty.name].append(gesture)
 
     page_data = {
         'title': _('Gestures'),
@@ -313,7 +280,7 @@ def list_gestures(keywords="", ordering=""):
     }
 
     return render_template('list_gestures.html', 
-                            gestures_list=gestures_list,
+                            gestures_dict=gestures_dict,
                             page_data=page_data)
 
 @app.route('/add/gesture/', methods=['GET', 'POST'])

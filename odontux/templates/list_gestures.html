@@ -1,35 +1,33 @@
 {% extends 'header.html' %}
 
 {% block main %}
-  {% block list_gesture %}
-    <br />
-    <br />
-    <table border=1>
-      <tr>
-        <th>Specialty</th>
-        <th>Code</th>
-        <th>Alias</th>
-        <th>Name</th>
-        <th>Color</th>
-        {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
-          <th>Modify</th>
-        {% endif %}
-      </tr>
-    {% for gesture, specialty in gestures_list %}
-      <tr>
-        <td style="background-color:{{specialty.color}};">{{ specialty.name }}</td>
-        <td>{{ gesture.code }}</td>
-        <td>{{ gesture.alias }}</td>
-        <td><a href="{{ url_for('view_gesture', gesture_id=gesture.id) }}">
-                        {{ gesture.name }}</a></td>
-        <td style="background-color:{{ gesture.color }};"></td>
-        {% if session.role == session.ROLE_ADMIN or session.role == session.ROLE_DENTIST %}
-          <td><a href="{{ url_for('update_gesture', gesture_id=gesture.id) }}">
-                Update</a>
-        {% endif %}
-      </tr>
-    {% endfor %}
-    </table>
-  </div>
-  {% endblock %}
+  {% for specialty in gestures_dict %}
+
+    {% if not loop.index0 % 3 %} {# open row grid #}
+      <div class="row">
+    {% endif %}
+
+      <div class="col-sm-4">
+        <h5 style='background-color:{{ gestures_dict[specialty][0].specialty.color }}'> 
+          {{ specialty }}
+        </h5>
+
+        {% for gesture in gestures_dict[specialty] %}
+          <div class='row'>
+            <div class='col-sm-1'>
+              <button class="btn" style='background-color:{{ gesture.color }}'>
+            </div>
+            <div class='col-sm-11'>
+            <a href="{{ url_for('update_gesture', 
+                                gesture_id=gesture.id) }}">
+                {{ gesture.name }}</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% if not (loop.index0 + 1) % 3 %}
+      </div>
+    {% endif %}
+  {% endfor %}
 {% endblock %}
