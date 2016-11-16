@@ -1,27 +1,25 @@
 {% extends 'header.html' %}
 {% from "_formhelpers.html" import render_simple_field, render_sfl_wol %}
 {% block main %}
-  <div class='container-fluid'>
-    <form class="form-inline" method='post' action="{{ url_for('list_specialties') }}">
-    {{ specialties_form.submit(class="btn btn-alert") }}
-    {% for specialty_form in specialties_form.specialties %}
-      <div class='row'>
-        {% for field in specialty_form %}
-          <div class="form-group form-group-md">
-            <div class="col-xs-3">
-            {{ field.label(class="sr-only") }}
+  <form class="form-inline" method='post' action="{{ url_for('list_specialties') }}">
+  {{ specialties_form.submit(class="btn btn-alert") }}
+  {% for specialty_form in specialties_form.specialties %}
+    <div class='row'>
+      {% for field in specialty_form %}
+        <div class="form-group form-group-sm">
+          <div class="col-xs-3">
+          {{ field.label(class="sr-only") }}
 
-            {% if 'color' in field.id %}
-              {{ field(class="form-control") }}
-            {% else %}
-              {{ field(class="form-control") }}
-            {% endif %}
+          {% if 'color' in field.id %}
+            {{ field(class="form-control") }}
+          {% else %}
+            {{ field(class="form-control") }}
+          {% endif %}
 
-            </div>
           </div>
-        {% endfor %}
-      </div>
-    {% endfor %}
-    </form>
-  </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+  </form>
 {% endblock %}
