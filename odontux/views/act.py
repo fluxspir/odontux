@@ -208,7 +208,9 @@ def list_specialties(ordering=[]):
     specialties = query.all()
     page_data = { 
         'title': _('Specialties'),
-        'menu': ( ),
+        'menu': ( 
+            ( "add_specialty", _('Add specialty') ),
+        ),
     }
     return render_template('list_specialties.html', specialties=specialties,
                                                     page_data=page_data)
@@ -317,8 +319,9 @@ def list_gestures(keywords="", ordering=""):
 
     page_data = {
         'title': _('Gestures'),
-        'menu': ( ( 'url_for("list_specialty")', _('List specialties') ),
-                    ( 'url_for("add_gesture")', _('Add gesture') ),
+        'menu': ( 
+            ( "list_specialties", _('List specialties') ),
+            ( "add_gesture", _('Add gesture') ),
         ),
     }
 
