@@ -17,7 +17,7 @@ from administration import (
                  )
 from search import find
 from act import (list_gestures, add_gesture, update_gesture, view_gesture,
-                 list_specialties, add_specialty, update_specialty)
+                 list_specialties)
 from md import (
                 list_md,
                 add_md,

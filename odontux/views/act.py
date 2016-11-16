@@ -24,20 +24,20 @@ from odontux.views.log import index
 
 from wtforms import (Form, BooleanField, TextField, TextAreaField, SelectField,
                      DecimalField, HiddenField, IntegerField, RadioField,
-                     FieldList, FormField, SubmitField, 
+                     FieldList, FormField, SubmitField,
                      validators )
 from odontux.views.forms import ColorField
 from decimal import Decimal
 import datetime
 
 class SpecialtyForm(Form):
-    name = TextField('name', [validators.Required(), 
-                     validators.Length(min=1, max=20, 
-                     message=_("Must be less than 20 characters"))])
+    specialty_id = HiddenField(_('id'))
+    name = TextField(_('Name'))
     color = ColorField('color')
 
 class SpecialtiesForm(Form):
-    specialties = FieldList(FormField(SpecialtyForm)
+    specialties = FieldList(FormField(SpecialtyForm), min_entries=1)
+    submit = SubmitField(_("Submit"))
 
 class ClinicGestureForm(Form):
     name = TextField(_('Name'), [validators.Required()])
@@ -138,8 +138,6 @@ class MaterioVigilanceUsedForm(Form):
     update = SubmitField(_('Update'))
 
 
-def get_specialty_field_list():
-    return [ "name", "color" ]
 
 def get_gesture_field_list():
     return [ "specialty_id", "code", "alias", 
@@ -196,74 +194,55 @@ def create_cotation_dictionnary(patient):
                                                         str(cotation.price) )
     return cotations
 
-@app.route('/portal/gesture/')
-def portal_gesture():
-    return render_template('portal_gestures.html')
-
-@app.route('/specialties/')
-def list_specialties(ordering=[]):
+#@app.route('/portal/gesture/')
+#def portal_gesture():
+#    return render_template('portal_gestures.html')
+#
+@app.route('/specialties/', methods=['GET', 'POST'])
+def list_specialties():
+    specialty_field_list = [ "name", "color" ]
     specialties_form = SpecialtiesForm(request.form)
-    query = meta.session.query(act.Specialty)
-    if not ordering:
-        ordering = [act.Specialty.id]
-    for order in ordering:
-        query = query.order_by(order)
-    specialties = query.all()
+    specialties = ( meta.session.query(act.Specialty)
+        .order_by(act.Specialty.name)
+        .all()
+    )
+
+    if request.method == 'POST' and specialties_form.validate():
+        for entry in specialties_form.specialties.entries:
+            if entry.data['specialty_id']:
+                specialty = ( meta.session.query(act.Specialty)
+                                .get(entry.data['specialty_id'])
+                )
+                for f in specialty_field_list:
+                    setattr(specialty, f, entry.data[f])
+                meta.session.commit()
+            elif not entry.data['specialty_id'] and entry.data['name']:
+                values = {} 
+                for f in specialty_field_list:
+                    values[f] = entry.data[f] 
+                new_specialty = act.Specialty(**values)
+                meta.session.add(new_specialty)
+                try:
+                    meta.session.commit()
+                except sqlalchemy.exc.IntegrityError:
+                    meta.session.rollback()
+        
+        return redirect(url_for('list_specialties'))
+
+    for specialty in specialties:
+        specialty_form = SpecialtyForm(request.form)
+        specialty_form.specialty_id = specialty.id
+        specialty_form.name = specialty.name
+        specialty_form.color = specialty.color
+        specialties_form.specialties.append_entry(specialty_form)
+
     page_data = { 
         'title': _('Specialties'),
-        'menu': ( 
-            ( "add_specialty", _('Add specialty') ),
-        ),
-    }
-    return render_template('list_specialties.html', specialties=specialties,
-                                                    page_data=page_data)
-
-@app.route('/add/specialty/', methods=['GET', 'POST'])
-def add_specialty():
-    form = SpecialtyForm(request.form)
-    if request.method == 'POST' and form.validate():
-        args = {f: getattr(form, f).data for f in get_specialty_field_list() }
-        new_specialty = act.Specialty(**args)
-        meta.session.add(new_specialty)
-        meta.session.commit()
-        return redirect(url_for('list_specialties'))
-    page_data = {
-        'title': _('Add specialty'),
         'menu': ( ),
     }
-    return render_template('add_specialty.html', form=form,
-                                        page_data=page_data)
-
-@app.route('/act/update_specialty/id=<int:specialty_id>/', 
-            methods=['GET', 'POST'])
-def update_specialty(specialty_id):
-    specialty = ( meta.session.query(act.Specialty)
-                    .filter(act.Specialty.id == specialty_id)
-                    .one_or_none()
-    )
-    if not specialty:
-        return redirect(url_for('list_specialties'))
-
-    form = SpecialtyForm(request.form)
-
-    if request.method == 'POST' and form.validate():
-        specialty.name = form.name.data
-        specialty.color = form.color.data
-        meta.session.commit()
-        return redirect(url_for('list_specialties'))
-    
-
-    return render_template('update_specialty.html', form=form, 
-                            specialty=specialty)
-
-@app.route('/delete/specialty?id=<int:specialty_id>')
-def delete_specialty(specialty_id):
-    specialty = meta.session.query(act.Specialty).filter(
-                    act.Specialty.id == specialty_id).one()
-    meta.session.delete(specialty)
-    meta.session.commit()
-    return redirect(url_for('list_specialties'))
-        
+    return render_template('specialties.html', 
+                                            specialties_form=specialties_form,
+                                            page_data=page_data)
 
 #####
 # Gestures
