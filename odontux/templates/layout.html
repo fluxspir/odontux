@@ -183,22 +183,20 @@
     {% endblock %}  {# header #}
     
 
-  <div class='container-fluid'>
-    <div id="main_container">
+    <div class='container-fluid'>
       {% block main %}
       {% endblock %}
     </div>
-  </div>
 
 
     {% block footer %}
-    <footer class="footer">
-      <div class="container">
+    <div class="container-fluid">
+      <footer class="footer">
         &copy; Copyright 2012-2016 by 
         <a class="footer" href="mailto:franck@kernlog.net">Franck Labadille</a>.
       <!--BTC : 12X27E9ZeApwLrbEphnQNgPM9DvRRKiUYq-->
-      </div>
-    </footer>
+      </footer>
+    </div>
     {% endblock %} {# footer #}
   </body>
 </html>
