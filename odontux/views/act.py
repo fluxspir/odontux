@@ -73,11 +73,12 @@ class ClinicGestureCotationReferenceForm(Form):
     submit = SubmitField(_('Update'))
 
 class GestureForm(Form):
+    name = TextField(_('Name'))
     specialty_id = SelectField('specialty', coerce=int)
-    code = TextField('code')
-    alias = TextField('alias')
-    name = TextField('name')
-    color = ColorField('color')
+    code = TextField(_('Code'))
+    alias = TextField(_('Alias'))
+    color = ColorField(_('Color'))
+    submit = SubmitField(_('Submit'))
 
 class AppointmentCotationReferenceForm(Form):
     anatomic_location = IntegerField(_('Teeth / Anatomic location'), 
@@ -194,10 +195,6 @@ def create_cotation_dictionnary(patient):
                                                         str(cotation.price) )
     return cotations
 
-#@app.route('/portal/gesture/')
-#def portal_gesture():
-#    return render_template('portal_gestures.html')
-#
 @app.route('/specialties/', methods=['GET', 'POST'])
 def list_specialties():
     specialty_field_list = [ "name", "color" ]
@@ -254,10 +251,6 @@ def list_gestures():
     Looking in Gesture table, we may decide to print only 
     The result will be a dict = { specialty_id: gesture, }
     """
-    gestures_dict = {}
-
-    specialty_names = meta.session.query(act.Specialty.name).all()
-
     gestures = ( meta.session.query(act.Gesture)
                     .join(act.Specialty)
                     .order_by(
@@ -266,6 +259,7 @@ def list_gestures():
                     .all()
     )
     
+    gestures_dict = {}
     for gesture in gestures:
         if gesture.specialty.name not in gestures_dict:
             gestures_dict[gesture.specialty.name] = []
@@ -280,6 +274,7 @@ def list_gestures():
     }
 
     return render_template('list_gestures.html', 
+                            sorted=sorted,
                             gestures_dict=gestures_dict,
                             page_data=page_data)
 
@@ -320,64 +315,137 @@ def clone_material_category_gesture(gesture_id, gesture_to_clone_id):
         if material_category not in gesture.materials:
             gesture.materials.append(material_category)
 
-    return redirect(url_for('update_gesture', gesture_id=gesture.id))
+    return redirect(url_for('view_gesture', gesture_id=gesture.id))
 
-@app.route('/update/gesture?gid=<int:gesture_id>/', methods=['GET', 'POST'])
-def update_gesture(gesture_id):
-    gesture = meta.session.query(act.Gesture).filter\
-              (act.Gesture.id == gesture_id).one()
-    if not gesture:
-        return redirect(url_for('list_gestures'))
-    try:
-        specialty = meta.session.query(act.Specialty)\
-                .filter(act.Specialty.id == gesture.specialty_id).one()
-    except sqlalchemy.orm.exc.NoResultFound:
-        specialty=""
+@app.route('/view/gesture?id=<int:gesture_id>')
+def view_gesture(gesture_id):
+    """ """
+    def _update_gesture_materials(gesture):
+        cotations = ( meta.session.query(act.Cotation)
+                        .filter(act.Cotation.gesture_id == gesture_id)
+                        .all()
+        )
+        clinic_gestures = set()
+        materials = set()
+        for cotation in cotations:
+            clinic_gestures.update(cotation.gests)
+        for clinic_gesture in clinic_gestures:
+            mat_list = []
+            for mat_cg_ref in clinic_gesture.materials:
+                mat_list.append(mat_cg_ref.material_category)
+            materials.update(mat_list)
+        for material in materials:
+            if material not in gesture.materials:
+                gesture.materials.append(material)
+                meta.session.commit()
+        return True
 
+    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
+                        constants.ROLE_ASSISTANT ]
+    if session['role'] not in authorized_roles:
+        return abort(403)
+
+    gesture = meta.session.query(act.Gesture).get(gesture_id)
+    _update_gesture_materials(gesture)
+
+    healthcare_plans_not_in_gesture = (
+        meta.session.query(act.HealthCarePlan)
+        .filter(act.HealthCarePlan.active.is_(True))
+        .filter(or_(
+            # Gesture that never had the cotation
+            ~act.HealthCarePlan.cotations.any(
+                act.Cotation.gesture_id == gesture.id),
+            # Gesture that already were associated with the cotation
+            act.HealthCarePlan.cotations.any(
+                act.Cotation.id.in_(
+                    meta.session.query(act.Cotation.id)
+                        .filter(
+                            act.Cotation.gesture_id == gesture.id,
+                            act.Cotation.active == False
+                        )
+                    )
+                )
+            )
+        ).all()
+    )
     gesture_form = GestureForm(request.form)
     gesture_form.specialty_id.choices = get_specialty_choice_list()
     
-    #TODO (130202 : je me demande ce que je voulais faire à ce todo qui date 
-    # d'on ne sait quand...
-    # (update 160504 : toujours pas d'idée)
-    
-    other_gestures = ( meta.session.query(act.Gesture)
-                        .filter(act.Gesture.id != gesture.id)
-                        .join(act.Specialty)
-                        .order_by(act.Specialty.name, act.Gesture.name)
-                        .all()
-    )
-    other_materials = ( meta.session.query(assets.MaterialCategory)
-                            .filter(~assets.MaterialCategory.id.in_(
-                                [ mat.id for mat in gesture.materials ]
-                                )
-                            )
-                            .join(act.Specialty)
-                            .order_by(
-                                act.Specialty.name,
-                                assets.MaterialCategory.brand,
-                                assets.MaterialCategory.commercial_name )
-                            .all()
-    )
-    if request.method == 'POST' and gesture_form.validate():
+    for f in get_gesture_field_list():
+        getattr(gesture_form, f).data = getattr(gesture, f)
+
+    materials_dict = {}
+    for material in gesture.materials:
+        if material.asset_specialty.name not in materials_dict:
+            materials_dict[material.asset_specialty.name] = []
+        materials_dict[material.asset_specialty.name].append(material)
+
+    materials_list = []
+    for materials in sorted(materials_dict.items(),
+                        key=lambda materials: len(materials[1]) ):
+            materials_list.append( (materials[0], materials[1]) )
+
+    page_data = {
+        'title': gesture.name,
+        'menu': ( ),
+    }
+    return render_template('view_gesture.html', 
+            sorted=sorted,
+            gesture=gesture,
+            gesture_form=gesture_form,
+            materials_dict=materials_dict,
+            materials_list=materials_list,
+            constants=constants,
+            healthcare_plans_not_in_gesture=healthcare_plans_not_in_gesture,
+            page_data=page_data)
+
+@app.route('/view/gesture2?gid=<int:gesture_id>/', methods=['POST'])
+def update_gesture(gesture_id):
+    gesture = meta.session.query(act.Gesture).get(gesture_id)
+
+    gesture_form = GestureForm(request.form)
+    gesture_form.specialty_id.choices = get_specialty_choice_list()
+    if gesture_form.validate():
         for f in get_gesture_field_list():
             setattr(gesture, f, getattr(gesture_form, f).data)
         meta.session.commit()
         return redirect(url_for('view_gesture', 
                                     gesture_id=gesture_id))
-
+   
+    #TODO (130202 : je me demande ce que je voulais faire à ce todo qui date 
+    # d'on ne sait quand...
+    # (update 160504 : toujours pas d'idée)
+    
+#    other_gestures = ( meta.session.query(act.Gesture)
+#                        .filter(act.Gesture.id != gesture.id)
+#                        .join(act.Specialty)
+#                        .order_by(act.Specialty.name, act.Gesture.name)
+#                        .all()
+#    )
+#    other_materials = ( meta.session.query(assets.MaterialCategory)
+#                            .filter(~assets.MaterialCategory.id.in_(
+#                                [ mat.id for mat in gesture.materials ]
+#                                )
+#                            )
+#                            .join(act.Specialty)
+#                            .order_by(
+#                                act.Specialty.name,
+#                                assets.MaterialCategory.brand,
+#                                assets.MaterialCategory.commercial_name )
+#                            .all()
+#    )
     # For the GET method
-    for f in get_gesture_field_list():
-        getattr(gesture_form, f).data = getattr(gesture, f)
 
-    specialty_form = SpecialtyForm(request.form)
-    return render_template('/update_gesture.html', 
-                            gesture_form=gesture_form, 
-                            specialty_form=specialty_form,
-                            gesture=gesture,
-                            other_materials=other_materials,
-                            other_gestures=other_gestures
-                            )
+#    specialty_form = SpecialtyForm(request.form)
+    return redirect(url_for('view_gesture', gesture_id=gesture_id))
+#    return render_template('/update_gesture.html', 
+#                            gesture_form=gesture_form, 
+#                            specialty_form=specialty_form,
+#                            gesture=gesture,
+#                            other_materials=other_materials,
+#                            other_gestures=other_gestures,
+#                            page_data=page_data
+#                            )
 
 @app.route('/add/clinic_gesture?crel=<int:cotation_id>', 
                                                     methods=['GET', 'POST'])
@@ -696,39 +764,6 @@ def add_material_category_to_gesture(gesture_id, material_category_id):
     gesture.materials.append(material_category)
     meta.session.commit()
     return redirect(url_for('update_gesture', gesture_id=gesture.id))
-
-@app.route('/view/gesture?id=<int:gesture_id>')
-@app.route('/view/gesture?id=<int:gesture_id>')
-def view_gesture(gesture_id):
-    authorized_roles = [ constants.ROLE_DENTIST, constants.ROLE_NURSE, 
-                        constants.ROLE_ASSISTANT, constants.ROLE_SECRETARY ]
-    if session['role'] not in authorized_roles:
-        return redirect(url_for('index'))
-    gesture = meta.session.query(act.Gesture).get(gesture_id)
-
-    healthcare_plans_not_in_gesture = (
-        meta.session.query(act.HealthCarePlan)
-        .filter(act.HealthCarePlan.active.is_(True))
-        .filter(or_(
-            # Gesture that never had the cotation
-            ~act.HealthCarePlan.cotations.any(
-                act.Cotation.gesture_id == gesture.id),
-            # Gesture that already were associated with the cotation
-            act.HealthCarePlan.cotations.any(
-                act.Cotation.id.in_(
-                    meta.session.query(act.Cotation.id)
-                        .filter(
-                            act.Cotation.gesture_id == gesture.id,
-                            act.Cotation.active == False
-                        )
-                    )
-                )
-            )
-        ).all()
-    )
-    return render_template('view_gesture.html', gesture=gesture,
-            constants=constants,
-            healthcare_plans_not_in_gesture=healthcare_plans_not_in_gesture)
 
 @app.route('/add/healthcare_plan_to_gesture?gest=<int:gesture_id>'
             '&HP=<int:healthcare_plan_id>')

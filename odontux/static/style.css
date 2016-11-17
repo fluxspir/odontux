@@ -42,6 +42,13 @@ h4 {
   color:blue;
 }
 
+.panel {
+  background-color:inherit;
+}
+
+.input['text'] {
+  background-color:inherit;
+}
 /*
 pagetitle {
   background-color:#FFFFFF;

@@ -2,20 +2,15 @@
 {% from "_formhelpers.html" import render_simple_field, render_sfl_wol %}
 {% block main %}
   <form class="form-inline" method='post' action="{{ url_for('list_specialties') }}">
-  {{ specialties_form.submit(class="btn btn-alert") }}
+    {{ specialties_form.submit.label(class="sr-only") }}
+    {{ specialties_form.submit(class="form-control btn btn-alert") }}
   {% for specialty_form in specialties_form.specialties %}
     <div class='row'>
       {% for field in specialty_form %}
         <div class="form-group form-group-sm">
-          <div class="col-xs-3">
-          {{ field.label(class="sr-only") }}
-
-          {% if 'color' in field.id %}
+          <div class="col-sd-3">
+            {{ field.label(class="sr-only") }}
             {{ field(class="form-control") }}
-          {% else %}
-            {{ field(class="form-control") }}
-          {% endif %}
-
           </div>
         </div>
       {% endfor %}

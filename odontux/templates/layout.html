@@ -43,7 +43,9 @@
     <nav class="navbar navbar-fixed-top" role="navigation">
       <div class="container-fluid">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <button type="button" class="navbar-toggle collapsed" 
+                  data-toggle="collapse" data-target="#navbar" 
+                  aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -59,101 +61,109 @@
         </div> <!-- navbar-header -->
 
         {% block nav %}
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li class="dropdown">
-              <a href="#"
-                  class="btn btn-success btn-md dropdown-toggle" data-toggle="dropdown" role="button" 
-                  aria-haspopup="true" aria-expanded="false">
-                  Clinic<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="{{ url_for('allpatients') }}">Patients</a></li>
-                <li><a href="{{ url_for('agenda') }}">Agenda</a></li>
-                <li><a href="{{ url_for('portal_anamnesis') }}">Survey</a></li>
-                <li><a href="{{ url_for('list_drugs') }}">Drugs</a></li>
-              </ul>
-            <li class='dropdown'>
-              <a href="#"
-                        class="btn btn-primary btn-md dropdown-toggle" data-toggle="dropdown" role="button" 
-                        aria-haspopup="true" aria-expanded="false">
-                          Gestures<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="{{ url_for('list_gestures') }}">Gestures</a></li>
-                <li><a href="{{ url_for('list_specialties') }}">Specialties</a></li>
-                <li><a href="{{ url_for('list_healthcare_plans', 
-                                          keywords=" ", ordering=" ") }}">
-                          Healthcare</a></li>
-                <li><a href="{{ url_for('portal_comptability') }}">Compta</a></li>
-              </ul>
-            </li>
-            <li class='dropdown'>
-              <a href="#"
-                        class="btn btn-info btn-md dropdown-toggle" data-toggle="dropdown" role="button" 
-                        aria-haspopup="true" aria-expanded="false">
-                          Assets<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="{{ url_for('my_assets') }}">Assets</a></li>
-                <li><a href="{{ url_for('traceability_portal') }}">Traceability</a></li>
-              </ul>
-            </li>
+        <div class="btn-toolbar" role="toolbar">
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="dropdown">
+                <a href="#"
+                    class="btn btn-success btn-xs dropdown-toggle" 
+                    data-toggle="dropdown" role="button" 
+                    aria-haspopup="true" aria-expanded="false">
+                    Clinic<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="{{ url_for('allpatients') }}">Patients</a></li>
+                  <li><a href="{{ url_for('agenda') }}">Agenda</a></li>
+                  <li><a href="{{ url_for('portal_anamnesis') }}">Survey</a></li>
+                  <li><a href="{{ url_for('list_drugs') }}">Drugs</a></li>
+                </ul>
+              <li class='dropdown'>
+                <a href="#"
+                      class="btn btn-primary btn-xs dropdown-toggle" 
+                      data-toggle="dropdown" role="button" 
+                      aria-haspopup="true" aria-expanded="false">
+                      Gestures<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="{{ url_for('list_gestures') }}">Gestures</a></li>
+                  <li><a href="{{ url_for('list_specialties') }}">Specialties</a></li>
+                  <li><a href="{{ url_for('list_healthcare_plans', 
+                                            keywords=" ", ordering=" ") }}">
+                            Healthcare</a></li>
+                  <li><a href="{{ url_for('portal_comptability') }}">Compta</a></li>
+                </ul>
+              </li>
+              <li class='dropdown'>
+                <a href="#"
+                      class="btn btn-info btn-xs dropdown-toggle" 
+                      data-toggle="dropdown" role="button" 
+                      aria-haspopup="true" aria-expanded="false">
+                            Assets<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="{{ url_for('my_assets') }}">Assets</a></li>
+                  <li><a href="{{ url_for('traceability_portal') }}">Traceability
+                      </a></li>
+                </ul>
+              </li>
 
-            <li class='dropdown'> 
-              <a href="#"
-                        class="btn btn-danger btn-md dropdown-toggle" data-toggle="dropdown" role="button" 
-                        aria-haspopup="true" aria-expanded="false">
-                          {{ session['username'] }}<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="{{ url_for('update_user', body_id=session.user_id,
-                                            form_to_display="gen_info") }}">
-                        Update</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="{{ url_for('list_users') }}">All users</a></li>
-              </ul>
-            </li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li>
-              <div>
-                <form action="{{ url_for('find') }}" method="post" autocomplete="on"
-                                                      role="form"
-                                                      class="navbar-form">
-                  <div class="form-group">
-                    <input type="search" name="keywords" placeholder="Quick Search" 
-                                          class="form-control" />
-                  </div>
-                  <div class="form-group">
-                    <select name="database" id="dbtable" class="form-control">
-                    <option value="patient">Patient</option>
-                    <option value="act">Act</option>
-                    <option value="odontuxuser">User</option>
-                    <option value="doctor">Doctor</option>
-                    <option value="drug">Drug</option>
-                    <option value="asset">Asset</option>
-                    <option value="device">Device</option>
-                    <option value="material">Material</option>
-                    <option value="asset_category">Asset Category</option>
-                    <option value="sterilized_asset">Sterilized_asset</option>
-                    </select>
-                  </div>
-                  <button type="submit" class="btn btn-info">
-                    <span class="glyphicon glyphicon-search">Search
-                  </button>
-                </form>
-              </div>
-            </li>
-            <li>
-              <time class='navbar'>
-              <script>
-                var myVar = setInterval(function(){clock2()}, 5000)
-                clock2();
-              </script>
-              </time>
-            </li>
-          </ul>
-        </div> {# navbar #}
-      </div> {# container #}
-    {% endblock %} {# nav #}
+              <li class='dropdown'> 
+                <a href="#"
+                      class="btn btn-danger btn-xs dropdown-toggle" 
+                      data-toggle="dropdown" role="button" 
+                      aria-haspopup="true" aria-expanded="false">
+                            <span class="glyphicon glyphicon-user"></span>
+                            {{ session['username'] }}<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="{{ url_for('update_user', body_id=session.user_id,
+                                              form_to_display="gen_info") }}">
+                          Update</a></li>
+                  <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li><a href="{{ url_for('list_users') }}">All users</a></li>
+                </ul>
+              </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li>
+                <div>
+                  <form action="{{ url_for('find') }}" method="post" autocomplete="on"
+                                                        role="form"
+                                                        class="navbar-form">
+                    <div class="form-group">
+                      <input type="search" name="keywords" placeholder="Quick Search" 
+                                            class="form-control" />
+                    </div>
+                    <div class="form-group">
+                      <select name="database" id="dbtable" class="form-control">
+                      <option value="patient">Patient</option>
+                      <option value="act">Act</option>
+                      <option value="odontuxuser">User</option>
+                      <option value="doctor">Doctor</option>
+                      <option value="drug">Drug</option>
+                      <option value="asset">Asset</option>
+                      <option value="device">Device</option>
+                      <option value="material">Material</option>
+                      <option value="asset_category">Asset Category</option>
+                      <option value="sterilized_asset">Sterilized_asset</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="btn btn-info">
+                      <span class="glyphicon glyphicon-search">Search
+                    </button>
+                  </form>
+                </div>
+              </li>
+              <li>
+                <time class='navbar'>
+                <script>
+                  var myVar = setInterval(function(){clock2()}, 5000)
+                  clock2();
+                </script>
+                </time>
+              </li>
+            </ul>
+          </div> {# navbar #}
+        </div> {# container #}
+      </div>
+      {% endblock %} {# nav #}
     </nav>
 
     {% block header %}
