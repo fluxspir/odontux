@@ -22,7 +22,12 @@ from gettext import gettext as _
 @app.route('/')
 def index():
     if 'username' in session:
-        return render_template('index.html')
+        page_data = {
+            'title': _('Home'),
+            "menu": ( ),
+        }
+        return render_template('index.html',
+                                page_data=page_data)
     return redirect(url_for('login'))
 
 
