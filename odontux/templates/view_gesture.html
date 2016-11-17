@@ -67,17 +67,14 @@
       <div class='col-sm-12'>
         <h5>Materials</h5>
         {% for materials in materials_list %}
-{#        {% for specialty in sorted(materials_dict.keys()) %} #}
           {% if not loop.index0 % 3 %}
             <div class='row'>
           {% endif %}
               <div class='col-sm-4'>
                 <h6 
                   style='background-color:
-{#                      {{materials_dict[specialty][0].asset_specialty.color}}'> #}
                       {{ materials[1][0].asset_specialty.color }}'>
                 {{ materials[0] }}</h6>
-{#                {% for material in materials_dict[specialty] %} #}
                 {% for material in materials[1] %}
                   <a href="{{ url_for('update_material_category',
                                       material_category_id=material.id) }}">

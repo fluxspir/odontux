@@ -264,6 +264,10 @@ def list_gestures():
         if gesture.specialty.name not in gestures_dict:
             gestures_dict[gesture.specialty.name] = []
         gestures_dict[gesture.specialty.name].append(gesture)
+    gestures_list = []
+    for gestures in sorted(gestures_dict.items(),
+                            key=lambda gestures: len(gestures[1]) ) :
+        gestures_list.append( ( gestures[0], gestures[1] ) ) 
 
     page_data = {
         'title': _('Gestures'),
@@ -275,7 +279,7 @@ def list_gestures():
 
     return render_template('list_gestures.html', 
                             sorted=sorted,
-                            gestures_dict=gestures_dict,
+                            gestures_list=gestures_list,
                             page_data=page_data)
 
 @app.route('/add/gesture/', methods=['GET', 'POST'])
@@ -393,7 +397,6 @@ def view_gesture(gesture_id):
             sorted=sorted,
             gesture=gesture,
             gesture_form=gesture_form,
-            materials_dict=materials_dict,
             materials_list=materials_list,
             constants=constants,
             healthcare_plans_not_in_gesture=healthcare_plans_not_in_gesture,

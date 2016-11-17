@@ -87,4 +87,127 @@ nav ul {list-style-type:none;}
 nav li {display:inline;} 
 
 .alert {color:red;}
+nav
+{
+  background-color:#FFECB0;
+  display:inline-block;
+  width:100% ;
+  height:5% ;
+  margin:0;
+  padding:0;
+/*
+/*text-align:center;
+}
+
+header
+{
+  background-color:#FFEFBE;
+  width:100% ;
+  height:10% ;
+  position:fixed;
+top:0%;
+left:0%;
+background-image: url("headerbg.png");*/
+}
+/*
+time {
+  display:inline-block;
+	color:green;
+	font-size:120%;
+  margin:0;
+  padding:0;
+}
+#search
+{
+  display:inline-block;
+  margin:0;
+  padding:0;
+  top:0% ;
+width 10%;
+height:20%;
+}
+
+#login {
+  display:inline-block;
+  text-align:right;
+  margin:0;
+  padding:0;
+}
+
+#login li {
+  list-style:none;
+  margin:0;
+  padding:0;
+}
+
+#login li a {
+  display:block;
+  margin:0;
+  padding:0;
+}
+
+#login li a:hover{
+  margin:0;
+  padding:0;
+}
+
+
+#generalinfo
+{
+position:absolute;
+top:0%;
+width:95% ;
+height:20% ;
+background-color:inherit;
+z-index:1;
+}
+/*
+#pagetitle {
+display=inline-block;
+width:95%;
+left:5%;
+position:absolute;
+color:black;
+text-align:center;
+}
+
+/*
+
+#user div {
+position:absolute ; 
+visibility:hidden;
+margin:0%;
+padding:0%;
+}
+#user div a { 
+display:block; margin:0%; padding:0% ; width:auto ; position:relative;}
+#user div a:hover {
+}
+
+#mainsummary
+{
+display: inline-block;
+position:absolute;
+top:20%;
+left:12%;
+width:88%;
+height:60%;
+z-index:2;
+background-color:green;
+}
+
+
+header nav
+{
+display=inline-block;
+position:absolute;
+top:80% ;
+left:12%;
+width:78% ;
+height:20%;
+background-color:yellow;
+}
+
+
+
 */
